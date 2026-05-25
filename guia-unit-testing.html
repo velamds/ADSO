@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Esencial de Unit Testing — PHP · Node.js · C#</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <style>
+    :root {
+      --php-color: #8892BF;
+      --php-dark: #4F5B93;
+      --php-light: #EEF0F8;
+      --node-color: #68A063;
+      --node-dark: #3E7B39;
+      --node-light: #EDF6EC;
+      --cs-color: #9B4F9B;
+      --cs-dark: #68217A;
+      --cs-light: #F5EEF5;
+      --sidebar-bg: #1a1d23;
+      --sidebar-text: #c9d1d9;
+      --sidebar-accent: #58a6ff;
+      --body-bg: #f6f8fa;
+      --card-bg: #ffffff;
+      --text-main: #24292f;
+      --text-muted: #57606a;
+      --border: #d0d7de;
+      --exercise-bg: #fffbf0;
+      --exercise-border: #f0a500;
+      --tip-bg: #dff0ff;
+      --tip-border: #0969da;
+      --warning-bg: #fff8c5;
+      --warning-border: #d4a017;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 0 0 2rem;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    #sidebar-header {
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid #30363d;
+      background: #0d1117;
+    }
+
+    #sidebar-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    #sidebar-header p {
+      font-size: 0.72rem;
+      color: #8b949e;
+      margin-top: 0.3rem;
+    }
+
+    .nav-section { padding: 1rem 0 0.5rem; }
+
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8b949e;
+      padding: 0 1.25rem 0.4rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(88,166,255,0.08);
+      color: #fff;
+      border-left-color: var(--sidebar-accent);
+    }
+
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-php  { background: var(--php-color); }
+    .dot-node { background: var(--node-color); }
+    .dot-cs   { background: var(--cs-color); }
+    .dot-ex   { background: var(--exercise-border); }
+    .dot-base { background: var(--sidebar-accent); }
+
+    /* ── MAIN CONTENT ── */
+    #main {
+      flex: 1;
+      padding: 2.5rem 2rem 4rem;
+      max-width: 980px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0d1117;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 3.5rem; }
+
+    .section-title {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-php  { background: var(--php-dark);  color: #fff; }
+    .badge-node { background: var(--node-dark); color: #fff; }
+    .badge-cs   { background: var(--cs-dark);   color: #fff; }
+    .badge-framework { background: #e1e4e8; color: #444; }
+
+    .subsection { margin: 2rem 0; }
+
+    .subsection-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #0d1117;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .step-php  { background: var(--php-dark); }
+    .step-node { background: var(--node-dark); }
+    .step-cs   { background: var(--cs-dark); }
+    .step-base { background: #0969da; }
+
+    p { color: var(--text-muted); line-height: 1.7; margin-bottom: 0.8rem; }
+
+    /* ── CODE BLOCKS ── */
+    .code-block {
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .code-header-php  { background: #2a2d4a; color: var(--php-color); }
+    .code-header-node { background: #1a2e1a; color: var(--node-color); }
+    .code-header-cs   { background: #2a1a2e; color: #c586c0; }
+    .code-header-shell { background: #1a1a1a; color: #8b949e; }
+
+    .code-block pre { margin: 0; }
+    .code-block pre code { font-size: 0.82rem; line-height: 1.6; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    .callout-body p { margin: 0; font-size: 0.85rem; }
+
+    .callout-tip     { background: var(--tip-bg);     border-left: 4px solid var(--tip-border); }
+    .callout-warning { background: var(--warning-bg); border-left: 4px solid var(--warning-border); }
+    .callout-laravel { background: #fff4f4; border-left: 4px solid #e3342f; }
+    .callout-express { background: #f0fff0; border-left: 4px solid var(--node-dark); }
+
+    /* ── CONCEPT CARDS ── */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .concept-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem;
+    }
+
+    .concept-card h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: #0d1117;
+    }
+
+    .concept-card p {
+      font-size: 0.8rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── AAA TABLE ── */
+    .aaa-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+
+    .aaa-table th {
+      background: #0d1117;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+
+    .aaa-table td {
+      padding: 0.75rem 1rem;
+      font-size: 0.83rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      vertical-align: top;
+    }
+
+    .aaa-table tr:last-child td { border-bottom: none; }
+
+    .aaa-pill {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .pill-a { background: #dbeafe; color: #1d4ed8; }
+    .pill-b { background: #dcfce7; color: #166534; }
+    .pill-c { background: #fce7f3; color: #9d174d; }
+
+    /* ── EXERCISES ── */
+    .exercise-section {
+      background: var(--exercise-bg);
+      border: 2px dashed var(--exercise-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin: 2.5rem 0;
+    }
+
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .exercise-icon {
+      font-size: 1.5rem;
+    }
+
+    .exercise-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .exercise-subtitle {
+      font-size: 0.8rem;
+      color: #b45309;
+      margin-top: 0.1rem;
+    }
+
+    .exercise-body p {
+      color: #57534e;
+      font-size: 0.88rem;
+    }
+
+    .exercise-task {
+      background: var(--card-bg);
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .exercise-task h5 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 0.4rem;
+    }
+
+    .exercise-task ul {
+      padding-left: 1.2rem;
+      font-size: 0.83rem;
+      color: #57534e;
+    }
+
+    .exercise-task li { margin-bottom: 0.3rem; }
+
+    .hint-toggle {
+      background: none;
+      border: 1px solid var(--exercise-border);
+      color: #92400e;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .hint-toggle:hover { background: var(--exercise-border); color: #fff; }
+
+    .hint-body {
+      display: none;
+      background: #fffde7;
+      border-radius: 6px;
+      padding: 0.9rem;
+      margin-top: 0.5rem;
+      font-size: 0.82rem;
+      color: #57534e;
+    }
+
+    .hint-body ul { padding-left: 1.2rem; }
+    .hint-body li { margin-bottom: 0.3rem; }
+
+    /* ── SETUP COMMANDS ── */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .setup-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .setup-card-title {
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .setup-card-php  { background: var(--php-light);  color: var(--php-dark); }
+    .setup-card-node { background: var(--node-light); color: var(--node-dark); }
+    .setup-card-cs   { background: var(--cs-light);   color: var(--cs-dark); }
+
+    .setup-card pre {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+      background: #1a1d23;
+      color: #c9d1d9;
+    }
+
+    /* ── DIVIDER ── */
+    .lang-divider {
+      height: 4px;
+      border-radius: 2px;
+      margin: 0 0 2rem;
+    }
+
+    .divider-php  { background: linear-gradient(90deg, var(--php-dark), var(--php-color)); }
+    .divider-node { background: linear-gradient(90deg, var(--node-dark), var(--node-color)); }
+    .divider-cs   { background: linear-gradient(90deg, var(--cs-dark), var(--cs-color)); }
+
+    /* ── INLINE CODE ── */
+    code:not([class]) {
+      background: #f1f3f4;
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.82em;
+      color: #c7254e;
+    }
+
+    /* ── DIFFICULTY BADGE ── */
+    .diff {
+      font-size: 0.65rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+
+    .diff-easy   { background: #dcfce7; color: #166534; }
+    .diff-medium { background: #fef3c7; color: #92400e; }
+    .diff-hard   { background: #fee2e2; color: #991b1b; }
+
+    /* ── SCROLLBAR ── */
+    #sidebar::-webkit-scrollbar { width: 5px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #sidebar { width: 100%; height: auto; position: static; }
+      #main { padding: 1.5rem 1rem; }
+    }
+
+    .toc-anchor { scroll-margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>Guía de Unit Testing</h1>
+    <p>PHP · Node.js · C# — Esencial</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Fundamentos</div>
+    <a href="#intro"    class="nav-link"><span class="nav-dot dot-base"></span>¿Qué es un test unitario?</a>
+    <a href="#aaa"      class="nav-link"><span class="nav-dot dot-base"></span>Patrón AAA</a>
+    <a href="#conceptos"class="nav-link"><span class="nav-dot dot-base"></span>Conceptos clave</a>
+    <a href="#setup"    class="nav-link"><span class="nav-dot dot-base"></span>Instalación y setup</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">PHP — PHPUnit</div>
+    <a href="#php-1" class="nav-link"><span class="nav-dot dot-php"></span>Paso 1 · Función simple</a>
+    <a href="#php-2" class="nav-link"><span class="nav-dot dot-php"></span>Paso 2 · Clase Calculator</a>
+    <a href="#php-3" class="nav-link"><span class="nav-dot dot-php"></span>Paso 3 · Datos y excepciones</a>
+    <a href="#php-4" class="nav-link"><span class="nav-dot dot-php"></span>Paso 4 · Mocks</a>
+    <a href="#php-laravel" class="nav-link"><span class="nav-dot dot-php"></span>Laravel · Modelos y rutas</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Node.js — Jest</div>
+    <a href="#node-1" class="nav-link"><span class="nav-dot dot-node"></span>Paso 1 · Función simple</a>
+    <a href="#node-2" class="nav-link"><span class="nav-dot dot-node"></span>Paso 2 · Clase y módulos</a>
+    <a href="#node-3" class="nav-link"><span class="nav-dot dot-node"></span>Paso 3 · Async / Await</a>
+    <a href="#node-4" class="nav-link"><span class="nav-dot dot-node"></span>Paso 4 · Mocks de módulos</a>
+    <a href="#node-express" class="nav-link"><span class="nav-dot dot-node"></span>Express · Rutas con Supertest</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">C# — xUnit + Moq</div>
+    <a href="#cs-1" class="nav-link"><span class="nav-dot dot-cs"></span>Paso 1 · Método simple</a>
+    <a href="#cs-2" class="nav-link"><span class="nav-dot dot-cs"></span>Paso 2 · Clase y Theory</a>
+    <a href="#cs-3" class="nav-link"><span class="nav-dot dot-cs"></span>Paso 3 · Interfaces y Moq</a>
+    <a href="#cs-4" class="nav-link"><span class="nav-dot dot-cs"></span>Paso 4 · Async y excepciones</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicios</div>
+    <a href="#ejercicio-1" class="nav-link"><span class="nav-dot dot-ex"></span>Ejercicio 1 · StringHelper</a>
+    <a href="#ejercicio-2" class="nav-link"><span class="nav-dot dot-ex"></span>Ejercicio 2 · OrderService</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main id="main">
+
+  <h1 class="page-title">Guía Esencial de Unit Testing</h1>
+  <p class="page-subtitle">PHP (PHPUnit + Laravel) · Node.js (Jest + Express) · C# (xUnit + Moq)</p>
+
+  <!-- ─────────────────── INTRO ─────────────────── -->
+  <section class="section" id="intro">
+    <h2 class="section-title toc-anchor">¿Qué es un test unitario?</h2>
+
+    <p>Un <strong>test unitario</strong> verifica una <em>unidad aislada</em> de código —generalmente una función o método— de forma automática y repetible. El objetivo es confirmar que cada pieza funciona correctamente de manera independiente, sin depender de bases de datos reales, redes ni otros servicios externos.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>Rápidos</h4>
+        <p>Deben ejecutarse en milisegundos. Un conjunto de miles de tests corre en segundos.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Aislados</h4>
+        <p>No dependen de otros tests ni de estado global. Cada test parte desde cero.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Repetibles</h4>
+        <p>Siempre producen el mismo resultado. No importa cuántas veces o en qué entorno se ejecuten.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Autodescriptivos</h4>
+        <p>Su nombre describe qué situación prueban y qué resultado esperan.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Regla de oro</strong>
+        <p>Un test unitario debería fallar solo por una razón: que el código que prueba cambió su comportamiento.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── AAA ─────────────────── -->
+  <section class="section" id="aaa">
+    <h2 class="section-title toc-anchor">Patrón AAA</h2>
+    <p>Todo test bien estructurado sigue tres fases. Aprenderlo como primer hábito es lo más valioso que puedes hacer.</p>
+
+    <table class="aaa-table">
+      <thead>
+        <tr>
+          <th>Fase</th>
+          <th>¿Qué haces?</th>
+          <th>Ejemplo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="aaa-pill pill-a">Arrange</span><br><small>Preparar</small></td>
+          <td>Crear objetos, datos de entrada y dependencias necesarias.</td>
+          <td><code>$calc = new Calculator();</code></td>
+        </tr>
+        <tr>
+          <td><span class="aaa-pill pill-b">Act</span><br><small>Ejecutar</small></td>
+          <td>Llamar al método o función que estás probando.</td>
+          <td><code>$result = $calc->add(2, 3);</code></td>
+        </tr>
+        <tr>
+          <td><span class="aaa-pill pill-c">Assert</span><br><small>Verificar</small></td>
+          <td>Comprobar que el resultado es el esperado.</td>
+          <td><code>assertEquals(5, $result);</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ─────────────────── CONCEPTOS ─────────────────── -->
+  <section class="section" id="conceptos">
+    <h2 class="section-title toc-anchor">Conceptos clave</h2>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>Mock</h4>
+        <p>Objeto falso que reemplaza una dependencia real. Permite controlar su comportamiento y verificar que fue llamado.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Stub</h4>
+        <p>Versión simplificada de una dependencia que devuelve valores predefinidos sin lógica propia.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Spy</h4>
+        <p>Envuelve el objeto real y registra las llamadas. Permite verificar interacciones sin reemplazar la implementación.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Fixture / Factory</h4>
+        <p>Datos de prueba reutilizables que se crean de forma consistente para cada test.</p>
+      </div>
+      <div class="concept-card">
+        <h4>setUp / tearDown</h4>
+        <p>Hooks que corren <em>antes</em> y <em>después</em> de cada test. Ideales para inicializar y limpiar estado.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Cobertura (Coverage)</h4>
+        <p>Porcentaje de líneas de código ejecutadas por los tests. Una métrica útil, pero no suficiente por sí sola.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── SETUP ─────────────────── -->
+  <section class="section" id="setup">
+    <h2 class="section-title toc-anchor">Instalación y setup</h2>
+
+    <div class="setup-grid">
+      <div class="setup-card">
+        <div class="setup-card-title setup-card-php">🐘 PHP — PHPUnit</div>
+        <pre>composer require --dev phpunit/phpunit
+# Crear phpunit.xml (ver abajo)
+./vendor/bin/phpunit</pre>
+      </div>
+      <div class="setup-card">
+        <div class="setup-card-title setup-card-node">🟢 Node.js — Jest</div>
+        <pre>npm install --save-dev jest
+# package.json → "test": "jest"
+npx jest --coverage</pre>
+      </div>
+      <div class="setup-card">
+        <div class="setup-card-title setup-card-cs">🔷 C# — xUnit + Moq</div>
+        <pre>dotnet new xunit -n MyTests
+cd MyTests
+dotnet add package Moq
+dotnet test</pre>
+      </div>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">📁</span>
+      <div class="callout-body">
+        <strong>Convención de nombres de archivos</strong>
+        <p>PHP: <code>tests/Unit/CalculatorTest.php</code> &nbsp;·&nbsp; Node: <code>src/__tests__/calculator.test.js</code> &nbsp;·&nbsp; C#: <code>MyTests/CalculatorTests.cs</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       PHP
+       ══════════════════════════════════════════════ -->
+  <div class="lang-divider divider-php"></div>
+
+  <section class="section" id="php-1">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-php">PHP · PHPUnit</span>
+      Paso 1 — Función simple <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>Empezamos con lo más básico: probar una función pura que recibe entradas y devuelve una salida predecible. No hay clases, no hay dependencias.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">📄 src/MathHelper.php</div>
+      <pre><code class="language-php">&lt;?php
+
+function add(int $a, int $b): int
+{
+    return $a + $b;
+}
+
+function divide(int $a, int $b): float
+{
+    if ($b === 0) {
+        throw new \InvalidArgumentException('No se puede dividir entre cero.');
+    }
+    return $a / $b;
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">🧪 tests/Unit/MathHelperTest.php</div>
+      <pre><code class="language-php">&lt;?php
+
+use PHPUnit\Framework\TestCase;
+
+require_once __DIR__ . '/../../src/MathHelper.php';
+
+class MathHelperTest extends TestCase
+{
+    // Arrange + Act + Assert en un solo test conciso
+    public function test_add_returns_correct_sum(): void
+    {
+        // Arrange
+        $a = 2;
+        $b = 3;
+
+        // Act
+        $result = add($a, $b);
+
+        // Assert
+        $this->assertEquals(5, $result);
+    }
+
+    public function test_divide_returns_float(): void
+    {
+        $this->assertEquals(2.5, divide(5, 2));
+    }
+
+    // Probar que una excepción se lanza correctamente
+    public function test_divide_by_zero_throws_exception(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('No se puede dividir entre cero.');
+
+        divide(10, 0);
+    }
+}</code></pre>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">✅</span>
+      <div class="callout-body">
+        <strong>Convención de nombres</strong>
+        <p>El método de test debe comenzar con <code>test_</code> (snake_case) o tener la anotación <code>/** @test */</code>. El nombre describe <em>qué</em> probamos y <em>qué esperamos</em>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="php-2">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-php">PHP · PHPUnit</span>
+      Paso 2 — Clase Calculator <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>Ahora organizamos la lógica en una clase. Usamos <code>setUp()</code> para crear la instancia una sola vez antes de cada test.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">📄 src/Calculator.php</div>
+      <pre><code class="language-php">&lt;?php
+
+class Calculator
+{
+    private array $history = [];
+
+    public function add(float $a, float $b): float
+    {
+        $result = $a + $b;
+        $this->history[] = "$a + $b = $result";
+        return $result;
+    }
+
+    public function subtract(float $a, float $b): float
+    {
+        $result = $a - $b;
+        $this->history[] = "$a - $b = $result";
+        return $result;
+    }
+
+    public function getHistory(): array
+    {
+        return $this->history;
+    }
+
+    public function clearHistory(): void
+    {
+        $this->history = [];
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">🧪 tests/Unit/CalculatorTest.php</div>
+      <pre><code class="language-php">&lt;?php
+
+use PHPUnit\Framework\TestCase;
+
+class CalculatorTest extends TestCase
+{
+    private Calculator $calc;
+
+    // setUp() se ejecuta ANTES de cada método de test
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->calc = new Calculator();
+    }
+
+    public function test_add_two_positive_numbers(): void
+    {
+        $result = $this->calc->add(10, 5);
+        $this->assertEquals(15, $result);
+    }
+
+    public function test_subtract_returns_negative_when_b_is_greater(): void
+    {
+        $result = $this->calc->subtract(3, 10);
+        $this->assertEquals(-7, $result);
+    }
+
+    public function test_history_records_operations(): void
+    {
+        $this->calc->add(2, 3);
+        $this->calc->subtract(10, 4);
+
+        $history = $this->calc->getHistory();
+
+        $this->assertCount(2, $history);
+        $this->assertStringContainsString('2 + 3 = 5', $history[0]);
+    }
+
+    public function test_clear_history_empties_records(): void
+    {
+        $this->calc->add(1, 1);
+        $this->calc->clearHistory();
+
+        $this->assertEmpty($this->calc->getHistory());
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="php-3">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-php">PHP · PHPUnit</span>
+      Paso 3 — Datos múltiples con DataProvider <span class="diff diff-medium">Intermedio</span>
+    </h2>
+
+    <p>Con <code>@dataProvider</code> podemos ejecutar el mismo test con múltiples combinaciones de datos sin repetir código. Ideal para validadores y transformadores.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">📄 src/PasswordValidator.php</div>
+      <pre><code class="language-php">&lt;?php
+
+class PasswordValidator
+{
+    public function isValid(string $password): bool
+    {
+        if (strlen($password) < 8) return false;
+        if (!preg_match('/[A-Z]/', $password)) return false;
+        if (!preg_match('/[0-9]/', $password)) return false;
+        return true;
+    }
+
+    public function getStrength(string $password): string
+    {
+        if (!$this->isValid($password)) return 'weak';
+        if (strlen($password) >= 12 && preg_match('/[^a-zA-Z0-9]/', $password)) return 'strong';
+        return 'medium';
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">🧪 tests/Unit/PasswordValidatorTest.php</div>
+      <pre><code class="language-php">&lt;?php
+
+use PHPUnit\Framework\TestCase;
+
+class PasswordValidatorTest extends TestCase
+{
+    private PasswordValidator $validator;
+
+    protected function setUp(): void
+    {
+        $this->validator = new PasswordValidator();
+    }
+
+    /**
+     * @dataProvider invalidPasswordProvider
+     */
+    public function test_invalid_passwords_are_rejected(string $password, string $reason): void
+    {
+        $this->assertFalse(
+            $this->validator->isValid($password),
+            "Debería ser inválido porque: $reason"
+        );
+    }
+
+    // Los DataProviders devuelven arrays de [argumentos...]
+    public static function invalidPasswordProvider(): array
+    {
+        return [
+            'muy corta'          => ['Ab1',      'menos de 8 caracteres'],
+            'sin mayúscula'      => ['abcdef12',  'no tiene mayúscula'],
+            'sin número'         => ['AbcdefGH',  'no tiene dígito'],
+            'completamente vacía'=> ['',           'vacía'],
+        ];
+    }
+
+    /**
+     * @dataProvider strengthProvider
+     */
+    public function test_password_strength(string $password, string $expected): void
+    {
+        $this->assertEquals($expected, $this->validator->getStrength($password));
+    }
+
+    public static function strengthProvider(): array
+    {
+        return [
+            ['Abc12345',          'medium'],
+            ['MyP@ssw0rd!2024',   'strong'],
+            ['simple',            'weak'],
+        ];
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="php-4">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-php">PHP · PHPUnit</span>
+      Paso 4 — Mocks e inyección de dependencias <span class="diff diff-hard">Avanzado</span>
+    </h2>
+
+    <p>Cuando una clase depende de otras (repositorios, mailers, servicios externos), usamos <strong>mocks</strong> para aislar la unidad bajo prueba. Así el test no toca la base de datos real.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">📄 src/UserRepository.php (interfaz)</div>
+      <pre><code class="language-php">&lt;?php
+
+interface UserRepositoryInterface
+{
+    public function findByEmail(string $email): ?array;
+    public function save(array $userData): bool;
+}
+
+// La implementación real usa Eloquent/PDO, pero los tests no la tocarán</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">📄 src/UserService.php</div>
+      <pre><code class="language-php">&lt;?php
+
+class UserService
+{
+    public function __construct(
+        private UserRepositoryInterface $repository
+    ) {}
+
+    public function register(string $email, string $password): array
+    {
+        if ($this->repository->findByEmail($email)) {
+            throw new \RuntimeException("El email '$email' ya está registrado.");
+        }
+
+        $user = [
+            'email'    => $email,
+            'password' => password_hash($password, PASSWORD_BCRYPT),
+            'role'     => 'user',
+        ];
+
+        $this->repository->save($user);
+
+        return $user;
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-php">🧪 tests/Unit/UserServiceTest.php</div>
+      <pre><code class="language-php">&lt;?php
+
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
+
+class UserServiceTest extends TestCase
+{
+    private MockObject $repositoryMock;
+    private UserService $service;
+
+    protected function setUp(): void
+    {
+        // createMock() genera un doble del contrato (interfaz)
+        $this->repositoryMock = $this->createMock(UserRepositoryInterface::class);
+        $this->service = new UserService($this->repositoryMock);
+    }
+
+    public function test_register_saves_new_user(): void
+    {
+        // Arrange — el mock devuelve null (email no existe)
+        $this->repositoryMock
+            ->expects($this->once())           // verificamos que save() se llame exactamente 1 vez
+            ->method('findByEmail')
+            ->willReturn(null);
+
+        $this->repositoryMock
+            ->expects($this->once())
+            ->method('save')
+            ->willReturn(true);
+
+        // Act
+        $user = $this->service->register('nuevo@ejemplo.com', 'Secret123');
+
+        // Assert
+        $this->assertEquals('nuevo@ejemplo.com', $user['email']);
+        $this->assertEquals('user', $user['role']);
+        $this->assertTrue(password_verify('Secret123', $user['password']));
+    }
+
+    public function test_register_throws_when_email_already_exists(): void
+    {
+        // Arrange — el mock simula que el email ya existe
+        $this->repositoryMock
+            ->method('findByEmail')
+            ->willReturn(['id' => 1, 'email' => 'existente@ejemplo.com']);
+
+        // Assert + Act — la excepción debe lanzarse
+        $this->expectException(\RuntimeException::class);
+
+        $this->service->register('existente@ejemplo.com', 'Secret123');
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- PHP — Laravel -->
+  <section class="section" id="php-laravel">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-php">PHP</span>
+      <span class="badge badge-framework">Laravel</span>
+      Tests de Feature y rutas HTTP
+    </h2>
+
+    <div class="callout callout-laravel">
+      <span class="callout-icon">🔴</span>
+      <div class="callout-body">
+        <strong>Laravel usa dos tipos de test</strong>
+        <p><strong>Unit tests</strong> (<code>tests/Unit/</code>) — igual a PHPUnit puro, sin arrancar el framework.<br>
+        <strong>Feature tests</strong> (<code>tests/Feature/</code>) — arrancan la aplicación completa. Ideales para probar rutas, controladores y base de datos con <code>RefreshDatabase</code>.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-shell">🔧 Comandos de artisan</div>
+      <pre><code class="language-bash">php artisan make:test UserRegistrationTest --unit    # Unit test
+php artisan make:test UserRegistrationTest           # Feature test
+php artisan test --filter UserRegistrationTest       # Ejecutar uno solo
+php artisan test --coverage                          # Con cobertura</code></pre>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">
+        <span class="step-num step-php">A</span>
+        Feature test — Registro de usuario (ruta HTTP)
+      </h3>
+
+      <div class="code-block">
+        <div class="code-header code-header-php">🧪 tests/Feature/UserRegistrationTest.php</div>
+        <pre><code class="language-php">&lt;?php
+
+namespace Tests\Feature;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+use App\Models\User;
+
+class UserRegistrationTest extends TestCase
+{
+    use RefreshDatabase; // Resetea la BD en cada test (usa SQLite en memoria)
+
+    public function test_user_can_register_with_valid_data(): void
+    {
+        // Act — hacer un POST a la ruta de registro
+        $response = $this->postJson('/api/register', [
+            'name'                  => 'Ana García',
+            'email'                 => 'ana@ejemplo.com',
+            'password'              => 'Secret123!',
+            'password_confirmation' => 'Secret123!',
+        ]);
+
+        // Assert — la respuesta HTTP debe ser 201 Created
+        $response->assertStatus(201)
+                 ->assertJsonStructure(['user' => ['id', 'name', 'email']]);
+
+        // Verificar que el usuario existe en la BD de prueba
+        $this->assertDatabaseHas('users', ['email' => 'ana@ejemplo.com']);
+    }
+
+    public function test_registration_fails_with_duplicate_email(): void
+    {
+        // Arrange — crear un usuario previo con ese email
+        User::factory()->create(['email' => 'duplicado@ejemplo.com']);
+
+        $response = $this->postJson('/api/register', [
+            'name'                  => 'Otro Usuario',
+            'email'                 => 'duplicado@ejemplo.com',
+            'password'              => 'Secret123!',
+            'password_confirmation' => 'Secret123!',
+        ]);
+
+        $response->assertStatus(422)         // Unprocessable Entity
+                 ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_authenticated_user_can_see_profile(): void
+    {
+        // Arrange — actuar como un usuario autenticado
+        $user = User::factory()->create();
+
+        // Act — petición autenticada
+        $response = $this->actingAs($user)->getJson('/api/profile');
+
+        $response->assertStatus(200)
+                 ->assertJson(['email' => $user->email]);
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">
+        <span class="step-num step-php">B</span>
+        Unit test — Servicio con mock usando el contenedor de Laravel
+      </h3>
+
+      <div class="code-block">
+        <div class="code-header code-header-php">🧪 tests/Unit/OrderServiceTest.php</div>
+        <pre><code class="language-php">&lt;?php
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use App\Services\OrderService;
+use App\Repositories\OrderRepository;
+use App\Notifications\OrderConfirmation;
+use Illuminate\Support\Facades\Notification;
+use Mockery;
+
+class OrderServiceTest extends TestCase
+{
+    public function test_place_order_sends_notification(): void
+    {
+        // Fake de notificaciones — intercepta sin enviar emails reales
+        Notification::fake();
+
+        // Mock del repositorio
+        $repoMock = Mockery::mock(OrderRepository::class);
+        $repoMock->shouldReceive('create')->once()->andReturn(['id' => 42]);
+
+        // Inyectar el mock en el contenedor de Laravel
+        $this->app->instance(OrderRepository::class, $repoMock);
+
+        $service = $this->app->make(OrderService::class);
+        $service->placeOrder(userId: 1, items: [['sku' => 'ABC', 'qty' => 2]]);
+
+        // Verificar que se envió la notificación al usuario 1
+        Notification::assertSentTo(
+            \App\Models\User::find(1),
+            OrderConfirmation::class
+        );
+    }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       NODE.JS
+       ══════════════════════════════════════════════ -->
+  <div class="lang-divider divider-node"></div>
+
+  <section class="section" id="node-1">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Paso 1 — Función simple <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>Jest no necesita configuración extra para la mayoría de proyectos Node. Cualquier archivo <code>*.test.js</code> es detectado automáticamente.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">📄 src/mathHelper.js</div>
+      <pre><code class="language-javascript">function add(a, b) {
+  return a + b;
+}
+
+function divide(a, b) {
+  if (b === 0) throw new Error('No se puede dividir entre cero.');
+  return a / b;
+}
+
+module.exports = { add, divide };</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">🧪 src/__tests__/mathHelper.test.js</div>
+      <pre><code class="language-javascript">const { add, divide } = require('../mathHelper');
+
+describe('mathHelper', () => {
+
+  // describe() agrupa tests relacionados
+  describe('add()', () => {
+    it('suma dos números positivos correctamente', () => {
+      // Arrange
+      const a = 2, b = 3;
+
+      // Act
+      const result = add(a, b);
+
+      // Assert
+      expect(result).toBe(5);
+    });
+
+    it('suma números negativos', () => {
+      expect(add(-1, -4)).toBe(-5);
+    });
+  });
+
+  describe('divide()', () => {
+    it('devuelve el cociente correcto', () => {
+      expect(divide(10, 4)).toBe(2.5);
+    });
+
+    it('lanza error al dividir entre cero', () => {
+      expect(() => divide(5, 0)).toThrow('No se puede dividir entre cero.');
+    });
+  });
+
+});</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="node-2">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Paso 2 — Clase con beforeEach <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">📄 src/ShoppingCart.js</div>
+      <pre><code class="language-javascript">class ShoppingCart {
+  constructor() {
+    this.items = [];
+  }
+
+  addItem(product) {
+    const existing = this.items.find(i => i.id === product.id);
+    if (existing) {
+      existing.quantity += product.quantity;
+    } else {
+      this.items.push({ ...product });
+    }
+  }
+
+  removeItem(productId) {
+    this.items = this.items.filter(i => i.id !== productId);
+  }
+
+  getTotal() {
+    return this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }
+
+  isEmpty() {
+    return this.items.length === 0;
+  }
+}
+
+module.exports = ShoppingCart;</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">🧪 src/__tests__/ShoppingCart.test.js</div>
+      <pre><code class="language-javascript">const ShoppingCart = require('../ShoppingCart');
+
+describe('ShoppingCart', () => {
+  let cart;
+
+  // beforeEach() se ejecuta ANTES de cada test → cart siempre está vacío
+  beforeEach(() => {
+    cart = new ShoppingCart();
+  });
+
+  it('inicia vacío', () => {
+    expect(cart.isEmpty()).toBe(true);
+    expect(cart.getTotal()).toBe(0);
+  });
+
+  it('agrega un producto nuevo', () => {
+    cart.addItem({ id: 1, name: 'Teclado', price: 50, quantity: 1 });
+    expect(cart.items).toHaveLength(1);
+  });
+
+  it('acumula cantidad si el producto ya existe', () => {
+    cart.addItem({ id: 1, name: 'Mouse', price: 25, quantity: 1 });
+    cart.addItem({ id: 1, name: 'Mouse', price: 25, quantity: 2 });
+    expect(cart.items[0].quantity).toBe(3);
+  });
+
+  it('calcula el total correctamente', () => {
+    cart.addItem({ id: 1, name: 'Teclado', price: 50, quantity: 2 });
+    cart.addItem({ id: 2, name: 'Mouse',   price: 25, quantity: 1 });
+    expect(cart.getTotal()).toBe(125); // 50*2 + 25*1
+  });
+
+  it('elimina un producto por id', () => {
+    cart.addItem({ id: 1, name: 'Auricular', price: 80, quantity: 1 });
+    cart.addItem({ id: 2, name: 'Webcam',    price: 60, quantity: 1 });
+    cart.removeItem(1);
+    expect(cart.items).toHaveLength(1);
+    expect(cart.items[0].id).toBe(2);
+  });
+});</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="node-3">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Paso 3 — Código asíncrono (Async/Await) <span class="diff diff-medium">Intermedio</span>
+    </h2>
+
+    <p>Jest soporta tests asíncronos de forma nativa. Solo hay que retornar una promesa o usar <code>async/await</code>.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">📄 src/userService.js</div>
+      <pre><code class="language-javascript">class UserService {
+  constructor(userRepository) {
+    this.repo = userRepository;
+  }
+
+  async findUser(id) {
+    if (!id || typeof id !== 'number') {
+      throw new TypeError('El id debe ser un número válido.');
+    }
+    const user = await this.repo.findById(id);
+    if (!user) throw new Error(`Usuario ${id} no encontrado.`);
+    return user;
+  }
+
+  async listActiveUsers() {
+    const users = await this.repo.findAll();
+    return users.filter(u => u.active);
+  }
+}
+
+module.exports = UserService;</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">🧪 src/__tests__/userService.test.js</div>
+      <pre><code class="language-javascript">const UserService = require('../userService');
+
+// Stub manual del repositorio
+const mockRepo = {
+  findById: jest.fn(),
+  findAll:  jest.fn(),
+};
+
+describe('UserService', () => {
+  let service;
+
+  beforeEach(() => {
+    jest.clearAllMocks();               // limpiar historial de llamadas entre tests
+    service = new UserService(mockRepo);
+  });
+
+  describe('findUser()', () => {
+    it('devuelve el usuario cuando existe', async () => {
+      mockRepo.findById.mockResolvedValue({ id: 1, name: 'María', active: true });
+
+      const user = await service.findUser(1);
+
+      expect(user.name).toBe('María');
+      expect(mockRepo.findById).toHaveBeenCalledWith(1);
+      expect(mockRepo.findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('lanza error si el usuario no existe', async () => {
+      mockRepo.findById.mockResolvedValue(null);
+
+      await expect(service.findUser(99)).rejects.toThrow('Usuario 99 no encontrado.');
+    });
+
+    it('lanza TypeError si el id es inválido', async () => {
+      await expect(service.findUser('abc')).rejects.toThrow(TypeError);
+    });
+  });
+
+  describe('listActiveUsers()', () => {
+    it('filtra solo usuarios activos', async () => {
+      mockRepo.findAll.mockResolvedValue([
+        { id: 1, name: 'Ana',   active: true  },
+        { id: 2, name: 'Luis',  active: false },
+        { id: 3, name: 'Elena', active: true  },
+      ]);
+
+      const result = await service.listActiveUsers();
+
+      expect(result).toHaveLength(2);
+      expect(result.every(u => u.active)).toBe(true);
+    });
+  });
+});</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="node-4">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Paso 4 — Mock de módulos externos <span class="diff diff-hard">Avanzado</span>
+    </h2>
+
+    <p>Con <code>jest.mock()</code> reemplazamos módulos enteros (como <code>axios</code> o cualquier módulo npm) sin tocar el código de producción.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">📄 src/weatherService.js</div>
+      <pre><code class="language-javascript">const axios = require('axios');
+
+async function getCurrentTemperature(city) {
+  const { data } = await axios.get(
+    `https://api.weather.example.com/current?city=${city}`
+  );
+  return data.temperature;
+}
+
+module.exports = { getCurrentTemperature };</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">🧪 src/__tests__/weatherService.test.js</div>
+      <pre><code class="language-javascript">// jest.mock() DEBE ir al principio, antes de cualquier require
+jest.mock('axios');
+
+const axios = require('axios');
+const { getCurrentTemperature } = require('../weatherService');
+
+describe('weatherService', () => {
+  it('retorna la temperatura de la ciudad', async () => {
+    // Simular respuesta exitosa de axios
+    axios.get.mockResolvedValue({ data: { temperature: 22 } });
+
+    const temp = await getCurrentTemperature('Bogotá');
+
+    expect(temp).toBe(22);
+    expect(axios.get).toHaveBeenCalledWith(expect.stringContaining('Bogotá'));
+  });
+
+  it('propaga el error de red', async () => {
+    axios.get.mockRejectedValue(new Error('Network Error'));
+
+    await expect(getCurrentTemperature('Lima')).rejects.toThrow('Network Error');
+  });
+});</code></pre>
+    </div>
+  </section>
+
+  <!-- NODE — Express -->
+  <section class="section" id="node-express">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-node">Node.js</span>
+      <span class="badge badge-framework">Express</span>
+      Rutas HTTP con Supertest
+    </h2>
+
+    <div class="callout callout-express">
+      <span class="callout-icon">🟢</span>
+      <div class="callout-body">
+        <strong>Supertest levanta el servidor en memoria</strong>
+        <p>No necesitas abrir un puerto real. Ideal para tests de integración de rutas sin arrancar el servidor con <code>app.listen()</code>.</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-shell">🔧 Instalación</div>
+      <pre><code class="language-bash">npm install --save-dev supertest</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">📄 src/app.js</div>
+      <pre><code class="language-javascript">const express = require('express');
+const app = express();
+app.use(express.json());
+
+const users = [
+  { id: 1, name: 'Ana', email: 'ana@ejemplo.com' },
+  { id: 2, name: 'Luis', email: 'luis@ejemplo.com' },
+];
+
+app.get('/api/users', (req, res) => {
+  res.json(users);
+});
+
+app.get('/api/users/:id', (req, res) => {
+  const user = users.find(u => u.id === Number(req.params.id));
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json(user);
+});
+
+app.post('/api/users', (req, res) => {
+  const { name, email } = req.body;
+  if (!name || !email) {
+    return res.status(400).json({ error: 'name y email son requeridos' });
+  }
+  const newUser = { id: users.length + 1, name, email };
+  users.push(newUser);
+  res.status(201).json(newUser);
+});
+
+module.exports = app; // exportar para Supertest (sin .listen())</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-node">🧪 src/__tests__/app.test.js</div>
+      <pre><code class="language-javascript">const request = require('supertest');
+const app = require('../app');
+
+describe('Users API', () => {
+
+  describe('GET /api/users', () => {
+    it('devuelve lista de usuarios con status 200', async () => {
+      const res = await request(app).get('/api/users');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toBeInstanceOf(Array);
+      expect(res.body.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GET /api/users/:id', () => {
+    it('devuelve el usuario correcto', async () => {
+      const res = await request(app).get('/api/users/1');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ id: 1, name: 'Ana' });
+    });
+
+    it('devuelve 404 si el usuario no existe', async () => {
+      const res = await request(app).get('/api/users/999');
+
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty('error');
+    });
+  });
+
+  describe('POST /api/users', () => {
+    it('crea un usuario y devuelve 201', async () => {
+      const res = await request(app)
+        .post('/api/users')
+        .send({ name: 'Elena', email: 'elena@ejemplo.com' });
+
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({ name: 'Elena', email: 'elena@ejemplo.com' });
+      expect(res.body.id).toBeDefined();
+    });
+
+    it('devuelve 400 si faltan campos requeridos', async () => {
+      const res = await request(app)
+        .post('/api/users')
+        .send({ name: 'SinEmail' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/email/i);
+    });
+  });
+
+});</code></pre>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       C#
+       ══════════════════════════════════════════════ -->
+  <div class="lang-divider divider-cs"></div>
+
+  <section class="section" id="cs-1">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-cs">C# · xUnit</span>
+      Paso 1 — Método simple con Fact <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>En xUnit, <code>[Fact]</code> marca un test individual y <code>[Theory]</code> permite datos múltiples. No hay <code>setUp/tearDown</code> como método anotado; xUnit crea una nueva instancia de la clase por cada test.</p>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">📄 src/MathHelper.cs</div>
+      <pre><code class="language-csharp">namespace MyApp;
+
+public static class MathHelper
+{
+    public static int Add(int a, int b) => a + b;
+
+    public static double Divide(double a, double b)
+    {
+        if (b == 0) throw new DivideByZeroException("No se puede dividir entre cero.");
+        return a / b;
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">🧪 MyTests/MathHelperTests.cs</div>
+      <pre><code class="language-csharp">using MyApp;
+using Xunit;
+
+namespace MyTests;
+
+public class MathHelperTests
+{
+    [Fact]
+    public void Add_TwoPositiveNumbers_ReturnsCorrectSum()
+    {
+        // Arrange
+        int a = 2, b = 3;
+
+        // Act
+        int result = MathHelper.Add(a, b);
+
+        // Assert
+        Assert.Equal(5, result);
+    }
+
+    [Fact]
+    public void Divide_ReturnsCorrectQuotient()
+    {
+        double result = MathHelper.Divide(10, 4);
+        Assert.Equal(2.5, result, precision: 2);
+    }
+
+    [Fact]
+    public void Divide_ByZero_ThrowsDivideByZeroException()
+    {
+        // Assert — envuelve la acción que debe lanzar
+        Assert.Throws&lt;DivideByZeroException&gt;(() => MathHelper.Divide(5, 0));
+    }
+}</code></pre>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">📌</span>
+      <div class="callout-body">
+        <strong>Convención de nombres en C#</strong>
+        <p>Usa el patrón <code>MetodoAProbar_Escenario_ResultadoEsperado</code> (PascalCase). Ejemplo: <code>Add_NegativeNumbers_ReturnsNegativeSum</code></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="cs-2">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-cs">C# · xUnit</span>
+      Paso 2 — Theory con InlineData <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">📄 src/PasswordValidator.cs</div>
+      <pre><code class="language-csharp">using System.Text.RegularExpressions;
+
+namespace MyApp;
+
+public class PasswordValidator
+{
+    public bool IsValid(string password)
+    {
+        if (string.IsNullOrEmpty(password) || password.Length < 8) return false;
+        if (!Regex.IsMatch(password, "[A-Z]")) return false;
+        if (!Regex.IsMatch(password, "[0-9]")) return false;
+        return true;
+    }
+
+    public string GetStrength(string password)
+    {
+        if (!IsValid(password)) return "weak";
+        if (password.Length >= 12 && Regex.IsMatch(password, "[^a-zA-Z0-9]")) return "strong";
+        return "medium";
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">🧪 MyTests/PasswordValidatorTests.cs</div>
+      <pre><code class="language-csharp">using MyApp;
+using Xunit;
+
+namespace MyTests;
+
+public class PasswordValidatorTests
+{
+    // xUnit crea una nueva instancia por cada test → no necesitamos setUp
+    private readonly PasswordValidator _validator = new();
+
+    // [Theory] + [InlineData] reemplaza DataProvider de PHPUnit
+    [Theory]
+    [InlineData("Ab1",      false)]   // muy corta
+    [InlineData("abcdef12", false)]   // sin mayúscula
+    [InlineData("AbcdefGH", false)]   // sin número
+    [InlineData("Secret12", true)]    // válida
+    public void IsValid_VariousPasswords_ReturnsExpected(string password, bool expected)
+    {
+        bool result = _validator.IsValid(password);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData("Abc12345",        "medium")]
+    [InlineData("MyP@ssw0rd!2024", "strong")]
+    [InlineData("simple",          "weak")]
+    public void GetStrength_ReturnsCorrectLevel(string password, string expectedStrength)
+    {
+        string strength = _validator.GetStrength(password);
+        Assert.Equal(expectedStrength, strength);
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="cs-3">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-cs">C# · xUnit</span>
+      Paso 3 — Interfaces y mocks con Moq <span class="diff diff-medium">Intermedio</span>
+    </h2>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">📄 src/IUserRepository.cs + UserService.cs</div>
+      <pre><code class="language-csharp">namespace MyApp;
+
+public interface IUserRepository
+{
+    Task&lt;User?&gt; FindByEmailAsync(string email);
+    Task SaveAsync(User user);
+}
+
+public record User(int Id, string Name, string Email, string Role);
+
+public class UserService
+{
+    private readonly IUserRepository _repo;
+
+    public UserService(IUserRepository repo) => _repo = repo;
+
+    public async Task&lt;User&gt; RegisterAsync(string name, string email, string password)
+    {
+        var existing = await _repo.FindByEmailAsync(email);
+        if (existing is not null)
+            throw new InvalidOperationException($"El email '{email}' ya está registrado.");
+
+        var user = new User(0, name, email, Role: "user");
+        await _repo.SaveAsync(user);
+        return user;
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">🧪 MyTests/UserServiceTests.cs</div>
+      <pre><code class="language-csharp">using MyApp;
+using Moq;
+using Xunit;
+
+namespace MyTests;
+
+public class UserServiceTests
+{
+    private readonly Mock&lt;IUserRepository&gt; _repoMock = new();
+    private readonly UserService _service;
+
+    public UserServiceTests()
+    {
+        // xUnit llama al constructor antes de cada test
+        _service = new UserService(_repoMock.Object);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_NewEmail_SavesUserAndReturnsIt()
+    {
+        // Arrange — el repositorio devuelve null (email no existe)
+        _repoMock
+            .Setup(r => r.FindByEmailAsync("nuevo@ejemplo.com"))
+            .ReturnsAsync((User?)null);
+
+        _repoMock
+            .Setup(r => r.SaveAsync(It.IsAny&lt;User&gt;()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var user = await _service.RegisterAsync("Ana", "nuevo@ejemplo.com", "Secret123");
+
+        // Assert
+        Assert.Equal("nuevo@ejemplo.com", user.Email);
+        Assert.Equal("user", user.Role);
+
+        // Verificar que SaveAsync fue llamado exactamente una vez
+        _repoMock.Verify(r => r.SaveAsync(It.IsAny&lt;User&gt;()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_DuplicateEmail_ThrowsInvalidOperationException()
+    {
+        // Arrange — simular que el email ya existe
+        _repoMock
+            .Setup(r => r.FindByEmailAsync("existente@ejemplo.com"))
+            .ReturnsAsync(new User(1, "Otro", "existente@ejemplo.com", "user"));
+
+        // Act + Assert
+        await Assert.ThrowsAsync&lt;InvalidOperationException&gt;(
+            () => _service.RegisterAsync("Nuevo", "existente@ejemplo.com", "pass")
+        );
+
+        // Verificar que SaveAsync NUNCA fue llamado
+        _repoMock.Verify(r => r.SaveAsync(It.IsAny&lt;User&gt;()), Times.Never);
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <section class="section" id="cs-4">
+    <h2 class="section-title toc-anchor">
+      <span class="badge badge-cs">C# · xUnit</span>
+      Paso 4 — Colecciones, excepciones y Output Helper <span class="diff diff-hard">Avanzado</span>
+    </h2>
+
+    <div class="code-block">
+      <div class="code-header code="code-header-cs">📄 src/ProductService.cs</div>
+      <pre><code class="language-csharp">namespace MyApp;
+
+public record Product(int Id, string Name, decimal Price, int Stock);
+
+public class ProductService
+{
+    private readonly List&lt;Product&gt; _products = new();
+
+    public void AddProduct(Product product)
+    {
+        if (product.Price &lt;= 0) throw new ArgumentException("El precio debe ser positivo.");
+        if (_products.Any(p => p.Id == product.Id))
+            throw new ArgumentException($"Ya existe un producto con Id {product.Id}.");
+        _products.Add(product);
+    }
+
+    public IEnumerable&lt;Product&gt; GetAffordable(decimal maxPrice) =>
+        _products.Where(p => p.Price &lt;= maxPrice).OrderBy(p => p.Price);
+
+    public bool TryReduceStock(int productId, int quantity, out string message)
+    {
+        var product = _products.FirstOrDefault(p => p.Id == productId);
+        if (product is null) { message = "Producto no encontrado."; return false; }
+        if (product.Stock &lt; quantity) { message = "Stock insuficiente."; return false; }
+        // Reemplazar con stock actualizado (record es inmutable)
+        _products[_products.IndexOf(product)] = product with { Stock = product.Stock - quantity };
+        message = "OK";
+        return true;
+    }
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-cs">🧪 MyTests/ProductServiceTests.cs</div>
+      <pre><code class="language-csharp">using MyApp;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace MyTests;
+
+public class ProductServiceTests
+{
+    private readonly ProductService _service = new();
+    private readonly ITestOutputHelper _output; // para log de diagnóstico en tests
+
+    public ProductServiceTests(ITestOutputHelper output) => _output = output;
+
+    private void SeedProducts()
+    {
+        _service.AddProduct(new Product(1, "Laptop",  899.99m, 10));
+        _service.AddProduct(new Product(2, "Mouse",    19.99m,  50));
+        _service.AddProduct(new Product(3, "Monitor", 299.99m,   5));
+    }
+
+    [Fact]
+    public void AddProduct_InvalidPrice_ThrowsArgumentException()
+    {
+        var ex = Assert.Throws&lt;ArgumentException&gt;(
+            () => _service.AddProduct(new Product(1, "Teclado", -10m, 5))
+        );
+        Assert.Contains("positivo", ex.Message);
+    }
+
+    [Fact]
+    public void GetAffordable_ReturnsFilteredAndOrdered()
+    {
+        SeedProducts();
+
+        var affordable = _service.GetAffordable(300m).ToList();
+
+        _output.WriteLine($"Asequibles encontrados: {affordable.Count}");
+
+        Assert.Equal(2, affordable.Count);                    // Mouse y Monitor
+        Assert.Equal("Mouse", affordable[0].Name);           // ordenado por precio
+        Assert.All(affordable, p => Assert.True(p.Price &lt;= 300m));
+    }
+
+    [Fact]
+    public void TryReduceStock_SufficientStock_ReturnsTrueAndReduces()
+    {
+        SeedProducts();
+
+        bool success = _service.TryReduceStock(2, 3, out string message);
+
+        Assert.True(success);
+        Assert.Equal("OK", message);
+    }
+
+    [Fact]
+    public void TryReduceStock_InsufficientStock_ReturnsFalse()
+    {
+        SeedProducts();
+
+        bool success = _service.TryReduceStock(3, 100, out string message);
+
+        Assert.False(success);
+        Assert.Equal("Stock insuficiente.", message);
+    }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ EJERCICIOS ═══════════════════════ -->
+  <div class="lang-divider" style="background: linear-gradient(90deg, #f0a500, #fcd34d); margin-bottom: 2rem;"></div>
+
+  <section class="section" id="ejercicio-1">
+    <h2 class="section-title toc-anchor">Ejercicios para practicar</h2>
+
+    <div class="exercise-section">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Ejercicio 1 — StringHelper</div>
+          <div class="exercise-subtitle">Implementa la clase y sus tests en el lenguaje de tu elección</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Crea una clase <code>StringHelper</code> con los siguientes métodos, y escribe <strong>al menos 2 tests por método</strong> (caso exitoso + caso borde/error).</p>
+
+        <div class="exercise-task">
+          <h5>Método 1 — <code>truncate(text, maxLength, suffix="...")</code></h5>
+          <ul>
+            <li>Si <code>text</code> tiene longitud ≤ <code>maxLength</code>, devuelve el texto original sin cambios.</li>
+            <li>Si es más largo, devuelve los primeros <code>maxLength</code> caracteres seguidos del sufijo.</li>
+            <li>Si <code>maxLength</code> es 0 o negativo, lanza una excepción.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Método 2 — <code>toSlug(text)</code></h5>
+          <ul>
+            <li>Convierte espacios en guiones (<code>-</code>).</li>
+            <li>Convierte todo a minúsculas.</li>
+            <li>Elimina caracteres especiales (solo letras, números y guiones).</li>
+            <li>Ejemplo: <code>"¡Hola Mundo! 2024"</code> → <code>"hola-mundo-2024"</code></li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Método 3 — <code>countWords(text)</code></h5>
+          <ul>
+            <li>Devuelve el número de palabras en el texto.</li>
+            <li>Debe manejar espacios múltiples entre palabras.</li>
+            <li>Texto vacío o solo espacios → devuelve 0.</li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint1')">Ver pistas</button>
+        <div class="hint-body" id="hint1">
+          <ul>
+            <li><strong>PHP:</strong> Usa <code>mb_strlen()</code>, <code>mb_strtolower()</code>, <code>preg_replace()</code> y <code>str_word_count()</code>.</li>
+            <li><strong>Node.js:</strong> Usa <code>.toLowerCase()</code>, <code>.replace(/\s+/g, '-')</code> y <code>.split(/\s+/).filter(Boolean)</code>.</li>
+            <li><strong>C#:</strong> Usa <code>string.IsNullOrWhiteSpace()</code>, <code>Regex.Replace()</code> y <code>Split(' ', StringSplitOptions.RemoveEmptyEntries)</code>.</li>
+            <li>Para <code>toSlug</code>: prueba con texto vacío, texto con múltiples espacios y texto con caracteres especiales.</li>
+            <li>Para <code>truncate</code>: prueba exactamente en el límite (<code>text.length == maxLength</code>).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ejercicio-2">
+    <div class="exercise-section">
+      <div class="exercise-header">
+        <span class="exercise-icon">🛒</span>
+        <div>
+          <div class="exercise-title">Ejercicio 2 — OrderService con dependencias</div>
+          <div class="exercise-subtitle">Practica mocks e inyección de dependencias</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa un <code>OrderService</code> que depende de dos interfaces: <code>IInventoryRepository</code> e <code>INotificationService</code>. Escribe los tests usando mocks.</p>
+
+        <div class="exercise-task">
+          <h5>Contratos a implementar</h5>
+          <ul>
+            <li><code>IInventoryRepository.getStock(productId)</code> — retorna el stock disponible (número).</li>
+            <li><code>IInventoryRepository.decreaseStock(productId, quantity)</code> — reduce el inventario.</li>
+            <li><code>INotificationService.sendConfirmation(userId, orderId)</code> — envía notificación al usuario.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Lógica de <code>OrderService.placeOrder(userId, productId, quantity)</code></h5>
+          <ul>
+            <li>Si <code>quantity</code> ≤ 0, lanzar excepción con mensaje claro.</li>
+            <li>Consultar stock disponible vía <code>IInventoryRepository</code>.</li>
+            <li>Si el stock es insuficiente, lanzar excepción <code>InsufficientStockError</code>.</li>
+            <li>Reducir el stock y enviar confirmación al usuario.</li>
+            <li>Retornar un objeto orden con <code>{ orderId, userId, productId, quantity, status: 'confirmed' }</code>.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos (al menos estos 4)</h5>
+          <ul>
+            <li><code>placeOrder_ValidOrder_DecreasesStockAndSendsNotification</code></li>
+            <li><code>placeOrder_InsufficientStock_ThrowsException</code></li>
+            <li><code>placeOrder_InvalidQuantity_ThrowsException</code></li>
+            <li><code>placeOrder_OnSuccess_NotificationServiceCalledOnce</code></li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint2')">Ver pistas</button>
+        <div class="hint-body" id="hint2">
+          <ul>
+            <li>Define las interfaces primero — los tests dependen de ellas, no de implementaciones concretas.</li>
+            <li>En el test de notificación, verifica que <code>sendConfirmation()</code> fue llamado <strong>exactamente una vez</strong> con los argumentos correctos.</li>
+            <li>En el test de stock insuficiente, verifica que <code>decreaseStock()</code> <strong>nunca fue llamado</strong>.</li>
+            <li><strong>PHP:</strong> Usa <code>$mock->expects($this->never())->method('decreaseStock')</code>.</li>
+            <li><strong>Node.js:</strong> Usa <code>expect(mockRepo.decreaseStock).not.toHaveBeenCalled()</code>.</li>
+            <li><strong>C#:</strong> Usa <code>_repoMock.Verify(r => r.DecreaseStock(...), Times.Never)</code>.</li>
+            <li>El <code>orderId</code> puede ser un UUID generado o un número autoincrementable simple para los tests.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── RECURSOS ─── -->
+  <section class="section">
+    <h2 class="section-title">Referencias rápidas</h2>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>PHPUnit</h4>
+        <p>Documentación oficial: <code>phpunit.de/documentation</code><br>Anotaciones: <code>@dataProvider</code>, <code>@test</code>, <code>@group</code></p>
+      </div>
+      <div class="concept-card">
+        <h4>Jest</h4>
+        <p>Documentación: <code>jestjs.io</code><br>Matchers: <code>toBe</code>, <code>toEqual</code>, <code>toMatchObject</code>, <code>toHaveBeenCalledWith</code></p>
+      </div>
+      <div class="concept-card">
+        <h4>xUnit + Moq</h4>
+        <p>xUnit: <code>xunit.net</code><br>Moq: <code>github.com/moq/moq4</code><br>Attributes: <code>[Fact]</code>, <code>[Theory]</code>, <code>[InlineData]</code></p>
+      </div>
+      <div class="concept-card">
+        <h4>Laravel Testing</h4>
+        <p>Docs: <code>laravel.com/docs/testing</code><br>Helpers: <code>actingAs()</code>, <code>assertDatabaseHas()</code>, <code>Notification::fake()</code></p>
+      </div>
+      <div class="concept-card">
+        <h4>Supertest</h4>
+        <p>GitHub: <code>github.com/ladjs/supertest</code><br>Métodos: <code>.get()</code>, <code>.post()</code>, <code>.send()</code>, <code>.expect()</code></p>
+      </div>
+      <div class="concept-card">
+        <h4>Regla 3A</h4>
+        <p>Siempre: <strong>Arrange</strong> → <strong>Act</strong> → <strong>Assert</strong>. Un solo <em>Act</em> por test. Un solo concepto por test.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    const btn = el.previousElementSibling;
+    if (el.style.display === 'block') {
+      el.style.display = 'none';
+      btn.textContent = 'Ver pistas';
+    } else {
+      el.style.display = 'block';
+      btn.textContent = 'Ocultar pistas';
+    }
+  }
+
+  // Active nav link on scroll
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.toc-anchor');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-10% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
