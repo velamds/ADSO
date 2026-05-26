@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ejercicios de Unit Testing — Node.js · Jest</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+  <script>hljs.highlightAll();</script>
+  <style>
+    :root {
+      --node-color: #68A063;
+      --node-dark: #3E7B39;
+      --node-light: #EDF6EC;
+      --sidebar-bg: #1a1d23;
+      --sidebar-text: #c9d1d9;
+      --sidebar-accent: #58a6ff;
+      --body-bg: #f6f8fa;
+      --card-bg: #ffffff;
+      --text-main: #24292f;
+      --text-muted: #57606a;
+      --border: #d0d7de;
+      --exercise-bg: #fffbf0;
+      --exercise-border: #f0a500;
+      --tip-bg: #dff0ff;
+      --tip-border: #0969da;
+      --example-bg: #f0fff4;
+      --example-border: #2da44e;
+      --warning-bg: #fff8c5;
+      --warning-border: #d4a017;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 0 0 2rem;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    #sidebar-header {
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid #30363d;
+      background: #0d1117;
+    }
+
+    #sidebar-header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    #sidebar-header p {
+      font-size: 0.72rem;
+      color: #8b949e;
+      margin-top: 0.3rem;
+    }
+
+    .nav-section { padding: 1rem 0 0.5rem; }
+
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8b949e;
+      padding: 0 1.25rem 0.4rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(88,166,255,0.08);
+      color: #fff;
+      border-left-color: var(--sidebar-accent);
+    }
+
+    .nav-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-node { background: var(--node-color); }
+    .dot-ex   { background: var(--exercise-border); }
+    .dot-base { background: var(--sidebar-accent); }
+    .dot-ex2  { background: #2da44e; }
+
+    /* ── MAIN CONTENT ── */
+    #main {
+      flex: 1;
+      padding: 2.5rem 2rem 4rem;
+      max-width: 980px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0d1117;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 3.5rem; }
+
+    .section-title {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-node { background: var(--node-dark); color: #fff; }
+
+    .subsection { margin: 2rem 0; }
+
+    .subsection-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #0d1117;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .step-node  { background: var(--node-dark); }
+    .step-ex    { background: #92400e; }
+    .step-green { background: #166534; }
+
+    p { color: var(--text-muted); line-height: 1.7; margin-bottom: 0.8rem; }
+
+    /* ── CODE BLOCKS ── */
+    .code-block {
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .code-header-node  { background: #1a2e1a; color: var(--node-color); }
+    .code-header-shell { background: #1a1a1a; color: #8b949e; }
+
+    .code-block pre { margin: 0; }
+    .code-block pre code { font-size: 0.82rem; line-height: 1.6; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; line-height: 1.6; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
+    .callout-body p { margin: 0; font-size: 0.85rem; }
+
+    .callout-tip     { background: var(--tip-bg);     border-left: 4px solid var(--tip-border); }
+    .callout-warning { background: var(--warning-bg); border-left: 4px solid var(--warning-border); }
+    .callout-example { background: var(--example-bg); border-left: 4px solid var(--example-border); }
+
+    /* ── CONCEPT CARDS ── */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .concept-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem;
+    }
+
+    .concept-card h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: #0d1117;
+    }
+
+    .concept-card p {
+      font-size: 0.8rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── SETUP COMMANDS ── */
+    .setup-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .setup-card-title {
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .setup-card-node { background: var(--node-light); color: var(--node-dark); }
+
+    .setup-card pre {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+      background: #1a1d23;
+      color: #c9d1d9;
+    }
+
+    /* ── EXERCISES ── */
+    .exercise-section {
+      background: var(--exercise-bg);
+      border: 2px dashed var(--exercise-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin: 2rem 0;
+    }
+
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .exercise-icon { font-size: 1.5rem; }
+
+    .exercise-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .exercise-subtitle {
+      font-size: 0.8rem;
+      color: #b45309;
+      margin-top: 0.1rem;
+    }
+
+    .exercise-body p {
+      color: #57534e;
+      font-size: 0.88rem;
+    }
+
+    .exercise-task {
+      background: var(--card-bg);
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.75rem 0;
+    }
+
+    .exercise-task h5 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 0.4rem;
+    }
+
+    .exercise-task ul, .exercise-task ol {
+      padding-left: 1.2rem;
+      font-size: 0.83rem;
+      color: #57534e;
+    }
+
+    .exercise-task li { margin-bottom: 0.3rem; }
+
+    /* ── EXAMPLE BOX ── */
+    .example-section {
+      background: var(--example-bg);
+      border: 1px solid var(--example-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .example-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .example-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #166534;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: #dcfce7;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+    }
+
+    .example-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #166534;
+    }
+
+    /* ── HINT TOGGLE ── */
+    .hint-toggle {
+      background: none;
+      border: 1px solid var(--exercise-border);
+      color: #92400e;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .hint-toggle:hover { background: var(--exercise-border); color: #fff; }
+
+    .hint-body {
+      display: none;
+      background: #fffde7;
+      border-radius: 6px;
+      padding: 0.9rem;
+      margin-top: 0.5rem;
+      font-size: 0.82rem;
+      color: #57534e;
+    }
+
+    .hint-body ul { padding-left: 1.2rem; }
+    .hint-body li { margin-bottom: 0.3rem; }
+
+    /* ── DIFFICULTY BADGE ── */
+    .diff {
+      font-size: 0.65rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+
+    .diff-easy   { background: #dcfce7; color: #166534; }
+    .diff-medium { background: #fef3c7; color: #92400e; }
+    .diff-hard   { background: #fee2e2; color: #991b1b; }
+
+    /* ── AAA TABLE ── */
+    .aaa-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+
+    .aaa-table th {
+      background: #0d1117;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+
+    .aaa-table td {
+      padding: 0.75rem 1rem;
+      font-size: 0.83rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      vertical-align: top;
+    }
+
+    .aaa-table tr:last-child td { border-bottom: none; }
+
+    .aaa-pill {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .pill-a { background: #dbeafe; color: #1d4ed8; }
+    .pill-b { background: #dcfce7; color: #166534; }
+    .pill-c { background: #fce7f3; color: #9d174d; }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      height: 4px;
+      border-radius: 2px;
+      margin: 0 0 2.5rem;
+      background: linear-gradient(90deg, var(--node-dark), var(--node-color));
+    }
+
+    /* ── INLINE CODE ── */
+    code:not([class]) {
+      background: #f1f3f4;
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.82em;
+      color: #c7254e;
+    }
+
+    /* ── PROGRESS INDICATOR ── */
+    .progress-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin: 2rem 0 1rem;
+      align-items: center;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .progress-dot {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .progress-dot-active { background: var(--node-dark); }
+    .progress-dot-inactive { background: #d0d7de; color: #57606a; }
+
+    .progress-arrow {
+      color: #d0d7de;
+      font-size: 0.8rem;
+    }
+
+    /* ── SCROLLBAR ── */
+    #sidebar::-webkit-scrollbar { width: 5px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #sidebar { width: 100%; height: auto; position: static; }
+      #main { padding: 1.5rem 1rem; }
+    }
+
+    .toc-anchor { scroll-margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <h1>Ejercicios · Unit Testing</h1>
+    <p>Node.js · Jest — 5 ejercicios prácticos</p>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Antes de empezar</div>
+    <a href="#setup"       class="nav-link"><span class="nav-dot dot-base"></span>Configuración inicial</a>
+    <a href="#recordatorio" class="nav-link"><span class="nav-dot dot-base"></span>Recordatorio: patrón AAA</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicio 1 · Fácil</div>
+    <a href="#ej1-ejemplo"   class="nav-link"><span class="nav-dot dot-ex2"></span>Ejemplo base</a>
+    <a href="#ej1-ejercicio" class="nav-link"><span class="nav-dot dot-ex"></span>NumberUtils</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicio 2 · Fácil</div>
+    <a href="#ej2-ejemplo"   class="nav-link"><span class="nav-dot dot-ex2"></span>Ejemplo base</a>
+    <a href="#ej2-ejercicio" class="nav-link"><span class="nav-dot dot-ex"></span>StringProcessor</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicio 3 · Intermedio</div>
+    <a href="#ej3-ejemplo"   class="nav-link"><span class="nav-dot dot-ex2"></span>Ejemplo base</a>
+    <a href="#ej3-ejercicio" class="nav-link"><span class="nav-dot dot-ex"></span>TaskManager</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicio 4 · Intermedio</div>
+    <a href="#ej4-ejemplo"   class="nav-link"><span class="nav-dot dot-ex2"></span>Ejemplo base</a>
+    <a href="#ej4-ejercicio" class="nav-link"><span class="nav-dot dot-ex"></span>ProductService async</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Ejercicio 5 · Intermedio+</div>
+    <a href="#ej5-ejemplo"   class="nav-link"><span class="nav-dot dot-ex2"></span>Ejemplo base</a>
+    <a href="#ej5-ejercicio" class="nav-link"><span class="nav-dot dot-ex"></span>API REST con Supertest</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main id="main">
+
+  <h1 class="page-title">Ejercicios de Unit Testing</h1>
+  <p class="page-subtitle">Node.js · Jest — Escribe primero el código, luego los tests que lo verifiquen</p>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">📋</span>
+    <div class="callout-body">
+      <strong>¿Cómo usar esta guía?</strong>
+      <p>Cada ejercicio incluye un <strong>ejemplo base</strong> que puedes tomar como referencia. Lee el ejemplo, entiende el patrón y luego implementa el ejercicio propuesto. No hay soluciones — el objetivo es que explores y te equivoques.</p>
+    </div>
+  </div>
+
+  <!-- ─────────────────── SETUP ─────────────────── -->
+  <section class="section" id="setup">
+    <h2 class="section-title toc-anchor">Configuración inicial</h2>
+
+    <p>Todos los ejercicios usan <strong>Node.js con Jest</strong>. Crea una carpeta por ejercicio o usa una estructura común:</p>
+
+    <div class="setup-card">
+      <div class="setup-card-title setup-card-node">🟢 Estructura de carpetas recomendada</div>
+      <pre>ejercicios-testing/
+├── src/
+│   ├── numberUtils.js
+│   ├── stringProcessor.js
+│   ├── taskManager.js
+│   ├── productService.js
+│   └── app.js
+├── __tests__/
+│   ├── numberUtils.test.js
+│   ├── stringProcessor.test.js
+│   ├── taskManager.test.js
+│   ├── productService.test.js
+│   └── app.test.js
+└── package.json</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header code-header-shell">🔧 Instalación</div>
+      <pre><code class="language-bash">mkdir ejercicios-testing && cd ejercicios-testing
+npm init -y
+npm install --save-dev jest supertest
+# En package.json, agrega: "test": "jest"
+npx jest --watchAll    # modo watch: re-ejecuta al guardar</code></pre>
+    </div>
+
+    <div class="callout callout-warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Si usas módulos ES (import/export)</strong>
+        <p>Agrega <code>"type": "module"</code> al <code>package.json</code> y configura Jest con <code>--experimental-vm-modules</code>, o usa <code>module.exports</code> / <code>require()</code> (CommonJS) para mayor simplicidad en estos ejercicios.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── AAA RECORDATORIO ─────────────────── -->
+  <section class="section" id="recordatorio">
+    <h2 class="section-title toc-anchor">Recordatorio: patrón AAA</h2>
+
+    <table class="aaa-table">
+      <thead>
+        <tr>
+          <th>Fase</th>
+          <th>¿Qué haces?</th>
+          <th>Ejemplo en Jest</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="aaa-pill pill-a">Arrange</span><br><small>Preparar</small></td>
+          <td>Crear datos, instancias y mocks necesarios.</td>
+          <td><code>const cart = new ShoppingCart();</code></td>
+        </tr>
+        <tr>
+          <td><span class="aaa-pill pill-b">Act</span><br><small>Ejecutar</small></td>
+          <td>Llamar a la función o método bajo prueba.</td>
+          <td><code>const total = cart.getTotal();</code></td>
+        </tr>
+        <tr>
+          <td><span class="aaa-pill pill-c">Assert</span><br><small>Verificar</small></td>
+          <td>Confirmar que el resultado es el esperado.</td>
+          <td><code>expect(total).toBe(0);</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Un test = una sola cosa</strong>
+        <p>Cada <code>it()</code> debe verificar un único comportamiento. Si tu test tiene tres <code>expect()</code> sobre conceptos distintos, probablemente deba dividirse en tres tests separados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EJERCICIO 1 ═══════════════════ -->
+  <div class="section-divider"></div>
+
+  <div class="progress-bar">
+    <div class="progress-step">
+      <div class="progress-dot progress-dot-active">1</div>
+    </div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step">
+      <div class="progress-dot progress-dot-inactive">2</div>
+    </div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step">
+      <div class="progress-dot progress-dot-inactive">3</div>
+    </div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step">
+      <div class="progress-dot progress-dot-inactive">4</div>
+    </div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step">
+      <div class="progress-dot progress-dot-inactive">5</div>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title toc-anchor" id="ej1-ejemplo">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Ejercicio 1 — NumberUtils <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>Empezamos con <strong>funciones puras</strong>: reciben entradas, devuelven una salida, no modifican estado externo. Son las más sencillas de testear porque no requieren mocks ni clases.</p>
+
+    <!-- EJEMPLO -->
+    <div class="example-section" id="ej1-ejemplo">
+      <div class="example-header">
+        <span class="example-label">Ejemplo base</span>
+        <span class="example-title">Funciones <code>isEven</code> y <code>safeSquareRoot</code></span>
+      </div>
+
+      <p style="color: #166534; font-size:0.88rem;">Lee este ejemplo antes de hacer el ejercicio. Observa la estructura del archivo de producción y del test.</p>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">📄 src/mathBasics.js</div>
+        <pre><code class="language-javascript">// Devuelve true si n es par, false si es impar
+function isEven(n) {
+  if (typeof n !== 'number' || !Number.isInteger(n)) {
+    throw new TypeError('Se esperaba un entero.');
+  }
+  return n % 2 === 0;
+}
+
+// Devuelve la raíz cuadrada o lanza error si n es negativo
+function safeSquareRoot(n) {
+  if (n < 0) throw new RangeError('No se puede calcular la raíz de un número negativo.');
+  return Math.sqrt(n);
+}
+
+module.exports = { isEven, safeSquareRoot };</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">🧪 __tests__/mathBasics.test.js</div>
+        <pre><code class="language-javascript">const { isEven, safeSquareRoot } = require('../src/mathBasics');
+
+describe('mathBasics', () => {
+
+  describe('isEven()', () => {
+    it('devuelve true para un número par', () => {
+      // Arrange
+      const n = 4;
+      // Act
+      const result = isEven(n);
+      // Assert
+      expect(result).toBe(true);
+    });
+
+    it('devuelve false para un número impar', () => {
+      expect(isEven(7)).toBe(false);
+    });
+
+    it('funciona con el número 0 (es par)', () => {
+      expect(isEven(0)).toBe(true);
+    });
+
+    it('lanza TypeError si el argumento no es un entero', () => {
+      expect(() => isEven('hola')).toThrow(TypeError);
+      expect(() => isEven(3.5)).toThrow(TypeError);
+    });
+  });
+
+  describe('safeSquareRoot()', () => {
+    it('devuelve la raíz cuadrada correcta', () => {
+      expect(safeSquareRoot(9)).toBe(3);
+      expect(safeSquareRoot(0)).toBe(0);
+    });
+
+    it('lanza RangeError para números negativos', () => {
+      expect(() => safeSquareRoot(-4)).toThrow(RangeError);
+      expect(() => safeSquareRoot(-4)).toThrow('negativo');
+    });
+  });
+
+});</code></pre>
+      </div>
+
+      <div class="callout callout-example">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-body">
+          <strong>¿Qué observar en este ejemplo?</strong>
+          <p>Cada <code>describe()</code> agrupa los tests de una función. Se prueban tanto casos exitosos como casos borde (0) y casos de error. Para errores se usa la forma <code>expect(() => funcion()).toThrow(...)</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO -->
+    <div class="exercise-section" id="ej1-ejercicio">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Tu turno — Implementa <code>numberUtils.js</code></div>
+          <div class="exercise-subtitle">Crea el archivo de producción y luego sus tests</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa en <code>src/numberUtils.js</code> las siguientes tres funciones. Luego escribe sus tests en <code>__tests__/numberUtils.test.js</code>.</p>
+
+        <div class="exercise-task">
+          <h5>Función 1 — <code>factorial(n)</code></h5>
+          <ul>
+            <li>Devuelve el factorial de <code>n</code> (ejemplo: <code>factorial(5)</code> → <code>120</code>).</li>
+            <li><code>factorial(0)</code> debe devolver <code>1</code> (por definición matemática).</li>
+            <li>Si <code>n</code> es negativo, lanza un <code>RangeError</code>.</li>
+            <li>Si <code>n</code> no es un entero, lanza un <code>TypeError</code>.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Función 2 — <code>isPrime(n)</code></h5>
+          <ul>
+            <li>Devuelve <code>true</code> si <code>n</code> es un número primo, <code>false</code> en caso contrario.</li>
+            <li>Los números menores a 2 no son primos (incluyendo 0 y 1).</li>
+            <li>Ejemplos de primos: 2, 3, 5, 7, 11, 13…</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Función 3 — <code>clamp(value, min, max)</code></h5>
+          <ul>
+            <li>Devuelve <code>value</code> si está entre <code>min</code> y <code>max</code>.</li>
+            <li>Si <code>value</code> es menor que <code>min</code>, devuelve <code>min</code>.</li>
+            <li>Si <code>value</code> es mayor que <code>max</code>, devuelve <code>max</code>.</li>
+            <li>Si <code>min > max</code>, lanza un <code>RangeError</code>.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos (mínimo 2 por función)</h5>
+          <ul>
+            <li><code>factorial</code>: caso normal, caso de <code>n=0</code>, negativo, decimal.</li>
+            <li><code>isPrime</code>: primo conocido, no primo, 0, 1, número negativo.</li>
+            <li><code>clamp</code>: valor dentro del rango, valor menor, valor mayor, <code>min === max</code>, <code>min > max</code>.</li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint1')">Ver pistas</button>
+        <div class="hint-body" id="hint1">
+          <ul>
+            <li>Para <code>factorial</code>, puedes usar recursión o un bucle <code>for</code>. Ambos son válidos.</li>
+            <li>Para <code>isPrime</code>, el algoritmo más sencillo es verificar divisibilidad desde 2 hasta <code>Math.floor(Math.sqrt(n))</code>.</li>
+            <li>Para <code>clamp</code>, <code>Math.min(Math.max(value, min), max)</code> es una forma elegante de implementarlo en una línea.</li>
+            <li>Prueba siempre el <strong>valor exacto en el límite</strong>: si el rango es [1, 10], prueba con <code>clamp(1, 1, 10)</code> y <code>clamp(10, 1, 10)</code>.</li>
+            <li>Recuerda exportar las funciones con <code>module.exports = { factorial, isPrime, clamp };</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EJERCICIO 2 ═══════════════════ -->
+  <div class="section-divider"></div>
+
+  <div class="progress-bar">
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">1</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-active">2</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">3</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">4</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">5</div></div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title toc-anchor" id="ej2-ejemplo">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Ejercicio 2 — StringProcessor <span class="diff diff-easy">Fácil</span>
+    </h2>
+
+    <p>Las funciones de procesamiento de texto son un excelente campo de práctica: tienen entradas y salidas claras, y hay muchos casos borde interesantes (texto vacío, espacios, caracteres especiales).</p>
+
+    <!-- EJEMPLO -->
+    <div class="example-section" id="ej2-ejemplo">
+      <div class="example-header">
+        <span class="example-label">Ejemplo base</span>
+        <span class="example-title">Funciones <code>capitalize</code> y <code>countOccurrences</code></span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">📄 src/textBasics.js</div>
+        <pre><code class="language-javascript">// Convierte la primera letra a mayúscula, el resto a minúscula
+function capitalize(text) {
+  if (typeof text !== 'string') throw new TypeError('Se esperaba un string.');
+  if (text.trim() === '') return '';
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+// Cuenta cuántas veces aparece `substring` dentro de `text`
+function countOccurrences(text, substring) {
+  if (!substring) return 0;
+  let count = 0;
+  let index = text.indexOf(substring);
+  while (index !== -1) {
+    count++;
+    index = text.indexOf(substring, index + 1);
+  }
+  return count;
+}
+
+module.exports = { capitalize, countOccurrences };</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">🧪 __tests__/textBasics.test.js</div>
+        <pre><code class="language-javascript">const { capitalize, countOccurrences } = require('../src/textBasics');
+
+describe('textBasics', () => {
+
+  describe('capitalize()', () => {
+    it('pone en mayúscula la primera letra', () => {
+      expect(capitalize('hola mundo')).toBe('Hola mundo');
+    });
+
+    it('convierte el resto a minúsculas', () => {
+      expect(capitalize('JAVASCRIPT')).toBe('Javascript');
+    });
+
+    it('devuelve cadena vacía si el texto está vacío o es solo espacios', () => {
+      expect(capitalize('')).toBe('');
+      expect(capitalize('   ')).toBe('');
+    });
+
+    it('lanza TypeError si el argumento no es un string', () => {
+      expect(() => capitalize(42)).toThrow(TypeError);
+    });
+  });
+
+  describe('countOccurrences()', () => {
+    it('cuenta correctamente las apariciones', () => {
+      expect(countOccurrences('banana', 'a')).toBe(3);
+    });
+
+    it('devuelve 0 si el substring no aparece', () => {
+      expect(countOccurrences('hola', 'z')).toBe(0);
+    });
+
+    it('devuelve 0 si el substring es una cadena vacía', () => {
+      expect(countOccurrences('hola', '')).toBe(0);
+    });
+  });
+
+});</code></pre>
+      </div>
+
+      <div class="callout callout-example">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-body">
+          <strong>¿Qué observar en este ejemplo?</strong>
+          <p>Se prueban explícitamente los casos borde: texto vacío, solo espacios, y substring vacío. Estos casos "raros" son donde el código suele fallar. Antes de escribir un test, pregúntate: <em>¿qué pasa si el usuario manda un string vacío?</em></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO -->
+    <div class="exercise-section" id="ej2-ejercicio">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Tu turno — Implementa <code>stringProcessor.js</code></div>
+          <div class="exercise-subtitle">Enfócate en los casos borde: texto vacío, espacios extras, caracteres especiales</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa en <code>src/stringProcessor.js</code> las siguientes funciones y escribe sus tests en <code>__tests__/stringProcessor.test.js</code>.</p>
+
+        <div class="exercise-task">
+          <h5>Función 1 — <code>maskEmail(email)</code></h5>
+          <ul>
+            <li>Oculta el usuario del email dejando solo el primer y último carácter visibles.</li>
+            <li>Ejemplo: <code>"sergio@gmail.com"</code> → <code>"s*****o@gmail.com"</code></li>
+            <li>Si el usuario tiene solo 1 carácter, devuelve el email sin cambios.</li>
+            <li>Si el email no contiene <code>@</code>, lanza un <code>Error</code>.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Función 2 — <code>reverseWords(sentence)</code></h5>
+          <ul>
+            <li>Invierte el orden de las <em>palabras</em> (no de los caracteres) en la oración.</li>
+            <li>Ejemplo: <code>"hola mundo node"</code> → <code>"node mundo hola"</code></li>
+            <li>Debe manejar espacios múltiples entre palabras.</li>
+            <li>Si el texto está vacío o es solo espacios, devuelve <code>""</code>.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Función 3 — <code>extractHashtags(text)</code></h5>
+          <ul>
+            <li>Devuelve un array con todos los hashtags encontrados en el texto.</li>
+            <li>Ejemplo: <code>"Me gusta #node y #testing"</code> → <code>["#node", "#testing"]</code></li>
+            <li>Si no hay hashtags, devuelve un array vacío <code>[]</code>.</li>
+            <li>El <code>#</code> solo cuenta como hashtag si le sigue al menos una letra o número.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos (mínimo 2 por función)</h5>
+          <ul>
+            <li><code>maskEmail</code>: email normal, usuario de 1 char, email sin <code>@</code>.</li>
+            <li><code>reverseWords</code>: oración normal, espacios múltiples, texto vacío, una sola palabra.</li>
+            <li><code>extractHashtags</code>: múltiples hashtags, sin hashtags, <code>#</code> solo (sin texto después).</li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint2')">Ver pistas</button>
+        <div class="hint-body" id="hint2">
+          <ul>
+            <li>Para <code>maskEmail</code>: usa <code>email.split('@')</code> para separar usuario y dominio. Luego construye la máscara con <code>'*'.repeat(n)</code>.</li>
+            <li>Para <code>reverseWords</code>: <code>sentence.trim().split(/\s+/).reverse().join(' ')</code> es una forma compacta. <code>/\s+/</code> maneja múltiples espacios.</li>
+            <li>Para <code>extractHashtags</code>: la expresión regular <code>/#\w+/g</code> captura hashtags con <code>text.match(/#\w+/g)</code>. Recuerda que <code>match()</code> devuelve <code>null</code> si no hay coincidencias.</li>
+            <li>Prueba <code>extractHashtags</code> con texto que tenga un <code>#</code> solo o al final de la cadena.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EJERCICIO 3 ═══════════════════ -->
+  <div class="section-divider"></div>
+
+  <div class="progress-bar">
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">1</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">2</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-active">3</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">4</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">5</div></div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title toc-anchor" id="ej3-ejemplo">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Ejercicio 3 — TaskManager <span class="diff diff-medium">Intermedio</span>
+    </h2>
+
+    <p>Cuando el código tiene <strong>estado interno</strong> (variables que cambian entre llamadas), es fundamental usar <code>beforeEach()</code> para resetear ese estado antes de cada test. De lo contrario, los tests se contaminan entre sí.</p>
+
+    <!-- EJEMPLO -->
+    <div class="example-section" id="ej3-ejemplo">
+      <div class="example-header">
+        <span class="example-label">Ejemplo base</span>
+        <span class="example-title">Clase <code>Stack</code> con <code>beforeEach</code></span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">📄 src/stack.js</div>
+        <pre><code class="language-javascript">class Stack {
+  constructor() {
+    this._items = [];
+  }
+
+  push(item) {
+    this._items.push(item);
+  }
+
+  pop() {
+    if (this.isEmpty()) throw new Error('El stack está vacío.');
+    return this._items.pop();
+  }
+
+  peek() {
+    if (this.isEmpty()) throw new Error('El stack está vacío.');
+    return this._items[this._items.length - 1];
+  }
+
+  isEmpty() {
+    return this._items.length === 0;
+  }
+
+  get size() {
+    return this._items.length;
+  }
+}
+
+module.exports = Stack;</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">🧪 __tests__/stack.test.js</div>
+        <pre><code class="language-javascript">const Stack = require('../src/stack');
+
+describe('Stack', () => {
+  let stack;
+
+  // beforeEach garantiza que cada test empiece con un stack vacío
+  beforeEach(() => {
+    stack = new Stack();
+  });
+
+  it('inicia vacío', () => {
+    expect(stack.isEmpty()).toBe(true);
+    expect(stack.size).toBe(0);
+  });
+
+  it('push agrega elementos y aumenta el tamaño', () => {
+    stack.push('A');
+    stack.push('B');
+    expect(stack.size).toBe(2);
+  });
+
+  it('pop devuelve el último elemento agregado', () => {
+    stack.push(10);
+    stack.push(20);
+
+    const result = stack.pop();
+
+    expect(result).toBe(20);
+    expect(stack.size).toBe(1);   // queda un elemento
+  });
+
+  it('pop lanza error si el stack está vacío', () => {
+    expect(() => stack.pop()).toThrow('El stack está vacío.');
+  });
+
+  it('peek devuelve el tope sin eliminarlo', () => {
+    stack.push('X');
+    expect(stack.peek()).toBe('X');
+    expect(stack.size).toBe(1);   // sigue intacto
+  });
+});</code></pre>
+      </div>
+
+      <div class="callout callout-example">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-body">
+          <strong>¿Qué observar en este ejemplo?</strong>
+          <p><code>beforeEach</code> declara <code>stack = new Stack()</code> antes de cada test, así ningún test hereda el estado del anterior. También nota cómo se verifica el efecto secundario: después de <code>pop()</code> se comprueba que el tamaño disminuyó.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO -->
+    <div class="exercise-section" id="ej3-ejercicio">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Tu turno — Implementa <code>TaskManager</code></div>
+          <div class="exercise-subtitle">Una clase que gestiona tareas con estado interno</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa en <code>src/taskManager.js</code> la clase <code>TaskManager</code> y luego escribe sus tests en <code>__tests__/taskManager.test.js</code>.</p>
+
+        <div class="exercise-task">
+          <h5>Comportamiento esperado de <code>TaskManager</code></h5>
+          <ul>
+            <li><code>addTask(title)</code> — agrega una tarea con estructura <code>{ id, title, completed: false, createdAt: Date }</code>. Si <code>title</code> está vacío, lanza un <code>Error</code>. Devuelve la tarea creada.</li>
+            <li><code>completeTask(id)</code> — marca la tarea con ese <code>id</code> como <code>completed: true</code>. Si el <code>id</code> no existe, lanza un <code>Error</code>.</li>
+            <li><code>removeTask(id)</code> — elimina la tarea con ese <code>id</code>. Si no existe, lanza un <code>Error</code>.</li>
+            <li><code>getPending()</code> — devuelve solo las tareas con <code>completed: false</code>.</li>
+            <li><code>getCompleted()</code> — devuelve solo las tareas con <code>completed: true</code>.</li>
+            <li><code>getAll()</code> — devuelve todas las tareas.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos</h5>
+          <ul>
+            <li>Una tarea recién creada tiene <code>completed: false</code>.</li>
+            <li>Después de <code>addTask</code>, el total de tareas aumenta en 1.</li>
+            <li><code>completeTask</code> cambia el estado correctamente sin afectar otras tareas.</li>
+            <li><code>removeTask</code> disminuye el total de tareas.</li>
+            <li><code>getPending()</code> no incluye tareas completadas.</li>
+            <li><code>getCompleted()</code> no incluye tareas pendientes.</li>
+            <li>Los métodos que reciben un <code>id</code> inválido lanzan error.</li>
+            <li><code>addTask</code> con <code>title</code> vacío lanza error.</li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint3')">Ver pistas</button>
+        <div class="hint-body" id="hint3">
+          <ul>
+            <li>Para generar IDs únicos, puedes usar un contador interno: <code>this._nextId = 1</code> y hacer <code>id: this._nextId++</code> en cada <code>addTask</code>.</li>
+            <li>Usa <code>beforeEach</code> en tus tests para crear una nueva instancia de <code>TaskManager</code> antes de cada test.</li>
+            <li>Para encontrar una tarea por ID: <code>this._tasks.find(t => t.id === id)</code>.</li>
+            <li>Recuerda probar que las operaciones son <strong>inmutables para otras tareas</strong>: si completas la tarea 1, la tarea 2 no debe verse afectada.</li>
+            <li><code>getPending()</code> puede implementarse con <code>this._tasks.filter(t => !t.completed)</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EJERCICIO 4 ═══════════════════ -->
+  <div class="section-divider"></div>
+
+  <div class="progress-bar">
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">1</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">2</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">3</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-active">4</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">5</div></div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title toc-anchor" id="ej4-ejemplo">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Ejercicio 4 — ProductService async <span class="diff diff-medium">Intermedio</span>
+    </h2>
+
+    <p>El código real casi siempre trabaja con operaciones asíncronas (base de datos, APIs externas). Jest soporta <code>async/await</code> de forma nativa, y con <code>jest.fn()</code> podemos simular dependencias sin hacer llamadas reales.</p>
+
+    <!-- EJEMPLO -->
+    <div class="example-section" id="ej4-ejemplo">
+      <div class="example-header">
+        <span class="example-label">Ejemplo base</span>
+        <span class="example-title">Clase <code>UserService</code> asíncrona con mock de repositorio</span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">📄 src/userService.js</div>
+        <pre><code class="language-javascript">class UserService {
+  constructor(userRepository) {
+    this.repo = userRepository;  // dependencia inyectada
+  }
+
+  async findById(id) {
+    if (typeof id !== 'number') throw new TypeError('id debe ser un número.');
+    const user = await this.repo.findById(id);
+    if (!user) throw new Error(`Usuario ${id} no encontrado.`);
+    return user;
+  }
+
+  async getActiveUsers() {
+    const all = await this.repo.findAll();
+    return all.filter(u => u.active);
+  }
+}
+
+module.exports = UserService;</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">🧪 __tests__/userService.test.js</div>
+        <pre><code class="language-javascript">const UserService = require('../src/userService');
+
+// Repositorio simulado: objeto con funciones mockeadas
+const mockRepo = {
+  findById: jest.fn(),
+  findAll:  jest.fn(),
+};
+
+describe('UserService', () => {
+  let service;
+
+  beforeEach(() => {
+    jest.clearAllMocks();               // reset del historial entre tests
+    service = new UserService(mockRepo);
+  });
+
+  describe('findById()', () => {
+    it('devuelve el usuario cuando existe', async () => {
+      // Arrange: el mock resolverá con este valor
+      mockRepo.findById.mockResolvedValue({ id: 1, name: 'Ana', active: true });
+
+      // Act
+      const user = await service.findById(1);
+
+      // Assert
+      expect(user.name).toBe('Ana');
+      expect(mockRepo.findById).toHaveBeenCalledWith(1);
+      expect(mockRepo.findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('lanza Error si el usuario no existe', async () => {
+      mockRepo.findById.mockResolvedValue(null);  // simula "no encontrado"
+
+      await expect(service.findById(99)).rejects.toThrow('Usuario 99 no encontrado.');
+    });
+
+    it('lanza TypeError si id no es un número', async () => {
+      await expect(service.findById('abc')).rejects.toThrow(TypeError);
+    });
+  });
+
+  describe('getActiveUsers()', () => {
+    it('filtra solo usuarios activos', async () => {
+      mockRepo.findAll.mockResolvedValue([
+        { id: 1, name: 'Ana',  active: true  },
+        { id: 2, name: 'Luis', active: false },
+        { id: 3, name: 'Eva',  active: true  },
+      ]);
+
+      const result = await service.getActiveUsers();
+
+      expect(result).toHaveLength(2);
+      expect(result.every(u => u.active)).toBe(true);
+    });
+  });
+});</code></pre>
+      </div>
+
+      <div class="callout callout-example">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-body">
+          <strong>¿Qué observar en este ejemplo?</strong>
+          <p><code>jest.fn()</code> crea una función vacía rastreable. <code>mockResolvedValue()</code> simula una promesa resuelta. <code>mockRejectedValue()</code> simula un error. <code>jest.clearAllMocks()</code> en <code>beforeEach</code> limpia el historial de llamadas para que los tests no se afecten entre sí.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO -->
+    <div class="exercise-section" id="ej4-ejercicio">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Tu turno — Implementa <code>ProductService</code></div>
+          <div class="exercise-subtitle">Código asíncrono con inyección de dependencias y mocks</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa en <code>src/productService.js</code> la clase <code>ProductService</code>. Esta clase recibe en su constructor un <code>productRepository</code> (que en producción hablaría con una BD, pero en los tests será un mock).</p>
+
+        <div class="exercise-task">
+          <h5>Contratos del repositorio (solo interfaces, no los implementes)</h5>
+          <ul>
+            <li><code>productRepository.findAll()</code> — promesa que resuelve con array de productos.</li>
+            <li><code>productRepository.findById(id)</code> — promesa que resuelve con un producto o <code>null</code>.</li>
+            <li><code>productRepository.save(product)</code> — promesa que resuelve con el producto guardado.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Métodos de <code>ProductService</code> a implementar</h5>
+          <ul>
+            <li><code>async getById(id)</code> — obtiene un producto por ID. Lanza <code>Error</code> si no existe.</li>
+            <li><code>async getByCategory(category)</code> — obtiene todos los productos y filtra por <code>product.category === category</code>.</li>
+            <li><code>async searchByName(query)</code> — obtiene todos los productos y filtra aquellos cuyo <code>name</code> contenga <code>query</code> (case-insensitive). Si <code>query</code> está vacío, lanza <code>Error</code>.</li>
+            <li><code>async create(productData)</code> — valida que <code>productData.name</code> y <code>productData.price</code> existan y que <code>price > 0</code>. Si no, lanza <code>Error</code>. Si es válido, llama a <code>repository.save()</code> y devuelve el resultado.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos</h5>
+          <ul>
+            <li><code>getById</code>: encontrado correctamente, no encontrado (lanza error), verifica que el repositorio fue llamado con el ID correcto.</li>
+            <li><code>getByCategory</code>: devuelve solo los de esa categoría, categoría sin productos devuelve array vacío.</li>
+            <li><code>searchByName</code>: búsqueda exitosa, búsqueda case-insensitive, query vacío lanza error.</li>
+            <li><code>create</code>: producto válido llama a <code>save()</code>, precio negativo lanza error, nombre faltante lanza error, <code>save()</code> solo se llama una vez con datos válidos.</li>
+          </ul>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint4')">Ver pistas</button>
+        <div class="hint-body" id="hint4">
+          <ul>
+            <li>Crea el <code>mockRepository</code> con <code>{ findAll: jest.fn(), findById: jest.fn(), save: jest.fn() }</code>.</li>
+            <li>Usa <code>mockResolvedValue()</code> para simular respuestas exitosas y <code>mockRejectedValue(new Error(...))</code> para simular fallos del repositorio.</li>
+            <li>Para búsqueda case-insensitive: <code>product.name.toLowerCase().includes(query.toLowerCase())</code>.</li>
+            <li>Verifica las interacciones con el mock: <code>expect(mockRepo.save).toHaveBeenCalledTimes(1)</code> y <code>expect(mockRepo.save).not.toHaveBeenCalled()</code>.</li>
+            <li>No olvides <code>jest.clearAllMocks()</code> en el <code>beforeEach</code>, o el historial de llamadas se acumulará entre tests.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EJERCICIO 5 ═══════════════════ -->
+  <div class="section-divider"></div>
+
+  <div class="progress-bar">
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">1</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">2</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">3</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-inactive">4</div></div>
+    <span class="progress-arrow">→</span>
+    <div class="progress-step"><div class="progress-dot progress-dot-active">5</div></div>
+  </div>
+
+  <section class="section">
+    <h2 class="section-title toc-anchor" id="ej5-ejemplo">
+      <span class="badge badge-node">Node.js · Jest</span>
+      Ejercicio 5 — API REST con Supertest <span class="diff diff-medium">Intermedio+</span>
+    </h2>
+
+    <p><strong>Supertest</strong> permite hacer peticiones HTTP a una app Express directamente en memoria, sin levantar un servidor real. Es la herramienta estándar para testear rutas en Node.js.</p>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">📦</span>
+      <div class="callout-body">
+        <strong>Instalación de Supertest</strong>
+        <p>Si aún no lo tienes: <code>npm install --save-dev supertest</code>. Tu <code>app.js</code> debe exportar la app con <code>module.exports = app</code> y <strong>sin</strong> llamar a <code>app.listen()</code> — eso lo hace Supertest internamente.</p>
+      </div>
+    </div>
+
+    <!-- EJEMPLO -->
+    <div class="example-section" id="ej5-ejemplo">
+      <div class="example-header">
+        <span class="example-label">Ejemplo base</span>
+        <span class="example-title">API simple de notas con <code>GET</code>, <code>POST</code> y <code>404</code></span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">📄 src/notesApp.js</div>
+        <pre><code class="language-javascript">const express = require('express');
+const app = express();
+app.use(express.json());
+
+let notes = [
+  { id: 1, text: 'Comprar leche', done: false },
+  { id: 2, text: 'Estudiar Jest',  done: false },
+];
+let nextId = 3;
+
+// GET todas las notas
+app.get('/api/notes', (req, res) => {
+  res.json(notes);
+});
+
+// GET una nota por ID
+app.get('/api/notes/:id', (req, res) => {
+  const note = notes.find(n => n.id === Number(req.params.id));
+  if (!note) return res.status(404).json({ error: 'Nota no encontrada.' });
+  res.json(note);
+});
+
+// POST crear una nota
+app.post('/api/notes', (req, res) => {
+  const { text } = req.body;
+  if (!text || text.trim() === '') {
+    return res.status(400).json({ error: 'El campo text es requerido.' });
+  }
+  const newNote = { id: nextId++, text: text.trim(), done: false };
+  notes.push(newNote);
+  res.status(201).json(newNote);
+});
+
+module.exports = app;   // sin app.listen()</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header code-header-node">🧪 __tests__/notesApp.test.js</div>
+        <pre><code class="language-javascript">const request = require('supertest');
+const app = require('../src/notesApp');
+
+describe('Notes API', () => {
+
+  describe('GET /api/notes', () => {
+    it('responde con status 200 y un array', async () => {
+      const res = await request(app).get('/api/notes');
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+  });
+
+  describe('GET /api/notes/:id', () => {
+    it('devuelve la nota correcta', async () => {
+      const res = await request(app).get('/api/notes/1');
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({ id: 1, text: 'Comprar leche' });
+    });
+
+    it('devuelve 404 si la nota no existe', async () => {
+      const res = await request(app).get('/api/notes/999');
+
+      expect(res.status).toBe(404);
+      expect(res.body).toHaveProperty('error');
+    });
+  });
+
+  describe('POST /api/notes', () => {
+    it('crea una nota y devuelve 201', async () => {
+      const res = await request(app)
+        .post('/api/notes')
+        .send({ text: 'Nueva nota de prueba' });
+
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({ text: 'Nueva nota de prueba', done: false });
+      expect(res.body.id).toBeDefined();
+    });
+
+    it('devuelve 400 si text está vacío', async () => {
+      const res = await request(app)
+        .post('/api/notes')
+        .send({ text: '' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/text/i);
+    });
+  });
+
+});</code></pre>
+      </div>
+
+      <div class="callout callout-example">
+        <span class="callout-icon">🔍</span>
+        <div class="callout-body">
+          <strong>¿Qué observar en este ejemplo?</strong>
+          <p><code>request(app).get('/ruta')</code> hace una petición HTTP real en memoria. Se verifican tanto el <strong>status HTTP</strong> como la <strong>estructura del cuerpo</strong>. <code>toMatchObject</code> verifica que el objeto contenga al menos esas propiedades (no necesariamente solo esas).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EJERCICIO -->
+    <div class="exercise-section" id="ej5-ejercicio">
+      <div class="exercise-header">
+        <span class="exercise-icon">✏️</span>
+        <div>
+          <div class="exercise-title">Tu turno — API REST de contactos</div>
+          <div class="exercise-subtitle">Construye la API y sus tests de integración con Supertest</div>
+        </div>
+      </div>
+
+      <div class="exercise-body">
+        <p>Implementa en <code>src/app.js</code> una API de contactos con las rutas descritas abajo. Luego escribe los tests en <code>__tests__/app.test.js</code> usando Supertest.</p>
+
+        <div class="exercise-task">
+          <h5>Estructura de un contacto</h5>
+          <ul>
+            <li><code>id</code>: número autoincremental</li>
+            <li><code>name</code>: string (requerido)</li>
+            <li><code>email</code>: string (requerido, debe contener <code>@</code>)</li>
+            <li><code>phone</code>: string (opcional)</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Rutas a implementar</h5>
+          <ul>
+            <li><code>GET /api/contacts</code> — devuelve todos los contactos.</li>
+            <li><code>GET /api/contacts/:id</code> — devuelve un contacto. Si no existe → 404.</li>
+            <li><code>POST /api/contacts</code> — crea un contacto. Si falta <code>name</code> o <code>email</code>, o el email no tiene <code>@</code> → 400 con mensaje de error.</li>
+            <li><code>PUT /api/contacts/:id</code> — actualiza parcialmente un contacto existente. Si no existe → 404.</li>
+            <li><code>DELETE /api/contacts/:id</code> — elimina un contacto. Si no existe → 404. Si se elimina correctamente → 200 con mensaje de confirmación.</li>
+          </ul>
+        </div>
+
+        <div class="exercise-task">
+          <h5>Tests requeridos</h5>
+          <ol>
+            <li><code>GET /api/contacts</code> devuelve status 200 y un array.</li>
+            <li><code>GET /api/contacts/:id</code> devuelve el contacto correcto.</li>
+            <li><code>GET /api/contacts/:id</code> devuelve 404 para un ID inexistente.</li>
+            <li><code>POST /api/contacts</code> crea el contacto y devuelve 201 con el objeto creado.</li>
+            <li><code>POST /api/contacts</code> devuelve 400 si falta el <code>name</code>.</li>
+            <li><code>POST /api/contacts</code> devuelve 400 si el email no tiene <code>@</code>.</li>
+            <li><code>PUT /api/contacts/:id</code> actualiza correctamente los campos enviados.</li>
+            <li><code>DELETE /api/contacts/:id</code> elimina el contacto y devuelve confirmación.</li>
+            <li><code>DELETE /api/contacts/:id</code> devuelve 404 para ID inexistente.</li>
+          </ol>
+        </div>
+
+        <div class="callout callout-warning" style="margin-top: 0.75rem;">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-body">
+            <strong>Problema de estado compartido entre tests</strong>
+            <p>Si tu API guarda los contactos en un array en memoria, los tests se contaminarán entre sí porque el <code>POST</code> del test 4 puede afectar el resultado del test 1. Una solución es reiniciar los datos en un <code>beforeEach</code>, o exportar una función <code>resetData()</code> desde tu app que los tests puedan llamar.</p>
+          </div>
+        </div>
+
+        <button class="hint-toggle" onclick="toggleHint('hint5')">Ver pistas</button>
+        <div class="hint-body" id="hint5">
+          <ul>
+            <li>Para <code>PUT</code>, usa <code>Object.assign(contact, req.body)</code> o el spread operator para actualizar solo los campos enviados sin reemplazar el objeto completo.</li>
+            <li>Para evitar contaminación entre tests, exporta una función <code>resetContacts()</code> que reinicie el array a datos iniciales, y llámala en <code>beforeEach</code> de los tests.</li>
+            <li>Valida el email con <code>email.includes('@')</code> — una validación simple es suficiente para este ejercicio.</li>
+            <li>Usa <code>res.body.length</code> para verificar cuántos elementos devuelve el GET después de agregar o eliminar.</li>
+            <li>Para el DELETE: <code>res.status(200).json({ message: 'Contacto eliminado.' })</code> es un patrón común.</li>
+            <li>El <code>id</code> en los parámetros de ruta llega como <strong>string</strong>: usa <code>Number(req.params.id)</code> al buscar en el array.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TIPS GENERALES ─── -->
+  <div class="section-divider"></div>
+
+  <section class="section">
+    <h2 class="section-title">Tips generales para escribir buenos tests</h2>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h4>Nombra los tests con claridad</h4>
+        <p>El nombre debe describir <em>qué</em> se prueba y <em>qué</em> se espera. Ejemplo: <code>'devuelve 404 si el id no existe'</code> es mejor que <code>'test de id'</code>.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Un test, un concepto</h4>
+        <p>Evita verificar múltiples comportamientos en un solo <code>it()</code>. Si el test falla, debes saber exactamente qué falló.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Prueba los casos borde</h4>
+        <p>Texto vacío, <code>null</code>, <code>0</code>, arrays vacíos, valores en el límite exacto. Ahí vive la mayoría de los bugs.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Usa <code>beforeEach</code></h4>
+        <p>Siempre reinicia el estado compartido (instancias de clase, mocks) antes de cada test para garantizar independencia.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Verifica las interacciones</h4>
+        <p>Con mocks, verifica no solo el resultado final sino también que las dependencias fueron llamadas correctamente: <code>toHaveBeenCalledWith</code>, <code>toHaveBeenCalledTimes</code>.</p>
+      </div>
+      <div class="concept-card">
+        <h4>Matchers útiles de Jest</h4>
+        <p><code>toBe</code> (igualdad estricta) · <code>toEqual</code> (igualdad profunda) · <code>toMatchObject</code> (contiene) · <code>toHaveLength</code> · <code>toContain</code> · <code>rejects.toThrow</code></p>
+      </div>
+    </div>
+
+    <div class="callout callout-tip" style="margin-top: 1.5rem;">
+      <span class="callout-icon">🚀</span>
+      <div class="callout-body">
+        <strong>Ejecuta los tests en modo watch mientras desarrollas</strong>
+        <p>Con <code>npx jest --watchAll</code>, Jest re-ejecuta automáticamente los tests cada vez que guardas un archivo. Esto te da feedback inmediato y hace el ciclo de desarrollo mucho más rápido.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function toggleHint(id) {
+    const el = document.getElementById(id);
+    const btn = el.previousElementSibling;
+    if (el.style.display === 'block') {
+      el.style.display = 'none';
+      btn.textContent = 'Ver pistas';
+    } else {
+      el.style.display = 'block';
+      btn.textContent = 'Ocultar pistas';
+    }
+  }
+
+  // Active nav link on scroll
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.toc-anchor');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-10% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
