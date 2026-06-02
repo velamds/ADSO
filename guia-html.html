@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía paso a paso: Aprende HTML</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.7;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1f2e, #2d3748);
+      padding: 48px 24px;
+      text-align: center;
+      border-bottom: 2px solid #e55a2b;
+    }
+
+    header h1 { font-size: 2.4rem; color: #fff; margin-bottom: 8px; }
+    header p  { color: #94a3b8; font-size: 1.1rem; }
+
+    nav {
+      background: #1a1f2e;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #2d3748;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    nav a {
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      border: 1px solid #2d3748;
+      transition: all 0.2s;
+    }
+
+    nav a:hover { background: #e55a2b; color: #fff; border-color: #e55a2b; }
+
+    main { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+
+    .step {
+      background: #1a1f2e;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+      border: 1px solid #2d3748;
+      scroll-margin-top: 80px;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .step-number {
+      background: #e55a2b;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    h2 { color: #f1f5f9; font-size: 1.4rem; }
+    h3 { color: #cbd5e1; font-size: 1.1rem; margin: 20px 0 10px; }
+    p  { color: #94a3b8; margin-bottom: 12px; }
+
+    .tag  { color: #e55a2b; font-weight: 600; font-family: monospace; }
+    .attr { color: #38bdf8; font-family: monospace; }
+    .val  { color: #a3e635; font-family: monospace; }
+
+    code {
+      background: #0f1117;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #e55a2b;
+    }
+
+    pre {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: #e2e8f0;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #2d3748;
+      color: #94a3b8;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { background: #e55a2b; color: #fff; }
+
+    .preview-box {
+      background: #fff;
+      color: #1a1a1a;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+      border: 2px solid #2d3748;
+    }
+
+    .preview-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .exercise {
+      background: #0d2137;
+      border: 1px solid #1e4060;
+      border-left: 4px solid #38bdf8;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .exercise h4 {
+      color: #38bdf8;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .exercise ol, .exercise ul {
+      color: #94a3b8;
+      padding-left: 20px;
+    }
+
+    .exercise li { margin-bottom: 6px; }
+
+    .tip {
+      background: #1a2e1a;
+      border: 1px solid #2d5a2d;
+      border-left: 4px solid #4ade80;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      color: #86efac;
+      font-size: 0.9rem;
+    }
+
+    .tip strong { color: #4ade80; }
+
+    .warning {
+      background: #2e1a0a;
+      border: 1px solid #5a3a1a;
+      border-left: 4px solid #fb923c;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      color: #fdba74;
+      font-size: 0.9rem;
+    }
+
+    .warning strong { color: #fb923c; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #2d3748;
+      color: #f1f5f9;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #2d3748;
+      color: #94a3b8;
+    }
+
+    tr:hover td { background: #1e2a3a; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-green  { background: #14532d; color: #4ade80; }
+    .badge-blue   { background: #1e3a5f; color: #60a5fa; }
+    .badge-orange { background: #431407; color: #fb923c; }
+
+    textarea {
+      width: 100%;
+      background: #0f1117;
+      color: #e2e8f0;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    textarea:focus { outline: none; border-color: #e55a2b; }
+
+    .run-btn {
+      background: #e55a2b;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    .run-btn:hover { background: #c44a1e; }
+
+    iframe.sandbox {
+      width: 100%;
+      min-height: 160px;
+      border: 2px solid #2d3748;
+      border-radius: 8px;
+      margin-top: 12px;
+      background: #fff;
+    }
+
+    .progress {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
+    .progress-item {
+      flex: 1;
+      min-width: 80px;
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .progress-item:hover  { border-color: #e55a2b; color: #e55a2b; }
+    .progress-item .icon  { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #4a5568;
+      border-top: 1px solid #2d3748;
+      font-size: 0.85rem;
+    }
+
+    .hl-tag   { color: #f87171; }
+    .hl-attr  { color: #60a5fa; }
+    .hl-val   { color: #a3e635; }
+    .hl-text  { color: #e2e8f0; }
+    .hl-comment { color: #64748b; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Aprende HTML desde cero</h1>
+  <p>Guía paso a paso con ejemplos interactivos y ejercicios prácticos</p>
+</header>
+
+<nav>
+  <a href="#paso1">1. Estructura</a>
+  <a href="#paso2">2. Texto</a>
+  <a href="#paso3">3. Enlaces</a>
+  <a href="#paso4">4. Imágenes</a>
+  <a href="#paso5">5. Listas</a>
+  <a href="#paso6">6. Tablas</a>
+  <a href="#paso7">7. Formularios</a>
+  <a href="#paso8">8. Semántica</a>
+  <a href="#paso9">9. Multimedia</a>
+  <a href="#paso10">10. Proyecto</a>
+</nav>
+
+<main>
+
+  <!-- ===== PASO 1 ===== -->
+  <section class="step" id="paso1">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <h2>Estructura básica de un documento HTML</h2>
+    </div>
+
+    <p>HTML (HyperText Markup Language) es el lenguaje base de toda página web. Funciona con <strong>etiquetas</strong> que envuelven el contenido.</p>
+
+    <h3>Esqueleto mínimo</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-comment">&lt;!-- Todo documento HTML empieza así --&gt;</span>
+<span class="hl-tag">&lt;!DOCTYPE html&gt;</span>
+<span class="hl-tag">&lt;html</span> <span class="hl-attr">lang</span>=<span class="hl-val">"es"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-tag">&lt;head&gt;</span>
+    <span class="hl-tag">&lt;meta</span> <span class="hl-attr">charset</span>=<span class="hl-val">"UTF-8"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;meta</span> <span class="hl-attr">name</span>=<span class="hl-val">"viewport"</span> <span class="hl-attr">content</span>=<span class="hl-val">"width=device-width, initial-scale=1.0"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;title&gt;</span><span class="hl-text">Mi primera página</span><span class="hl-tag">&lt;/title&gt;</span>
+  <span class="hl-tag">&lt;/head&gt;</span>
+
+  <span class="hl-tag">&lt;body&gt;</span>
+    <span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">¡Hola, mundo!</span><span class="hl-tag">&lt;/h1&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span><span class="hl-text">Esta es mi primera página web.</span><span class="hl-tag">&lt;/p&gt;</span>
+  <span class="hl-tag">&lt;/body&gt;</span>
+
+<span class="hl-tag">&lt;/html&gt;</span></code></pre>
+
+    <table>
+      <tr><th>Etiqueta</th><th>Función</th></tr>
+      <tr><td><code>&lt;!DOCTYPE html&gt;</code></td><td>Le dice al navegador que es HTML5</td></tr>
+      <tr><td><code>&lt;html&gt;</code></td><td>Raíz del documento</td></tr>
+      <tr><td><code>&lt;head&gt;</code></td><td>Metadatos — no se ve en pantalla</td></tr>
+      <tr><td><code>&lt;title&gt;</code></td><td>Título de la pestaña del navegador</td></tr>
+      <tr><td><code>&lt;body&gt;</code></td><td>Todo el contenido visible</td></tr>
+    </table>
+
+    <div class="tip"><strong>Tip:</strong> Los atributos van siempre dentro de la etiqueta de apertura: <code>&lt;etiqueta atributo="valor"&gt;</code></div>
+
+    <div class="exercise">
+      <h4>Ejercicio 1 — Prueba en vivo</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Escribe tu propio HTML y haz clic en <strong>Ejecutar</strong>:</p>
+      <textarea id="ej1" rows="6">&lt;h1&gt;Mi nombre es ...&lt;/h1&gt;
+&lt;p&gt;Aprendo HTML el día de hoy.&lt;/p&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej1','out1')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out1"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 2 ===== -->
+  <section class="step" id="paso2">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <h2>Etiquetas de texto y formato</h2>
+    </div>
+
+    <p>HTML tiene etiquetas dedicadas a organizar y dar significado al texto.</p>
+
+    <h3>Encabezados</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;h1&gt;</span>Título principal (el más importante)<span class="hl-tag">&lt;/h1&gt;</span>
+<span class="hl-tag">&lt;h2&gt;</span>Subtítulo<span class="hl-tag">&lt;/h2&gt;</span>
+<span class="hl-tag">&lt;h3&gt;</span>Sección<span class="hl-tag">&lt;/h3&gt;</span>
+<span class="hl-tag">&lt;h4&gt;</span>Sub-sección<span class="hl-tag">&lt;/h4&gt;</span>
+<span class="hl-tag">&lt;h5&gt;</span>Nivel 5<span class="hl-tag">&lt;/h5&gt;</span>
+<span class="hl-tag">&lt;h6&gt;</span>Nivel 6 (el menor)<span class="hl-tag">&lt;/h6&gt;</span></code></pre>
+
+    <h3>Párrafos y formato en línea</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;p&gt;</span>Párrafo normal.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;p&gt;</span>Texto <span class="hl-tag">&lt;strong&gt;</span>negrita<span class="hl-tag">&lt;/strong&gt;</span> y texto <span class="hl-tag">&lt;em&gt;</span>cursiva<span class="hl-tag">&lt;/em&gt;</span>.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;p&gt;</span>Texto <span class="hl-tag">&lt;mark&gt;</span>resaltado<span class="hl-tag">&lt;/mark&gt;</span>.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;p&gt;</span>Texto <span class="hl-tag">&lt;del&gt;</span>tachado<span class="hl-tag">&lt;/del&gt;</span> y <span class="hl-tag">&lt;ins&gt;</span>subrayado<span class="hl-tag">&lt;/ins&gt;</span>.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;p&gt;</span>H<span class="hl-tag">&lt;sub&gt;</span>2<span class="hl-tag">&lt;/sub&gt;</span>O y E = mc<span class="hl-tag">&lt;sup&gt;</span>2<span class="hl-tag">&lt;/sup&gt;</span><span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;code&gt;</span>codigo_en_linea()<span class="hl-tag">&lt;/code&gt;</span>
+<span class="hl-tag">&lt;br&gt;</span>  <span class="hl-comment">&lt;!-- salto de línea (no tiene cierre) --&gt;</span>
+<span class="hl-tag">&lt;hr&gt;</span>  <span class="hl-comment">&lt;!-- línea horizontal --&gt;</span></code></pre>
+
+    <div class="preview-box">
+      <p class="preview-label">Vista previa</p>
+      <h3 style="margin:0 0 8px">Subtítulo h3</h3>
+      <p>Texto <strong>negrita</strong> y texto <em>cursiva</em>.</p>
+      <p>Texto <mark>resaltado</mark>.</p>
+      <p>Texto <del>tachado</del> y <ins>subrayado</ins>.</p>
+      <p>H<sub>2</sub>O y E = mc<sup>2</sup></p>
+      <code>codigo_en_linea()</code>
+      <hr style="margin:10px 0">
+    </div>
+
+    <div class="exercise">
+      <h4>Ejercicio 2 — Tu presentación</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Crea una presentación personal usando al menos: <code>h1</code>, <code>h2</code>, <code>p</code>, <code>strong</code> y <code>em</code>.</p>
+      <textarea id="ej2" rows="8">&lt;h1&gt;Hola, soy [tu nombre]&lt;/h1&gt;
+&lt;h2&gt;Sobre mí&lt;/h2&gt;
+&lt;p&gt;Soy &lt;strong&gt;desarrollador&lt;/strong&gt; y me gusta &lt;em&gt;aprender&lt;/em&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Estoy aprendiendo &lt;mark&gt;HTML&lt;/mark&gt; hoy.&lt;/p&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej2','out2')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out2"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 3 ===== -->
+  <section class="step" id="paso3">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <h2>Enlaces (hipervínculos)</h2>
+    </div>
+
+    <p>Los enlaces son la esencia de la web. Se crean con la etiqueta <code>&lt;a&gt;</code> y su atributo <code>href</code>.</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-comment">&lt;!-- Enlace externo --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"https://ejemplo.com"</span><span class="hl-tag">&gt;</span>Visitar ejemplo<span class="hl-tag">&lt;/a&gt;</span>
+
+<span class="hl-comment">&lt;!-- Abrir en nueva pestaña --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"https://ejemplo.com"</span> <span class="hl-attr">target</span>=<span class="hl-val">"_blank"</span><span class="hl-tag">&gt;</span>Nueva pestaña<span class="hl-tag">&lt;/a&gt;</span>
+
+<span class="hl-comment">&lt;!-- Enlace a otra página del mismo sitio --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"contacto.html"</span><span class="hl-tag">&gt;</span>Contacto<span class="hl-tag">&lt;/a&gt;</span>
+
+<span class="hl-comment">&lt;!-- Ancla: saltar a una sección de la misma página --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"#seccion"</span><span class="hl-tag">&gt;</span>Ir a sección<span class="hl-tag">&lt;/a&gt;</span>
+<span class="hl-tag">&lt;h2</span> <span class="hl-attr">id</span>=<span class="hl-val">"seccion"</span><span class="hl-tag">&gt;</span>La sección<span class="hl-tag">&lt;/h2&gt;</span>
+
+<span class="hl-comment">&lt;!-- Enlace de email --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"mailto:hola@ejemplo.com"</span><span class="hl-tag">&gt;</span>Enviar email<span class="hl-tag">&lt;/a&gt;</span>
+
+<span class="hl-comment">&lt;!-- Enlace de teléfono --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"tel:+521234567890"</span><span class="hl-tag">&gt;</span>Llamar<span class="hl-tag">&lt;/a&gt;</span></code></pre>
+
+    <div class="tip"><strong>Tip:</strong> Siempre usa <code>rel="noopener"</code> junto con <code>target="_blank"</code> por seguridad: <code>&lt;a href="..." target="_blank" rel="noopener"&gt;</code></div>
+
+    <div class="exercise">
+      <h4>Ejercicio 3 — Menú de navegación</h4>
+      <ol style="color:#94a3b8;padding-left:20px">
+        <li>Crea tres enlaces: uno externo, uno de email y uno de ancla.</li>
+        <li>El enlace externo debe abrir en nueva pestaña.</li>
+        <li>Añade un elemento con <code>id</code> al que apunte el ancla.</li>
+      </ol>
+      <textarea id="ej3" rows="8">&lt;nav&gt;
+  &lt;a href="https://developer.mozilla.org" target="_blank" rel="noopener"&gt;MDN Docs&lt;/a&gt; |
+  &lt;a href="mailto:yo@ejemplo.com"&gt;Escríbeme&lt;/a&gt; |
+  &lt;a href="#pie"&gt;Ir al pie&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;p&gt;Mucho contenido aquí...&lt;/p&gt;
+
+&lt;footer id="pie"&gt;Pie de página&lt;/footer&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej3','out3')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out3"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 4 ===== -->
+  <section class="step" id="paso4">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <h2>Imágenes</h2>
+    </div>
+
+    <p>La etiqueta <code>&lt;img&gt;</code> inserta imágenes. Es una etiqueta vacía (no tiene cierre).</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-comment">&lt;!-- Imagen desde URL --&gt;</span>
+<span class="hl-tag">&lt;img</span>
+  <span class="hl-attr">src</span>=<span class="hl-val">"https://via.placeholder.com/300x200"</span>
+  <span class="hl-attr">alt</span>=<span class="hl-val">"Descripción de la imagen"</span>
+  <span class="hl-attr">width</span>=<span class="hl-val">"300"</span>
+  <span class="hl-attr">height</span>=<span class="hl-val">"200"</span>
+<span class="hl-tag">&gt;</span>
+
+<span class="hl-comment">&lt;!-- Imagen local --&gt;</span>
+<span class="hl-tag">&lt;img</span> <span class="hl-attr">src</span>=<span class="hl-val">"fotos/paisaje.jpg"</span> <span class="hl-attr">alt</span>=<span class="hl-val">"Un paisaje"</span><span class="hl-tag">&gt;</span>
+
+<span class="hl-comment">&lt;!-- Figura con pie de foto --&gt;</span>
+<span class="hl-tag">&lt;figure&gt;</span>
+  <span class="hl-tag">&lt;img</span> <span class="hl-attr">src</span>=<span class="hl-val">"foto.jpg"</span> <span class="hl-attr">alt</span>=<span class="hl-val">"Mi foto"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;figcaption&gt;</span>Esta es mi foto<span class="hl-tag">&lt;/figcaption&gt;</span>
+<span class="hl-tag">&lt;/figure&gt;</span>
+
+<span class="hl-comment">&lt;!-- Imagen que es un enlace --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"https://ejemplo.com"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;img</span> <span class="hl-attr">src</span>=<span class="hl-val">"logo.png"</span> <span class="hl-attr">alt</span>=<span class="hl-val">"Logo de Ejemplo"</span><span class="hl-tag">&gt;</span>
+<span class="hl-tag">&lt;/a&gt;</span></code></pre>
+
+    <div class="warning"><strong>Importante:</strong> El atributo <code>alt</code> es obligatorio. Describe la imagen para lectores de pantalla y cuando la imagen no carga. Si es puramente decorativa, usa <code>alt=""</code>.</div>
+
+    <div class="exercise">
+      <h4>Ejercicio 4 — Galería simple</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Usa imágenes de placeholder para crear una mini galería con pie de foto en cada imagen.</p>
+      <textarea id="ej4" rows="12">&lt;h2&gt;Mi galería&lt;/h2&gt;
+
+&lt;figure&gt;
+  &lt;img src="https://picsum.photos/200/150?random=1" alt="Foto aleatoria 1"&gt;
+  &lt;figcaption&gt;Foto 1: Naturaleza&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;figure&gt;
+  &lt;img src="https://picsum.photos/200/150?random=2" alt="Foto aleatoria 2"&gt;
+  &lt;figcaption&gt;Foto 2: Ciudad&lt;/figcaption&gt;
+&lt;/figure&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej4','out4')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out4" style="min-height:220px"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 5 ===== -->
+  <section class="step" id="paso5">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <h2>Listas</h2>
+    </div>
+
+    <p>Hay tres tipos de listas en HTML: desordenadas, ordenadas y de definición.</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-comment">&lt;!-- Lista desordenada (viñetas) --&gt;</span>
+<span class="hl-tag">&lt;ul&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Manzana<span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Naranja<span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Plátano<span class="hl-tag">&lt;/li&gt;</span>
+<span class="hl-tag">&lt;/ul&gt;</span>
+
+<span class="hl-comment">&lt;!-- Lista ordenada (numerada) --&gt;</span>
+<span class="hl-tag">&lt;ol&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Primero<span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Segundo<span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Tercero<span class="hl-tag">&lt;/li&gt;</span>
+<span class="hl-tag">&lt;/ol&gt;</span>
+
+<span class="hl-comment">&lt;!-- Lista anidada --&gt;</span>
+<span class="hl-tag">&lt;ul&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Frutas
+    <span class="hl-tag">&lt;ul&gt;</span>
+      <span class="hl-tag">&lt;li&gt;</span>Manzana<span class="hl-tag">&lt;/li&gt;</span>
+      <span class="hl-tag">&lt;li&gt;</span>Pera<span class="hl-tag">&lt;/li&gt;</span>
+    <span class="hl-tag">&lt;/ul&gt;</span>
+  <span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;li&gt;</span>Verduras<span class="hl-tag">&lt;/li&gt;</span>
+<span class="hl-tag">&lt;/ul&gt;</span>
+
+<span class="hl-comment">&lt;!-- Lista de definición --&gt;</span>
+<span class="hl-tag">&lt;dl&gt;</span>
+  <span class="hl-tag">&lt;dt&gt;</span>HTML<span class="hl-tag">&lt;/dt&gt;</span>
+  <span class="hl-tag">&lt;dd&gt;</span>Lenguaje de marcado para páginas web.<span class="hl-tag">&lt;/dd&gt;</span>
+  <span class="hl-tag">&lt;dt&gt;</span>CSS<span class="hl-tag">&lt;/dt&gt;</span>
+  <span class="hl-tag">&lt;dd&gt;</span>Lenguaje de estilos para darle diseño al HTML.<span class="hl-tag">&lt;/dd&gt;</span>
+<span class="hl-tag">&lt;/dl&gt;</span></code></pre>
+
+    <div class="exercise">
+      <h4>Ejercicio 5 — Receta de cocina</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Escribe una receta usando: una lista de ingredientes (<code>ul</code>) y una lista de pasos (<code>ol</code>).</p>
+      <textarea id="ej5" rows="14">&lt;h2&gt;Receta: Guacamole&lt;/h2&gt;
+
+&lt;h3&gt;Ingredientes&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;2 aguacates maduros&lt;/li&gt;
+  &lt;li&gt;1 limón&lt;/li&gt;
+  &lt;li&gt;Sal al gusto&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3&gt;Pasos&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;Pela y abre los aguacates.&lt;/li&gt;
+  &lt;li&gt;Aplasta la pulpa con un tenedor.&lt;/li&gt;
+  &lt;li&gt;Exprime el limón y añade sal.&lt;/li&gt;
+&lt;/ol&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej5','out5')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out5"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 6 ===== -->
+  <section class="step" id="paso6">
+    <div class="step-header">
+      <div class="step-number">6</div>
+      <h2>Tablas</h2>
+    </div>
+
+    <p>Las tablas se usan para mostrar datos en filas y columnas. Nunca para maquetar la página.</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;table</span> <span class="hl-attr">border</span>=<span class="hl-val">"1"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Encabezado de tabla --&gt;</span>
+  <span class="hl-tag">&lt;thead&gt;</span>
+    <span class="hl-tag">&lt;tr&gt;</span>
+      <span class="hl-tag">&lt;th&gt;</span>Nombre<span class="hl-tag">&lt;/th&gt;</span>
+      <span class="hl-tag">&lt;th&gt;</span>Edad<span class="hl-tag">&lt;/th&gt;</span>
+      <span class="hl-tag">&lt;th&gt;</span>Ciudad<span class="hl-tag">&lt;/th&gt;</span>
+    <span class="hl-tag">&lt;/tr&gt;</span>
+  <span class="hl-tag">&lt;/thead&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Cuerpo de tabla --&gt;</span>
+  <span class="hl-tag">&lt;tbody&gt;</span>
+    <span class="hl-tag">&lt;tr&gt;</span>
+      <span class="hl-tag">&lt;td&gt;</span>Ana<span class="hl-tag">&lt;/td&gt;</span>
+      <span class="hl-tag">&lt;td&gt;</span>28<span class="hl-tag">&lt;/td&gt;</span>
+      <span class="hl-tag">&lt;td&gt;</span>Madrid<span class="hl-tag">&lt;/td&gt;</span>
+    <span class="hl-tag">&lt;/tr&gt;</span>
+    <span class="hl-tag">&lt;tr&gt;</span>
+      <span class="hl-tag">&lt;td&gt;</span>Luis<span class="hl-tag">&lt;/td&gt;</span>
+      <span class="hl-tag">&lt;td&gt;</span>35<span class="hl-tag">&lt;/td&gt;</span>
+      <span class="hl-tag">&lt;td</span> <span class="hl-attr">colspan</span>=<span class="hl-val">"1"</span><span class="hl-tag">&gt;</span>México DF<span class="hl-tag">&lt;/td&gt;</span>
+    <span class="hl-tag">&lt;/tr&gt;</span>
+  <span class="hl-tag">&lt;/tbody&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Pie de tabla --&gt;</span>
+  <span class="hl-tag">&lt;tfoot&gt;</span>
+    <span class="hl-tag">&lt;tr&gt;</span>
+      <span class="hl-tag">&lt;td</span> <span class="hl-attr">colspan</span>=<span class="hl-val">"3"</span><span class="hl-tag">&gt;</span>Total: 2 personas<span class="hl-tag">&lt;/td&gt;</span>
+    <span class="hl-tag">&lt;/tr&gt;</span>
+  <span class="hl-tag">&lt;/tfoot&gt;</span>
+
+<span class="hl-tag">&lt;/table&gt;</span></code></pre>
+
+    <table style="margin:16px 0">
+      <thead><tr><th>Atributo</th><th>Uso</th></tr></thead>
+      <tbody>
+        <tr><td><code>colspan="N"</code></td><td>La celda ocupa N columnas</td></tr>
+        <tr><td><code>rowspan="N"</code></td><td>La celda ocupa N filas</td></tr>
+        <tr><td><code>scope="col/row"</code></td><td>Accesibilidad en <code>&lt;th&gt;</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="exercise">
+      <h4>Ejercicio 6 — Horario semanal</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Crea una tabla con tu horario de lunes a viernes. Usa <code>thead</code>, <code>tbody</code> y al menos un <code>colspan</code>.</p>
+      <textarea id="ej6" rows="14">&lt;table border="1"&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Hora&lt;/th&gt;&lt;th&gt;Lunes&lt;/th&gt;&lt;th&gt;Martes&lt;/th&gt;&lt;th&gt;Miércoles&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;9:00&lt;/td&gt;&lt;td&gt;HTML&lt;/td&gt;&lt;td&gt;CSS&lt;/td&gt;&lt;td colspan="1"&gt;JavaScript&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;11:00&lt;/td&gt;&lt;td colspan="3"&gt;Proyecto libre&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej6','out6')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out6"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 7 ===== -->
+  <section class="step" id="paso7">
+    <div class="step-header">
+      <div class="step-number">7</div>
+      <h2>Formularios</h2>
+    </div>
+
+    <p>Los formularios permiten al usuario enviar datos. Son esenciales para login, búsqueda, registros, etc.</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;form</span> <span class="hl-attr">action</span>=<span class="hl-val">"/enviar"</span> <span class="hl-attr">method</span>=<span class="hl-val">"post"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Texto --&gt;</span>
+  <span class="hl-tag">&lt;label</span> <span class="hl-attr">for</span>=<span class="hl-val">"nombre"</span><span class="hl-tag">&gt;</span>Nombre:<span class="hl-tag">&lt;/label&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"text"</span> <span class="hl-attr">id</span>=<span class="hl-val">"nombre"</span> <span class="hl-attr">name</span>=<span class="hl-val">"nombre"</span> <span class="hl-attr">placeholder</span>=<span class="hl-val">"Tu nombre"</span> <span class="hl-attr">required</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Email --&gt;</span>
+  <span class="hl-tag">&lt;label</span> <span class="hl-attr">for</span>=<span class="hl-val">"email"</span><span class="hl-tag">&gt;</span>Email:<span class="hl-tag">&lt;/label&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"email"</span> <span class="hl-attr">id</span>=<span class="hl-val">"email"</span> <span class="hl-attr">name</span>=<span class="hl-val">"email"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Contraseña --&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"password"</span> <span class="hl-attr">name</span>=<span class="hl-val">"pass"</span> <span class="hl-attr">minlength</span>=<span class="hl-val">"8"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Número y rango --&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"number"</span> <span class="hl-attr">min</span>=<span class="hl-val">"0"</span> <span class="hl-attr">max</span>=<span class="hl-val">"100"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"range"</span>  <span class="hl-attr">min</span>=<span class="hl-val">"0"</span> <span class="hl-attr">max</span>=<span class="hl-val">"10"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Opciones --&gt;</span>
+  <span class="hl-tag">&lt;select</span> <span class="hl-attr">name</span>=<span class="hl-val">"pais"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;option</span> <span class="hl-attr">value</span>=<span class="hl-val">"mx"</span><span class="hl-tag">&gt;</span>México<span class="hl-tag">&lt;/option&gt;</span>
+    <span class="hl-tag">&lt;option</span> <span class="hl-attr">value</span>=<span class="hl-val">"es"</span><span class="hl-tag">&gt;</span>España<span class="hl-tag">&lt;/option&gt;</span>
+  <span class="hl-tag">&lt;/select&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Radio y checkbox --&gt;</span>
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"radio"</span> <span class="hl-attr">name</span>=<span class="hl-val">"genero"</span> <span class="hl-attr">value</span>=<span class="hl-val">"m"</span><span class="hl-tag">&gt;</span> Masculino
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"radio"</span> <span class="hl-attr">name</span>=<span class="hl-val">"genero"</span> <span class="hl-attr">value</span>=<span class="hl-val">"f"</span><span class="hl-tag">&gt;</span> Femenino
+  <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"checkbox"</span> <span class="hl-attr">name</span>=<span class="hl-val">"terms"</span><span class="hl-tag">&gt;</span> Acepto términos
+
+  <span class="hl-comment">&lt;!-- Área de texto --&gt;</span>
+  <span class="hl-tag">&lt;textarea</span> <span class="hl-attr">name</span>=<span class="hl-val">"mensaje"</span> <span class="hl-attr">rows</span>=<span class="hl-val">"4"</span> <span class="hl-attr">cols</span>=<span class="hl-val">"40"</span><span class="hl-tag">&gt;&lt;/textarea&gt;</span>
+
+  <span class="hl-comment">&lt;!-- Botones --&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">type</span>=<span class="hl-val">"submit"</span><span class="hl-tag">&gt;</span>Enviar<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">type</span>=<span class="hl-val">"reset"</span><span class="hl-tag">&gt;</span>Limpiar<span class="hl-tag">&lt;/button&gt;</span>
+
+<span class="hl-tag">&lt;/form&gt;</span></code></pre>
+
+    <div class="exercise">
+      <h4>Ejercicio 7 — Formulario de contacto</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Crea un formulario con: nombre, email, asunto (select) y mensaje (textarea). Incluye un botón de envío.</p>
+      <textarea id="ej7" rows="16">&lt;form&gt;
+  &lt;p&gt;
+    &lt;label for="nom"&gt;Nombre:&lt;/label&gt;&lt;br&gt;
+    &lt;input type="text" id="nom" name="nombre" placeholder="Tu nombre" required&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;label for="mail"&gt;Email:&lt;/label&gt;&lt;br&gt;
+    &lt;input type="email" id="mail" name="email" required&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;label for="asunto"&gt;Asunto:&lt;/label&gt;&lt;br&gt;
+    &lt;select id="asunto" name="asunto"&gt;
+      &lt;option&gt;Consulta general&lt;/option&gt;
+      &lt;option&gt;Soporte técnico&lt;/option&gt;
+      &lt;option&gt;Ventas&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;label for="msg"&gt;Mensaje:&lt;/label&gt;&lt;br&gt;
+    &lt;textarea id="msg" name="mensaje" rows="3"&gt;&lt;/textarea&gt;
+  &lt;/p&gt;
+  &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+  &lt;button type="reset"&gt;Limpiar&lt;/button&gt;
+&lt;/form&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej7','out7')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out7" style="min-height:260px"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 8 ===== -->
+  <section class="step" id="paso8">
+    <div class="step-header">
+      <div class="step-number">8</div>
+      <h2>HTML Semántico</h2>
+    </div>
+
+    <p>El HTML semántico usa etiquetas con significado. Mejora la accesibilidad, el SEO y la legibilidad del código.</p>
+
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;body&gt;</span>
+
+  <span class="hl-tag">&lt;header&gt;</span>
+    <span class="hl-comment">&lt;!-- Logo, nombre del sitio, menú principal --&gt;</span>
+    <span class="hl-tag">&lt;nav&gt;</span>
+      <span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"/"</span><span class="hl-tag">&gt;</span>Inicio<span class="hl-tag">&lt;/a&gt;</span>
+      <span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"/blog"</span><span class="hl-tag">&gt;</span>Blog<span class="hl-tag">&lt;/a&gt;</span>
+    <span class="hl-tag">&lt;/nav&gt;</span>
+  <span class="hl-tag">&lt;/header&gt;</span>
+
+  <span class="hl-tag">&lt;main&gt;</span>
+    <span class="hl-tag">&lt;article&gt;</span>
+      <span class="hl-tag">&lt;h1&gt;</span>Título del artículo<span class="hl-tag">&lt;/h1&gt;</span>
+      <span class="hl-tag">&lt;time</span> <span class="hl-attr">datetime</span>=<span class="hl-val">"2026-06-01"</span><span class="hl-tag">&gt;</span>1 de junio, 2026<span class="hl-tag">&lt;/time&gt;</span>
+      <span class="hl-tag">&lt;p&gt;</span>Contenido principal del artículo...<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;/article&gt;</span>
+
+    <span class="hl-tag">&lt;aside&gt;</span>
+      <span class="hl-comment">&lt;!-- Barra lateral: artículos relacionados, publicidad --&gt;</span>
+      <span class="hl-tag">&lt;h2&gt;</span>Relacionados<span class="hl-tag">&lt;/h2&gt;</span>
+    <span class="hl-tag">&lt;/aside&gt;</span>
+  <span class="hl-tag">&lt;/main&gt;</span>
+
+  <span class="hl-tag">&lt;section&gt;</span>
+    <span class="hl-comment">&lt;!-- Sección temática de la página --&gt;</span>
+    <span class="hl-tag">&lt;h2&gt;</span>Comentarios<span class="hl-tag">&lt;/h2&gt;</span>
+  <span class="hl-tag">&lt;/section&gt;</span>
+
+  <span class="hl-tag">&lt;footer&gt;</span>
+    <span class="hl-tag">&lt;p&gt;</span>&amp;copy; 2026 Mi Sitio<span class="hl-tag">&lt;/p&gt;</span>
+    <span class="hl-tag">&lt;address&gt;</span>
+      Contacto: <span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"mailto:info@misitio.com"</span><span class="hl-tag">&gt;</span>info@misitio.com<span class="hl-tag">&lt;/a&gt;</span>
+    <span class="hl-tag">&lt;/address&gt;</span>
+  <span class="hl-tag">&lt;/footer&gt;</span>
+
+<span class="hl-tag">&lt;/body&gt;</span></code></pre>
+
+    <table>
+      <tr><th>Etiqueta</th><th>Cuándo usarla</th></tr>
+      <tr><td><code>&lt;header&gt;</code></td><td>Cabecera de la página o de una sección</td></tr>
+      <tr><td><code>&lt;nav&gt;</code></td><td>Menú de navegación principal</td></tr>
+      <tr><td><code>&lt;main&gt;</code></td><td>Contenido principal (solo uno por página)</td></tr>
+      <tr><td><code>&lt;article&gt;</code></td><td>Contenido independiente (post, noticia)</td></tr>
+      <tr><td><code>&lt;section&gt;</code></td><td>Sección temática con encabezado propio</td></tr>
+      <tr><td><code>&lt;aside&gt;</code></td><td>Contenido complementario / barra lateral</td></tr>
+      <tr><td><code>&lt;footer&gt;</code></td><td>Pie de página o de sección</td></tr>
+      <tr><td><code>&lt;div&gt;</code></td><td>Contenedor genérico (cuando nada semántico encaja)</td></tr>
+      <tr><td><code>&lt;span&gt;</code></td><td>Contenedor en línea genérico</td></tr>
+    </table>
+
+    <div class="tip"><strong>Tip:</strong> Si te preguntas "¿uso <code>div</code> o algo semántico?", pregúntate: ¿tiene significado propio este bloque? Si es un artículo, una sección, un header — úsalo. Si es solo un contenedor de layout, usa <code>div</code>.</div>
+
+    <div class="exercise">
+      <h4>Ejercicio 8 — Página de blog</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Construye la estructura semántica de una página de blog con: header, nav, main con un article, aside y footer.</p>
+      <textarea id="ej8" rows="18">&lt;header&gt;
+  &lt;h1&gt;Mi Blog&lt;/h1&gt;
+  &lt;nav&gt;
+    &lt;a href="#"&gt;Inicio&lt;/a&gt; |
+    &lt;a href="#"&gt;Artículos&lt;/a&gt; |
+    &lt;a href="#"&gt;Contacto&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;main&gt;
+  &lt;article&gt;
+    &lt;h2&gt;Mi primer post&lt;/h2&gt;
+    &lt;time datetime="2026-06-01"&gt;1 junio 2026&lt;/time&gt;
+    &lt;p&gt;Este es el contenido de mi artículo...&lt;/p&gt;
+  &lt;/article&gt;
+
+  &lt;aside&gt;
+    &lt;h3&gt;Sobre el autor&lt;/h3&gt;
+    &lt;p&gt;Soy un desarrollador aprendiendo HTML.&lt;/p&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;footer&gt;
+  &lt;p&gt;&amp;copy; 2026 Mi Blog&lt;/p&gt;
+&lt;/footer&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej8','out8')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out8" style="min-height:260px"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 9 ===== -->
+  <section class="step" id="paso9">
+    <div class="step-header">
+      <div class="step-number">9</div>
+      <h2>Multimedia y elementos adicionales</h2>
+    </div>
+
+    <h3>Video</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;video</span> <span class="hl-attr">width</span>=<span class="hl-val">"640"</span> <span class="hl-attr">controls</span> <span class="hl-attr">poster</span>=<span class="hl-val">"miniatura.jpg"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;source</span> <span class="hl-attr">src</span>=<span class="hl-val">"video.mp4"</span>  <span class="hl-attr">type</span>=<span class="hl-val">"video/mp4"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;source</span> <span class="hl-attr">src</span>=<span class="hl-val">"video.webm"</span> <span class="hl-attr">type</span>=<span class="hl-val">"video/webm"</span><span class="hl-tag">&gt;</span>
+  Tu navegador no soporta video HTML5.
+<span class="hl-tag">&lt;/video&gt;</span></code></pre>
+
+    <h3>Audio</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;audio</span> <span class="hl-attr">controls</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;source</span> <span class="hl-attr">src</span>=<span class="hl-val">"cancion.mp3"</span> <span class="hl-attr">type</span>=<span class="hl-val">"audio/mpeg"</span><span class="hl-tag">&gt;</span>
+  Tu navegador no soporta audio HTML5.
+<span class="hl-tag">&lt;/audio&gt;</span></code></pre>
+
+    <h3>Details / Summary (acordeón nativo)</h3>
+    <pre><button class="copy-btn" onclick="copiar(this)">Copiar</button><code><span class="hl-tag">&lt;details&gt;</span>
+  <span class="hl-tag">&lt;summary&gt;</span>¿Qué es HTML?<span class="hl-tag">&lt;/summary&gt;</span>
+  <span class="hl-tag">&lt;p&gt;</span>HTML es el lenguaje de marcado estándar para páginas web.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/details&gt;</span></code></pre>
+
+    <h3>Entidades HTML (caracteres especiales)</h3>
+    <table>
+      <tr><th>Carácter</th><th>Entidad</th><th>Resultado</th></tr>
+      <tr><td>Espacio sin romper</td><td><code>&amp;nbsp;</code></td><td>&nbsp;</td></tr>
+      <tr><td>&lt;</td><td><code>&amp;lt;</code></td><td>&lt;</td></tr>
+      <tr><td>&gt;</td><td><code>&amp;gt;</code></td><td>&gt;</td></tr>
+      <tr><td>&amp;</td><td><code>&amp;amp;</code></td><td>&amp;</td></tr>
+      <tr><td>&copy;</td><td><code>&amp;copy;</code></td><td>&copy;</td></tr>
+      <tr><td>&hearts;</td><td><code>&amp;hearts;</code></td><td>&hearts;</td></tr>
+    </table>
+
+    <div class="exercise">
+      <h4>Ejercicio 9 — Preguntas frecuentes</h4>
+      <p style="color:#94a3b8;margin-bottom:10px">Crea una sección FAQ usando <code>&lt;details&gt;</code> y <code>&lt;summary&gt;</code> con al menos 3 preguntas.</p>
+      <textarea id="ej9" rows="16">&lt;h2&gt;Preguntas Frecuentes&lt;/h2&gt;
+
+&lt;details&gt;
+  &lt;summary&gt;¿Qué es HTML?&lt;/summary&gt;
+  &lt;p&gt;HTML es el lenguaje base de las páginas web.&lt;/p&gt;
+&lt;/details&gt;
+
+&lt;details&gt;
+  &lt;summary&gt;¿Es difícil aprender HTML?&lt;/summary&gt;
+  &lt;p&gt;¡No! Con práctica diaria lo dominas en pocas semanas.&lt;/p&gt;
+&lt;/details&gt;
+
+&lt;details&gt;
+  &lt;summary&gt;¿Qué sigue después de HTML?&lt;/summary&gt;
+  &lt;p&gt;CSS para estilos y JavaScript para interactividad.&lt;/p&gt;
+&lt;/details&gt;</textarea>
+      <button class="run-btn" onclick="ejecutar('ej9','out9')">&#9654; Ejecutar</button>
+      <iframe class="sandbox" id="out9"></iframe>
+    </div>
+  </section>
+
+  <!-- ===== PASO 10 — PROYECTO FINAL ===== -->
+  <section class="step" id="paso10">
+    <div class="step-header">
+      <div class="step-number">10</div>
+      <h2>Proyecto final — Página personal completa</h2>
+    </div>
+
+    <p>Pon en práctica todo lo aprendido. Crea tu página personal con todas las secciones.</p>
+
+    <div class="tip">
+      <strong>Tu página debe incluir:</strong><br>
+      ✓ Estructura semántica completa (header, main, footer)<br>
+      ✓ Navegación con enlaces de ancla<br>
+      ✓ Sección "Sobre mí" con imagen y texto formateado<br>
+      ✓ Lista de habilidades<br>
+      ✓ Tabla de experiencia o estudios<br>
+      ✓ Formulario de contacto<br>
+      ✓ Sección de preguntas frecuentes con details/summary
+    </div>
+
+    <textarea id="ej10" rows="60">&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Mi Página Personal&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;header&gt;
+  &lt;h1&gt;[Tu Nombre]&lt;/h1&gt;
+  &lt;nav&gt;
+    &lt;a href="#sobre"&gt;Sobre mí&lt;/a&gt; |
+    &lt;a href="#habilidades"&gt;Habilidades&lt;/a&gt; |
+    &lt;a href="#contacto"&gt;Contacto&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;main&gt;
+
+  &lt;section id="sobre"&gt;
+    &lt;h2&gt;Sobre mí&lt;/h2&gt;
+    &lt;img src="https://picsum.photos/120/120?random=5" alt="Mi foto"&gt;
+    &lt;p&gt;Soy &lt;strong&gt;[tu nombre]&lt;/strong&gt;, un &lt;em&gt;apasionado del desarrollo web&lt;/em&gt;.&lt;/p&gt;
+    &lt;p&gt;Vivo en [tu ciudad] y actualmente aprendo HTML.&lt;/p&gt;
+  &lt;/section&gt;
+
+  &lt;section id="habilidades"&gt;
+    &lt;h2&gt;Mis habilidades&lt;/h2&gt;
+    &lt;ul&gt;
+      &lt;li&gt;HTML&lt;/li&gt;
+      &lt;li&gt;CSS (aprendiendo)&lt;/li&gt;
+      &lt;li&gt;JavaScript (próximamente)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;Formación&lt;/h2&gt;
+    &lt;table border="1"&gt;
+      &lt;thead&gt;
+        &lt;tr&gt;&lt;th&gt;Año&lt;/th&gt;&lt;th&gt;Estudio&lt;/th&gt;&lt;th&gt;Lugar&lt;/th&gt;&lt;/tr&gt;
+      &lt;/thead&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;&lt;td&gt;2026&lt;/td&gt;&lt;td&gt;HTML desde cero&lt;/td&gt;&lt;td&gt;Autodidacta&lt;/td&gt;&lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/section&gt;
+
+  &lt;section id="contacto"&gt;
+    &lt;h2&gt;Contacto&lt;/h2&gt;
+    &lt;form&gt;
+      &lt;p&gt;
+        &lt;label&gt;Nombre: &lt;input type="text" required&gt;&lt;/label&gt;
+      &lt;/p&gt;
+      &lt;p&gt;
+        &lt;label&gt;Email: &lt;input type="email" required&gt;&lt;/label&gt;
+      &lt;/p&gt;
+      &lt;p&gt;
+        &lt;label&gt;Mensaje:&lt;br&gt;&lt;textarea rows="3"&gt;&lt;/textarea&gt;&lt;/label&gt;
+      &lt;/p&gt;
+      &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/section&gt;
+
+  &lt;section&gt;
+    &lt;h2&gt;FAQ&lt;/h2&gt;
+    &lt;details&gt;
+      &lt;summary&gt;¿Puedo contratarte?&lt;/summary&gt;
+      &lt;p&gt;¡Claro! Escríbeme al formulario de contacto.&lt;/p&gt;
+    &lt;/details&gt;
+  &lt;/section&gt;
+
+&lt;/main&gt;
+
+&lt;footer&gt;
+  &lt;p&gt;&amp;copy; 2026 [Tu Nombre] &amp;mdash; Hecho con &amp;hearts; y HTML&lt;/p&gt;
+&lt;/footer&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+    <button class="run-btn" onclick="ejecutar('ej10','out10')">&#9654; Ejecutar</button>
+    <iframe class="sandbox" id="out10" style="min-height:400px"></iframe>
+  </section>
+
+</main>
+
+<footer>
+  <p>Guía HTML paso a paso &mdash; Todos los ejercicios son interactivos. &hearts; Sigue practicando.</p>
+  <p style="margin-top:8px">Siguiente paso: <strong>CSS</strong> para dar estilo, luego <strong>JavaScript</strong> para interactividad.</p>
+</footer>
+
+<script>
+  function ejecutar(inputId, outputId) {
+    const code = document.getElementById(inputId).value;
+    const frame = document.getElementById(outputId);
+    frame.srcdoc = code;
+  }
+
+  function copiar(btn) {
+    const pre = btn.parentElement;
+    const text = pre.innerText.replace('Copiar', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '¡Copiado!';
+      setTimeout(() => btn.textContent = 'Copiar', 2000);
+    });
+  }
+
+  // Ejecutar todos los ejercicios al cargar para que tengan contenido inicial
+  window.addEventListener('load', () => {
+    ['1','2','3','4','5','6','7','8','9','10'].forEach(n => {
+      const el = document.getElementById('ej' + n);
+      if (el) ejecutar('ej' + n, 'out' + n);
+    });
+  });
+</script>
+
+</body>
+</html>
