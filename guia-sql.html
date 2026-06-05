@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía SQL — MySQL & PostgreSQL</title>
+<style>
+  :root {
+    --mysql: #00758f;
+    --pg: #336791;
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232636;
+    --border: #2e3248;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --accent: #64ffda;
+    --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6; }
+
+  /* HEADER */
+  header { background: linear-gradient(135deg, #0d1117 0%, #1a1d27 100%); border-bottom: 1px solid var(--border); padding: 2rem; text-align: center; }
+  header h1 { font-size: 2rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.95rem; }
+  .badges { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .badge { padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+  .badge-mysql { background: #00758f22; color: #4fc3e0; border: 1px solid #00758f55; }
+  .badge-pg { background: #33679122; color: #7ab3e0; border: 1px solid #33679155; }
+  .badge-win { background: #0078d422; color: #74b9ff; border: 1px solid #0078d455; }
+
+  /* LAYOUT */
+  .container { display: flex; min-height: calc(100vh - 120px); }
+
+  /* SIDEBAR */
+  nav.sidebar { width: 260px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav.sidebar h3 { color: var(--muted); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0 1.25rem; margin-bottom: 0.5rem; }
+  nav.sidebar a { display: block; padding: 0.4rem 1.25rem; color: var(--muted); text-decoration: none; font-size: 0.85rem; border-left: 3px solid transparent; transition: all 0.15s; }
+  nav.sidebar a:hover, nav.sidebar a.active { color: var(--text); border-left-color: var(--accent); background: #64ffda0a; }
+  .nav-section { margin-bottom: 1.5rem; }
+
+  /* MAIN */
+  main { flex: 1; padding: 2rem 2.5rem; max-width: 900px; }
+
+  /* SECTIONS */
+  section { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+  section h2 { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+  section h2 .num { background: var(--accent); color: var(--bg); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; flex-shrink: 0; }
+  section h3 { font-size: 1.1rem; color: #a8b5c8; margin: 1.5rem 0 0.75rem; }
+  section p { color: var(--muted); margin-bottom: 0.75rem; font-size: 0.9rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* TABS */
+  .tab-group { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 1rem 0; }
+  .tab-nav { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 0.6rem 1.2rem; background: none; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; display: flex; align-items: center; gap: 0.4rem; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active-mysql { color: #4fc3e0; border-bottom-color: #00758f; }
+  .tab-btn.active-pg { color: #7ab3e0; border-bottom-color: #336791; }
+  .tab-content { display: none; padding: 1.25rem; }
+  .tab-content.active { display: block; }
+
+  /* CODE BLOCKS */
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 0.5rem 0; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 1rem; background: #161b22; border-bottom: 1px solid var(--border); }
+  .code-header span { font-size: 0.75rem; color: var(--muted); font-family: 'Consolas', monospace; }
+  .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer; transition: all 0.15s; }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  pre { padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.82rem; line-height: 1.7; }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+
+  /* SQL Syntax highlighting classes */
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .num { color: #79c0ff; }
+  .cmt { color: #8b949e; font-style: italic; }
+  .tbl { color: #ffa657; }
+  .col { color: #e6edf3; }
+
+  /* INFO BOXES */
+  .info-box { border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; border-left: 3px solid; font-size: 0.85rem; }
+  .info-box.tip { background: #64ffda0d; border-color: var(--accent); color: #a8d5c8; }
+  .info-box.warn { background: #ffa6570d; border-color: #ffa657; color: #d4a87a; }
+  .info-box.win { background: #74b9ff0d; border-color: #74b9ff; color: #a8c8e8; }
+  .info-box strong { display: block; margin-bottom: 0.25rem; color: inherit; opacity: 0.9; }
+
+  /* TABLES */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 1rem 0; }
+  .data-table th { background: var(--surface2); color: var(--accent); padding: 0.6rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top; }
+  .data-table td:first-child { color: #ffa657; font-family: 'Consolas', monospace; }
+  .data-table td:nth-child(2) { color: #7ab3e0; font-family: 'Consolas', monospace; }
+  .data-table tr:hover td { background: #ffffff05; }
+
+  /* STEP LIST */
+  .steps { list-style: none; counter-reset: step; }
+  .steps li { counter-increment: step; padding: 0.75rem 0 0.75rem 3rem; position: relative; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--muted); }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; top: 0.75rem; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .steps li strong { color: var(--text); }
+
+  /* DIFF TABLE */
+  .diff-row td:first-child { color: #4fc3e0; }
+  .diff-row td:nth-child(2) { color: #7ab3e0; }
+
+  /* TOC scroll */
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Guía SQL desde Cero</h1>
+  <p>MySQL &amp; PostgreSQL · Línea de comandos en Windows</p>
+  <div class="badges">
+    <span class="badge badge-mysql">MySQL 8+</span>
+    <span class="badge badge-pg">PostgreSQL 16+</span>
+    <span class="badge badge-win">Windows CMD / PowerShell</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar">
+  <div class="nav-section">
+    <h3>Inicio</h3>
+    <a href="#instalacion">Instalación</a>
+    <a href="#conexion">Conectarse al servidor</a>
+  </div>
+  <div class="nav-section">
+    <h3>Fundamentos</h3>
+    <a href="#tipos">Tipos de datos</a>
+    <a href="#databases">Bases de datos</a>
+    <a href="#tablas">Crear tablas</a>
+    <a href="#constraints">Restricciones</a>
+  </div>
+  <div class="nav-section">
+    <h3>CRUD</h3>
+    <a href="#insert">INSERT</a>
+    <a href="#select">SELECT</a>
+    <a href="#where">WHERE y filtros</a>
+    <a href="#update">UPDATE</a>
+    <a href="#delete">DELETE</a>
+  </div>
+  <div class="nav-section">
+    <h3>Intermedio</h3>
+    <a href="#joins">JOINs</a>
+    <a href="#agregados">Funciones de agregado</a>
+    <a href="#groupby">GROUP BY / HAVING</a>
+    <a href="#subqueries">Subconsultas</a>
+    <a href="#indices">Índices</a>
+    <a href="#vistas">Vistas</a>
+  </div>
+  <div class="nav-section">
+    <h3>Referencia</h3>
+    <a href="#diferencias">MySQL vs PostgreSQL</a>
+  </div>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<main>
+
+<!-- 1. INSTALACIÓN -->
+<section id="instalacion">
+  <h2><span class="num">1</span> Instalación en Windows</h2>
+  <p>Descarga e instala los servidores. Ambos pueden coexistir en la misma máquina.</p>
+
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'inst-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'inst-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="inst-mysql" class="tab-content active">
+      <ol class="steps">
+        <li>Descarga <strong>MySQL Installer</strong> desde <code>dev.mysql.com/downloads/installer</code></li>
+        <li>Elige <strong>Developer Default</strong> e instala MySQL Server + MySQL Shell</li>
+        <li>Durante la configuración, elige puerto <strong>3306</strong> y establece la contraseña del usuario <code>root</code></li>
+        <li>Al finalizar, MySQL se registra como servicio de Windows y arranca automáticamente</li>
+        <li>Agrega al PATH: <code>C:\Program Files\MySQL\MySQL Server 8.x\bin</code></li>
+      </ol>
+      <div class="info-box win">
+        <strong>Verificar desde CMD:</strong>
+        Abre CMD o PowerShell y ejecuta: <code>mysql --version</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>CMD — verificar instalación</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- En CMD de Windows:</span>
+mysql --version
+<span class="cmt">-- Salida esperada:</span>
+<span class="cmt">-- mysql  Ver 8.x.x Distrib 8.x.x, for Win64 (x86_64)</span></code></pre>
+      </div>
+    </div>
+    <div id="inst-pg" class="tab-content">
+      <ol class="steps">
+        <li>Descarga el instalador de <strong>EDB</strong> desde <code>postgresql.org/download/windows</code></li>
+        <li>Instala PostgreSQL Server + pgAdmin 4 + herramientas de línea de comandos</li>
+        <li>Puerto por defecto: <strong>5432</strong>. El superusuario se llama <code>postgres</code></li>
+        <li>Al finalizar, el servicio se inicia automáticamente en Windows</li>
+        <li>Agrega al PATH: <code>C:\Program Files\PostgreSQL\16\bin</code></li>
+      </ol>
+      <div class="info-box win">
+        <strong>Verificar desde CMD:</strong>
+        Abre CMD o PowerShell y ejecuta: <code>psql --version</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>CMD — verificar instalación</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- En CMD de Windows:</span>
+psql --version
+<span class="cmt">-- Salida esperada:</span>
+<span class="cmt">-- psql (PostgreSQL) 16.x</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. CONEXIÓN -->
+<section id="conexion">
+  <h2><span class="num">2</span> Conectarse al servidor</h2>
+  <p>Siempre desde CMD o PowerShell como administrador.</p>
+
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'con-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'con-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="con-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL — conectar</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Conectar como root al servidor local:</span>
+mysql -u root -p
+
+<span class="cmt">-- Conectar a un servidor remoto:</span>
+mysql -h 192.168.1.100 -P 3306 -u root -p
+
+<span class="cmt">-- Conectar y seleccionar base de datos directamente:</span>
+mysql -u root -p mi_base_datos
+
+<span class="cmt">-- Salir del cliente:</span>
+<span class="kw">EXIT</span>;
+<span class="cmt">-- o también: QUIT;  o  \q</span></code></pre>
+      </div>
+      <div class="info-box tip">
+        <strong>Comandos útiles dentro del cliente MySQL:</strong>
+        <code>\s</code> — estado del servidor · <code>\h</code> — ayuda · <code>SHOW DATABASES;</code> · <code>USE nombre;</code>
+      </div>
+    </div>
+    <div id="con-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — conectar</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Conectar como postgres al servidor local:</span>
+psql -U postgres
+
+<span class="cmt">-- Conectar a una base de datos específica:</span>
+psql -U postgres -d mi_base_datos
+
+<span class="cmt">-- Conectar a servidor remoto:</span>
+psql -h 192.168.1.100 -p 5432 -U postgres -d mi_base_datos
+
+<span class="cmt">-- Salir del cliente:</span>
+\q</code></pre>
+      </div>
+      <div class="info-box tip">
+        <strong>Meta-comandos útiles en psql:</strong>
+        <code>\l</code> — listar bases · <code>\dt</code> — listar tablas · <code>\d tabla</code> — describir tabla · <code>\?</code> — ayuda
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. TIPOS DE DATOS -->
+<section id="tipos">
+  <h2><span class="num">3</span> Tipos de datos más usados</h2>
+  <p>Elegir el tipo correcto ahorra espacio y evita errores de validación.</p>
+
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'tipos-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'tipos-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+
+    <div id="tipos-mysql" class="tab-content active">
+      <h3>Numéricos</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Rango</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>TINYINT</td><td>-128 a 127</td><td>Flags, estados booleanos</td></tr>
+          <tr><td>SMALLINT</td><td>-32,768 a 32,767</td><td>Valores pequeños</td></tr>
+          <tr><td>INT / INTEGER</td><td>-2,147M a 2,147M</td><td>IDs, contadores generales</td></tr>
+          <tr><td>BIGINT</td><td>±9.2 × 10¹⁸</td><td>IDs en tablas grandes</td></tr>
+          <tr><td>DECIMAL(p,s)</td><td>Exacto</td><td>Dinero, precios</td></tr>
+          <tr><td>FLOAT / DOUBLE</td><td>Aprox.</td><td>Coordenadas, cálculos científicos</td></tr>
+        </tbody>
+      </table>
+      <h3>Cadenas de texto</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Tamaño máx.</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>CHAR(n)</td><td>255 chars</td><td>Códigos de longitud fija (ISO, ZIP)</td></tr>
+          <tr><td>VARCHAR(n)</td><td>65,535 bytes</td><td>Nombres, emails, títulos</td></tr>
+          <tr><td>TEXT</td><td>~65 KB</td><td>Descripciones, comentarios</td></tr>
+          <tr><td>MEDIUMTEXT</td><td>~16 MB</td><td>Artículos, contenido HTML</td></tr>
+          <tr><td>LONGTEXT</td><td>~4 GB</td><td>Documentos largos</td></tr>
+        </tbody>
+      </table>
+      <h3>Fecha y tiempo</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Formato</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>DATE</td><td>YYYY-MM-DD</td><td>Fechas de nacimiento, vencimientos</td></tr>
+          <tr><td>TIME</td><td>HH:MM:SS</td><td>Horas de apertura</td></tr>
+          <tr><td>DATETIME</td><td>YYYY-MM-DD HH:MM:SS</td><td>Eventos con fecha y hora</td></tr>
+          <tr><td>TIMESTAMP</td><td>UNIX timestamp</td><td>created_at, updated_at</td></tr>
+          <tr><td>YEAR</td><td>YYYY</td><td>Año de publicación</td></tr>
+        </tbody>
+      </table>
+      <h3>Otros</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td>BOOLEAN / TINYINT(1)</td><td>Verdadero / Falso (MySQL usa TINYINT internamente)</td></tr>
+          <tr><td>ENUM('a','b')</td><td>Lista fija de valores permitidos</td></tr>
+          <tr><td>JSON</td><td>Documentos JSON (desde MySQL 5.7)</td></tr>
+          <tr><td>BLOB</td><td>Datos binarios (imágenes, archivos)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="tipos-pg" class="tab-content">
+      <h3>Numéricos</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Rango</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>SMALLINT</td><td>-32,768 a 32,767</td><td>Valores pequeños</td></tr>
+          <tr><td>INTEGER / INT</td><td>-2,147M a 2,147M</td><td>IDs, contadores generales</td></tr>
+          <tr><td>BIGINT</td><td>±9.2 × 10¹⁸</td><td>IDs en tablas grandes</td></tr>
+          <tr><td>SERIAL</td><td>1 a 2,147M</td><td>Auto-incremento (legacy)</td></tr>
+          <tr><td>BIGSERIAL</td><td>1 a 9.2 × 10¹⁸</td><td>Auto-incremento para bigint</td></tr>
+          <tr><td>NUMERIC(p,s)</td><td>Exacto</td><td>Dinero, precios</td></tr>
+          <tr><td>REAL / DOUBLE PRECISION</td><td>Aprox.</td><td>Coordenadas, cálculos científicos</td></tr>
+        </tbody>
+      </table>
+      <h3>Cadenas de texto</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Tamaño máx.</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>CHAR(n)</td><td>n chars</td><td>Códigos de longitud fija</td></tr>
+          <tr><td>VARCHAR(n)</td><td>n chars</td><td>Nombres, emails, títulos</td></tr>
+          <tr><td>TEXT</td><td>Ilimitado</td><td>Cualquier texto largo (preferido en PG)</td></tr>
+        </tbody>
+      </table>
+      <h3>Fecha y tiempo</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Formato</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td>DATE</td><td>YYYY-MM-DD</td><td>Fechas de nacimiento, vencimientos</td></tr>
+          <tr><td>TIME</td><td>HH:MM:SS</td><td>Horas del día</td></tr>
+          <tr><td>TIMESTAMP</td><td>YYYY-MM-DD HH:MM:SS</td><td>Eventos sin zona horaria</td></tr>
+          <tr><td>TIMESTAMPTZ</td><td>Con zona horaria</td><td>created_at, updated_at (recomendado)</td></tr>
+          <tr><td>INTERVAL</td><td>Duración</td><td>Cálculos de tiempo</td></tr>
+        </tbody>
+      </table>
+      <h3>Otros (exclusivos de PostgreSQL)</h3>
+      <table class="data-table">
+        <thead><tr><th>Tipo</th><th>Descripción</th></tr></thead>
+        <tbody>
+          <tr><td>BOOLEAN</td><td>TRUE / FALSE nativo</td></tr>
+          <tr><td>UUID</td><td>Identificador único universal</td></tr>
+          <tr><td>JSONB</td><td>JSON binario indexable (muy eficiente)</td></tr>
+          <tr><td>ARRAY</td><td>Arreglos de cualquier tipo: INT[], TEXT[]</td></tr>
+          <tr><td>ENUM (tipo custom)</td><td>CREATE TYPE estado AS ENUM(...)</td></tr>
+          <tr><td>BYTEA</td><td>Datos binarios</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 4. BASES DE DATOS -->
+<section id="databases">
+  <h2><span class="num">4</span> Bases de datos</h2>
+  <p>Crear, listar, seleccionar y eliminar bases de datos.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'db-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'db-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="db-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Crear base de datos con codificación UTF-8</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">tienda</span>
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+<span class="cmt">-- Listar todas las bases de datos</span>
+<span class="kw">SHOW DATABASES</span>;
+
+<span class="cmt">-- Seleccionar / usar una base de datos</span>
+<span class="kw">USE</span> <span class="tbl">tienda</span>;
+
+<span class="cmt">-- Ver la base de datos activa</span>
+<span class="kw">SELECT DATABASE</span>();
+
+<span class="cmt">-- Eliminar base de datos (¡irreversible!)</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> <span class="tbl">tienda</span>;</code></pre>
+      </div>
+    </div>
+    <div id="db-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Crear base de datos</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">tienda</span>
+  ENCODING <span class="str">'UTF8'</span>
+  LC_COLLATE <span class="str">'es_ES.UTF-8'</span>
+  TEMPLATE template0;
+
+<span class="cmt">-- Listar bases de datos (meta-comando psql)</span>
+\l
+
+<span class="cmt">-- O con SQL:</span>
+<span class="kw">SELECT</span> datname <span class="kw">FROM</span> pg_database;
+
+<span class="cmt">-- Conectarse a otra base de datos (meta-comando)</span>
+\c tienda
+
+<span class="cmt">-- Ver la base de datos activa</span>
+<span class="kw">SELECT current_database</span>();
+
+<span class="cmt">-- Eliminar base de datos (¡irreversible!)</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> <span class="tbl">tienda</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. TABLAS -->
+<section id="tablas">
+  <h2><span class="num">5</span> Crear tablas</h2>
+  <p>La estructura de la tabla define las columnas, tipos y restricciones.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'tbl-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'tbl-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="tbl-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Tabla de clientes</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">clientes</span> (
+  id          <span class="kw">INT</span> <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+  nombre      <span class="kw">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  email       <span class="kw">VARCHAR</span>(<span class="num">150</span>) <span class="kw">UNIQUE NOT NULL</span>,
+  telefono    <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+  activo      <span class="kw">TINYINT</span>(<span class="num">1</span>) <span class="kw">DEFAULT</span> <span class="num">1</span>,
+  created_at  <span class="kw">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+<span class="cmt">-- Tabla de productos</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">productos</span> (
+  id          <span class="kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  nombre      <span class="kw">VARCHAR</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,
+  precio      <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  stock       <span class="kw">INT DEFAULT</span> <span class="num">0</span>,
+  categoria   <span class="kw">VARCHAR</span>(<span class="num">80</span>)
+);
+
+<span class="cmt">-- Ver las tablas de la base activa</span>
+<span class="kw">SHOW TABLES</span>;
+
+<span class="cmt">-- Ver estructura de una tabla</span>
+<span class="kw">DESCRIBE</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Modificar tabla: agregar columna</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">clientes</span> <span class="kw">ADD COLUMN</span> ciudad <span class="kw">VARCHAR</span>(<span class="num">80</span>);
+
+<span class="cmt">-- Eliminar tabla</span>
+<span class="kw">DROP TABLE IF EXISTS</span> <span class="tbl">productos</span>;</code></pre>
+      </div>
+    </div>
+    <div id="tbl-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Tabla de clientes</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">clientes</span> (
+  id          <span class="kw">SERIAL PRIMARY KEY</span>,
+  nombre      <span class="kw">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,
+  email       <span class="kw">VARCHAR</span>(<span class="num">150</span>) <span class="kw">UNIQUE NOT NULL</span>,
+  telefono    <span class="kw">VARCHAR</span>(<span class="num">20</span>),
+  activo      <span class="kw">BOOLEAN DEFAULT</span> <span class="kw">TRUE</span>,
+  created_at  <span class="kw">TIMESTAMPTZ DEFAULT NOW</span>()
+);
+
+<span class="cmt">-- Tabla de productos</span>
+<span class="kw">CREATE TABLE</span> <span class="tbl">productos</span> (
+  id          <span class="kw">SERIAL PRIMARY KEY</span>,
+  nombre      <span class="kw">VARCHAR</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,
+  precio      <span class="kw">NUMERIC</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  stock       <span class="kw">INTEGER DEFAULT</span> <span class="num">0</span>,
+  categoria   <span class="kw">VARCHAR</span>(<span class="num">80</span>)
+);
+
+<span class="cmt">-- Ver tablas en el esquema actual</span>
+\dt
+
+<span class="cmt">-- Ver estructura de una tabla</span>
+\d clientes
+
+<span class="cmt">-- Modificar tabla: agregar columna</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">clientes</span> <span class="kw">ADD COLUMN</span> ciudad <span class="kw">VARCHAR</span>(<span class="num">80</span>);
+
+<span class="cmt">-- Eliminar tabla</span>
+<span class="kw">DROP TABLE IF EXISTS</span> <span class="tbl">productos</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. CONSTRAINTS -->
+<section id="constraints">
+  <h2><span class="num">6</span> Restricciones (Constraints)</h2>
+  <p>Las restricciones garantizan la integridad de los datos.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'con2-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'con2-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="con2-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL — Tabla con todas las restricciones</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="kw">CREATE TABLE</span> <span class="tbl">pedidos</span> (
+  id            <span class="kw">INT AUTO_INCREMENT</span>,
+  cliente_id    <span class="kw">INT NOT NULL</span>,
+  producto_id   <span class="kw">INT NOT NULL</span>,
+  cantidad      <span class="kw">INT NOT NULL</span>,
+  total         <span class="kw">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  estado        <span class="kw">ENUM</span>(<span class="str">'pendiente'</span>,<span class="str">'pagado'</span>,<span class="str">'cancelado'</span>) <span class="kw">DEFAULT</span> <span class="str">'pendiente'</span>,
+  created_at    <span class="kw">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+
+  <span class="cmt">-- Restricciones</span>
+  <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">CONSTRAINT</span> fk_pedido_cliente
+    <span class="kw">FOREIGN KEY</span> (cliente_id) <span class="kw">REFERENCES</span> <span class="tbl">clientes</span>(id)
+    <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>,
+  <span class="kw">CONSTRAINT</span> fk_pedido_producto
+    <span class="kw">FOREIGN KEY</span> (producto_id) <span class="kw">REFERENCES</span> <span class="tbl">productos</span>(id),
+  <span class="kw">CONSTRAINT</span> chk_cantidad <span class="kw">CHECK</span> (cantidad &gt; <span class="num">0</span>),
+  <span class="kw">CONSTRAINT</span> chk_total <span class="kw">CHECK</span> (total &gt;= <span class="num">0</span>)
+) ENGINE=InnoDB;</code></pre>
+      </div>
+    </div>
+    <div id="con2-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — Tabla con todas las restricciones</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Primero crear el tipo ENUM</span>
+<span class="kw">CREATE TYPE</span> estado_pedido <span class="kw">AS ENUM</span> (<span class="str">'pendiente'</span>,<span class="str">'pagado'</span>,<span class="str">'cancelado'</span>);
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">pedidos</span> (
+  id            <span class="kw">SERIAL</span>,
+  cliente_id    <span class="kw">INTEGER NOT NULL</span>,
+  producto_id   <span class="kw">INTEGER NOT NULL</span>,
+  cantidad      <span class="kw">INTEGER NOT NULL</span>,
+  total         <span class="kw">NUMERIC</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+  estado        estado_pedido <span class="kw">DEFAULT</span> <span class="str">'pendiente'</span>,
+  created_at    <span class="kw">TIMESTAMPTZ DEFAULT NOW</span>(),
+
+  <span class="cmt">-- Restricciones</span>
+  <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">CONSTRAINT</span> fk_pedido_cliente
+    <span class="kw">FOREIGN KEY</span> (cliente_id) <span class="kw">REFERENCES</span> <span class="tbl">clientes</span>(id)
+    <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>,
+  <span class="kw">CONSTRAINT</span> fk_pedido_producto
+    <span class="kw">FOREIGN KEY</span> (producto_id) <span class="kw">REFERENCES</span> <span class="tbl">productos</span>(id),
+  <span class="kw">CONSTRAINT</span> chk_cantidad <span class="kw">CHECK</span> (cantidad &gt; <span class="num">0</span>),
+  <span class="kw">CONSTRAINT</span> chk_total <span class="kw">CHECK</span> (total &gt;= <span class="num">0</span>)
+);</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. INSERT -->
+<section id="insert">
+  <h2><span class="num">7</span> INSERT — Insertar datos</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'ins-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'ins-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="ins-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Insertar un registro</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">clientes</span> (nombre, email, telefono)
+<span class="kw">VALUES</span> (<span class="str">'Ana García'</span>, <span class="str">'ana@email.com'</span>, <span class="str">'555-1234'</span>);
+
+<span class="cmt">-- Insertar múltiples registros a la vez</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">clientes</span> (nombre, email)
+<span class="kw">VALUES</span>
+  (<span class="str">'Luis Pérez'</span>,  <span class="str">'luis@email.com'</span>),
+  (<span class="str">'María López'</span>, <span class="str">'maria@email.com'</span>),
+  (<span class="str">'Carlos Ruiz'</span>, <span class="str">'carlos@email.com'</span>);
+
+<span class="cmt">-- Insertar productos</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">productos</span> (nombre, precio, stock, categoria)
+<span class="kw">VALUES</span>
+  (<span class="str">'Laptop Pro'</span>,  <span class="num">1299.99</span>, <span class="num">10</span>, <span class="str">'Electrónica'</span>),
+  (<span class="str">'Mouse USB'</span>,   <span class="num">25.00</span>,   <span class="num">50</span>, <span class="str">'Periféricos'</span>),
+  (<span class="str">'Teclado Mec'</span>, <span class="num">89.90</span>,   <span class="num">30</span>, <span class="str">'Periféricos'</span>);
+
+<span class="cmt">-- Ver el ID generado automáticamente</span>
+<span class="kw">SELECT LAST_INSERT_ID</span>();</code></pre>
+      </div>
+    </div>
+    <div id="ins-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Insertar un registro</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">clientes</span> (nombre, email, telefono)
+<span class="kw">VALUES</span> (<span class="str">'Ana García'</span>, <span class="str">'ana@email.com'</span>, <span class="str">'555-1234'</span>);
+
+<span class="cmt">-- Insertar múltiples registros</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">clientes</span> (nombre, email)
+<span class="kw">VALUES</span>
+  (<span class="str">'Luis Pérez'</span>,  <span class="str">'luis@email.com'</span>),
+  (<span class="str">'María López'</span>, <span class="str">'maria@email.com'</span>),
+  (<span class="str">'Carlos Ruiz'</span>, <span class="str">'carlos@email.com'</span>);
+
+<span class="cmt">-- Insertar productos</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">productos</span> (nombre, precio, stock, categoria)
+<span class="kw">VALUES</span>
+  (<span class="str">'Laptop Pro'</span>,  <span class="num">1299.99</span>, <span class="num">10</span>, <span class="str">'Electrónica'</span>),
+  (<span class="str">'Mouse USB'</span>,   <span class="num">25.00</span>,   <span class="num">50</span>, <span class="str">'Periféricos'</span>),
+  (<span class="str">'Teclado Mec'</span>, <span class="num">89.90</span>,   <span class="num">30</span>, <span class="str">'Periféricos'</span>);
+
+<span class="cmt">-- Retornar el ID generado (RETURNING es exclusivo de PostgreSQL)</span>
+<span class="kw">INSERT INTO</span> <span class="tbl">clientes</span> (nombre, email)
+<span class="kw">VALUES</span> (<span class="str">'Nuevo Cliente'</span>, <span class="str">'nuevo@email.com'</span>)
+<span class="kw">RETURNING</span> id, nombre;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. SELECT -->
+<section id="select">
+  <h2><span class="num">8</span> SELECT — Consultar datos</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'sel-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'sel-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="sel-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Seleccionar todas las columnas</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Seleccionar columnas específicas</span>
+<span class="kw">SELECT</span> nombre, email <span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Usar alias para columnas</span>
+<span class="kw">SELECT</span>
+  nombre  <span class="kw">AS</span> cliente,
+  email   <span class="kw">AS</span> correo,
+  activo  <span class="kw">AS</span> habilitado
+<span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Ordenar resultados</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC</span>;
+
+<span class="cmt">-- Limitar resultados</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC LIMIT</span> <span class="num">5</span>;
+
+<span class="cmt">-- Paginación con LIMIT + OFFSET</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>
+<span class="kw">LIMIT</span> <span class="num">10</span> <span class="kw">OFFSET</span> <span class="num">20</span>;  <span class="cmt">-- página 3 de 10 por página</span>
+
+<span class="cmt">-- Valores distintos</span>
+<span class="kw">SELECT DISTINCT</span> categoria <span class="kw">FROM</span> <span class="tbl">productos</span>;</code></pre>
+      </div>
+    </div>
+    <div id="sel-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Seleccionar todas las columnas</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Seleccionar columnas específicas</span>
+<span class="kw">SELECT</span> nombre, email <span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Usar alias para columnas</span>
+<span class="kw">SELECT</span>
+  nombre  <span class="kw">AS</span> cliente,
+  email   <span class="kw">AS</span> correo,
+  activo  <span class="kw">AS</span> habilitado
+<span class="kw">FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Ordenar resultados</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC</span>;
+
+<span class="cmt">-- Limitar resultados</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC LIMIT</span> <span class="num">5</span>;
+
+<span class="cmt">-- Paginación con LIMIT + OFFSET</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>
+<span class="kw">LIMIT</span> <span class="num">10</span> <span class="kw">OFFSET</span> <span class="num">20</span>;
+
+<span class="cmt">-- Valores distintos</span>
+<span class="kw">SELECT DISTINCT</span> categoria <span class="kw">FROM</span> <span class="tbl">productos</span>;
+
+<span class="cmt">-- FETCH FIRST (estándar SQL, equivalente a LIMIT)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC
+FETCH FIRST</span> <span class="num">5</span> <span class="kw">ROWS ONLY</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. WHERE -->
+<section id="where">
+  <h2><span class="num">9</span> WHERE — Filtrar datos</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'wh-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'wh-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="wh-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Comparaciones básicas</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span> <span class="kw">WHERE</span> precio &gt; <span class="num">100</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>  <span class="kw">WHERE</span> activo = <span class="num">1</span>;
+
+<span class="cmt">-- Operadores lógicos AND / OR / NOT</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> precio &gt; <span class="num">50</span> <span class="kw">AND</span> stock &gt; <span class="num">0</span>;
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> categoria = <span class="str">'Electrónica'</span> <span class="kw">OR</span> categoria = <span class="str">'Periféricos'</span>;
+
+<span class="cmt">-- IN: lista de valores</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> categoria <span class="kw">IN</span> (<span class="str">'Electrónica'</span>, <span class="str">'Periféricos'</span>);
+
+<span class="cmt">-- BETWEEN: rango de valores</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> precio <span class="kw">BETWEEN</span> <span class="num">50</span> <span class="kw">AND</span> <span class="num">500</span>;
+
+<span class="cmt">-- LIKE: búsqueda por patrón  (% = cualquier cadena, _ = un carácter)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> nombre <span class="kw">LIKE</span> <span class="str">'Ana%'</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> email <span class="kw">LIKE</span> <span class="str">'%@gmail.com'</span>;
+
+<span class="cmt">-- IS NULL / IS NOT NULL</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> telefono <span class="kw">IS NULL</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> telefono <span class="kw">IS NOT NULL</span>;</code></pre>
+      </div>
+    </div>
+    <div id="wh-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Comparaciones básicas (igual que MySQL)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span> <span class="kw">WHERE</span> precio &gt; <span class="num">100</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>  <span class="kw">WHERE</span> activo = <span class="kw">TRUE</span>;  <span class="cmt">-- BOOLEAN real en PG</span>
+
+<span class="cmt">-- AND / OR / IN / BETWEEN / IS NULL — idénticos a MySQL</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> categoria <span class="kw">IN</span> (<span class="str">'Electrónica'</span>, <span class="str">'Periféricos'</span>)
+  <span class="kw">AND</span> precio <span class="kw">BETWEEN</span> <span class="num">50</span> <span class="kw">AND</span> <span class="num">500</span>;
+
+<span class="cmt">-- LIKE (sensible a mayúsculas en PG)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> nombre <span class="kw">LIKE</span> <span class="str">'Ana%'</span>;
+
+<span class="cmt">-- ILIKE: igual que LIKE pero sin distinción mayúsculas (solo PG)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> nombre <span class="kw">ILIKE</span> <span class="str">'ana%'</span>;
+
+<span class="cmt">-- Operador ~: expresiones regulares (solo PG)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> email ~ <span class="str">'^[a-z]+'</span>;
+
+<span class="cmt">-- IS NULL / IS NOT NULL — igual que MySQL</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> telefono <span class="kw">IS NULL</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10. UPDATE -->
+<section id="update">
+  <h2><span class="num">10</span> UPDATE — Actualizar datos</h2>
+  <div class="info-box warn">
+    <strong>Precaución:</strong> Siempre usa WHERE en UPDATE y DELETE. Sin WHERE, se modifican o eliminan TODOS los registros de la tabla.
+  </div>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'upd-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'upd-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="upd-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Actualizar un campo</span>
+<span class="kw">UPDATE</span> <span class="tbl">clientes</span>
+<span class="kw">SET</span> telefono = <span class="str">'555-9999'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cmt">-- Actualizar múltiples campos</span>
+<span class="kw">UPDATE</span> <span class="tbl">productos</span>
+<span class="kw">SET</span>
+  precio = <span class="num">999.99</span>,
+  stock  = stock - <span class="num">1</span>
+<span class="kw">WHERE</span> id = <span class="num">3</span>;
+
+<span class="cmt">-- Aplicar aumento de precio a una categoría</span>
+<span class="kw">UPDATE</span> <span class="tbl">productos</span>
+<span class="kw">SET</span> precio = precio * <span class="num">1.10</span>
+<span class="kw">WHERE</span> categoria = <span class="str">'Electrónica'</span>;
+
+<span class="cmt">-- Ver cuántas filas fueron afectadas</span>
+<span class="kw">SELECT ROW_COUNT</span>();  <span class="cmt">-- ejecutar inmediatamente después</span></code></pre>
+      </div>
+    </div>
+    <div id="upd-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Actualizar un campo</span>
+<span class="kw">UPDATE</span> <span class="tbl">clientes</span>
+<span class="kw">SET</span> telefono = <span class="str">'555-9999'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="cmt">-- Actualizar múltiples campos</span>
+<span class="kw">UPDATE</span> <span class="tbl">productos</span>
+<span class="kw">SET</span>
+  precio = <span class="num">999.99</span>,
+  stock  = stock - <span class="num">1</span>
+<span class="kw">WHERE</span> id = <span class="num">3</span>;
+
+<span class="cmt">-- Aplicar aumento de precio</span>
+<span class="kw">UPDATE</span> <span class="tbl">productos</span>
+<span class="kw">SET</span> precio = precio * <span class="num">1.10</span>
+<span class="kw">WHERE</span> categoria = <span class="str">'Electrónica'</span>;
+
+<span class="cmt">-- RETURNING: retornar los registros modificados (exclusivo PG)</span>
+<span class="kw">UPDATE</span> <span class="tbl">productos</span>
+<span class="kw">SET</span> stock = stock - <span class="num">5</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>
+<span class="kw">RETURNING</span> id, nombre, stock;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11. DELETE -->
+<section id="delete">
+  <h2><span class="num">11</span> DELETE — Eliminar datos</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'del-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'del-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="del-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Eliminar un registro específico</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> id = <span class="num">5</span>;
+
+<span class="cmt">-- Eliminar con condición</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">productos</span> <span class="kw">WHERE</span> stock = <span class="num">0</span>;
+
+<span class="cmt">-- Eliminar TODOS los registros (mantiene la tabla)</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- TRUNCATE: elimina todos y reinicia el auto_increment (más rápido)</span>
+<span class="kw">TRUNCATE TABLE</span> <span class="tbl">clientes</span>;</code></pre>
+      </div>
+    </div>
+    <div id="del-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Eliminar un registro específico</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> id = <span class="num">5</span>;
+
+<span class="cmt">-- Eliminar con condición</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">productos</span> <span class="kw">WHERE</span> stock = <span class="num">0</span>;
+
+<span class="cmt">-- RETURNING: retornar lo eliminado (exclusivo PG)</span>
+<span class="kw">DELETE FROM</span> <span class="tbl">clientes</span>
+<span class="kw">WHERE</span> activo = <span class="kw">FALSE</span>
+<span class="kw">RETURNING</span> id, nombre, email;
+
+<span class="cmt">-- TRUNCATE: elimina todos y reinicia la secuencia</span>
+<span class="kw">TRUNCATE TABLE</span> <span class="tbl">clientes</span> <span class="kw">RESTART IDENTITY</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. JOINS -->
+<section id="joins">
+  <h2><span class="num">12</span> JOINs — Unir tablas</h2>
+  <p>Los JOINs combinan filas de dos o más tablas según una condición de relación.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'join-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'join-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="join-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL — INNER JOIN (solo coincidencias)</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Pedidos con nombre de cliente y producto</span>
+<span class="kw">SELECT</span>
+  p.id           <span class="kw">AS</span> pedido_id,
+  c.nombre       <span class="kw">AS</span> cliente,
+  pr.nombre      <span class="kw">AS</span> producto,
+  p.cantidad,
+  p.total
+<span class="kw">FROM</span> <span class="tbl">pedidos</span> p
+<span class="kw">INNER JOIN</span> <span class="tbl">clientes</span>  c  <span class="kw">ON</span> p.cliente_id  = c.id
+<span class="kw">INNER JOIN</span> <span class="tbl">productos</span> pr <span class="kw">ON</span> p.producto_id = pr.id;</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>MySQL — LEFT JOIN (todos los de la izquierda)</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Todos los clientes, tengan pedidos o no</span>
+<span class="kw">SELECT</span>
+  c.nombre,
+  <span class="fn">COUNT</span>(p.id) <span class="kw">AS</span> total_pedidos
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id, c.nombre
+<span class="kw">ORDER BY</span> total_pedidos <span class="kw">DESC</span>;</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>MySQL — Clientes SIN pedidos</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="kw">SELECT</span> c.nombre, c.email
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">WHERE</span> p.id <span class="kw">IS NULL</span>;</code></pre>
+      </div>
+    </div>
+    <div id="join-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — INNER JOIN</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Idéntico a MySQL en sintaxis</span>
+<span class="kw">SELECT</span>
+  p.id           <span class="kw">AS</span> pedido_id,
+  c.nombre       <span class="kw">AS</span> cliente,
+  pr.nombre      <span class="kw">AS</span> producto,
+  p.cantidad,
+  p.total
+<span class="kw">FROM</span> <span class="tbl">pedidos</span> p
+<span class="kw">INNER JOIN</span> <span class="tbl">clientes</span>  c  <span class="kw">ON</span> p.cliente_id  = c.id
+<span class="kw">INNER JOIN</span> <span class="tbl">productos</span> pr <span class="kw">ON</span> p.producto_id = pr.id;</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — LEFT / RIGHT / FULL OUTER JOIN</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- LEFT JOIN: igual que MySQL</span>
+<span class="kw">SELECT</span> c.nombre, <span class="fn">COUNT</span>(p.id) <span class="kw">AS</span> total_pedidos
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id
+<span class="kw">ORDER BY</span> total_pedidos <span class="kw">DESC</span>;
+
+<span class="cmt">-- FULL OUTER JOIN: registros de ambas tablas aunque no coincidan</span>
+<span class="kw">SELECT</span> c.nombre, p.id <span class="kw">AS</span> pedido
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">FULL OUTER JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id;
+
+<span class="cmt">-- CROSS JOIN: producto cartesiano</span>
+<span class="kw">SELECT</span> c.nombre, pr.nombre
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">CROSS JOIN</span> <span class="tbl">productos</span> pr;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. AGREGADOS -->
+<section id="agregados">
+  <h2><span class="num">13</span> Funciones de agregado</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'agg-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'agg-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="agg-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- COUNT: contar registros</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_clientes <span class="kw">FROM</span> <span class="tbl">clientes</span>;
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(telefono) <span class="kw">AS</span> con_telefono <span class="kw">FROM</span> <span class="tbl">clientes</span>; <span class="cmt">-- ignora NULLs</span>
+
+<span class="cmt">-- SUM: suma</span>
+<span class="kw">SELECT</span> <span class="fn">SUM</span>(total) <span class="kw">AS</span> ingresos_totales <span class="kw">FROM</span> <span class="tbl">pedidos</span>;
+
+<span class="cmt">-- AVG: promedio</span>
+<span class="kw">SELECT</span> <span class="fn">AVG</span>(precio) <span class="kw">AS</span> precio_promedio <span class="kw">FROM</span> <span class="tbl">productos</span>;
+
+<span class="cmt">-- MIN / MAX</span>
+<span class="kw">SELECT</span>
+  <span class="fn">MIN</span>(precio) <span class="kw">AS</span> mas_barato,
+  <span class="fn">MAX</span>(precio) <span class="kw">AS</span> mas_caro
+<span class="kw">FROM</span> <span class="tbl">productos</span>;
+
+<span class="cmt">-- Combinar varias</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*)         <span class="kw">AS</span> total,
+  <span class="fn">SUM</span>(stock)       <span class="kw">AS</span> unidades,
+  <span class="fn">AVG</span>(precio)      <span class="kw">AS</span> precio_avg,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(precio), <span class="num">2</span>) <span class="kw">AS</span> precio_redondeado
+<span class="kw">FROM</span> <span class="tbl">productos</span>;</code></pre>
+      </div>
+    </div>
+    <div id="agg-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Las funciones básicas son idénticas a MySQL</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*)              <span class="kw">AS</span> total,
+  <span class="fn">SUM</span>(stock)            <span class="kw">AS</span> unidades,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(precio),<span class="num">2</span>) <span class="kw">AS</span> precio_avg,
+  <span class="fn">MIN</span>(precio)           <span class="kw">AS</span> mas_barato,
+  <span class="fn">MAX</span>(precio)           <span class="kw">AS</span> mas_caro
+<span class="kw">FROM</span> <span class="tbl">productos</span>;
+
+<span class="cmt">-- STRING_AGG: concatenar valores de un grupo (solo PG)</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">STRING_AGG</span>(nombre, <span class="str">', '</span> <span class="kw">ORDER BY</span> nombre) <span class="kw">AS</span> productos
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria;
+
+<span class="cmt">-- ARRAY_AGG: agrupar en un arreglo (solo PG)</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">ARRAY_AGG</span>(nombre) <span class="kw">AS</span> lista_productos
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14. GROUP BY -->
+<section id="groupby">
+  <h2><span class="num">14</span> GROUP BY / HAVING</h2>
+  <p><code>GROUP BY</code> agrupa filas. <code>HAVING</code> filtra grupos (como WHERE pero para agregados).</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'grp-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'grp-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="grp-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Ventas por categoría</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cant_productos,
+  <span class="fn">SUM</span>(stock) <span class="kw">AS</span> total_stock,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(precio), <span class="num">2</span>) <span class="kw">AS</span> precio_prom
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria;
+
+<span class="cmt">-- HAVING: solo categorías con más de 2 productos</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cant
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="num">2</span>
+<span class="kw">ORDER BY</span> cant <span class="kw">DESC</span>;
+
+<span class="cmt">-- Pedidos por cliente con HAVING</span>
+<span class="kw">SELECT</span>
+  c.nombre,
+  <span class="fn">COUNT</span>(p.id)   <span class="kw">AS</span> num_pedidos,
+  <span class="fn">SUM</span>(p.total)  <span class="kw">AS</span> total_gastado
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id, c.nombre
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(p.total) &gt; <span class="num">500</span>
+<span class="kw">ORDER BY</span> total_gastado <span class="kw">DESC</span>;</code></pre>
+      </div>
+    </div>
+    <div id="grp-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — igual que MySQL + extras</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- GROUP BY / HAVING — sintaxis idéntica</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cant_productos,
+  <span class="fn">ROUND</span>(<span class="fn">AVG</span>(precio),<span class="num">2</span>) <span class="kw">AS</span> precio_prom
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="num">1</span>
+<span class="kw">ORDER BY</span> precio_prom <span class="kw">DESC</span>;
+
+<span class="cmt">-- ROLLUP: subtotales y gran total (también en MySQL 8+)</span>
+<span class="kw">SELECT</span>
+  categoria,
+  <span class="fn">SUM</span>(stock) <span class="kw">AS</span> total_stock
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY ROLLUP</span>(categoria);
+
+<span class="cmt">-- FILTER dentro de agregados (solo PG)</span>
+<span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total,
+  <span class="fn">COUNT</span>(*) <span class="kw">FILTER</span> (<span class="kw">WHERE</span> precio &gt; <span class="num">100</span>) <span class="kw">AS</span> premium
+<span class="kw">FROM</span> <span class="tbl">productos</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15. SUBQUERIES -->
+<section id="subqueries">
+  <h2><span class="num">15</span> Subconsultas</h2>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'sub-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'sub-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="sub-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Productos con precio mayor al promedio</span>
+<span class="kw">SELECT</span> nombre, precio
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> precio &gt; (
+  <span class="kw">SELECT AVG</span>(precio) <span class="kw">FROM</span> <span class="tbl">productos</span>
+);
+
+<span class="cmt">-- Clientes que han realizado al menos un pedido</span>
+<span class="kw">SELECT</span> nombre, email
+<span class="kw">FROM</span> <span class="tbl">clientes</span>
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+  <span class="kw">SELECT DISTINCT</span> cliente_id <span class="kw">FROM</span> <span class="tbl">pedidos</span>
+);
+
+<span class="cmt">-- Subconsulta en FROM (tabla derivada)</span>
+<span class="kw">SELECT</span> categoria, precio_prom
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> categoria, <span class="fn">AVG</span>(precio) <span class="kw">AS</span> precio_prom
+  <span class="kw">FROM</span> <span class="tbl">productos</span>
+  <span class="kw">GROUP BY</span> categoria
+) <span class="kw">AS</span> resumen
+<span class="kw">WHERE</span> precio_prom &gt; <span class="num">200</span>;</code></pre>
+      </div>
+    </div>
+    <div id="sub-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL — subqueries + CTE</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Subconsultas — misma sintaxis que MySQL</span>
+<span class="kw">SELECT</span> nombre, precio
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> precio &gt; (<span class="kw">SELECT AVG</span>(precio) <span class="kw">FROM</span> <span class="tbl">productos</span>);
+
+<span class="cmt">-- CTE (Common Table Expression) con WITH — más legible</span>
+<span class="kw">WITH</span> promedio_precios <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> categoria, <span class="fn">AVG</span>(precio) <span class="kw">AS</span> avg_precio
+  <span class="kw">FROM</span> <span class="tbl">productos</span>
+  <span class="kw">GROUP BY</span> categoria
+),
+top_categorias <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> promedio_precios
+  <span class="kw">WHERE</span> avg_precio &gt; <span class="num">200</span>
+)
+<span class="kw">SELECT</span> p.nombre, p.precio, t.avg_precio
+<span class="kw">FROM</span> <span class="tbl">productos</span> p
+<span class="kw">JOIN</span> top_categorias t <span class="kw">ON</span> p.categoria = t.categoria;
+
+<span class="cmt">-- EXISTS: más eficiente que IN para grandes volúmenes</span>
+<span class="kw">SELECT</span> nombre
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">WHERE EXISTS</span> (
+  <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> <span class="tbl">pedidos</span> p <span class="kw">WHERE</span> p.cliente_id = c.id
+);</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 16. ÍNDICES -->
+<section id="indices">
+  <h2><span class="num">16</span> Índices</h2>
+  <p>Los índices aceleran las búsquedas en columnas que se consultan frecuentemente.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'idx-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'idx-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="idx-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Índice simple</span>
+<span class="kw">CREATE INDEX</span> idx_email <span class="kw">ON</span> <span class="tbl">clientes</span>(email);
+
+<span class="cmt">-- Índice único</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email_unico <span class="kw">ON</span> <span class="tbl">clientes</span>(email);
+
+<span class="cmt">-- Índice compuesto (para queries con múltiples columnas)</span>
+<span class="kw">CREATE INDEX</span> idx_cat_precio <span class="kw">ON</span> <span class="tbl">productos</span>(categoria, precio);
+
+<span class="cmt">-- Ver índices de una tabla</span>
+<span class="kw">SHOW INDEX FROM</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Eliminar índice</span>
+<span class="kw">DROP INDEX</span> idx_email <span class="kw">ON</span> <span class="tbl">clientes</span>;
+
+<span class="cmt">-- Analizar cómo MySQL usa los índices</span>
+<span class="kw">EXPLAIN SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span> <span class="kw">WHERE</span> email = <span class="str">'ana@email.com'</span>;</code></pre>
+      </div>
+    </div>
+    <div id="idx-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Índice simple (B-tree por defecto)</span>
+<span class="kw">CREATE INDEX</span> idx_email <span class="kw">ON</span> <span class="tbl">clientes</span>(email);
+
+<span class="cmt">-- Índice único</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email_unico <span class="kw">ON</span> <span class="tbl">clientes</span>(email);
+
+<span class="cmt">-- Índice compuesto</span>
+<span class="kw">CREATE INDEX</span> idx_cat_precio <span class="kw">ON</span> <span class="tbl">productos</span>(categoria, precio);
+
+<span class="cmt">-- Índice parcial: solo indexa productos activos (solo PG)</span>
+<span class="kw">CREATE INDEX</span> idx_activos <span class="kw">ON</span> <span class="tbl">clientes</span>(email)
+<span class="kw">WHERE</span> activo = <span class="kw">TRUE</span>;
+
+<span class="cmt">-- Ver índices</span>
+\di
+
+<span class="cmt">-- Eliminar índice</span>
+<span class="kw">DROP INDEX</span> idx_email;
+
+<span class="cmt">-- Analizar plan de ejecución</span>
+<span class="kw">EXPLAIN ANALYZE SELECT</span> * <span class="kw">FROM</span> <span class="tbl">clientes</span>
+<span class="kw">WHERE</span> email = <span class="str">'ana@email.com'</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 17. VISTAS -->
+<section id="vistas">
+  <h2><span class="num">17</span> Vistas (Views)</h2>
+  <p>Una vista es una consulta almacenada que se comporta como una tabla virtual.</p>
+  <div class="tab-group">
+    <div class="tab-nav">
+      <button class="tab-btn active-mysql" onclick="switchTab(this,'view-mysql')" data-flavor="mysql">🐬 MySQL</button>
+      <button class="tab-btn" onclick="switchTab(this,'view-pg')" data-flavor="pg">🐘 PostgreSQL</button>
+    </div>
+    <div id="view-mysql" class="tab-content active">
+      <div class="code-block">
+        <div class="code-header"><span>MySQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Crear vista: resumen de pedidos por cliente</span>
+<span class="kw">CREATE VIEW</span> <span class="tbl">v_resumen_clientes</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+  c.id,
+  c.nombre,
+  c.email,
+  <span class="fn">COUNT</span>(p.id)  <span class="kw">AS</span> total_pedidos,
+  <span class="fn">SUM</span>(p.total) <span class="kw">AS</span> total_gastado
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id, c.nombre, c.email;
+
+<span class="cmt">-- Consultar la vista como si fuera una tabla</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">v_resumen_clientes</span>
+<span class="kw">WHERE</span> total_pedidos &gt; <span class="num">0</span>
+<span class="kw">ORDER BY</span> total_gastado <span class="kw">DESC</span>;
+
+<span class="cmt">-- Listar vistas</span>
+<span class="kw">SHOW FULL TABLES WHERE</span> Table_type = <span class="str">'VIEW'</span>;
+
+<span class="cmt">-- Eliminar vista</span>
+<span class="kw">DROP VIEW IF EXISTS</span> <span class="tbl">v_resumen_clientes</span>;</code></pre>
+      </div>
+    </div>
+    <div id="view-pg" class="tab-content">
+      <div class="code-block">
+        <div class="code-header"><span>PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copiar</button></div>
+        <pre><code><span class="cmt">-- Crear vista — misma sintaxis</span>
+<span class="kw">CREATE VIEW</span> <span class="tbl">v_resumen_clientes</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+  c.id,
+  c.nombre,
+  c.email,
+  <span class="fn">COUNT</span>(p.id)  <span class="kw">AS</span> total_pedidos,
+  <span class="fn">SUM</span>(p.total) <span class="kw">AS</span> total_gastado
+<span class="kw">FROM</span> <span class="tbl">clientes</span> c
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span> p <span class="kw">ON</span> c.id = p.cliente_id
+<span class="kw">GROUP BY</span> c.id;
+
+<span class="cmt">-- Consultar la vista</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">v_resumen_clientes</span>
+<span class="kw">ORDER BY</span> total_gastado <span class="kw">DESC NULLS LAST</span>;
+
+<span class="cmt">-- Vista materializada (almacena resultado físicamente, solo PG)</span>
+<span class="kw">CREATE MATERIALIZED VIEW</span> <span class="tbl">mv_resumen</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> categoria, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total, <span class="fn">AVG</span>(precio) <span class="kw">AS</span> avg_precio
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">GROUP BY</span> categoria;
+
+<span class="cmt">-- Actualizar vista materializada</span>
+<span class="kw">REFRESH MATERIALIZED VIEW</span> <span class="tbl">mv_resumen</span>;
+
+<span class="cmt">-- Listar vistas</span>
+\dv
+
+<span class="cmt">-- Eliminar vista</span>
+<span class="kw">DROP VIEW IF EXISTS</span> <span class="tbl">v_resumen_clientes</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 18. DIFERENCIAS -->
+<section id="diferencias">
+  <h2><span class="num">18</span> MySQL vs PostgreSQL — Referencia rápida</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Característica</th><th>MySQL 8+</th><th>PostgreSQL 16+</th></tr>
+    </thead>
+    <tbody class="diff-row">
+      <tr><td>Auto-incremento</td><td>AUTO_INCREMENT</td><td>SERIAL / GENERATED AS IDENTITY</td></tr>
+      <tr><td>Booleano</td><td>TINYINT(1)</td><td>BOOLEAN nativo</td></tr>
+      <tr><td>Texto largo</td><td>TEXT, MEDIUMTEXT, LONGTEXT</td><td>TEXT (sin límite)</td></tr>
+      <tr><td>Tiempo con zona</td><td>TIMESTAMP (UTC fijo)</td><td>TIMESTAMPTZ</td></tr>
+      <tr><td>JSON</td><td>JSON</td><td>JSON / JSONB (indexable)</td></tr>
+      <tr><td>Último ID insertado</td><td>LAST_INSERT_ID()</td><td>RETURNING id</td></tr>
+      <tr><td>Case-insensitive LIKE</td><td>LIKE (por defecto)</td><td>ILIKE</td></tr>
+      <tr><td>Regex</td><td>REGEXP</td><td>~ (POSIX)</td></tr>
+      <tr><td>Concatenar texto</td><td>CONCAT(a, b)</td><td>a || b  o  CONCAT(a,b)</td></tr>
+      <tr><td>Listar tablas</td><td>SHOW TABLES</td><td>\dt</td></tr>
+      <tr><td>Describir tabla</td><td>DESCRIBE tabla</td><td>\d tabla</td></tr>
+      <tr><td>Vista materializada</td><td>No nativo</td><td>CREATE MATERIALIZED VIEW</td></tr>
+      <tr><td>CTE recursivo</td><td>Desde MySQL 8.0</td><td>Sí (WITH RECURSIVE)</td></tr>
+      <tr><td>Índice parcial</td><td>No</td><td>CREATE INDEX ... WHERE</td></tr>
+      <tr><td>Arrays</td><td>No</td><td>INT[], TEXT[], etc.</td></tr>
+      <tr><td>Motor de almac.</td><td>InnoDB (default), MyISAM</td><td>Único motor integrado</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box tip">
+    <strong>Recomendación general:</strong>
+    Usa <strong>MySQL</strong> para proyectos web tradicionales (WordPress, Laravel, etc.) o cuando el equipo ya lo conoce. Usa <strong>PostgreSQL</strong> para datos complejos, analítica, necesitas JSON avanzado, o conformidad estricta con el estándar SQL.
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+function switchTab(btn, targetId) {
+  const group = btn.closest('.tab-group');
+  group.querySelectorAll('.tab-btn').forEach(b => b.className = 'tab-btn');
+  group.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const flavor = btn.getAttribute('data-flavor') || 'mysql';
+  btn.classList.add('active-' + flavor);
+  document.getElementById(targetId).classList.add('active');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado!';
+    setTimeout(() => btn.textContent = 'Copiar', 1500);
+  });
+}
+
+// Highlight active nav link on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav.sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
