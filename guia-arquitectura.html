@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de Arquitectura de Software</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #252836;
+    --border: #2e3248;
+    --accent: #7c6af7;
+    --accent2: #4ecdc4;
+    --accent3: #f7c948;
+    --accent4: #f76a6a;
+    --text: #e2e4f0;
+    --muted: #7a7f9a;
+    --code-bg: #12141e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  header {
+    background: linear-gradient(135deg, #1a1d27 0%, #252836 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+  header p { color: var(--muted); font-size: 1.1rem; }
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.35rem 0.9rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  nav a:hover { color: var(--accent); border-color: var(--accent); }
+  main { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 2.5rem 0;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-number {
+    background: var(--accent);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .section-header h2 { font-size: 1.4rem; font-weight: 700; }
+  .section-body { padding: 2rem; }
+  .description { color: var(--muted); margin-bottom: 1.5rem; }
+  .diagram-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+  }
+  .tag-diagram { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .tag-example { background: rgba(78,205,196,0.15); color: var(--accent2); }
+  .tag-exercise { background: rgba(247,201,72,0.15); color: var(--accent3); }
+  h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin: 0.75rem 0 1.5rem;
+  }
+  code { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+  .kw  { color: #c792ea; }
+  .fn  { color: #82aaff; }
+  .st  { color: #c3e88d; }
+  .cm  { color: #546e7a; font-style: italic; }
+  .num { color: #f78c6c; }
+  .cls { color: var(--accent3); }
+  .exercise-box {
+    background: rgba(247,201,72,0.06);
+    border: 1px solid rgba(247,201,72,0.25);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .exercise-box p { color: var(--text); font-size: 0.95rem; margin-top: 0.5rem; }
+  .exercise-box ul { margin-top: 0.5rem; padding-left: 1.5rem; }
+  .exercise-box ul li { margin: 0.25rem 0; font-size: 0.9rem; color: var(--muted); }
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .pro, .con {
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+  }
+  .pro { background: rgba(78,205,196,0.07); border: 1px solid rgba(78,205,196,0.2); }
+  .con { background: rgba(247,106,106,0.07); border: 1px solid rgba(247,106,106,0.2); }
+  .pro strong { color: var(--accent2); display: block; margin-bottom: 0.4rem; }
+  .con strong { color: var(--accent4); display: block; margin-bottom: 0.4rem; }
+  .pro li, .con li { margin: 0.2rem 0; padding-left: 1rem; list-style: none; }
+  .pro li::before { content: '✓ '; color: var(--accent2); }
+  .con li::before { content: '✗ '; color: var(--accent4); }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Arquitectura de Software</h1>
+  <p>Patrones fundamentales · Diagramas · Ejemplos prácticos · Ejercicios</p>
+</header>
+
+<nav>
+  <a href="#monolitica">1. Monolítica</a>
+  <a href="#capas">2. En Capas</a>
+  <a href="#microservicios">3. Microservicios</a>
+  <a href="#eventos">4. Orientada a Eventos</a>
+  <a href="#hexagonal">5. Hexagonal</a>
+  <a href="#mvc">6. MVC</a>
+  <a href="#cqrs">7. CQRS</a>
+</nav>
+
+<main>
+
+<!-- ===== 1. MONOLÍTICA ===== -->
+<div class="section" id="monolitica">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2>Arquitectura Monolítica</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      Todo el sistema se construye y despliega como una sola unidad. La UI, la lógica de negocio y el acceso a datos viven en el mismo proceso y artefacto de despliegue.
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Simple de desarrollar al inicio</li><li>Fácil de depurar localmente</li><li>Sin latencia de red entre módulos</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Difícil de escalar partes individuales</li><li>Despliegues de toda la app por cambio mínimo</li><li>Acoplamiento fuerte entre módulos</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="340" height="260" viewBox="0 0 340 260" font-family="monospace" font-size="12">
+        <!-- outer box -->
+        <rect x="10" y="10" width="320" height="240" rx="10" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.5"/>
+        <text x="170" y="32" text-anchor="middle" fill="#4ecdc4" font-size="11" font-weight="bold">MONOLITO</text>
+        <!-- UI -->
+        <rect x="80" y="45" width="180" height="42" rx="6" fill="#2a2d3e" stroke="#7c6af7" stroke-width="1.2"/>
+        <text x="170" y="71" text-anchor="middle" fill="#7c6af7" font-weight="bold">Interfaz de Usuario (UI)</text>
+        <!-- arrow -->
+        <line x1="170" y1="87" x2="170" y2="110" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Business -->
+        <rect x="80" y="110" width="180" height="42" rx="6" fill="#2a2d3e" stroke="#f7c948" stroke-width="1.2"/>
+        <text x="170" y="136" text-anchor="middle" fill="#f7c948" font-weight="bold">Lógica de Negocio</text>
+        <!-- arrow -->
+        <line x1="170" y1="152" x2="170" y2="175" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- DB -->
+        <rect x="80" y="175" width="180" height="42" rx="6" fill="#2a2d3e" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="170" y="201" text-anchor="middle" fill="#f76a6a" font-weight="bold">Acceso a Datos (DB)</text>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Blog en PHP</div>
+    <pre><code><span class="cm">// index.php  — todo en un solo archivo/proyecto</span>
+
+<span class="kw">class</span> <span class="cls">BlogApp</span> {
+    <span class="kw">private</span> <span class="cls">PDO</span> <span class="fn">$db</span>;
+
+    <span class="kw">public function</span> <span class="fn">__construct</span>() {
+        <span class="fn">$this</span>->db = <span class="kw">new</span> <span class="cls">PDO</span>(<span class="st">'mysql:host=localhost;dbname=blog'</span>, <span class="st">'user'</span>, <span class="st">'pass'</span>);
+    }
+
+    <span class="cm">// UI: renderiza HTML</span>
+    <span class="kw">public function</span> <span class="fn">render</span>(<span class="fn">$posts</span>): <span class="kw">void</span> {
+        <span class="kw">foreach</span> (<span class="fn">$posts</span> <span class="kw">as</span> <span class="fn">$post</span>) {
+            <span class="kw">echo</span> <span class="st">"&lt;h2&gt;{$post['title']}&lt;/h2&gt;"</span>;
+        }
+    }
+
+    <span class="cm">// Lógica de negocio</span>
+    <span class="kw">public function</span> <span class="fn">getPublishedPosts</span>(): array {
+        <span class="fn">$posts</span> = <span class="fn">$this</span>-><span class="fn">fetchFromDb</span>();
+        <span class="kw">return</span> <span class="fn">array_filter</span>(<span class="fn">$posts</span>, fn(<span class="fn">$p</span>) => <span class="fn">$p</span>[<span class="st">'status'</span>] === <span class="st">'published'</span>);
+    }
+
+    <span class="cm">// Acceso a datos</span>
+    <span class="kw">private function</span> <span class="fn">fetchFromDb</span>(): array {
+        <span class="kw">return</span> <span class="fn">$this</span>->db-><span class="fn">query</span>(<span class="st">'SELECT * FROM posts'</span>)-><span class="fn">fetchAll</span>();
+    }
+}
+
+<span class="fn">$app</span> = <span class="kw">new</span> <span class="cls">BlogApp</span>();
+<span class="fn">$app</span>-><span class="fn">render</span>(<span class="fn">$app</span>-><span class="fn">getPublishedPosts</span>());
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Extiende el monolito</h3>
+      <p>Partiendo del ejemplo anterior, agrega las siguientes funcionalidades <strong>sin separar la estructura</strong> (para experimentar sus limitaciones):</p>
+      <ul>
+        <li>Método <code>createPost(string $title, string $body)</code> que inserta en la DB</li>
+        <li>Método <code>deletePost(int $id)</code> que elimina un post por ID</li>
+        <li>Agrega validación: el título no puede estar vacío y debe tener menos de 100 caracteres</li>
+        <li>Reflexión: ¿qué pasa si necesitas la misma validación en otro módulo?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 2. EN CAPAS ===== -->
+<div class="section" id="capas">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2>Arquitectura en Capas (N-Tier)</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      Organiza el código en capas horizontales donde cada capa tiene una responsabilidad específica y solo puede comunicarse con la capa inmediatamente inferior.
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Separación clara de responsabilidades</li><li>Fácil de testear cada capa</li><li>Cambiar la DB no afecta la UI</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Puede generar código repetitivo (DTOs)</li><li>Cambios que cruzan capas son costosos</li><li>Aún se despliega todo junto</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="380" height="300" viewBox="0 0 380 300" font-family="monospace" font-size="12">
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+        </defs>
+        <!-- Presentation -->
+        <rect x="30" y="15" width="320" height="46" rx="8" fill="#1e2130" stroke="#7c6af7" stroke-width="1.5"/>
+        <text x="190" y="44" text-anchor="middle" fill="#7c6af7" font-weight="bold">Capa de Presentación</text>
+        <text x="190" y="57" text-anchor="middle" fill="#546e7a" font-size="10">Controllers / Views / API Endpoints</text>
+        <line x1="190" y1="62" x2="190" y2="82" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Application -->
+        <rect x="30" y="82" width="320" height="46" rx="8" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.5"/>
+        <text x="190" y="111" text-anchor="middle" fill="#4ecdc4" font-weight="bold">Capa de Aplicación</text>
+        <text x="190" y="124" text-anchor="middle" fill="#546e7a" font-size="10">Use Cases / Application Services</text>
+        <line x1="190" y1="129" x2="190" y2="149" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Domain -->
+        <rect x="30" y="149" width="320" height="46" rx="8" fill="#1e2130" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="190" y="178" text-anchor="middle" fill="#f7c948" font-weight="bold">Capa de Dominio</text>
+        <text x="190" y="191" text-anchor="middle" fill="#546e7a" font-size="10">Entities / Domain Services / Business Rules</text>
+        <line x1="190" y1="196" x2="190" y2="216" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <!-- Infrastructure -->
+        <rect x="30" y="216" width="320" height="46" rx="8" fill="#1e2130" stroke="#f76a6a" stroke-width="1.5"/>
+        <text x="190" y="245" text-anchor="middle" fill="#f76a6a" font-weight="bold">Capa de Infraestructura</text>
+        <text x="190" y="258" text-anchor="middle" fill="#546e7a" font-size="10">Repositories / ORM / External APIs / DB</text>
+        <!-- dependency label -->
+        <text x="365" y="170" fill="#546e7a" font-size="10" transform="rotate(90,365,170)">dependencia →</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Servicio de usuarios</div>
+    <pre><code><span class="cm">// Capa de Dominio</span>
+<span class="kw">class</span> <span class="cls">User</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(
+        <span class="kw">public readonly</span> <span class="kw">int</span>    <span class="fn">$id</span>,
+        <span class="kw">public readonly</span> <span class="kw">string</span> <span class="fn">$email</span>,
+        <span class="kw">public readonly</span> <span class="kw">string</span> <span class="fn">$name</span>
+    ) {}
+}
+
+<span class="cm">// Capa de Infraestructura</span>
+<span class="kw">class</span> <span class="cls">UserRepository</span> {
+    <span class="kw">public function</span> <span class="fn">findById</span>(<span class="kw">int</span> <span class="fn">$id</span>): ?<span class="cls">User</span> {
+        <span class="fn">$row</span> = <span class="fn">$this</span>->db-><span class="fn">query</span>(<span class="st">"SELECT * FROM users WHERE id = $id"</span>)-><span class="fn">fetch</span>();
+        <span class="kw">return</span> <span class="fn">$row</span> ? <span class="kw">new</span> <span class="cls">User</span>(<span class="fn">$row</span>[<span class="st">'id'</span>], <span class="fn">$row</span>[<span class="st">'email'</span>], <span class="fn">$row</span>[<span class="st">'name'</span>]) : <span class="kw">null</span>;
+    }
+}
+
+<span class="cm">// Capa de Aplicación</span>
+<span class="kw">class</span> <span class="cls">GetUserUseCase</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="cls">UserRepository</span> <span class="fn">$repo</span>) {}
+
+    <span class="kw">public function</span> <span class="fn">execute</span>(<span class="kw">int</span> <span class="fn">$id</span>): <span class="cls">User</span> {
+        <span class="fn">$user</span> = <span class="fn">$this</span>-><span class="fn">repo</span>-><span class="fn">findById</span>(<span class="fn">$id</span>);
+        <span class="kw">if</span> (!<span class="fn">$user</span>) <span class="kw">throw new</span> <span class="cls">NotFoundException</span>(<span class="st">"User $id not found"</span>);
+        <span class="kw">return</span> <span class="fn">$user</span>;
+    }
+}
+
+<span class="cm">// Capa de Presentación</span>
+<span class="kw">class</span> <span class="cls">UserController</span> {
+    <span class="kw">public function</span> <span class="fn">show</span>(<span class="kw">int</span> <span class="fn">$id</span>): array {
+        <span class="fn">$user</span> = (<span class="kw">new</span> <span class="cls">GetUserUseCase</span>(<span class="kw">new</span> <span class="cls">UserRepository</span>()))-><span class="fn">execute</span>(<span class="fn">$id</span>);
+        <span class="kw">return</span> [<span class="st">'id'</span> => <span class="fn">$user</span>-><span class="fn">id</span>, <span class="st">'name'</span> => <span class="fn">$user</span>-><span class="fn">name</span>];
+    }
+}
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Agrega la capa de aplicación para productos</h3>
+      <p>Crea una entidad <code>Product</code> con campos <code>id</code>, <code>name</code>, <code>price</code> e implementa:</p>
+      <ul>
+        <li><code>ProductRepository</code> con métodos <code>findAll()</code> y <code>save(Product)</code></li>
+        <li><code>CreateProductUseCase</code> que valide que el precio sea mayor a 0</li>
+        <li><code>ProductController</code> con método <code>store(array $data)</code> que llame al use case</li>
+        <li>¿Qué cambiaría si necesitas guardar en un archivo en vez de una DB?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 3. MICROSERVICIOS ===== -->
+<div class="section" id="microservicios">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2>Arquitectura de Microservicios</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      El sistema se divide en servicios pequeños e independientes, cada uno con su propia base de datos, desplegable por separado y comunicado a través de una red (HTTP/REST, gRPC, mensajería).
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Escala independiente por servicio</li><li>Equipos autónomos por servicio</li><li>Despliegues sin afectar el sistema entero</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Alta complejidad operacional</li><li>Latencia de red entre servicios</li><li>Consistencia eventual difícil de manejar</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="520" height="300" viewBox="0 0 520 300" font-family="monospace" font-size="11">
+        <defs>
+          <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+        </defs>
+        <!-- Client -->
+        <rect x="200" y="10" width="120" height="36" rx="6" fill="#1e2130" stroke="#7c6af7" stroke-width="1.5"/>
+        <text x="260" y="33" text-anchor="middle" fill="#7c6af7" font-weight="bold">Cliente</text>
+        <!-- Arrow to gateway -->
+        <line x1="260" y1="46" x2="260" y2="70" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <!-- API Gateway -->
+        <rect x="165" y="70" width="190" height="36" rx="6" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.5"/>
+        <text x="260" y="93" text-anchor="middle" fill="#4ecdc4" font-weight="bold">API Gateway</text>
+        <!-- Arrows to services -->
+        <line x1="200" y1="106" x2="100" y2="155" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="260" y1="106" x2="260" y2="155" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <line x1="320" y1="106" x2="420" y2="155" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <!-- Service Users -->
+        <rect x="30" y="155" width="140" height="40" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="100" y="180" text-anchor="middle" fill="#f7c948" font-weight="bold">Servicio Usuarios</text>
+        <!-- Service Orders -->
+        <rect x="190" y="155" width="140" height="40" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="260" y="180" text-anchor="middle" fill="#f7c948" font-weight="bold">Servicio Pedidos</text>
+        <!-- Service Payments -->
+        <rect x="350" y="155" width="140" height="40" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="420" y="180" text-anchor="middle" fill="#f7c948" font-weight="bold">Servicio Pagos</text>
+        <!-- DBs -->
+        <ellipse cx="100" cy="240" rx="55" ry="20" fill="#12141e" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="100" y="244" text-anchor="middle" fill="#f76a6a" font-size="10">DB Usuarios</text>
+        <line x1="100" y1="195" x2="100" y2="220" stroke="#546e7a" stroke-width="1.2" marker-end="url(#arr3)"/>
+        <ellipse cx="260" cy="240" rx="55" ry="20" fill="#12141e" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="260" y="244" text-anchor="middle" fill="#f76a6a" font-size="10">DB Pedidos</text>
+        <line x1="260" y1="195" x2="260" y2="220" stroke="#546e7a" stroke-width="1.2" marker-end="url(#arr3)"/>
+        <ellipse cx="420" cy="240" rx="55" ry="20" fill="#12141e" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="420" y="244" text-anchor="middle" fill="#f76a6a" font-size="10">DB Pagos</text>
+        <line x1="420" y1="195" x2="420" y2="220" stroke="#546e7a" stroke-width="1.2" marker-end="url(#arr3)"/>
+        <!-- Message bus -->
+        <rect x="100" y="268" width="320" height="24" rx="4" fill="#1e2130" stroke="#546e7a" stroke-dasharray="4,3"/>
+        <text x="260" y="284" text-anchor="middle" fill="#546e7a" font-size="10">Message Bus (eventos async)</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Servicio de pedidos llama al de usuarios vía HTTP</div>
+    <pre><code><span class="cm">// order-service/src/OrderService.php</span>
+<span class="kw">class</span> <span class="cls">OrderService</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="cls">HttpClient</span> <span class="fn">$http</span>) {}
+
+    <span class="kw">public function</span> <span class="fn">createOrder</span>(<span class="kw">int</span> <span class="fn">$userId</span>, array <span class="fn">$items</span>): array {
+        <span class="cm">// Llama al microservicio de usuarios</span>
+        <span class="fn">$user</span> = <span class="fn">$this</span>-><span class="fn">http</span>-><span class="fn">get</span>(<span class="st">"http://user-service/api/users/{$userId}"</span>);
+
+        <span class="kw">if</span> (!<span class="fn">$user</span>[<span class="st">'active'</span>]) {
+            <span class="kw">throw new</span> <span class="cls">UnauthorizedException</span>(<span class="st">'Usuario inactivo'</span>);
+        }
+
+        <span class="fn">$order</span> = [
+            <span class="st">'id'</span>      => <span class="fn">uniqid</span>(<span class="st">'order_'</span>),
+            <span class="st">'user_id'</span> => <span class="fn">$userId</span>,
+            <span class="st">'items'</span>   => <span class="fn">$items</span>,
+            <span class="st">'total'</span>   => <span class="fn">array_sum</span>(<span class="fn">array_column</span>(<span class="fn">$items</span>, <span class="st">'price'</span>)),
+            <span class="st">'status'</span>  => <span class="st">'pending'</span>,
+        ];
+
+        <span class="fn">$this</span>-><span class="fn">save</span>(<span class="fn">$order</span>);
+
+        <span class="cm">// Publica evento para que el servicio de pagos lo procese</span>
+        <span class="fn">$this</span>-><span class="fn">bus</span>-><span class="fn">publish</span>(<span class="st">'order.created'</span>, <span class="fn">$order</span>);
+
+        <span class="kw">return</span> <span class="fn">$order</span>;
+    }
+}
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Diseña un API Gateway simple</h3>
+      <p>Crea una clase <code>ApiGateway</code> que:</p>
+      <ul>
+        <li>Reciba peticiones con un campo <code>service</code> (<code>'users'</code>, <code>'orders'</code>, <code>'payments'</code>)</li>
+        <li>Enrute la petición al URL correcto según el servicio</li>
+        <li>Implemente un timeout de 3 segundos y retorne un error estándar si el servicio no responde</li>
+        <li>Registre cada petición en un log (método, servicio, tiempo de respuesta)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 4. ORIENTADA A EVENTOS ===== -->
+<div class="section" id="eventos">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2>Arquitectura Orientada a Eventos (EDA)</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      Los componentes se comunican mediante eventos. Un productor emite un evento sin saber quién lo consume. Los consumidores reaccionan de forma asíncrona e independiente.
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Desacoplamiento total entre productores y consumidores</li><li>Escala horizontal de consumidores</li><li>Fácil agregar nuevos comportamientos sin cambiar el productor</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Flujo de datos difícil de rastrear</li><li>Consistencia eventual (no inmediata)</li><li>Orden de eventos no garantizado</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="480" height="220" viewBox="0 0 480 220" font-family="monospace" font-size="11">
+        <defs>
+          <marker id="arr4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+        </defs>
+        <!-- Producer -->
+        <rect x="10" y="82" width="130" height="46" rx="8" fill="#1e2130" stroke="#7c6af7" stroke-width="1.5"/>
+        <text x="75" y="106" text-anchor="middle" fill="#7c6af7" font-weight="bold">Productor</text>
+        <text x="75" y="121" text-anchor="middle" fill="#546e7a" font-size="10">OrderService</text>
+        <!-- Arrow to bus -->
+        <line x1="140" y1="105" x2="180" y2="105" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr4)"/>
+        <text x="160" y="98" text-anchor="middle" fill="#546e7a" font-size="9">order.created</text>
+        <!-- Event Bus -->
+        <rect x="180" y="70" width="120" height="70" rx="8" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.5"/>
+        <text x="240" y="100" text-anchor="middle" fill="#4ecdc4" font-weight="bold">Event Bus</text>
+        <text x="240" y="115" text-anchor="middle" fill="#546e7a" font-size="10">Kafka / RabbitMQ</text>
+        <text x="240" y="130" text-anchor="middle" fill="#546e7a" font-size="10">Redis Streams</text>
+        <!-- Arrows to consumers -->
+        <line x1="300" y1="88" x2="340" y2="60" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr4)"/>
+        <line x1="300" y1="105" x2="340" y2="105" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr4)"/>
+        <line x1="300" y1="122" x2="340" y2="152" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr4)"/>
+        <!-- Consumers -->
+        <rect x="340" y="40" width="130" height="38" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.2"/>
+        <text x="405" y="64" text-anchor="middle" fill="#f7c948" font-size="10" font-weight="bold">Pagos: cobrar</text>
+        <rect x="340" y="86" width="130" height="38" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.2"/>
+        <text x="405" y="110" text-anchor="middle" fill="#f7c948" font-size="10" font-weight="bold">Email: confirmar</text>
+        <rect x="340" y="132" width="130" height="38" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.2"/>
+        <text x="405" y="156" text-anchor="middle" fill="#f7c948" font-size="10" font-weight="bold">Inventario: reservar</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Event Bus simple en PHP</div>
+    <pre><code><span class="kw">class</span> <span class="cls">EventBus</span> {
+    <span class="kw">private</span> array <span class="fn">$listeners</span> = [];
+
+    <span class="kw">public function</span> <span class="fn">subscribe</span>(<span class="kw">string</span> <span class="fn">$event</span>, <span class="kw">callable</span> <span class="fn">$handler</span>): <span class="kw">void</span> {
+        <span class="fn">$this</span>-><span class="fn">listeners</span>[<span class="fn">$event</span>][] = <span class="fn">$handler</span>;
+    }
+
+    <span class="kw">public function</span> <span class="fn">publish</span>(<span class="kw">string</span> <span class="fn">$event</span>, array <span class="fn">$payload</span>): <span class="kw">void</span> {
+        <span class="kw">foreach</span> (<span class="fn">$this</span>-><span class="fn">listeners</span>[<span class="fn">$event</span>] ?? [] <span class="kw">as</span> <span class="fn">$handler</span>) {
+            <span class="fn">$handler</span>(<span class="fn">$payload</span>);
+        }
+    }
+}
+
+<span class="cm">// Registro de listeners (consumidores)</span>
+<span class="fn">$bus</span> = <span class="kw">new</span> <span class="cls">EventBus</span>();
+
+<span class="fn">$bus</span>-><span class="fn">subscribe</span>(<span class="st">'order.created'</span>, <span class="kw">function</span>(array <span class="fn">$order</span>) {
+    <span class="fn">echo</span> <span class="st">"💳 Pagos: procesando orden {$order['id']}\n"</span>;
+});
+
+<span class="fn">$bus</span>-><span class="fn">subscribe</span>(<span class="st">'order.created'</span>, <span class="kw">function</span>(array <span class="fn">$order</span>) {
+    <span class="fn">echo</span> <span class="st">"📧 Email: enviando confirmación a {$order['user_email']}\n"</span>;
+});
+
+<span class="cm">// El productor solo publica — no sabe quién escucha</span>
+<span class="fn">$bus</span>-><span class="fn">publish</span>(<span class="st">'order.created'</span>, [
+    <span class="st">'id'</span>         => <span class="st">'order_abc'</span>,
+    <span class="st">'user_email'</span> => <span class="st">'user@example.com'</span>,
+    <span class="st">'total'</span>      => <span class="num">99.90</span>,
+]);
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Extiende el EventBus</h3>
+      <p>Sobre el ejemplo anterior, implementa:</p>
+      <ul>
+        <li>Un evento <code>user.registered</code> con payload <code>{id, email, name}</code></li>
+        <li>Tres listeners: enviar email de bienvenida, crear perfil en la DB, registrar en analytics</li>
+        <li>Método <code>unsubscribe($event, $handler)</code> que elimine un listener específico</li>
+        <li>Soporte para listeners que se ejecuten solo una vez (<code>subscribeOnce</code>)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 5. HEXAGONAL ===== -->
+<div class="section" id="hexagonal">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2>Arquitectura Hexagonal (Ports &amp; Adapters)</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      El dominio de negocio está en el centro y se comunica con el exterior únicamente a través de puertos (interfaces). Los adaptadores implementan esos puertos y conectan el dominio con tecnologías concretas (DB, HTTP, CLI).
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>El dominio es 100% independiente de frameworks</li><li>Tests unitarios sin DB ni HTTP real</li><li>Intercambia adaptadores sin tocar el negocio</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Más interfaces y archivos iniciales</li><li>Curva de aprendizaje media</li><li>Puede ser overkill para apps pequeñas</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="420" height="300" viewBox="0 0 420 300" font-family="monospace" font-size="11">
+        <!-- Hexagon (domain) -->
+        <polygon points="210,40 300,90 300,180 210,230 120,180 120,90"
+          fill="#1a1d27" stroke="#f7c948" stroke-width="2"/>
+        <text x="210" y="125" text-anchor="middle" fill="#f7c948" font-weight="bold" font-size="13">Dominio</text>
+        <text x="210" y="143" text-anchor="middle" fill="#546e7a" font-size="10">Lógica de Negocio</text>
+        <text x="210" y="158" text-anchor="middle" fill="#546e7a" font-size="10">Entidades &amp; Use Cases</text>
+        <!-- Ports labels inside -->
+        <text x="165" y="107" text-anchor="middle" fill="#7c6af7" font-size="9">«port»</text>
+        <text x="255" y="107" text-anchor="middle" fill="#7c6af7" font-size="9">«port»</text>
+        <!-- Left adapters -->
+        <rect x="10" y="55" width="95" height="36" rx="5" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.2"/>
+        <text x="57" y="78" text-anchor="middle" fill="#4ecdc4" font-size="10" font-weight="bold">REST API</text>
+        <line x1="105" y1="73" x2="120" y2="108" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <rect x="10" y="110" width="95" height="36" rx="5" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.2"/>
+        <text x="57" y="133" text-anchor="middle" fill="#4ecdc4" font-size="10" font-weight="bold">CLI</text>
+        <line x1="105" y1="128" x2="120" y2="135" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <rect x="10" y="165" width="95" height="36" rx="5" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.2"/>
+        <text x="57" y="188" text-anchor="middle" fill="#4ecdc4" font-size="10" font-weight="bold">Tests</text>
+        <line x1="105" y1="183" x2="120" y2="163" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <!-- Right adapters -->
+        <rect x="315" y="55" width="95" height="36" rx="5" fill="#1e2130" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="362" y="78" text-anchor="middle" fill="#f76a6a" font-size="10" font-weight="bold">MySQL</text>
+        <line x1="315" y1="73" x2="300" y2="108" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <rect x="315" y="110" width="95" height="36" rx="5" fill="#1e2130" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="362" y="133" text-anchor="middle" fill="#f76a6a" font-size="10" font-weight="bold">Stripe API</text>
+        <line x1="315" y1="128" x2="300" y2="135" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <rect x="315" y="165" width="95" height="36" rx="5" fill="#1e2130" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="362" y="188" text-anchor="middle" fill="#f76a6a" font-size="10" font-weight="bold">SendGrid</text>
+        <line x1="315" y1="183" x2="300" y2="163" stroke="#7c6af7" stroke-width="1.2" stroke-dasharray="4,2"/>
+        <!-- Labels -->
+        <text x="57" y="225" text-anchor="middle" fill="#4ecdc4" font-size="9">Adaptadores Driving</text>
+        <text x="57" y="237" text-anchor="middle" fill="#546e7a" font-size="9">(entran al dominio)</text>
+        <text x="362" y="225" text-anchor="middle" fill="#f76a6a" font-size="9">Adaptadores Driven</text>
+        <text x="362" y="237" text-anchor="middle" fill="#546e7a" font-size="9">(salen del dominio)</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Puerto de repositorio intercambiable</div>
+    <pre><code><span class="cm">// Puerto (interfaz del dominio — no depende de nada externo)</span>
+<span class="kw">interface</span> <span class="cls">UserRepositoryPort</span> {
+    <span class="kw">public function</span> <span class="fn">findById</span>(<span class="kw">int</span> <span class="fn">$id</span>): ?<span class="cls">User</span>;
+    <span class="kw">public function</span> <span class="fn">save</span>(<span class="cls">User</span> <span class="fn">$user</span>): <span class="kw">void</span>;
+}
+
+<span class="cm">// Adaptador MySQL (infraestructura)</span>
+<span class="kw">class</span> <span class="cls">MysqlUserRepository</span> <span class="kw">implements</span> <span class="cls">UserRepositoryPort</span> {
+    <span class="kw">public function</span> <span class="fn">findById</span>(<span class="kw">int</span> <span class="fn">$id</span>): ?<span class="cls">User</span> {
+        <span class="cm">// ... consulta real a MySQL</span>
+    }
+    <span class="kw">public function</span> <span class="fn">save</span>(<span class="cls">User</span> <span class="fn">$user</span>): <span class="kw">void</span> { <span class="cm">/* ... */</span> }
+}
+
+<span class="cm">// Adaptador en memoria (para tests — sin DB real)</span>
+<span class="kw">class</span> <span class="cls">InMemoryUserRepository</span> <span class="kw">implements</span> <span class="cls">UserRepositoryPort</span> {
+    <span class="kw">private</span> array <span class="fn">$store</span> = [];
+    <span class="kw">public function</span> <span class="fn">findById</span>(<span class="kw">int</span> <span class="fn">$id</span>): ?<span class="cls">User</span> {
+        <span class="kw">return</span> <span class="fn">$this</span>-><span class="fn">store</span>[<span class="fn">$id</span>] ?? <span class="kw">null</span>;
+    }
+    <span class="kw">public function</span> <span class="fn">save</span>(<span class="cls">User</span> <span class="fn">$user</span>): <span class="kw">void</span> {
+        <span class="fn">$this</span>-><span class="fn">store</span>[<span class="fn">$user</span>-><span class="fn">id</span>] = <span class="fn">$user</span>;
+    }
+}
+
+<span class="cm">// Use case del dominio — solo conoce el puerto, no el adaptador</span>
+<span class="kw">class</span> <span class="cls">RegisterUserUseCase</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">private</span> <span class="cls">UserRepositoryPort</span> <span class="fn">$repo</span>) {}
+
+    <span class="kw">public function</span> <span class="fn">execute</span>(<span class="kw">string</span> <span class="fn">$email</span>, <span class="kw">string</span> <span class="fn">$name</span>): <span class="cls">User</span> {
+        <span class="fn">$user</span> = <span class="kw">new</span> <span class="cls">User</span>(<span class="fn">rand</span>(<span class="num">1</span>, <span class="num">9999</span>), <span class="fn">$email</span>, <span class="fn">$name</span>);
+        <span class="fn">$this</span>-><span class="fn">repo</span>-><span class="fn">save</span>(<span class="fn">$user</span>);
+        <span class="kw">return</span> <span class="fn">$user</span>;
+    }
+}
+
+<span class="cm">// Producción usa MySQL; tests usan InMemory — mismo use case</span>
+<span class="fn">$useCase</span> = <span class="kw">new</span> <span class="cls">RegisterUserUseCase</span>(<span class="kw">new</span> <span class="cls">MysqlUserRepository</span>());
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Puerto de notificaciones intercambiable</h3>
+      <p>Define una interfaz <code>NotificationPort</code> con método <code>send(string $to, string $message)</code> e implementa:</p>
+      <ul>
+        <li>Adaptador <code>EmailNotification</code> (simula envío con un <code>echo</code>)</li>
+        <li>Adaptador <code>SmsNotification</code> (simula con un <code>echo</code> diferente)</li>
+        <li>Adaptador <code>NullNotification</code> (no hace nada — útil en tests)</li>
+        <li>Un use case <code>SendWelcomeUseCase</code> que use el puerto y pruébalo con cada adaptador</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 6. MVC ===== -->
+<div class="section" id="mvc">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2>MVC — Model · View · Controller</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      Separa la aplicación en tres componentes: el <strong>Modelo</strong> gestiona datos y lógica, la <strong>Vista</strong> renderiza la UI y el <strong>Controlador</strong> recibe la petición y orquesta la respuesta.
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Patrón ampliamente conocido</li><li>Vistas intercambiables sin tocar el modelo</li><li>Testabilidad del controlador y modelo</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Controladores gordos fáciles de crear</li><li>Vista y modelo pueden acoplarse</li><li>No escala bien sin capas adicionales</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="440" height="200" viewBox="0 0 440 200" font-family="monospace" font-size="11">
+        <defs>
+          <marker id="arr5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+          <marker id="arr5r" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
+            <path d="M8,0 L8,6 L0,3 z" fill="#f7c948"/>
+          </marker>
+        </defs>
+        <!-- User -->
+        <rect x="10" y="75" width="80" height="40" rx="6" fill="#1e2130" stroke="#546e7a" stroke-width="1.2"/>
+        <text x="50" y="100" text-anchor="middle" fill="#7a7f9a">Usuario</text>
+        <!-- Arrows user -> controller -->
+        <line x1="90" y1="88" x2="145" y2="88" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr5)"/>
+        <text x="117" y="82" text-anchor="middle" fill="#546e7a" font-size="9">request</text>
+        <line x1="145" y1="102" x2="90" y2="102" stroke="#f7c948" stroke-width="1.5" marker-end="url(#arr5r)"/>
+        <text x="117" y="116" text-anchor="middle" fill="#f7c948" font-size="9">response</text>
+        <!-- Controller -->
+        <rect x="145" y="60" width="110" height="60" rx="8" fill="#1e2130" stroke="#7c6af7" stroke-width="1.5"/>
+        <text x="200" y="90" text-anchor="middle" fill="#7c6af7" font-weight="bold">Controller</text>
+        <text x="200" y="108" text-anchor="middle" fill="#546e7a" font-size="9">orquesta flujo</text>
+        <!-- C -> M -->
+        <line x1="255" y1="78" x2="305" y2="78" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr5)"/>
+        <text x="280" y="72" text-anchor="middle" fill="#546e7a" font-size="9">consulta</text>
+        <line x1="305" y1="92" x2="255" y2="92" stroke="#4ecdc4" stroke-width="1.5" marker-end="url(#arr5r)"/>
+        <text x="280" y="106" text-anchor="middle" fill="#4ecdc4" font-size="9">datos</text>
+        <!-- Model -->
+        <rect x="305" y="60" width="110" height="60" rx="8" fill="#1e2130" stroke="#f76a6a" stroke-width="1.5"/>
+        <text x="360" y="90" text-anchor="middle" fill="#f76a6a" font-weight="bold">Model</text>
+        <text x="360" y="108" text-anchor="middle" fill="#546e7a" font-size="9">datos + reglas</text>
+        <!-- C -> V -->
+        <line x1="200" y1="120" x2="200" y2="158" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr5)"/>
+        <!-- View -->
+        <rect x="145" y="158" width="110" height="34" rx="6" fill="#1e2130" stroke="#f7c948" stroke-width="1.5"/>
+        <text x="200" y="180" text-anchor="middle" fill="#f7c948" font-weight="bold">View</text>
+        <!-- Model notifies View (optional) -->
+        <line x1="305" y1="130" x2="255" y2="170" stroke="#546e7a" stroke-width="1" stroke-dasharray="4,2"/>
+        <text x="295" y="162" text-anchor="middle" fill="#546e7a" font-size="8">notifica (opcional)</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — MVC sin framework</div>
+    <pre><code><span class="cm">// Model</span>
+<span class="kw">class</span> <span class="cls">PostModel</span> {
+    <span class="kw">public function</span> <span class="fn">all</span>(): array {
+        <span class="kw">return</span> [
+            [<span class="st">'id'</span> => <span class="num">1</span>, <span class="st">'title'</span> => <span class="st">'Primer post'</span>, <span class="st">'body'</span> => <span class="st">'Contenido...'</span>],
+            [<span class="st">'id'</span> => <span class="num">2</span>, <span class="st">'title'</span> => <span class="st">'Segundo post'</span>, <span class="st">'body'</span> => <span class="st">'Más contenido...'</span>],
+        ];
+    }
+}
+
+<span class="cm">// View</span>
+<span class="kw">class</span> <span class="cls">PostView</span> {
+    <span class="kw">public function</span> <span class="fn">renderList</span>(array <span class="fn">$posts</span>): <span class="kw">string</span> {
+        <span class="fn">$html</span> = <span class="st">'&lt;ul&gt;'</span>;
+        <span class="kw">foreach</span> (<span class="fn">$posts</span> <span class="kw">as</span> <span class="fn">$post</span>) {
+            <span class="fn">$html</span> .= <span class="st">"&lt;li&gt;&lt;strong&gt;{$post['title']}&lt;/strong&gt;&lt;/li&gt;"</span>;
+        }
+        <span class="kw">return</span> <span class="fn">$html</span> . <span class="st">'&lt;/ul&gt;'</span>;
+    }
+}
+
+<span class="cm">// Controller</span>
+<span class="kw">class</span> <span class="cls">PostController</span> {
+    <span class="kw">public function</span> <span class="fn">index</span>(): <span class="kw">string</span> {
+        <span class="fn">$model</span> = <span class="kw">new</span> <span class="cls">PostModel</span>();
+        <span class="fn">$view</span>  = <span class="kw">new</span> <span class="cls">PostView</span>();
+        <span class="fn">$posts</span> = <span class="fn">$model</span>-><span class="fn">all</span>();
+        <span class="kw">return</span> <span class="fn">$view</span>-><span class="fn">renderList</span>(<span class="fn">$posts</span>);
+    }
+}
+
+<span class="fn">echo</span> (<span class="kw">new</span> <span class="cls">PostController</span>())-><span class="fn">index</span>();
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>CRUD completo en MVC</h3>
+      <p>Extiende el ejemplo con un modelo <code>TaskModel</code> (tareas con <code>id</code>, <code>title</code>, <code>done</code>) e implementa:</p>
+      <ul>
+        <li>Controlador con métodos <code>index()</code>, <code>store($data)</code>, <code>update($id, $data)</code>, <code>destroy($id)</code></li>
+        <li>Vista que muestre tareas pendientes con ✗ y completadas con ✓</li>
+        <li>Vista separada para el formulario de creación</li>
+        <li>Valida en el controlador que <code>title</code> no esté vacío antes de llamar al modelo</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 7. CQRS ===== -->
+<div class="section" id="cqrs">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2>CQRS — Command Query Responsibility Segregation</h2>
+  </div>
+  <div class="section-body">
+    <p class="description">
+      Separa las operaciones de <strong>escritura</strong> (Commands) de las de <strong>lectura</strong> (Queries). Cada una tiene su propio modelo, stack y puede escalar de forma independiente.
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro"><strong>Ventajas</strong><ul><li>Lecturas y escrituras escalan por separado</li><li>Modelo de lectura optimizado para queries</li><li>Historial de comandos auditables</li></ul></div>
+      <div class="con"><strong>Desventajas</strong><ul><li>Duplicación del modelo de datos</li><li>Consistencia eventual entre stacks</li><li>Overhead para apps CRUD simples</li></ul></div>
+    </div>
+
+    <div class="tag tag-diagram">Diagrama</div>
+    <div class="diagram-wrap">
+      <svg width="480" height="240" viewBox="0 0 480 240" font-family="monospace" font-size="11">
+        <defs>
+          <marker id="arr6" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+          </marker>
+        </defs>
+        <!-- Client -->
+        <rect x="185" y="10" width="110" height="36" rx="6" fill="#1e2130" stroke="#546e7a" stroke-width="1.2"/>
+        <text x="240" y="33" text-anchor="middle" fill="#7a7f9a">Cliente / API</text>
+        <!-- Arrows -->
+        <line x1="210" y1="46" x2="130" y2="80" stroke="#f76a6a" stroke-width="1.5" marker-end="url(#arr6)"/>
+        <text x="155" y="68" text-anchor="middle" fill="#f76a6a" font-size="9">Command</text>
+        <line x1="270" y1="46" x2="350" y2="80" stroke="#4ecdc4" stroke-width="1.5" marker-end="url(#arr6)"/>
+        <text x="325" y="68" text-anchor="middle" fill="#4ecdc4" font-size="9">Query</text>
+        <!-- Command side -->
+        <rect x="30" y="80" width="160" height="40" rx="6" fill="#1e2130" stroke="#f76a6a" stroke-width="1.5"/>
+        <text x="110" y="105" text-anchor="middle" fill="#f76a6a" font-weight="bold">Command Handler</text>
+        <line x1="110" y1="120" x2="110" y2="148" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr6)"/>
+        <rect x="30" y="148" width="160" height="40" rx="6" fill="#1e2130" stroke="#f76a6a" stroke-width="1.2"/>
+        <text x="110" y="173" text-anchor="middle" fill="#f76a6a" font-weight="bold">Write DB</text>
+        <text x="110" y="186" text-anchor="middle" fill="#546e7a" font-size="9">optimizada para escritura</text>
+        <!-- Query side -->
+        <rect x="290" y="80" width="160" height="40" rx="6" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.5"/>
+        <text x="370" y="105" text-anchor="middle" fill="#4ecdc4" font-weight="bold">Query Handler</text>
+        <line x1="370" y1="120" x2="370" y2="148" stroke="#546e7a" stroke-width="1.5" marker-end="url(#arr6)"/>
+        <rect x="290" y="148" width="160" height="40" rx="6" fill="#1e2130" stroke="#4ecdc4" stroke-width="1.2"/>
+        <text x="370" y="173" text-anchor="middle" fill="#4ecdc4" font-weight="bold">Read DB</text>
+        <text x="370" y="186" text-anchor="middle" fill="#546e7a" font-size="9">optimizada para lectura</text>
+        <!-- Sync arrow -->
+        <line x1="190" y1="175" x2="290" y2="175" stroke="#546e7a" stroke-width="1" stroke-dasharray="5,3"/>
+        <text x="240" y="170" text-anchor="middle" fill="#546e7a" font-size="9">sincronización async</text>
+        <!-- Labels -->
+        <text x="110" y="225" text-anchor="middle" fill="#f76a6a" font-size="10">Stack de Escritura</text>
+        <text x="370" y="225" text-anchor="middle" fill="#4ecdc4" font-size="10">Stack de Lectura</text>
+      </svg>
+    </div>
+
+    <hr class="divider">
+    <div class="tag tag-example">Ejemplo — Commands y Queries separados</div>
+    <pre><code><span class="cm">// ── COMMAND SIDE ──────────────────────────────────────</span>
+
+<span class="kw">class</span> <span class="cls">CreateProductCommand</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(
+        <span class="kw">public readonly</span> <span class="kw">string</span> <span class="fn">$name</span>,
+        <span class="kw">public readonly</span> <span class="kw">float</span>  <span class="fn">$price</span>
+    ) {}
+}
+
+<span class="kw">class</span> <span class="cls">CreateProductHandler</span> {
+    <span class="kw">public function</span> <span class="fn">handle</span>(<span class="cls">CreateProductCommand</span> <span class="fn">$cmd</span>): <span class="kw">void</span> {
+        <span class="cm">// Valida, crea entidad, persiste en Write DB</span>
+        <span class="fn">$product</span> = <span class="kw">new</span> <span class="cls">Product</span>(<span class="fn">uniqid</span>(), <span class="fn">$cmd</span>-><span class="fn">name</span>, <span class="fn">$cmd</span>-><span class="fn">price</span>);
+        <span class="fn">$this</span>-><span class="fn">writeDb</span>-><span class="fn">save</span>(<span class="fn">$product</span>);
+        <span class="fn">$this</span>-><span class="fn">bus</span>-><span class="fn">publish</span>(<span class="st">'product.created'</span>, <span class="fn">$product</span>);
+    }
+}
+
+<span class="cm">// ── QUERY SIDE ────────────────────────────────────────</span>
+
+<span class="kw">class</span> <span class="cls">GetProductsQuery</span> {
+    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="kw">public readonly</span> <span class="kw">int</span> <span class="fn">$limit</span> = <span class="num">20</span>) {}
+}
+
+<span class="kw">class</span> <span class="cls">GetProductsHandler</span> {
+    <span class="kw">public function</span> <span class="fn">handle</span>(<span class="cls">GetProductsQuery</span> <span class="fn">$query</span>): array {
+        <span class="cm">// Lee directo del Read DB (puede ser una vista desnormalizada)</span>
+        <span class="kw">return</span> <span class="fn">$this</span>-><span class="fn">readDb</span>-><span class="fn">query</span>(
+            <span class="st">"SELECT id, name, price FROM products_view LIMIT {$query->limit}"</span>
+        )-><span class="fn">fetchAll</span>();
+    }
+}
+
+<span class="cm">// ── USO ───────────────────────────────────────────────</span>
+<span class="fn">$bus</span>-><span class="fn">dispatch</span>(<span class="kw">new</span> <span class="cls">CreateProductCommand</span>(<span class="st">'Teclado'</span>, <span class="num">49.99</span>));
+<span class="fn">$products</span> = <span class="fn">$bus</span>-><span class="fn">dispatch</span>(<span class="kw">new</span> <span class="cls">GetProductsQuery</span>(<span class="num">10</span>));
+</code></pre>
+
+    <div class="tag tag-exercise">Ejercicio</div>
+    <div class="exercise-box">
+      <h3>Implementa un Command Bus</h3>
+      <p>Crea un <code>CommandBus</code> genérico que:</p>
+      <ul>
+        <li>Registre handlers con <code>register(string $commandClass, callable $handler)</code></li>
+        <li>Despacha con <code>dispatch(object $command)</code> encontrando el handler por clase</li>
+        <li>Lance una excepción si no hay handler registrado para el comando</li>
+        <li>Agrega un <code>UpdateProductCommand</code> con su handler y prueba el bus con ambos commands</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Guía de Arquitectura de Software · Patrones fundamentales para sistemas mantenibles y escalables
+</footer>
+
+</body>
+</html>
