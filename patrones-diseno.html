@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patrones de Diseño de Software</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --c1: #d97706; --c1l: #fef3c7;
+      --c2: #2563eb; --c2l: #dbeafe;
+      --c3: #059669; --c3l: #d1fae5;
+      --paper: #fefce8; --paper-b: #fde68a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+    /* NAV */
+    nav { background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: .5rem; padding: .6rem 1.5rem; overflow-x: auto; scrollbar-width: none; }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .nav-logo { font-weight: 800; font-size: .95rem; white-space: nowrap; margin-right: .75rem; color: var(--text); text-decoration: none; }
+    nav a { text-decoration: none; color: var(--muted); font-size: .8rem; white-space: nowrap; padding: .2rem .65rem; border-radius: 999px; transition: background .15s, color .15s; }
+    nav a:hover { background: var(--bg); color: var(--text); }
+    .nc1 { color: var(--c1) !important; } .nc2 { color: var(--c2) !important; } .nc3 { color: var(--c3) !important; }
+    .nsep { color: #cbd5e1; font-size: .7rem; }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%); color: #fff; padding: 4rem 1.5rem; text-align: center; }
+    .hero h1 { font-size: 2.4rem; font-weight: 900; letter-spacing: -.02em; margin-bottom: .75rem; }
+    .hero p { color: #94a3b8; max-width: 560px; margin: 0 auto 2rem; font-size: 1.05rem; }
+    .pills { display: flex; justify-content: center; gap: .75rem; flex-wrap: wrap; }
+    .pill { padding: .45rem 1.25rem; border-radius: 999px; font-size: .85rem; font-weight: 700; }
+    .p1 { background: var(--c1l); color: var(--c1); }
+    .p2 { background: var(--c2l); color: var(--c2); }
+    .p3 { background: var(--c3l); color: var(--c3); }
+
+    /* LAYOUT */
+    main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    section[id] { scroll-margin-top: 68px; }
+
+    /* CHEATSHEET */
+    .cheat { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 3rem; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .cheat-title { padding: 1rem 1.5rem; background: #f8fafc; border-bottom: 1px solid var(--border); font-weight: 700; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { background: #f8fafc; padding: .65rem 1rem; text-align: left; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    td { padding: .6rem 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .tag { display: inline-block; padding: .15rem .55rem; border-radius: 4px; font-size: .7rem; font-weight: 700; }
+    .tag1 { background: var(--c1l); color: var(--c1); }
+    .tag2 { background: var(--c2l); color: var(--c2); }
+    .tag3 { background: var(--c3l); color: var(--c3); }
+
+    /* CATEGORY HEADER */
+    .cat-header { display: flex; align-items: center; gap: 1rem; margin: 3rem 0 1.5rem; }
+    .cat-header h2 { font-size: 1.6rem; font-weight: 800; white-space: nowrap; }
+    .cat-line { flex: 1; height: 3px; border-radius: 999px; }
+    .l1 { background: linear-gradient(90deg, var(--c1), transparent); }
+    .l2 { background: linear-gradient(90deg, var(--c2), transparent); }
+    .l3 { background: linear-gradient(90deg, var(--c3), transparent); }
+
+    /* PATTERN CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 2.5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+    .card-head { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; }
+    .card-head .tag { font-size: .72rem; margin-top: .3rem; padding: .25rem .7rem; }
+    .card-head h3 { font-size: 1.35rem; font-weight: 800; margin-bottom: .2rem; }
+    .card-head .sub { color: var(--muted); font-size: .9rem; }
+    .card-body { padding: 1.5rem 2rem; }
+
+    .meta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media(max-width:600px){ .meta-row{grid-template-columns:1fr;} .card-head{flex-direction:column;} .hero h1{font-size:1.7rem;} }
+    .meta-box { background: var(--bg); border-radius: 8px; padding: 1rem; }
+    .meta-box h4 { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .4rem; }
+    .meta-box p { font-size: .88rem; }
+
+    /* TABS */
+    .code-tabs { margin: 1.5rem 0; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; }
+    .tab-bar { background: #0f172a; display: flex; align-items: stretch; justify-content: space-between; }
+    .tab-bar .fname { color: #64748b; font-size: .74rem; font-family: 'SF Mono', monospace; padding: .65rem 1rem; display: flex; align-items: center; }
+    .tab-buttons { display: flex; }
+    .tab-btn { background: transparent; border: none; border-left: 1px solid #1e293b; color: #64748b; padding: .65rem 1.2rem; font-size: .78rem; font-weight: 700; cursor: pointer; transition: all .15s; font-family: 'SF Mono', monospace; letter-spacing: .03em; }
+    .tab-btn:hover { color: #cbd5e1; background: #1e293b; }
+    .tab-btn.active { color: #fff; background: #1d4ed8; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .tab-panel pre { margin: 0; border-radius: 0; }
+    .tab-panel pre code { font-size: .82rem; line-height: 1.65; }
+
+    /* PAPER EXERCISE */
+    .paper { background: var(--paper); border: 2px dashed var(--paper-b); border-radius: 10px; padding: 1.5rem; margin-top: 1.5rem; position: relative; }
+    .paper-label { position: absolute; top: -.75rem; left: 1.2rem; background: var(--paper); padding: 0 .6rem; font-size: .8rem; font-weight: 700; color: #78350f; }
+    .paper h4 { color: #78350f; font-size: .95rem; margin-bottom: 1rem; }
+    .paper ol, .paper ul { padding-left: 1.4rem; }
+    .paper li { margin-bottom: .5rem; font-size: .88rem; color: #44403c; }
+    .chip { display: inline-block; padding: .1rem .5rem; border-radius: 4px; font-size: .75rem; font-weight: 700; margin: 0 .15rem; }
+    .cr { background: #fee2e2; color: #991b1b; }
+    .cb { background: #dbeafe; color: #1e40af; }
+    .cg { background: #d1fae5; color: #065f46; }
+    .cy { background: #fef9c3; color: #78350f; }
+    .cp { background: #ede9fe; color: #5b21b6; }
+    .co { background: #ffedd5; color: #9a3412; }
+
+    .ascii { background: #fff; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1rem 1.25rem; margin: .75rem 0; font-family: 'SF Mono', 'Courier New', monospace; font-size: .76rem; line-height: 1.9; white-space: pre; overflow-x: auto; color: #292524; }
+
+    /* FINAL */
+    .final { background: #0f172a; color: #fff; border-radius: 14px; padding: 2.5rem; margin-top: 3rem; }
+    .final h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
+    .final .intro { color: #94a3b8; margin-bottom: 1.5rem; font-size: .95rem; }
+    .scenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:600px){ .scenarios{grid-template-columns:1fr;} }
+    .sc { background: #1e293b; border-radius: 8px; padding: 1.25rem; border-left: 3px solid #334155; }
+    .sc .sc-num { font-size: .7rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: .35rem; }
+    .sc h4 { color: #f1f5f9; font-size: .9rem; margin-bottom: .4rem; }
+    .sc p { color: #94a3b8; font-size: .82rem; margin-bottom: .5rem; }
+    .sc .answer { background: #0f172a; border-radius: 4px; padding: .4rem .7rem; font-size: .78rem; color: #64748b; font-family: monospace; display: inline-block; cursor: pointer; border: 1px solid #334155; }
+    .sc .answer:hover { color: #94a3b8; border-color: #475569; }
+    .sc .answer.show { color: #86efac; border-color: #166534; }
+
+    footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 2rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">🧩 Patrones</a>
+    <span class="nsep">|</span>
+    <a class="nc1" href="#singleton">Singleton</a>
+    <a class="nc1" href="#factory">Factory</a>
+    <a class="nc1" href="#builder">Builder</a>
+    <span class="nsep">|</span>
+    <a class="nc2" href="#adapter">Adapter</a>
+    <a class="nc2" href="#decorator">Decorator</a>
+    <span class="nsep">|</span>
+    <a class="nc3" href="#observer">Observer</a>
+    <a class="nc3" href="#strategy">Strategy</a>
+    <a class="nc3" href="#command">Command</a>
+    <span class="nsep">|</span>
+    <a href="#ejercicio-final">🎯 Ejercicio</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>Patrones de Diseño de Software</h1>
+  <p>Los 8 patrones más usados en producción, con ejemplos reales y ejercicios para practicar con papel y lápiz.</p>
+  <div class="pills">
+    <span class="pill p1">🏗️ Creacionales &nbsp;·&nbsp; 3 patrones</span>
+    <span class="pill p2">🔧 Estructurales &nbsp;·&nbsp; 2 patrones</span>
+    <span class="pill p3">🎭 Comportamentales &nbsp;·&nbsp; 3 patrones</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- CHEAT SHEET -->
+  <section id="resumen">
+    <div class="cat-header" style="margin-top:2rem;">
+      <h2 style="font-size:1.2rem;color:var(--muted);">Referencia rápida</h2>
+      <div class="cat-line" style="background:linear-gradient(90deg,#e2e8f0,transparent);"></div>
+    </div>
+    <div class="cheat">
+      <div class="cheat-title">Tabla de patrones</div>
+      <table>
+        <thead>
+          <tr><th>Patrón</th><th>Categoría</th><th>Problema que resuelve</th><th>Ejemplo real</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Singleton</strong></td><td><span class="tag tag1">Creacional</span></td><td>Una única instancia global compartida</td><td>App Config, Logger, DB Pool</td></tr>
+          <tr><td><strong>Factory Method</strong></td><td><span class="tag tag1">Creacional</span></td><td>Crear objetos sin conocer la clase concreta</td><td>Pasarela de pagos, conectores de BD</td></tr>
+          <tr><td><strong>Builder</strong></td><td><span class="tag tag1">Creacional</span></td><td>Construir objetos complejos paso a paso</td><td>Query builder, constructores de email</td></tr>
+          <tr><td><strong>Adapter</strong></td><td><span class="tag tag2">Estructural</span></td><td>Compatibilizar interfaces incompatibles</td><td>Integración de SDKs de terceros</td></tr>
+          <tr><td><strong>Decorator</strong></td><td><span class="tag tag2">Estructural</span></td><td>Agregar responsabilidades dinámicamente</td><td>Middleware HTTP, permisos, logging</td></tr>
+          <tr><td><strong>Observer</strong></td><td><span class="tag tag3">Comportamental</span></td><td>Notificar cambios a múltiples suscriptores</td><td>Eventos de sistema, webhooks, UI reactiva</td></tr>
+          <tr><td><strong>Strategy</strong></td><td><span class="tag tag3">Comportamental</span></td><td>Intercambiar algoritmos en tiempo de ejecución</td><td>Cálculo de envíos, ordenamiento, compresión</td></tr>
+          <tr><td><strong>Command</strong></td><td><span class="tag tag3">Comportamental</span></td><td>Encapsular acciones para deshacer/rehacer</td><td>Editores, transacciones, colas de trabajo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  CREACIONALES                                       -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="cat-header">
+    <h2>🏗️ Creacionales</h2>
+    <div class="cat-line l1"></div>
+  </div>
+
+  <!-- ─── SINGLETON ─────────────────────────────────────── -->
+  <section class="card" id="singleton">
+    <div class="card-head">
+      <span class="tag tag1">Creacional</span>
+      <div>
+        <h3>Singleton</h3>
+        <p class="sub">Garantiza que una clase tenga una única instancia y proporciona un punto global de acceso a ella.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando exactamente un objeto debe coordinar acciones en todo el sistema: configuración, conexión a base de datos, logging, caché.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Spotify / Netflix:</strong> El módulo de configuración carga variables de entorno una sola vez al arrancar y todas las partes de la app leen de la misma instancia.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">AppConfig — Spotify-like config manager</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+class AppConfig {
+    private static ?AppConfig $instance = null;
+    private array $data = [];
+    private bool  $loaded = false;
+
+    private function __construct() {}
+    private function __clone()    {}
+
+    public static function getInstance(): static {
+        if (static::$instance === null) {
+            static::$instance = new static();
+        }
+        return static::$instance;
+    }
+
+    public function load(string $env = 'production'): void {
+        if ($this->loaded) return;
+        $this->data = [
+            'db_url'      => "postgresql://db-{$env}.internal:5432/spotify",
+            'redis_url'   => 'redis://cache.internal:6379',
+            'cache_ttl'   => 3600,
+            'max_streams' => 5,
+            'feature_flags' => [
+                'new_home_feed' => true,
+                'podcast_v2'   => false,
+                'hifi_audio'   => $env === 'production',
+            ],
+        ];
+        $this->loaded = true;
+    }
+
+    public function get(string $key, mixed $default = null): mixed {
+        return $this->data[$key] ?? $default;
+    }
+
+    public function feature(string $flag): bool {
+        return $this->data['feature_flags'][$flag] ?? false;
+    }
+}
+
+// ── Uso ──────────────────────────────────────────────────────
+$configA = AppConfig::getInstance();
+$configA->load();
+echo $configA->get('max_streams');          // 5
+
+$configB = AppConfig::getInstance();        // misma instancia
+echo $configB->get('cache_ttl');            // 3600
+
+var_dump($configA === $configB);            // bool(true) ← MISMA instancia
+
+if (AppConfig::getInstance()->feature('hifi_audio')) {
+    echo 'Activando audio HiFi 24-bit...';
+}</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">public sealed class AppConfig
+{
+    private static AppConfig? _instance;
+    private static readonly object _lock = new();
+    private Dictionary&lt;string, object&gt; _data = new();
+    private bool _loaded;
+
+    private AppConfig() { }
+
+    public static AppConfig Instance
+    {
+        get {
+            if (_instance is null)
+                lock (_lock) { _instance ??= new AppConfig(); }
+            return _instance;
+        }
+    }
+
+    public void Load(string env = "production")
+    {
+        if (_loaded) return;
+        _data = new()
+        {
+            ["db_url"]      = $"postgresql://db-{env}.internal:5432/spotify",
+            ["redis_url"]   = "redis://cache.internal:6379",
+            ["cache_ttl"]   = 3600,
+            ["max_streams"] = 5,
+            ["feature_flags"] = new Dictionary&lt;string, bool&gt;
+            {
+                ["new_home_feed"] = true,
+                ["podcast_v2"]   = false,
+                ["hifi_audio"]   = env == "production",
+            },
+        };
+        _loaded = true;
+    }
+
+    public T? Get&lt;T&gt;(string key, T? def = default) =>
+        _data.TryGetValue(key, out var v) ? (T)v : def;
+
+    public bool Feature(string flag)
+    {
+        var flags = Get&lt;Dictionary&lt;string, bool&gt;&gt;("feature_flags");
+        return flags?.GetValueOrDefault(flag) ?? false;
+    }
+}
+
+// ── Uso ──────────────────────────────────────────────────────
+var configA = AppConfig.Instance;
+configA.Load();
+Console.WriteLine(configA.Get&lt;int&gt;("max_streams"));   // 5
+
+var configB = AppConfig.Instance;                      // misma instancia
+Console.WriteLine(configB.Get&lt;int&gt;("cache_ttl"));     // 3600
+
+Console.WriteLine(ReferenceEquals(configA, configB)); // True ← MISMA instancia
+
+if (AppConfig.Instance.Feature("hifi_audio"))
+    Console.WriteLine("Activando audio HiFi 24-bit...");</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Dibuja el diagrama de clase y el flujo de instanciación</h4>
+        <ol>
+          <li><strong>Dibuja el diagrama de clase</strong> de <code>AppConfig</code> con tres secciones: atributos, constructor, métodos.<br>
+              Usa <span class="chip cr">rojo</span> para los miembros privados (<code>_instance</code>, <code>_data</code>).<br>
+              Usa <span class="chip cb">azul</span> para los métodos públicos (<code>load</code>, <code>get</code>, <code>feature</code>).</li>
+          <li><strong>Dibuja este flujo de secuencia</strong> y colorea las flechas según el resultado:</li>
+        </ol>
+        <div class="ascii">  Módulo A              AppConfig               Módulo B
+      │                     │                         │
+      │── AppConfig() ──────►│                         │
+      │                     │ crea _instance           │
+      │◄─── instancia ───────│                         │
+      │                     │                         │
+      │── .load("prod") ───►│ carga config            │
+      │                     │                         │
+      │                     │◄──── AppConfig() ────────│
+      │                     │ devuelve _instance       │
+      │                     │─────── instancia ───────►│
+      │                     │                         │
+                  ¿A y B son el mismo objeto?  →  ___________</div>
+        <ol start="3">
+          <li>Con <span class="chip cg">verde</span>, dibuja una flecha de <em>Módulo A</em> hacia <em>Módulo B</em> indicando que <strong>comparten estado</strong>.</li>
+          <li><strong>Pregunta de reflexión:</strong> ¿Qué problema ocurriría en tests unitarios si AppConfig es un Singleton? Escribe tu respuesta abajo del diagrama. (Pista: estado compartido entre tests)</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FACTORY METHOD ────────────────────────────────── -->
+  <section class="card" id="factory">
+    <div class="card-head">
+      <span class="tag tag1">Creacional</span>
+      <div>
+        <h3>Factory Method</h3>
+        <p class="sub">Define una interfaz para crear un objeto, pero deja que las subclases decidan qué clase instanciar.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando el código necesita trabajar con distintas variantes de un objeto sin acoplarse a sus implementaciones concretas.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Shopify / MercadoPago:</strong> El checkout soporta múltiples métodos de pago. La lógica de negocio no conoce (ni le importa) si el cobro es por Stripe, PayPal o criptomonedas.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">payments — Pasarela de pagos multi-proveedor</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+abstract class PaymentProcessor {
+    abstract public function charge(float $amount, string $currency, string $token): array;
+    abstract public function refund(string $transactionId): bool;
+
+    protected function fmt(float $amount, string $currency): string {
+        return "{$currency} " . number_format($amount, 2);
+    }
+}
+
+class StripeProcessor extends PaymentProcessor {
+    public function charge(float $amount, string $currency, string $token): array {
+        echo "[Stripe] Cobrando {$this->fmt($amount, $currency)}\n";
+        return ['id' => 'ch_3Nxy...', 'status' => 'succeeded', 'provider' => 'stripe'];
+    }
+    public function refund(string $transactionId): bool {
+        echo "[Stripe] Reembolsando {$transactionId}\n";
+        return true;
+    }
+}
+
+class PayPalProcessor extends PaymentProcessor {
+    public function charge(float $amount, string $currency, string $token): array {
+        echo "[PayPal] Cobrando {$this->fmt($amount, $currency)}\n";
+        return ['id' => 'PAYID-xxx', 'status' => 'COMPLETED', 'provider' => 'paypal'];
+    }
+    public function refund(string $transactionId): bool {
+        echo "[PayPal] Reembolsando {$transactionId}\n";
+        return true;
+    }
+}
+
+class CryptoProcessor extends PaymentProcessor {
+    public function charge(float $amount, string $currency, string $token): array {
+        echo "[Crypto] Registrando tx de {$this->fmt($amount, $currency)}\n";
+        return ['tx_hash' => '0xabc...', 'status' => 'confirmed', 'provider' => 'crypto'];
+    }
+    public function refund(string $transactionId): bool {
+        echo "[Crypto] Las transacciones cripto son irreversibles.\n";
+        return false;
+    }
+}
+
+// ── Factory ──────────────────────────────────────────────────
+function createProcessor(string $method): PaymentProcessor {
+    return match($method) {
+        'stripe' => new StripeProcessor(),
+        'paypal' => new PayPalProcessor(),
+        'crypto' => new CryptoProcessor(),
+        default  => throw new InvalidArgumentException("Método desconocido: '{$method}'"),
+    };
+}
+
+// ── Lógica de negocio (no conoce las clases concretas) ───────
+function processCheckout(float $total, string $method, string $token): array {
+    $processor = createProcessor($method);
+    $result    = $processor->charge($total, 'MXN', $token);
+    echo "Orden confirmada. ID: {$result['id']}\n";
+    return $result;
+}
+
+processCheckout(1500.00, 'stripe', 'tok_visa_4242');
+processCheckout(850.50,  'paypal', 'tok_paypal_abc');
+processCheckout(200.00,  'crypto', 'wallet_0x...');</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">public abstract class PaymentProcessor
+{
+    public abstract Dictionary&lt;string, string&gt; Charge(decimal amount, string currency, string token);
+    public abstract bool Refund(string transactionId);
+    protected string Fmt(decimal amount, string currency) => $"{currency} {amount:F2}";
+}
+
+public class StripeProcessor : PaymentProcessor
+{
+    public override Dictionary&lt;string, string&gt; Charge(decimal amount, string currency, string token)
+    {
+        Console.WriteLine($"[Stripe] Cobrando {Fmt(amount, currency)}");
+        return new() { ["id"] = "ch_3Nxy...", ["status"] = "succeeded", ["provider"] = "stripe" };
+    }
+    public override bool Refund(string transactionId)
+    { Console.WriteLine($"[Stripe] Reembolsando {transactionId}"); return true; }
+}
+
+public class PayPalProcessor : PaymentProcessor
+{
+    public override Dictionary&lt;string, string&gt; Charge(decimal amount, string currency, string token)
+    {
+        Console.WriteLine($"[PayPal] Cobrando {Fmt(amount, currency)}");
+        return new() { ["id"] = "PAYID-xxx", ["status"] = "COMPLETED", ["provider"] = "paypal" };
+    }
+    public override bool Refund(string transactionId)
+    { Console.WriteLine($"[PayPal] Reembolsando {transactionId}"); return true; }
+}
+
+public class CryptoProcessor : PaymentProcessor
+{
+    public override Dictionary&lt;string, string&gt; Charge(decimal amount, string currency, string token)
+    {
+        Console.WriteLine($"[Crypto] Registrando tx de {Fmt(amount, currency)}");
+        return new() { ["tx_hash"] = "0xabc...", ["status"] = "confirmed", ["provider"] = "crypto" };
+    }
+    public override bool Refund(string transactionId)
+    { Console.WriteLine("[Crypto] Las transacciones cripto son irreversibles."); return false; }
+}
+
+// ── Factory ──────────────────────────────────────────────────
+static PaymentProcessor CreateProcessor(string method) => method switch
+{
+    "stripe" => new StripeProcessor(),
+    "paypal" => new PayPalProcessor(),
+    "crypto" => new CryptoProcessor(),
+    _        => throw new ArgumentException($"Método desconocido: '{method}'"),
+};
+
+// ── Lógica de negocio (no conoce las clases concretas) ───────
+static Dictionary&lt;string, string&gt; ProcessCheckout(decimal total, string method, string token)
+{
+    var processor = CreateProcessor(method);
+    var result    = processor.Charge(total, "MXN", token);
+    Console.WriteLine($"Orden confirmada. ID: {result["id"]}");
+    return result;
+}
+
+ProcessCheckout(1500.00m, "stripe", "tok_visa_4242");
+ProcessCheckout(850.50m,  "paypal", "tok_paypal_abc");
+ProcessCheckout(200.00m,  "crypto", "wallet_0x...");</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Completa el diagrama UML y agrega un nuevo proveedor</h4>
+        <div class="ascii">          &lt;&lt;interfaz&gt;&gt;                        Factory
+        PaymentProcessor                  create_payment_processor()
+   ┌────────────────────────┐           ┌──────────────────────────┐
+   │ + charge()             │◄──────────│ recibe: "stripe"/"paypal" │
+   │ + refund()             │           │ devuelve: instancia       │
+   │ + formatted_amount()   │           └──────────────────────────┘
+   └───────────┬────────────┘
+               │ hereda
+       ┌───────┼──────────┬────────────┐
+       ▼       ▼          ▼            ▼
+  [Stripe] [PayPal]   [Crypto]    [_________]
+                                  ← tú llenas</div>
+        <ol>
+          <li>Usa <span class="chip co">naranja</span> para colorear la interfaz <code>PaymentProcessor</code>.</li>
+          <li>Usa <span class="chip cb">azul</span> para las tres implementaciones concretas.</li>
+          <li>Usa <span class="chip cg">verde</span> para la función <code>create_payment_processor</code>.</li>
+          <li><strong>Agrega un nuevo procesador</strong> llamado <code>MercadoPagoProcessor</code> en el cuadro vacío. Escribe sus métodos <code>charge</code> y <code>refund</code> en pseudocódigo al lado del diagrama.</li>
+          <li>Responde: ¿Qué líneas del código original <em>no</em> necesitas modificar para agregar el nuevo procesador?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BUILDER ───────────────────────────────────────── -->
+  <section class="card" id="builder">
+    <div class="card-head">
+      <span class="tag tag1">Creacional</span>
+      <div>
+        <h3>Builder</h3>
+        <p class="sub">Separa la construcción de un objeto complejo de su representación para que el mismo proceso pueda crear distintas representaciones.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando construir un objeto requiere muchos pasos opcionales o cuando el constructor tendría demasiados parámetros.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Django ORM / SQLAlchemy:</strong> La API <code>.filter().order_by().limit()</code> es un Builder que construye una consulta SQL compleja de forma legible y encadenada.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">QueryBuilder — ORM query builder (estilo Laravel/Eloquent)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+class QueryBuilder {
+    private string  $table;
+    private array   $cols   = ['*'];
+    private array   $joins  = [];
+    private array   $wheres = [];
+    private ?string $order  = null;
+    private ?int    $lim    = null;
+
+    public function __construct(string $table) {
+        $this->table = $table;
+    }
+
+    // Cada método retorna $this para encadenamiento fluido
+    public function select(string ...$cols): static {
+        $this->cols = $cols; return $this;
+    }
+    public function join(string $table, string $on): static {
+        $this->joins[] = "JOIN {$table} ON {$on}"; return $this;
+    }
+    public function where(string $cond): static {
+        $this->wheres[] = $cond; return $this;
+    }
+    public function orderBy(string $col, string $dir = 'ASC'): static {
+        $this->order = "{$col} {$dir}"; return $this;
+    }
+    public function limit(int $n): static {
+        $this->lim = $n; return $this;
+    }
+
+    public function build(): string {
+        $sql = 'SELECT ' . implode(', ', $this->cols) . " FROM {$this->table}";
+        foreach ($this->joins as $j)  { $sql .= "\n  {$j}"; }
+        if ($this->wheres) { $sql .= "\n  WHERE " . implode(' AND ', $this->wheres); }
+        if ($this->order)  { $sql .= "\n  ORDER BY {$this->order}"; }
+        if ($this->lim)    { $sql .= "\n  LIMIT {$this->lim}"; }
+        return $sql;
+    }
+}
+
+// ── Consulta 1: panel de órdenes pendientes ──────────────────
+$ordersQuery = (new QueryBuilder('orders'))
+    ->select('orders.id', 'users.email', 'orders.total', 'orders.status')
+    ->join('users', 'orders.user_id = users.id')
+    ->where("orders.status = 'pending'")
+    ->where('orders.total > 500')
+    ->orderBy('orders.created_at', 'DESC')
+    ->limit(25)
+    ->build();
+
+echo $ordersQuery . "\n";
+
+// ── Consulta 2: reporte de ingresos ──────────────────────────
+$revenueQuery = (new QueryBuilder('orders'))
+    ->select('DATE(created_at) AS day', 'SUM(total) AS revenue')
+    ->where("status = 'paid'")
+    ->orderBy('day', 'DESC')
+    ->limit(7)
+    ->build();
+
+echo $revenueQuery; // El mismo Builder, dos resultados distintos.</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">public class QueryBuilder
+{
+    private readonly string _table;
+    private List&lt;string&gt; _cols   = ["*"];
+    private List&lt;string&gt; _joins  = [];
+    private List&lt;string&gt; _wheres = [];
+    private string? _order;
+    private int?    _lim;
+
+    public QueryBuilder(string table) => _table = table;
+
+    // Cada método retorna this para encadenamiento fluido
+    public QueryBuilder Select(params string[] cols)
+        { _cols = [.. cols]; return this; }
+    public QueryBuilder Join(string table, string on)
+        { _joins.Add($"JOIN {table} ON {on}"); return this; }
+    public QueryBuilder Where(string cond)
+        { _wheres.Add(cond); return this; }
+    public QueryBuilder OrderBy(string col, string dir = "ASC")
+        { _order = $"{col} {dir}"; return this; }
+    public QueryBuilder Limit(int n)
+        { _lim = n; return this; }
+
+    public string Build()
+    {
+        var sql = $"SELECT {string.Join(", ", _cols)} FROM {_table}";
+        foreach (var j in _joins)  sql += $"\n  {j}";
+        if (_wheres.Count > 0)     sql += $"\n  WHERE {string.Join(" AND ", _wheres)}";
+        if (_order is not null)    sql += $"\n  ORDER BY {_order}";
+        if (_lim.HasValue)         sql += $"\n  LIMIT {_lim}";
+        return sql;
+    }
+}
+
+// ── Consulta 1: panel de órdenes pendientes ──────────────────
+var ordersQuery = new QueryBuilder("orders")
+    .Select("orders.id", "users.email", "orders.total", "orders.status")
+    .Join("users", "orders.user_id = users.id")
+    .Where("orders.status = 'pending'")
+    .Where("orders.total > 500")
+    .OrderBy("orders.created_at", "DESC")
+    .Limit(25)
+    .Build();
+
+Console.WriteLine(ordersQuery);
+
+// ── Consulta 2: reporte de ingresos ──────────────────────────
+var revenueQuery = new QueryBuilder("orders")
+    .Select("DATE(created_at) AS day", "SUM(total) AS revenue")
+    .Where("status = 'paid'")
+    .OrderBy("day", "DESC")
+    .Limit(7)
+    .Build();
+
+Console.WriteLine(revenueQuery); // El mismo Builder, dos resultados distintos.</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Traza el pipeline de construcción paso a paso</h4>
+        <div class="ascii">  QueryBuilder("products")
+         │
+         ▼ ① .select("id", "name", "price")
+         │   _cols = ["id", "name", "price"]
+         │
+         ▼ ② .join(_____________, _____________)    ← tú llenas
+         │   _joins = [...]
+         │
+         ▼ ③ .where(__________________________)    ← tú llenas
+         │   _wheres = [...]
+         │
+         ▼ ④ .order_by(____________, _________)    ← tú llenas
+         │   _order = "..."
+         │
+         ▼ ⑤ .limit(10)
+         │
+         ▼ ⑥ .build()
+         │
+         └──► SQL: __________________________________________
+                   __________________________________________
+                   __________________________________________</div>
+        <ol>
+          <li>Completa los pasos ②③④ con valores realistas para listar los 10 productos más baratos de la categoría "electrónica".</li>
+          <li>Usa <span class="chip cb">azul</span> para los pasos que filtran datos (WHERE, LIMIT).</li>
+          <li>Usa <span class="chip co">naranja</span> para los pasos que dan forma al resultado (SELECT, JOIN, ORDER BY).</li>
+          <li>Escribe el SQL final que producirían tus pasos.</li>
+          <li><strong>Reflexión:</strong> ¿Qué alternativa habría sin el patrón Builder? (Pista: función con 6+ parámetros) ¿Qué desventajas tendría eso?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  ESTRUCTURALES                                      -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="cat-header">
+    <h2>🔧 Estructurales</h2>
+    <div class="cat-line l2"></div>
+  </div>
+
+  <!-- ─── ADAPTER ────────────────────────────────────── -->
+  <section class="card" id="adapter">
+    <div class="card-head">
+      <span class="tag tag2">Estructural</span>
+      <div>
+        <h3>Adapter</h3>
+        <p class="sub">Convierte la interfaz de una clase en otra que el cliente espera. Permite que trabajen juntas clases con interfaces incompatibles.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando necesitas usar una biblioteca o API externa que tiene una interfaz diferente a la que tu sistema espera, sin modificar ninguno de los dos.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Uber / Rappi:</strong> La app integra Google Maps, OpenStreetMap y HERE Maps. Un Adapter por proveedor permite cambiar de SDK sin tocar la lógica de enrutamiento.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">maps — Integración de SDKs de mapas (Uber/Rappi)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+// ── Interfaz que NUESTRO sistema espera ──────────────────────
+interface MapService {
+    public function getRoute(array $origin, array $destination): array; // [lat, lng]
+    public function geocode(string $address): array;                    // [lat, lng]
+}
+
+// ── SDK externo de Google Maps (no podemos modificarlo) ──────
+class GoogleMapsSDK {
+    public function getDirections(float $oLat, float $oLng, float $dLat, float $dLng): array {
+        return ['distance_m' => 5200, 'duration_s' => 720, 'status' => 'OK'];
+    }
+    public function geocodeAddress(string $address): array {
+        return ['lat' => 19.4326, 'lng' => -99.1332];
+    }
+}
+
+// ── Adapter: traduce nuestra interfaz a la del SDK ───────────
+class GoogleMapsAdapter implements MapService {
+    private GoogleMapsSDK $sdk;
+
+    public function __construct() { $this->sdk = new GoogleMapsSDK(); }
+
+    public function getRoute(array $origin, array $destination): array {
+        $raw = $this->sdk->getDirections($origin[0], $origin[1], $destination[0], $destination[1]);
+        return [
+            'distance_km'  => $raw['distance_m'] / 1000,
+            'duration_min' => intdiv($raw['duration_s'], 60),
+        ];
+    }
+
+    public function geocode(string $address): array {
+        $raw = $this->sdk->geocodeAddress($address);
+        return [$raw['lat'], $raw['lng']];
+    }
+}
+
+// ── Lógica de negocio: solo conoce MapService ────────────────
+function calculateDelivery(MapService $maps, string $pickup, string $dropoff): array {
+    $origin = $maps->geocode($pickup);
+    $dest   = $maps->geocode($dropoff);
+    $route  = $maps->getRoute($origin, $dest);
+    return [...$route, 'fare' => $route['distance_km'] * 8.5];
+}
+
+// Cambiamos proveedor sin tocar la lógica de negocio
+$delivery = calculateDelivery(new GoogleMapsAdapter(), 'Reforma 222, CDMX', 'Polanco, CDMX');
+printf("Distancia: %.1f km | Tarifa: $%.2f\n", $delivery['distance_km'], $delivery['fare']);</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">// ── Interfaz que NUESTRO sistema espera ──────────────────────
+public interface IMapService
+{
+    RouteResult GetRoute((double Lat, double Lng) origin, (double Lat, double Lng) dest);
+    (double Lat, double Lng) Geocode(string address);
+}
+
+public record RouteResult(double DistanceKm, int DurationMin);
+
+// ── SDK externo de Google Maps (no podemos modificarlo) ──────
+public class GoogleMapsSDK
+{
+    public (int DistanceM, int DurationS) GetDirections(
+        double oLat, double oLng, double dLat, double dLng) => (5200, 720);
+
+    public (double Lat, double Lng) GeocodeAddress(string address) => (19.4326, -99.1332);
+}
+
+// ── Adapter: traduce nuestra interfaz a la del SDK ───────────
+public class GoogleMapsAdapter : IMapService
+{
+    private readonly GoogleMapsSDK _sdk = new();
+
+    public RouteResult GetRoute((double Lat, double Lng) origin, (double Lat, double Lng) dest)
+    {
+        var (distM, durS) = _sdk.GetDirections(origin.Lat, origin.Lng, dest.Lat, dest.Lng);
+        return new(DistanceKm: distM / 1000.0, DurationMin: durS / 60);
+    }
+
+    public (double Lat, double Lng) Geocode(string address) =>
+        _sdk.GeocodeAddress(address);
+}
+
+// ── Lógica de negocio: solo conoce IMapService ───────────────
+static (double DistanceKm, int DurationMin, double Fare) CalculateDelivery(
+    IMapService maps, string pickup, string dropoff)
+{
+    var origin = maps.Geocode(pickup);
+    var dest   = maps.Geocode(dropoff);
+    var route  = maps.GetRoute(origin, dest);
+    return (route.DistanceKm, route.DurationMin, route.DistanceKm * 8.5);
+}
+
+// Cambiamos proveedor sin tocar la lógica de negocio
+var d = CalculateDelivery(new GoogleMapsAdapter(), "Reforma 222, CDMX", "Polanco, CDMX");
+Console.WriteLine($"Distancia: {d.DistanceKm} km | Tarifa: ${d.Fare:F2}");</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Dibuja la "traducción" de interfaces</h4>
+        <div class="ascii">  [Tu código]          [Adapter]            [SDK de Google]
+  ┌──────────────┐   ┌─────────────────┐   ┌──────────────────────┐
+  │  MapService  │   │ GoogleMaps      │   │ GoogleMapsSDK        │
+  │ (interfaz)   │──►│ Adapter         │──►│                      │
+  │              │   │                 │   │ .getDirections(      │
+  │ .get_route() │   │ traduce:        │   │   lat1,lng1,         │
+  │   (origin,   │   │ tuplas →        │   │   lat2,lng2)         │
+  │    dest)     │   │ 4 parámetros    │   │                      │
+  │              │   │                 │   │ .geocodeAddress(str) │
+  │ .geocode()   │   │ dict anidado →  │   │                      │
+  │   (address)  │   │ tupla simple    │   │                      │
+  └──────────────┘   └─────────────────┘   └──────────────────────┘</div>
+        <ol>
+          <li>Colorea con <span class="chip cb">azul</span> la interfaz de tu sistema y con <span class="chip co">naranja</span> el SDK externo.</li>
+          <li>Colorea el Adapter con <span class="chip cg">verde</span> y dibuja las flechas de traducción dentro de él.</li>
+          <li><strong>Nuevo proveedor:</strong> Imagina que Rappi quiere integrar <em>Waze API</em> que usa <code>waze.findPath(from_id, to_id)</code> con IDs de nodo, no coordenadas. Dibuja el <code>WazeAdapter</code> al lado e indica qué traducciones necesita.</li>
+          <li><strong>Reflexión:</strong> Sin el Adapter, ¿cuántos lugares del código necesitarías cambiar si decides reemplazar Google Maps por Waze?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── DECORATOR ─────────────────────────────────────── -->
+  <section class="card" id="decorator">
+    <div class="card-head">
+      <span class="tag tag2">Estructural</span>
+      <div>
+        <h3>Decorator</h3>
+        <p class="sub">Agrega responsabilidades adicionales a un objeto de forma dinámica, como una alternativa flexible a la herencia.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando necesitas agregar comportamiento a funciones o clases de manera composable y sin modificarlas: logging, autenticación, caché, rate limiting.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Express.js / Django / FastAPI:</strong> El middleware es puro Decorator. Cada capa (auth, logging, rate limit) envuelve al handler sin que éste sepa nada de ellas.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">middleware — Middleware API (estilo Laravel/ASP.NET)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+// ── Interfaz del handler ──────────────────────────────────────
+interface RequestHandler {
+    public function handle(array $request): array;
+}
+
+// ── Handler base (núcleo, sin saber nada de las capas) ───────
+class DashboardHandler implements RequestHandler {
+    public function handle(array $request): array {
+        return ['user_id' => $request['user_id'], 'orders' => 14, 'status' => 200];
+    }
+}
+
+// ── Decoradores (capas de middleware) ─────────────────────────
+abstract class HandlerDecorator implements RequestHandler {
+    public function __construct(protected RequestHandler $inner) {}
+}
+
+class LogDecorator extends HandlerDecorator {
+    public function handle(array $request): array {
+        echo "[LOG]  {$request['method']} {$request['path']}\n";
+        $response = $this->inner->handle($request);
+        echo "[LOG]  Status: {$response['status']}\n";
+        return $response;
+    }
+}
+
+class AuthDecorator extends HandlerDecorator {
+    public function handle(array $request): array {
+        if (empty($request['token'])) {
+            return ['error' => 'No autorizado', 'status' => 401];
+        }
+        $request['user_id'] = 42; // validar JWT en producción
+        return $this->inner->handle($request);
+    }
+}
+
+class RateLimitDecorator extends HandlerDecorator {
+    private array $log = [];
+    public function __construct(RequestHandler $inner, private int $maxPerMin = 60) {
+        parent::__construct($inner);
+    }
+    public function handle(array $request): array {
+        $user = $request['user_id'] ?? $request['ip'] ?? 'anon';
+        $now  = time();
+        $this->log[$user] = array_filter($this->log[$user] ?? [], fn($t) => $now - $t &lt; 60);
+        if (count($this->log[$user]) >= $this->maxPerMin) {
+            return ['error' => 'Rate limit excedido', 'status' => 429];
+        }
+        $this->log[$user][] = $now;
+        return $this->inner->handle($request);
+    }
+}
+
+// ── Componer decoradores (de adentro hacia afuera) ────────────
+$handler = new LogDecorator(
+    new AuthDecorator(
+        new RateLimitDecorator(new DashboardHandler(), maxPerMin: 100)
+    )
+);
+
+$reqOk     = ['method' => 'GET', 'path' => '/dashboard', 'token' => 'eyJhb...', 'ip' => '10.0.0.1'];
+$reqNoAuth = ['method' => 'GET', 'path' => '/dashboard', 'token' => null,        'ip' => '10.0.0.2'];
+
+print_r($handler->handle($reqOk));      // Pasa todas las capas
+print_r($handler->handle($reqNoAuth));  // Se detiene en Auth → 401</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">// ── Interfaz del handler ──────────────────────────────────────
+public interface IRequestHandler
+{
+    Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request);
+}
+
+// ── Handler base (núcleo, sin saber nada de las capas) ───────
+public class DashboardHandler : IRequestHandler
+{
+    public Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request) => new()
+    {
+        ["user_id"] = request["user_id"], ["orders"] = 14, ["status"] = 200,
+    };
+}
+
+// ── Decoradores (capas de middleware) ─────────────────────────
+public abstract class HandlerDecorator(IRequestHandler inner) : IRequestHandler
+{
+    protected readonly IRequestHandler _inner = inner;
+    public abstract Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request);
+}
+
+public class LogDecorator(IRequestHandler inner) : HandlerDecorator(inner)
+{
+    public override Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request)
+    {
+        Console.WriteLine($"[LOG]  {request["method"]} {request["path"]}");
+        var response = _inner.Handle(request);
+        Console.WriteLine($"[LOG]  Status: {response["status"]}");
+        return response;
+    }
+}
+
+public class AuthDecorator(IRequestHandler inner) : HandlerDecorator(inner)
+{
+    public override Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request)
+    {
+        if (request.GetValueOrDefault("token") is null)
+            return new() { ["error"] = "No autorizado", ["status"] = 401 };
+        request["user_id"] = 42; // validar JWT en producción
+        return _inner.Handle(request);
+    }
+}
+
+public class RateLimitDecorator(IRequestHandler inner, int maxPerMin = 60) : HandlerDecorator(inner)
+{
+    private readonly Dictionary&lt;string, List&lt;long&gt;&gt; _log = new();
+    public override Dictionary&lt;string, object&gt; Handle(Dictionary&lt;string, object&gt; request)
+    {
+        var user = request.GetValueOrDefault("user_id")?.ToString() ?? "anon";
+        var now  = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        _log.TryAdd(user, []);
+        _log[user].RemoveAll(t => now - t >= 60);
+        if (_log[user].Count >= maxPerMin)
+            return new() { ["error"] = "Rate limit excedido", ["status"] = 429 };
+        _log[user].Add(now);
+        return _inner.Handle(request);
+    }
+}
+
+// ── Componer decoradores (de adentro hacia afuera) ────────────
+IRequestHandler handler = new LogDecorator(
+    new AuthDecorator(
+        new RateLimitDecorator(new DashboardHandler(), maxPerMin: 100)
+    )
+);
+
+var reqOk = new Dictionary&lt;string, object&gt;
+    { ["method"]="GET", ["path"]="/dashboard", ["token"]="eyJhb...", ["ip"]="10.0.0.1" };
+var reqNoAuth = new Dictionary&lt;string, object&gt;
+    { ["method"]="GET", ["path"]="/dashboard", ["token"]=null!, ["ip"]="10.0.0.2" };
+
+handler.Handle(reqOk);     // Pasa todas las capas
+handler.Handle(reqNoAuth); // Se detiene en Auth → 401</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Diagrama de cebolla (onion) y flujo de request</h4>
+        <div class="ascii">  Una request entra por fuera y llega al handler en el centro:
+
+  ┌───────────────────────────────────────────────┐
+  │  log_request                                  │  ← NARANJA
+  │  ┌─────────────────────────────────────────┐  │
+  │  │  require_auth                           │  │  ← ROJO
+  │  │  ┌───────────────────────────────────┐  │  │
+  │  │  │  rate_limit                       │  │  │  ← AMARILLO
+  │  │  │  ┌─────────────────────────────┐  │  │  │
+  │  │  │  │  timer                      │  │  │  │  ← VERDE
+  │  │  │  │  ┌───────────────────────┐  │  │  │  │
+  │  │  │  │  │  get_dashboard()      │  │  │  │  │  ← AZUL
+  │  │  │  │  └───────────────────────┘  │  │  │  │
+  │  │  │  └─────────────────────────────┘  │  │  │
+  │  │  └───────────────────────────────────┘  │  │
+  │  └─────────────────────────────────────────┘  │
+  └───────────────────────────────────────────────┘
+       ▲ request entra aquí           respuesta sale aquí ▲</div>
+        <ol>
+          <li>Colorea cada capa según los colores indicados.</li>
+          <li>Traza con una flecha <span class="chip cg">verde</span> el camino feliz (request con token válido).</li>
+          <li>Traza con una flecha <span class="chip cr">roja</span> el camino de la request sin token. ¿En qué capa se detiene?</li>
+          <li>Numera el orden de ejecución: ¿cuál decorador se ejecuta primero al entrar? ¿Y al salir?</li>
+          <li><strong>Nuevo requerimiento:</strong> Agrega una capa <code>cache_response</code> que guarde el resultado por 5 minutos. ¿Dónde en el diagrama la colocarías? Dibújala con <span class="chip cp">morado</span>.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  COMPORTAMENTALES                                   -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="cat-header">
+    <h2>🎭 Comportamentales</h2>
+    <div class="cat-line l3"></div>
+  </div>
+
+  <!-- ─── OBSERVER ─────────────────────────────────────── -->
+  <section class="card" id="observer">
+    <div class="card-head">
+      <span class="tag tag3">Comportamental</span>
+      <div>
+        <h3>Observer</h3>
+        <p class="sub">Define una dependencia uno-a-muchos: cuando un objeto cambia de estado, todos sus dependientes son notificados automáticamente.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando un cambio en un objeto requiere actualizar otros, y no sabes cuántos son ni quiénes son. Eventos de dominio, sistemas reactivos, webhooks.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>GitHub Actions / Slack:</strong> Cuando un build falla, el sistema publica un evento. Email, Slack, PagerDuty y audit log reaccionan de forma independiente.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">events — Bus de eventos (estilo GitHub Actions / CI-CD)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+// ── Interfaz del suscriptor ───────────────────────────────────
+interface EventListener {
+    public function handle(string $event, array $data): void;
+}
+
+// ── Bus de eventos ────────────────────────────────────────────
+class EventBus {
+    private array $listeners = [];
+
+    public function subscribe(string $event, EventListener $listener): void {
+        $this->listeners[$event][] = $listener;
+    }
+
+    public function publish(string $event, array $data = []): void {
+        echo "\n── Evento: [{$event}] ──\n";
+        foreach ($this->listeners[$event] ?? [] as $listener) {
+            $listener->handle($event, $data);
+        }
+    }
+}
+
+// ── Suscriptores concretos ────────────────────────────────────
+class EmailNotifier implements EventListener {
+    public function handle(string $event, array $data): void {
+        echo "  [Email] → {$data['email']} | Asunto: {$event}\n";
+    }
+}
+
+class SlackNotifier implements EventListener {
+    public function __construct(private string $channel) {}
+    public function handle(string $event, array $data): void {
+        echo "  [Slack] #{$this->channel} | {$event}: {$data['repo']} @ {$data['branch']}\n";
+    }
+}
+
+class PagerDutyAlert implements EventListener {
+    public function handle(string $event, array $data): void {
+        $sev = str_contains($event, 'failed') ? 'CRITICAL' : 'INFO';
+        echo "  [PagerDuty] Alerta {$sev} por: {$event}\n";
+    }
+}
+
+class AuditLogger implements EventListener {
+    public function handle(string $event, array $data): void {
+        echo "  [Audit] {$event} | user={$data['user']} | ts={$data['timestamp']}\n";
+    }
+}
+
+// ── Configuración del sistema ─────────────────────────────────
+$bus = new EventBus();
+$bus->subscribe('build.failed',       new EmailNotifier());
+$bus->subscribe('build.failed',       new SlackNotifier('#alerts'));
+$bus->subscribe('build.failed',       new PagerDutyAlert());
+$bus->subscribe('build.failed',       new AuditLogger());
+$bus->subscribe('deployment.success', new SlackNotifier('#deployments'));
+$bus->subscribe('deployment.success', new AuditLogger());
+
+$bus->publish('build.failed', [
+    'repo' => 'backend-api', 'branch' => 'main',
+    'email' => 'dev-team@empresa.com', 'user' => 'ci-bot',
+    'timestamp' => '2025-03-10T14:22:00Z',
+]);</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">// ── Interfaz del suscriptor ───────────────────────────────────
+public interface IEventListener
+{
+    void Handle(string eventName, Dictionary&lt;string, string&gt; data);
+}
+
+// ── Bus de eventos ────────────────────────────────────────────
+public class EventBus
+{
+    private readonly Dictionary&lt;string, List&lt;IEventListener&gt;&gt; _listeners = new();
+
+    public void Subscribe(string eventName, IEventListener listener)
+    {
+        if (!_listeners.ContainsKey(eventName)) _listeners[eventName] = [];
+        _listeners[eventName].Add(listener);
+    }
+
+    public void Publish(string eventName, Dictionary&lt;string, string&gt; data)
+    {
+        Console.WriteLine($"\n── Evento: [{eventName}] ──");
+        foreach (var l in _listeners.GetValueOrDefault(eventName) ?? [])
+            l.Handle(eventName, data);
+    }
+}
+
+// ── Suscriptores concretos ────────────────────────────────────
+public class EmailNotifier : IEventListener
+{
+    public void Handle(string ev, Dictionary&lt;string, string&gt; data)
+        => Console.WriteLine($"  [Email] → {data["email"]} | Asunto: {ev}");
+}
+
+public class SlackNotifier(string channel) : IEventListener
+{
+    public void Handle(string ev, Dictionary&lt;string, string&gt; data)
+        => Console.WriteLine($"  [Slack] #{channel} | {ev}: {data["repo"]} @ {data["branch"]}");
+}
+
+public class PagerDutyAlert : IEventListener
+{
+    public void Handle(string ev, Dictionary&lt;string, string&gt; data)
+    {
+        var sev = ev.Contains("failed") ? "CRITICAL" : "INFO";
+        Console.WriteLine($"  [PagerDuty] Alerta {sev} por: {ev}");
+    }
+}
+
+public class AuditLogger : IEventListener
+{
+    public void Handle(string ev, Dictionary&lt;string, string&gt; data)
+        => Console.WriteLine($"  [Audit] {ev} | user={data["user"]} | ts={data["timestamp"]}");
+}
+
+// ── Configuración del sistema ─────────────────────────────────
+var bus = new EventBus();
+bus.Subscribe("build.failed",       new EmailNotifier());
+bus.Subscribe("build.failed",       new SlackNotifier("#alerts"));
+bus.Subscribe("build.failed",       new PagerDutyAlert());
+bus.Subscribe("build.failed",       new AuditLogger());
+bus.Subscribe("deployment.success", new SlackNotifier("#deployments"));
+bus.Subscribe("deployment.success", new AuditLogger());
+
+bus.Publish("build.failed", new()
+{
+    ["repo"] = "backend-api", ["branch"] = "main",
+    ["email"] = "dev-team@empresa.com", ["user"] = "ci-bot",
+    ["timestamp"] = "2025-03-10T14:22:00Z",
+});</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Dibuja el grafo de suscripciones</h4>
+        <div class="ascii">                     ┌────────────────┐
+                     │    EventBus    │
+                     └───────┬────────┘
+                             │ publish(evento, datos)
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+     [EmailNotifier]  [SlackNotifier]  [AuditLogger]
+          .handle()       .handle()       .handle()</div>
+        <ol>
+          <li>Extiende el diagrama para incluir los 3 eventos: <code>build.failed</code>, <code>deployment.success</code>, <code>user.signup</code>.</li>
+          <li>Usa <span class="chip cr">rojo</span> para las flechas de <code>build.failed</code>, <span class="chip cg">verde</span> para <code>deployment.success</code>, <span class="chip cb">azul</span> para <code>user.signup</code>.</li>
+          <li><strong>Nuevo evento:</strong> La empresa quiere agregar <code>payment.failed</code>. Decide qué suscriptores deben reaccionar y dibújalos. ¿Cuántas líneas de código existente necesitas cambiar?</li>
+          <li><strong>Reflexión:</strong> ¿Qué pasaría si en lugar del EventBus usaras llamadas directas (<code>if build_failed: send_email(); post_slack(); alert_pagerduty();</code>)? Escribe dos problemas que esto genera.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── STRATEGY ─────────────────────────────────────── -->
+  <section class="card" id="strategy">
+    <div class="card-head">
+      <span class="tag tag3">Comportamental</span>
+      <div>
+        <h3>Strategy</h3>
+        <p class="sub">Define una familia de algoritmos, los encapsula y los hace intercambiables en tiempo de ejecución.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando tienes múltiples variantes de un algoritmo y necesitas intercambiarlos según condiciones de runtime (tipo de usuario, plan, contexto).</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Amazon / Mercado Libre:</strong> El cálculo de envío varía según el plan del usuario (Prime, normal), el peso y el destino. Cada variante es una estrategia intercambiable.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">shipping — Calculadora de envíos (estilo Amazon/Mercado Libre)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+class Package {
+    public function __construct(
+        public readonly float  $weightKg,
+        public readonly string $destination,
+        public readonly float  $declaredValue = 0.0,
+    ) {}
+}
+
+// ── Interfaz de estrategia ────────────────────────────────────
+interface ShippingStrategy {
+    public function calculateCost(Package $pkg): float;
+    public function estimatedDays(Package $pkg): int;
+    public function label(): string;
+}
+
+// ── Estrategias concretas ─────────────────────────────────────
+class StandardShipping implements ShippingStrategy {
+    public function calculateCost(Package $pkg): float { return round($pkg->weightKg * 35.0, 2); }
+    public function estimatedDays(Package $pkg): int   { return $pkg->destination === 'remoto' ? 7 : 5; }
+    public function label(): string { return 'Envío estándar'; }
+}
+
+class ExpressShipping implements ShippingStrategy {
+    public function calculateCost(Package $pkg): float { return round($pkg->weightKg * 90.0 + 50.0, 2); }
+    public function estimatedDays(Package $pkg): int   { return 2; }
+    public function label(): string { return 'Envío express'; }
+}
+
+class PrimeShipping implements ShippingStrategy {
+    public function calculateCost(Package $pkg): float { return 0.0; } // Gratis
+    public function estimatedDays(Package $pkg): int   { return 1; }
+    public function label(): string { return 'Prime: envío gratis en 1 día'; }
+}
+
+class InsuredShipping implements ShippingStrategy {
+    public function calculateCost(Package $pkg): float {
+        return round($pkg->weightKg * 45.0 + $pkg->declaredValue * 0.02, 2);
+    }
+    public function estimatedDays(Package $pkg): int { return 3; }
+    public function label(): string { return 'Envío con seguro'; }
+}
+
+// ── Contexto ──────────────────────────────────────────────────
+class ShippingCalculator {
+    public function __construct(private ShippingStrategy $strategy) {}
+
+    public function setStrategy(ShippingStrategy $s): void { $this->strategy = $s; }
+
+    public function quote(Package $pkg): array {
+        return [
+            'method' => $this->strategy->label(),
+            'cost'   => $this->strategy->calculateCost($pkg),
+            'days'   => $this->strategy->estimatedDays($pkg),
+        ];
+    }
+}
+
+function selectStrategy(bool $prime, bool $urgent, bool $insured): ShippingStrategy {
+    if ($prime)   return new PrimeShipping();
+    if ($insured) return new InsuredShipping();
+    if ($urgent)  return new ExpressShipping();
+    return new StandardShipping();
+}
+
+$pkg = new Package(weightKg: 3.2, destination: 'CDMX', declaredValue: 2000.0);
+
+foreach ([[true,false,false],[false,true,false],[false,false,true],[false,false,false]] as [$p,$u,$i]) {
+    $q = (new ShippingCalculator(selectStrategy($p, $u, $i)))->quote($pkg);
+    printf("%-30s | $%7.2f | %d días\n", $q['method'], $q['cost'], $q['days']);
+}</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">public record Package(double WeightKg, string Destination, double DeclaredValue = 0.0);
+
+// ── Interfaz de estrategia ────────────────────────────────────
+public interface IShippingStrategy
+{
+    double CalculateCost(Package pkg);
+    int    EstimatedDays(Package pkg);
+    string Label { get; }
+}
+
+// ── Estrategias concretas ─────────────────────────────────────
+public class StandardShipping : IShippingStrategy
+{
+    public double CalculateCost(Package p) => Math.Round(p.WeightKg * 35.0, 2);
+    public int    EstimatedDays(Package p) => p.Destination == "remoto" ? 7 : 5;
+    public string Label => "Envío estándar";
+}
+
+public class ExpressShipping : IShippingStrategy
+{
+    public double CalculateCost(Package p) => Math.Round(p.WeightKg * 90.0 + 50.0, 2);
+    public int    EstimatedDays(Package p) => 2;
+    public string Label => "Envío express";
+}
+
+public class PrimeShipping : IShippingStrategy
+{
+    public double CalculateCost(Package p) => 0.0; // Gratis
+    public int    EstimatedDays(Package p) => 1;
+    public string Label => "Prime: envío gratis en 1 día";
+}
+
+public class InsuredShipping : IShippingStrategy
+{
+    public double CalculateCost(Package p) =>
+        Math.Round(p.WeightKg * 45.0 + p.DeclaredValue * 0.02, 2);
+    public int    EstimatedDays(Package p) => 3;
+    public string Label => "Envío con seguro";
+}
+
+// ── Contexto ──────────────────────────────────────────────────
+public class ShippingCalculator(IShippingStrategy strategy)
+{
+    private IShippingStrategy _strategy = strategy;
+    public void SetStrategy(IShippingStrategy s) => _strategy = s;
+    public (string Method, double Cost, int Days) Quote(Package pkg) =>
+        (_strategy.Label, _strategy.CalculateCost(pkg), _strategy.EstimatedDays(pkg));
+}
+
+static IShippingStrategy SelectStrategy(bool prime, bool urgent, bool insured) =>
+    (prime, insured, urgent) switch
+    {
+        (true, _, _) => new PrimeShipping(),
+        (_, true, _) => new InsuredShipping(),
+        (_, _, true) => new ExpressShipping(),
+        _            => new StandardShipping(),
+    };
+
+var pkg = new Package(3.2, "CDMX", 2000.0);
+bool[][] scenarios = [[true,false,false],[false,true,false],[false,false,true],[false,false,false]];
+
+foreach (var s in scenarios)
+{
+    var q = new ShippingCalculator(SelectStrategy(s[0], s[1], s[2])).Quote(pkg);
+    Console.WriteLine($"{q.Method,-30} | ${q.Cost,7:F2} | {q.Days} días");
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Árbol de decisión y tabla comparativa</h4>
+        <div class="ascii">          ¿usuario es Prime?
+               /            \
+            SÍ               NO
+            │                │
+     PrimeShipping     ¿tiene seguro?
+     ($0, 1 día)          /       \
+                        SÍ         NO
+                        │          │
+               InsuredShipping  ¿es urgente?
+               (base+seguro,      /      \
+                3 días)         SÍ        NO
+                                │          │
+                        ExpressShipping  StandardShipping
+                        ($$, 2 días)     ($, 5-7 días)</div>
+        <ol>
+          <li>Colorea cada hoja del árbol con un color distinto: <span class="chip cg">verde</span> Prime, <span class="chip cb">azul</span> Standard, <span class="chip co">naranja</span> Express, <span class="chip cp">morado</span> Insured.</li>
+          <li>Llena la siguiente tabla con los valores del código para un paquete de 3.2 kg, valor $2,000:</li>
+        </ol>
+        <div class="ascii">  Estrategia        │ Costo (MXN) │ Días │ ¿Cuándo aplica?
+  ──────────────────┼─────────────┼──────┼─────────────────────
+  Standard          │             │      │
+  Express           │             │      │
+  Prime             │             │      │
+  Insured           │             │      │</div>
+        <ol start="3">
+          <li><strong>Nueva estrategia:</strong> La empresa quiere agregar "Entrega en sucursal" ($0, 3 días). Dibuja la nueva clase en el árbol y en el diagrama UML.</li>
+          <li>¿Cuántas líneas existentes necesitas modificar para agregarla? (Respuesta correcta: muy pocas. ¿Por qué?)</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMMAND ──────────────────────────────────────── -->
+  <section class="card" id="command">
+    <div class="card-head">
+      <span class="tag tag3">Comportamental</span>
+      <div>
+        <h3>Command</h3>
+        <p class="sub">Encapsula una solicitud como un objeto, lo que permite parametrizar clientes, encolar solicitudes y soportar operaciones reversibles.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="meta-row">
+        <div class="meta-box">
+          <h4>¿Cuándo usarlo?</h4>
+          <p>Cuando necesitas historial de operaciones, deshacer/rehacer, colas de trabajo, transacciones o auditoría. También útil para macro-comandos.</p>
+        </div>
+        <div class="meta-box">
+          <h4>Producto real</h4>
+          <p><strong>Google Docs / Figma / VS Code:</strong> Cada acción del usuario (escribir, formatear, mover) es un Command. El historial de Commands permite Ctrl+Z y Ctrl+Y ilimitados.</p>
+        </div>
+      </div>
+
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <span class="fname">editor — Editor con undo/redo (estilo Google Docs / Figma)</span>
+          <div class="tab-buttons">
+            <button class="tab-btn active" data-lang="php" onclick="switchTab(this.closest('.code-tabs'),'php')">PHP</button>
+            <button class="tab-btn" data-lang="csharp" onclick="switchTab(this.closest('.code-tabs'),'csharp')">C#</button>
+          </div>
+        </div>
+        <div class="tab-panel active" data-lang="php">
+<pre><code class="language-php">&lt;?php
+
+// ── Estado del documento ──────────────────────────────────────
+class Document {
+    public string $content  = '';
+    public int    $fontSize = 12;
+    public bool   $isBold   = false;
+}
+
+// ── Interfaz Command ──────────────────────────────────────────
+interface Command {
+    public function execute(): void;
+    public function undo(): void;
+    public function description(): string;
+}
+
+// ── Comandos concretos ────────────────────────────────────────
+class InsertTextCommand implements Command {
+    private int $pos;
+
+    public function __construct(private Document $doc, private string $text, ?int $pos = null) {
+        $this->pos = $pos ?? strlen($doc->content);
+    }
+
+    public function execute(): void {
+        $this->doc->content = substr($this->doc->content, 0, $this->pos)
+            . $this->text . substr($this->doc->content, $this->pos);
+    }
+    public function undo(): void {
+        $this->doc->content = substr($this->doc->content, 0, $this->pos)
+            . substr($this->doc->content, $this->pos + strlen($this->text));
+    }
+    public function description(): string { return "InsertText(\"{$this->text}\")"; }
+}
+
+class FormatCommand implements Command {
+    private mixed $oldValue;
+
+    public function __construct(
+        private Document $doc, private string $prop, private mixed $newValue
+    ) {
+        $this->oldValue = $doc->{$prop};
+    }
+
+    public function execute(): void { $this->doc->{$this->prop} = $this->newValue; }
+    public function undo():    void { $this->doc->{$this->prop} = $this->oldValue; }
+    public function description(): string {
+        return "Format({$this->prop}: {$this->oldValue} → {$this->newValue})";
+    }
+}
+
+// ── Historial de comandos ─────────────────────────────────────
+class CommandHistory {
+    private array $done = [], $undone = [];
+
+    public function execute(Command $cmd): void {
+        $cmd->execute();
+        $this->done[]  = $cmd;
+        $this->undone  = []; // nueva acción borra el redo stack
+        echo "  DO:   " . $cmd->description() . "\n";
+    }
+    public function undo(): void {
+        if (!$this->done) { echo "Nada que deshacer.\n"; return; }
+        $cmd = array_pop($this->done);
+        $cmd->undo();
+        $this->undone[] = $cmd;
+        echo "  UNDO: " . $cmd->description() . "\n";
+    }
+    public function redo(): void {
+        if (!$this->undone) { echo "Nada que rehacer.\n"; return; }
+        $cmd = array_pop($this->undone);
+        $cmd->execute();
+        $this->done[] = $cmd;
+        echo "  REDO: " . $cmd->description() . "\n";
+    }
+}
+
+// ── Simulación de sesión de edición ──────────────────────────
+$doc     = new Document();
+$history = new CommandHistory();
+
+$history->execute(new InsertTextCommand($doc, 'Hola, mundo!'));
+$history->execute(new FormatCommand($doc, 'fontSize', 24));
+$history->execute(new FormatCommand($doc, 'isBold', true));
+
+echo "\nDoc: '{$doc->content}' | size={$doc->fontSize} | bold=" . ($doc->isBold ? 'true' : 'false') . "\n\n";
+
+$history->undo(); // deshace isBold
+$history->undo(); // deshace fontSize
+$history->redo(); // rehace fontSize</code></pre>
+        </div>
+        <div class="tab-panel" data-lang="csharp">
+<pre><code class="language-csharp">// ── Estado del documento ──────────────────────────────────────
+public class Document
+{
+    public string Content  { get; set; } = "";
+    public int    FontSize { get; set; } = 12;
+    public bool   IsBold   { get; set; } = false;
+}
+
+// ── Interfaz Command ──────────────────────────────────────────
+public interface ICommand
+{
+    void   Execute();
+    void   Undo();
+    string Description { get; }
+}
+
+// ── Comandos concretos ────────────────────────────────────────
+public class InsertTextCommand(Document doc, string text, int? pos = null) : ICommand
+{
+    private readonly int _pos = pos ?? doc.Content.Length;
+
+    public void Execute() =>
+        doc.Content = doc.Content[.._pos] + text + doc.Content[_pos..];
+    public void Undo() =>
+        doc.Content = doc.Content[.._pos] + doc.Content[(_pos + text.Length)..];
+    public string Description => $"InsertText(\"{text}\")";
+}
+
+public class FormatCommand&lt;T&gt;(
+    Document doc, Func&lt;Document, T&gt; get, Action&lt;Document, T&gt; set, T newVal) : ICommand
+{
+    private readonly T _old = get(doc);
+    public void Execute() => set(doc, newVal);
+    public void Undo()    => set(doc, _old);
+    public string Description => $"Format({_old} → {newVal})";
+}
+
+// ── Historial de comandos ─────────────────────────────────────
+public class CommandHistory
+{
+    private readonly Stack&lt;ICommand&gt; _done   = new();
+    private readonly Stack&lt;ICommand&gt; _undone = new();
+
+    public void Execute(ICommand cmd)
+    {
+        cmd.Execute(); _done.Push(cmd); _undone.Clear();
+        Console.WriteLine($"  DO:   {cmd.Description}");
+    }
+    public void Undo()
+    {
+        if (_done.Count == 0) { Console.WriteLine("Nada que deshacer."); return; }
+        var cmd = _done.Pop(); cmd.Undo(); _undone.Push(cmd);
+        Console.WriteLine($"  UNDO: {cmd.Description}");
+    }
+    public void Redo()
+    {
+        if (_undone.Count == 0) { Console.WriteLine("Nada que rehacer."); return; }
+        var cmd = _undone.Pop(); cmd.Execute(); _done.Push(cmd);
+        Console.WriteLine($"  REDO: {cmd.Description}");
+    }
+}
+
+// ── Simulación de sesión de edición ──────────────────────────
+var doc     = new Document();
+var history = new CommandHistory();
+
+history.Execute(new InsertTextCommand(doc, "Hola, mundo!"));
+history.Execute(new FormatCommand&lt;int&gt;(doc,  d => d.FontSize, (d, v) => d.FontSize = v, 24));
+history.Execute(new FormatCommand&lt;bool&gt;(doc, d => d.IsBold,   (d, v) => d.IsBold   = v, true));
+
+Console.WriteLine($"\nDoc: '{doc.Content}' | size={doc.FontSize} | bold={doc.IsBold}\n");
+
+history.Undo(); // deshace IsBold
+history.Undo(); // deshace FontSize
+history.Redo(); // rehace FontSize</code></pre>
+        </div>
+      </div>
+
+      <div class="paper">
+        <span class="paper-label">✏️ Ejercicio — papel, lápiz y colores</span>
+        <h4>Actividad: Dibuja el stack de historial en cada paso</h4>
+        <div class="ascii">  Dibuja el estado del stack en cada momento:
+
+  Acción                       │ Stack _done          │ Stack _undone
+  ─────────────────────────────┼──────────────────────┼─────────────────
+  execute(InsertText("Hola"))  │ [InsertText]         │ []
+  execute(Format(size→24))     │ [InsertText,Format]  │ []
+  execute(Format(bold→True))   │ [_____,_____,_____]  │ []    ← tú llenas
+  execute(InsertText("¿Cómo"))│ [_____,_____,___,___]│ []    ← tú llenas
+  undo()                       │ [_____,_____,_____]  │ [____] ← tú llenas
+  undo()                       │ [_____,_____]        │ [____,_____]
+  execute(Format(color→rojo))  │ [_____,_____,_____]  │ [____]  ← ¿qué pasa?</div>
+        <ol>
+          <li>Completa la tabla dibujando el estado de ambos stacks en cada paso.</li>
+          <li>Para el último paso (<code>execute(Format(color→rojo))</code>): ¿qué le pasa al stack <code>_undone</code>? ¿Por qué tiene sentido?</li>
+          <li>Usa <span class="chip cg">verde</span> para los comandos en <code>_done</code> y <span class="chip cr">rojo</span> para los de <code>_undone</code>.</li>
+          <li><strong>Nuevo comando:</strong> Diseña un <code>MoveTextCommand(doc, from_pos, to_pos, length)</code>. Escribe en pseudocódigo sus métodos <code>execute</code> y <code>undo</code>.</li>
+          <li><strong>Reflexión:</strong> ¿Por qué al ejecutar un nuevo comando se borra el stack de redo? Piensa en el ejemplo de Google Docs.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  EJERCICIO FINAL                                    -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="final" id="ejercicio-final">
+    <h2>🎯 Ejercicio Final Integrador</h2>
+    <p class="intro">
+      Estás diseñando el backend de <strong>StreamFlix</strong>, una plataforma de streaming (como Netflix).
+      Para cada escenario, identifica qué patrón de diseño aplica y justifica tu respuesta.
+      Haz clic en "Ver patrón" para revelar la respuesta.
+    </p>
+    <div class="scenarios">
+
+      <div class="sc">
+        <div class="sc-num">Escenario 01</div>
+        <h4>Configuración global</h4>
+        <p>La app necesita acceder a claves de API, URLs de servicios y feature flags desde cualquier módulo, sin recargar la configuración cada vez.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Singleton — una instancia global compartida de AppConfig')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 02</div>
+        <h4>Métodos de pago</h4>
+        <p>El checkout soporta tarjeta de crédito, PayPal y transferencia bancaria. La lógica de negocio no debe cambiar si se agrega Apple Pay.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Factory Method — create_payment_processor(method)')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 03</div>
+        <h4>Construcción de emails</h4>
+        <p>Los correos transaccionales tienen muchos campos opcionales: CC, adjuntos, plantilla, idioma, botones CTA. El constructor tiene demasiados parámetros.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Builder — EmailBuilder().to().subject().template().attach().build()')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 04</div>
+        <h4>Integración de proveedores de video</h4>
+        <p>StreamFlix usa AWS CloudFront, pero quiere poder cambiar a Cloudflare Stream sin modificar la lógica de reproducción.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Adapter — VideoDeliveryAdapter traduce la interfaz del SDK')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 05</div>
+        <h4>Seguridad de endpoints</h4>
+        <p>Cada endpoint de la API necesita autenticación JWT, logging de accesos y rate limiting, sin repetir esa lógica en cada handler.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Decorator — @require_auth @log @rate_limit sobre cada handler')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 06</div>
+        <h4>Notificaciones de eventos</h4>
+        <p>Cuando un usuario completa su primer mes de suscripción, deben reaccionar: el sistema de emails, el CRM, el sistema de badges y el analytics.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Observer — EventBus.publish(\"subscription.milestone\", data)')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 07</div>
+        <h4>Calidad de video adaptativa</h4>
+        <p>El reproductor elige entre HD, Full HD y 4K según el ancho de banda del usuario. El algoritmo de selección debe ser intercambiable.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Strategy — QualityStrategy: LowBandwidth / HD / UHD')">Ver patrón →</span>
+      </div>
+
+      <div class="sc">
+        <div class="sc-num">Escenario 08</div>
+        <h4>Editor de listas de reproducción</h4>
+        <p>El usuario puede agregar, reordenar y eliminar videos de su playlist. Se necesita soporte de Ctrl+Z para deshacer cambios.</p>
+        <span class="answer" onclick="toggleAnswer(this, 'Command — AddVideoCmd, RemoveVideoCmd, ReorderCmd con undo()')">Ver patrón →</span>
+      </div>
+
+    </div>
+
+    <div style="margin-top:2rem; background:#1e293b; border-radius:8px; padding:1.25rem;">
+      <p style="color:#94a3b8; font-size:.88rem; margin-bottom:.75rem;"><strong style="color:#f1f5f9;">Ejercicio de papel final:</strong> Con todos los patrones identificados, dibuja el diagrama de arquitectura de StreamFlix mostrando cómo se relacionan entre sí. Usa un color diferente para cada categoría de patrón (naranja creacional, azul estructural, verde comportamental). Identifica qué capa de la arquitectura (presentación, lógica de negocio, infraestructura) usa cada patrón.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Basado en "Design Patterns: Elements of Reusable Object-Oriented Software" — Gang of Four (GoF), 1994.
+</footer>
+
+<script>
+  hljs.highlightAll();
+
+  function switchTab(tabsEl, lang) {
+    tabsEl.querySelectorAll('.tab-btn').forEach(btn =>
+      btn.classList.toggle('active', btn.dataset.lang === lang));
+    tabsEl.querySelectorAll('.tab-panel').forEach(panel =>
+      panel.classList.toggle('active', panel.dataset.lang === lang));
+  }
+
+  function toggleAnswer(el, answer) {
+    if (el.classList.contains('show')) {
+      el.textContent = 'Ver patrón →';
+      el.classList.remove('show');
+    } else {
+      el.textContent = '✓ ' + answer;
+      el.classList.add('show');
+    }
+  }
+</script>
+</body>
+</html>
