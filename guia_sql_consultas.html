@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Completa de Consultas SQL — TechStore DB</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #242736;
+      --border: #2e3347;
+      --accent: #7c6af7;
+      --accent2: #5cb8ff;
+      --accent3: #4eca8b;
+      --accent4: #f7c948;
+      --accent5: #f76c6c;
+      --text: #e2e4f0;
+      --text2: #9ba3c2;
+      --text3: #6b7394;
+      --code-bg: #12141e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.65;
+      display: flex;
+    }
+
+    /* Sidebar */
+    nav#sidebar {
+      width: 270px;
+      min-width: 270px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+    }
+    nav#sidebar .logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    nav#sidebar .logo span {
+      display: block;
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    nav#sidebar .logo h2 { font-size: 16px; color: var(--accent); }
+    nav#sidebar a {
+      display: block;
+      padding: 7px 20px;
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    nav#sidebar a:hover { color: var(--text); background: var(--surface2); border-left-color: var(--accent); }
+    nav#sidebar .section-label {
+      padding: 12px 20px 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text3);
+      margin-top: 8px;
+    }
+
+    /* Main */
+    main { flex: 1; padding: 48px 56px; max-width: 1000px; }
+
+    h1 { font-size: 32px; margin-bottom: 8px; }
+    h1 span { color: var(--accent); }
+    .subtitle { color: var(--text2); margin-bottom: 40px; font-size: 15px; }
+
+    h2 {
+      font-size: 22px;
+      margin: 56px 0 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      scroll-margin-top: 24px;
+    }
+    h2 .num {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    h3 {
+      font-size: 16px;
+      margin: 28px 0 12px;
+      color: var(--accent2);
+    }
+    p { margin-bottom: 14px; color: var(--text2); }
+    p strong { color: var(--text); }
+
+    /* Schema cards */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 20px 0 32px;
+    }
+    .schema-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .schema-card h4 {
+      font-size: 13px;
+      color: var(--accent4);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
+    .schema-card .col {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .schema-card .col:last-child { border-bottom: none; }
+    .schema-card .col .type { color: var(--accent3); font-family: monospace; }
+    .schema-card .col .pk { color: var(--accent4); font-size: 10px; font-weight: bold; }
+    .schema-card .col .fk { color: var(--accent5); font-size: 10px; font-weight: bold; }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+    }
+    .code-block .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-block .header .label {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .code-block .header .badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .badge-select { background: rgba(124,106,247,0.2); color: var(--accent); }
+    .badge-join   { background: rgba(92,184,255,0.2); color: var(--accent2); }
+    .badge-agg    { background: rgba(78,202,139,0.2); color: var(--accent3); }
+    .badge-adv    { background: rgba(247,201,72,0.2); color: var(--accent4); }
+    .badge-sub    { background: rgba(247,108,108,0.2); color: var(--accent5); }
+    pre {
+      padding: 18px 20px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.7;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    }
+    /* SQL Syntax coloring */
+    .kw  { color: #c792ea; font-weight: 600; }
+    .fn  { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .num { color: #f78c6c; }
+    .cmt { color: #546e7a; font-style: italic; }
+    .tbl { color: #ffcb6b; }
+    .col { color: #89ddff; }
+    .op  { color: #89ddff; }
+
+    /* Info / tip boxes */
+    .box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0 24px;
+      font-size: 14px;
+      display: flex;
+      gap: 12px;
+    }
+    .box-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .box-tip  { background: rgba(78,202,139,0.08); border: 1px solid rgba(78,202,139,0.2); color: var(--text2); }
+    .box-warn { background: rgba(247,201,72,0.08); border: 1px solid rgba(247,201,72,0.2); color: var(--text2); }
+    .box-info { background: rgba(92,184,255,0.08); border: 1px solid rgba(92,184,255,0.2); color: var(--text2); }
+
+    /* Result tables */
+    .result-wrap { margin: 12px 0 24px; overflow-x: auto; }
+    .result-label {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    table.result {
+      border-collapse: collapse;
+      font-size: 13px;
+      width: 100%;
+    }
+    table.result th {
+      background: var(--surface2);
+      color: var(--accent4);
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 2px solid var(--border);
+    }
+    table.result td {
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+      font-family: monospace;
+      font-size: 13px;
+    }
+    table.result tr:hover td { background: var(--surface2); }
+
+    /* Steps */
+    .steps { counter-reset: step; margin: 20px 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 18px;
+      align-items: flex-start;
+    }
+    .step-num {
+      counter-increment: step;
+      min-width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-content h4 { font-size: 14px; margin-bottom: 4px; color: var(--text); }
+    .step-content p  { font-size: 13px; margin: 0; }
+
+    /* Exercise */
+    .exercise {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    .exercise h4 { color: var(--accent4); margin-bottom: 10px; font-size: 14px; }
+    .exercise ol { padding-left: 20px; color: var(--text2); font-size: 14px; }
+    .exercise ol li { margin-bottom: 10px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav#sidebar { display: none; }
+      main { padding: 28px 20px; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <span>Guía de Práctica</span>
+    <h2>SQL &amp; Consultas</h2>
+  </div>
+
+  <div class="section-label">Fundamentos</div>
+  <a href="#schema">La Base de Datos</a>
+  <a href="#select">SELECT Básico</a>
+  <a href="#where">WHERE — Filtros</a>
+  <a href="#order">ORDER BY</a>
+  <a href="#limit">LIMIT / OFFSET</a>
+
+  <div class="section-label">Agregaciones</div>
+  <a href="#funciones">Funciones de Agregación</a>
+  <a href="#groupby">GROUP BY</a>
+  <a href="#having">HAVING</a>
+
+  <div class="section-label">Relaciones</div>
+  <a href="#joins">JOINs</a>
+  <a href="#inner">INNER JOIN</a>
+  <a href="#left">LEFT / RIGHT JOIN</a>
+  <a href="#full">FULL OUTER JOIN</a>
+  <a href="#self">SELF JOIN</a>
+
+  <div class="section-label">Avanzado</div>
+  <a href="#subqueries">Subconsultas</a>
+  <a href="#cte">CTEs — WITH</a>
+  <a href="#window">Funciones de Ventana</a>
+  <a href="#case">CASE / condicionales</a>
+  <a href="#string">Funciones de cadena</a>
+  <a href="#date">Funciones de fecha</a>
+
+  <div class="section-label">Práctica</div>
+  <a href="#ejercicios">Ejercicios por nivel</a>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <h1>Guía Completa de <span>Consultas SQL</span></h1>
+  <p class="subtitle">Aprende SQL paso a paso con la base de datos <strong>TechStore</strong> — 15,555 registros reales para practicar.</p>
+
+  <!-- ==================== SCHEMA ==================== -->
+  <h2 id="schema"><span class="num">0</span>La Base de Datos — TechStore</h2>
+  <p>Antes de escribir consultas necesitamos conocer la estructura. TechStore es una tienda de electrónicos con las siguientes tablas:</p>
+
+  <div class="schema-grid">
+    <div class="schema-card">
+      <h4>regiones</h4>
+      <div class="col"><span>region_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre</span><span class="type">VARCHAR(50)</span></div>
+      <div class="col"><span>pais</span><span class="type">VARCHAR(50)</span></div>
+    </div>
+    <div class="schema-card">
+      <h4>departamentos</h4>
+      <div class="col"><span>departamento_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre</span><span class="type">VARCHAR(80)</span></div>
+      <div class="col"><span>presupuesto</span><span class="type">DECIMAL</span></div>
+      <div class="col"><span>region_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+    </div>
+    <div class="schema-card">
+      <h4>empleados</h4>
+      <div class="col"><span>empleado_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre / apellido</span><span class="type">VARCHAR</span></div>
+      <div class="col"><span>puesto / salario</span><span class="type">VARCHAR/DECIMAL</span></div>
+      <div class="col"><span>departamento_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>jefe_id</span><span><span class="fk">FK→self</span> <span class="type">INTEGER</span></span></div>
+    </div>
+    <div class="schema-card">
+      <h4>categorias</h4>
+      <div class="col"><span>categoria_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre</span><span class="type">VARCHAR(80)</span></div>
+      <div class="col"><span>descripcion</span><span class="type">TEXT</span></div>
+      <div class="col"><span>activa</span><span class="type">BOOLEAN</span></div>
+    </div>
+    <div class="schema-card">
+      <h4>productos</h4>
+      <div class="col"><span>producto_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre / marca</span><span class="type">VARCHAR</span></div>
+      <div class="col"><span>precio_compra</span><span class="type">DECIMAL</span></div>
+      <div class="col"><span>precio_venta</span><span class="type">DECIMAL</span></div>
+      <div class="col"><span>stock</span><span class="type">INTEGER</span></div>
+      <div class="col"><span>categoria_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+    </div>
+    <div class="schema-card">
+      <h4>clientes</h4>
+      <div class="col"><span>cliente_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>nombre / apellido</span><span class="type">VARCHAR</span></div>
+      <div class="col"><span>email / telefono</span><span class="type">VARCHAR</span></div>
+      <div class="col"><span>ciudad / estado</span><span class="type">VARCHAR</span></div>
+      <div class="col"><span>tipo_cliente</span><span class="type">VARCHAR(20)</span></div>
+    </div>
+    <div class="schema-card">
+      <h4>pedidos</h4>
+      <div class="col"><span>pedido_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>cliente_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>empleado_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>fecha_pedido</span><span class="type">DATE</span></div>
+      <div class="col"><span>estado / total</span><span class="type">VARCHAR/DECIMAL</span></div>
+      <div class="col"><span>metodo_pago</span><span class="type">VARCHAR(30)</span></div>
+    </div>
+    <div class="schema-card">
+      <h4>detalle_pedidos</h4>
+      <div class="col"><span>detalle_id</span><span><span class="pk">PK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>pedido_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>producto_id</span><span><span class="fk">FK</span> <span class="type">INTEGER</span></span></div>
+      <div class="col"><span>cantidad</span><span class="type">INTEGER</span></div>
+      <div class="col"><span>precio_unitario</span><span class="type">DECIMAL</span></div>
+      <div class="col"><span>descuento_linea</span><span class="type">DECIMAL</span></div>
+    </div>
+  </div>
+
+  <div class="box box-info">
+    <span class="box-icon">💡</span>
+    <div>Para cargar la base de datos ejecuta: <code>sqlite3 techstore.db &lt; techstore.sql</code> (SQLite) o <code>psql -d techstore -f techstore.sql</code> (PostgreSQL). Los ejemplos de esta guía son compatibles con ambos.</div>
+  </div>
+
+  <!-- ==================== SELECT ==================== -->
+  <h2 id="select"><span class="num">1</span>SELECT — Seleccionar columnas</h2>
+  <p>El comando <strong>SELECT</strong> es el más fundamental de SQL. Lee datos sin modificarlos.</p>
+
+  <h3>Sintaxis básica</h3>
+  <div class="code-block">
+    <div class="header"><span class="label">Sintaxis</span><span class="badge badge-select">SELECT</span></div>
+    <pre><span class="kw">SELECT</span> <span class="col">columna1</span>, <span class="col">columna2</span>, ...
+<span class="kw">FROM</span>   <span class="tbl">nombre_tabla</span>;</pre>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Seleccionar todas las columnas con *</h4><p>Usa <code>*</code> para traer todas las columnas. Evítalo en producción — es mejor ser explícito.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Nombrar columnas (alias)</h4><p>Con <code>AS</code> renombras una columna en el resultado.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Expresiones calculadas</h4><p>Puedes hacer cálculos directamente en el SELECT.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content"><h4>DISTINCT para valores únicos</h4><p><code>DISTINCT</code> elimina filas duplicadas.</p></div></div>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 1.1 — SELECT *</span><span class="badge badge-select">SELECT</span></div>
+    <pre><span class="cmt">-- Traer todos los campos de categorías</span>
+<span class="kw">SELECT</span> *
+<span class="kw">FROM</span>  <span class="tbl">categorias</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 1.2 — Columnas específicas y alias</span><span class="badge badge-select">SELECT</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">producto_id</span>                                   <span class="kw">AS</span> <span class="col">id</span>,
+    <span class="col">nombre</span>                                        <span class="kw">AS</span> <span class="col">producto</span>,
+    <span class="col">marca</span>,
+    <span class="col">precio_venta</span>                                  <span class="kw">AS</span> <span class="col">precio</span>,
+    <span class="col">precio_venta</span> <span class="op">-</span> <span class="col">precio_compra</span>                  <span class="kw">AS</span> <span class="col">ganancia</span>,
+    <span class="op">ROUND</span>(((<span class="col">precio_venta</span> <span class="op">-</span> <span class="col">precio_compra</span>) <span class="op">/</span> <span class="col">precio_compra</span>) <span class="op">*</span> <span class="num">100</span>, <span class="num">2</span>) <span class="kw">AS</span> <span class="col">margen_pct</span>
+<span class="kw">FROM</span>  <span class="tbl">productos</span>;</pre>
+  </div>
+
+  <div class="result-wrap">
+    <div class="result-label">Resultado esperado (primeras filas)</div>
+    <table class="result">
+      <tr><th>id</th><th>producto</th><th>marca</th><th>precio</th><th>ganancia</th><th>margen_pct</th></tr>
+      <tr><td>1</td><td>Apple Pro Max 2023</td><td>Apple</td><td>18420.50</td><td>4210.30</td><td>29.64</td></tr>
+      <tr><td>2</td><td>Samsung Ultra S</td><td>Samsung</td><td>12340.00</td><td>2890.10</td><td>30.57</td></tr>
+      <tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 1.3 — DISTINCT</span><span class="badge badge-select">SELECT</span></div>
+    <pre><span class="cmt">-- Listar marcas únicas (sin repetir)</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">marca</span>
+<span class="kw">FROM</span>            <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span>        <span class="col">marca</span>;
+
+<span class="cmt">-- Estados únicos de pedidos</span>
+<span class="kw">SELECT DISTINCT</span> <span class="col">estado</span>, <span class="col">metodo_pago</span>
+<span class="kw">FROM</span>            <span class="tbl">pedidos</span>
+<span class="kw">ORDER BY</span>        <span class="col">estado</span>;</pre>
+  </div>
+
+  <!-- ==================== WHERE ==================== -->
+  <h2 id="where"><span class="num">2</span>WHERE — Filtrar filas</h2>
+  <p>La cláusula <strong>WHERE</strong> filtra qué filas incluye el resultado. Solo pasan las filas donde la condición es <code>TRUE</code>.</p>
+
+  <h3>Operadores de comparación</h3>
+  <div class="code-block">
+    <div class="header"><span class="label">Operadores disponibles</span><span class="badge badge-select">WHERE</span></div>
+    <pre><span class="col">columna</span> <span class="op">=</span>   <span class="str">'valor'</span>   <span class="cmt">-- igual</span>
+<span class="col">columna</span> <span class="op">&lt;&gt;</span>  <span class="str">'valor'</span>   <span class="cmt">-- diferente (también !=)</span>
+<span class="col">columna</span> <span class="op">&gt;</span>   <span class="num">100</span>       <span class="cmt">-- mayor que</span>
+<span class="col">columna</span> <span class="op">&gt;=</span>  <span class="num">100</span>       <span class="cmt">-- mayor o igual</span>
+<span class="col">columna</span> <span class="op">&lt;</span>   <span class="num">100</span>       <span class="cmt">-- menor que</span>
+<span class="col">columna</span> <span class="op">BETWEEN</span> <span class="num">100</span> <span class="kw">AND</span> <span class="num">500</span>
+<span class="col">columna</span> <span class="op">IN</span> (<span class="str">'a'</span>, <span class="str">'b'</span>, <span class="str">'c'</span>)
+<span class="col">columna</span> <span class="op">LIKE</span> <span class="str">'patrón%'</span>
+<span class="col">columna</span> <span class="kw">IS NULL</span>
+<span class="col">columna</span> <span class="kw">IS NOT NULL</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 2.1 — Comparaciones simples</span><span class="badge badge-select">WHERE</span></div>
+    <pre><span class="cmt">-- Productos con precio mayor a 5000</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">marca</span>, <span class="col">precio_venta</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">WHERE</span>  <span class="col">precio_venta</span> <span class="op">&gt;</span> <span class="num">5000</span>
+<span class="kw">ORDER BY</span> <span class="col">precio_venta</span> <span class="kw">DESC</span>;
+
+<span class="cmt">-- Clientes del tipo 'vip'</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">ciudad</span>, <span class="col">tipo_cliente</span>
+<span class="kw">FROM</span>   <span class="tbl">clientes</span>
+<span class="kw">WHERE</span>  <span class="col">tipo_cliente</span> <span class="op">=</span> <span class="str">'vip'</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 2.2 — BETWEEN, IN, LIKE</span><span class="badge badge-select">WHERE</span></div>
+    <pre><span class="cmt">-- Pedidos con total entre 1000 y 10000</span>
+<span class="kw">SELECT</span> <span class="col">pedido_id</span>, <span class="col">fecha_pedido</span>, <span class="col">total</span>, <span class="col">estado</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">WHERE</span>  <span class="col">total</span> <span class="op">BETWEEN</span> <span class="num">1000</span> <span class="kw">AND</span> <span class="num">10000</span>;
+
+<span class="cmt">-- Pedidos con estado 'entregado' o 'enviado'</span>
+<span class="kw">SELECT</span> <span class="col">pedido_id</span>, <span class="col">estado</span>, <span class="col">total</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">WHERE</span>  <span class="col">estado</span> <span class="op">IN</span> (<span class="str">'entregado'</span>, <span class="str">'enviado'</span>);
+
+<span class="cmt">-- Productos cuyo nombre empieza con 'Samsung'</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">precio_venta</span>, <span class="col">stock</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">WHERE</span>  <span class="col">nombre</span> <span class="op">LIKE</span> <span class="str">'Samsung%'</span>;
+
+<span class="cmt">-- Empleados cuyo apellido contiene 'García'</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">puesto</span>
+<span class="kw">FROM</span>   <span class="tbl">empleados</span>
+<span class="kw">WHERE</span>  <span class="col">apellido</span> <span class="op">LIKE</span> <span class="str">'%García%'</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 2.3 — AND, OR, NOT</span><span class="badge badge-select">WHERE</span></div>
+    <pre><span class="cmt">-- Productos Apple con precio mayor a 10000 y con stock disponible</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">precio_venta</span>, <span class="col">stock</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">WHERE</span>  <span class="col">marca</span> <span class="op">=</span> <span class="str">'Apple'</span>
+  <span class="kw">AND</span>  <span class="col">precio_venta</span> <span class="op">&gt;</span> <span class="num">10000</span>
+  <span class="kw">AND</span>  <span class="col">stock</span> <span class="op">&gt;</span> <span class="num">0</span>;
+
+<span class="cmt">-- Clientes de CDMX o Guadalajara</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">ciudad</span>
+<span class="kw">FROM</span>   <span class="tbl">clientes</span>
+<span class="kw">WHERE</span>  <span class="col">ciudad</span> <span class="op">=</span> <span class="str">'Ciudad de México'</span>
+   <span class="kw">OR</span>  <span class="col">ciudad</span> <span class="op">=</span> <span class="str">'Guadalajara'</span>;
+
+<span class="cmt">-- Productos activos, no Samsung, precio menor a 3000</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">marca</span>, <span class="col">precio_venta</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">WHERE</span>  <span class="col">activo</span> <span class="op">=</span> <span class="kw">TRUE</span>
+  <span class="kw">AND NOT</span> <span class="col">marca</span> <span class="op">=</span> <span class="str">'Samsung'</span>
+  <span class="kw">AND</span>  <span class="col">precio_venta</span> <span class="op">&lt;</span> <span class="num">3000</span>;</pre>
+  </div>
+
+  <div class="box box-warn">
+    <span class="box-icon">⚠️</span>
+    <div><strong>Precaución con NULL:</strong> <code>columna = NULL</code> nunca es TRUE. Siempre usa <code>IS NULL</code> o <code>IS NOT NULL</code>. Por ejemplo: <code>WHERE jefe_id IS NULL</code> para empleados sin jefe.</div>
+  </div>
+
+  <!-- ==================== ORDER BY ==================== -->
+  <h2 id="order"><span class="num">3</span>ORDER BY — Ordenar resultados</h2>
+  <p>Sin <code>ORDER BY</code>, el motor de base de datos puede devolver filas en cualquier orden. Usa esta cláusula para controlar el orden.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 3.1 — Orden simple</span><span class="badge badge-select">ORDER BY</span></div>
+    <pre><span class="cmt">-- Productos ordenados por precio, más caro primero</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">marca</span>, <span class="col">precio_venta</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> <span class="col">precio_venta</span> <span class="kw">DESC</span>;
+
+<span class="cmt">-- Clientes ordenados por apellido alfabéticamente</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">ciudad</span>
+<span class="kw">FROM</span>   <span class="tbl">clientes</span>
+<span class="kw">ORDER BY</span> <span class="col">apellido</span> <span class="kw">ASC</span>, <span class="col">nombre</span> <span class="kw">ASC</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 3.2 — Orden múltiple y por expresión</span><span class="badge badge-select">ORDER BY</span></div>
+    <pre><span class="cmt">-- Empleados ordenados por departamento y luego por salario desc</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">departamento_id</span>, <span class="col">salario</span>
+<span class="kw">FROM</span>   <span class="tbl">empleados</span>
+<span class="kw">ORDER BY</span> <span class="col">departamento_id</span> <span class="kw">ASC</span>,
+         <span class="col">salario</span> <span class="kw">DESC</span>;
+
+<span class="cmt">-- Productos por margen calculado (puedes ordenar por alias o posición)</span>
+<span class="kw">SELECT</span>
+    <span class="col">nombre</span>,
+    <span class="col">precio_venta</span> <span class="op">-</span> <span class="col">precio_compra</span> <span class="kw">AS</span> <span class="col">margen</span>
+<span class="kw">FROM</span>  <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> <span class="col">margen</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <!-- ==================== LIMIT ==================== -->
+  <h2 id="limit"><span class="num">4</span>LIMIT y OFFSET — Paginación</h2>
+  <p><code>LIMIT</code> restringe cuántas filas se devuelven. <code>OFFSET</code> salta las primeras <em>n</em> filas — útil para paginación.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 4.1 — Top N</span><span class="badge badge-select">LIMIT</span></div>
+    <pre><span class="cmt">-- Top 10 productos más caros</span>
+<span class="kw">SELECT</span> <span class="col">nombre</span>, <span class="col">marca</span>, <span class="col">precio_venta</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> <span class="col">precio_venta</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>  <span class="num">10</span>;
+
+<span class="cmt">-- Top 5 pedidos de mayor valor</span>
+<span class="kw">SELECT</span> <span class="col">pedido_id</span>, <span class="col">cliente_id</span>, <span class="col">total</span>, <span class="col">fecha_pedido</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">ORDER BY</span> <span class="col">total</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>  <span class="num">5</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 4.2 — Paginación con OFFSET</span><span class="badge badge-select">LIMIT</span></div>
+    <pre><span class="cmt">-- Página 1 (registros 1-20)</span>
+<span class="kw">SELECT</span> <span class="col">cliente_id</span>, <span class="col">nombre</span>, <span class="col">ciudad</span>
+<span class="kw">FROM</span>   <span class="tbl">clientes</span>
+<span class="kw">ORDER BY</span> <span class="col">cliente_id</span>
+<span class="kw">LIMIT</span>  <span class="num">20</span> <span class="kw">OFFSET</span> <span class="num">0</span>;
+
+<span class="cmt">-- Página 2 (registros 21-40)</span>
+<span class="kw">SELECT</span> <span class="col">cliente_id</span>, <span class="col">nombre</span>, <span class="col">ciudad</span>
+<span class="kw">FROM</span>   <span class="tbl">clientes</span>
+<span class="kw">ORDER BY</span> <span class="col">cliente_id</span>
+<span class="kw">LIMIT</span>  <span class="num">20</span> <span class="kw">OFFSET</span> <span class="num">20</span>;
+
+<span class="cmt">-- Fórmula: OFFSET = (página - 1) * tamaño_página</span></pre>
+  </div>
+
+  <!-- ==================== FUNCIONES ==================== -->
+  <h2 id="funciones"><span class="num">5</span>Funciones de Agregación</h2>
+  <p>Las funciones de agregación <strong>resumen múltiples filas en un solo valor</strong>. Ignoran NULLs (excepto COUNT(*)).</p>
+
+  <div class="schema-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 24px;">
+    <div class="schema-card"><h4 style="color:var(--accent)">COUNT</h4><div class="col" style="border:none; font-size:13px; color:var(--text2)">Contar filas</div></div>
+    <div class="schema-card"><h4 style="color:var(--accent2)">SUM</h4><div class="col" style="border:none; font-size:13px; color:var(--text2)">Sumar valores</div></div>
+    <div class="schema-card"><h4 style="color:var(--accent3)">AVG</h4><div class="col" style="border:none; font-size:13px; color:var(--text2)">Promedio</div></div>
+    <div class="schema-card"><h4 style="color:var(--accent4)">MIN</h4><div class="col" style="border:none; font-size:13px; color:var(--text2)">Mínimo</div></div>
+    <div class="schema-card"><h4 style="color:var(--accent5)">MAX</h4><div class="col" style="border:none; font-size:13px; color:var(--text2)">Máximo</div></div>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 5.1 — Métricas generales</span><span class="badge badge-agg">AGG</span></div>
+    <pre><span class="cmt">-- Estadísticas globales de pedidos</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*)                     <span class="kw">AS</span> <span class="col">total_pedidos</span>,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> <span class="col">cliente_id</span>)   <span class="kw">AS</span> <span class="col">clientes_unicos</span>,
+    <span class="fn">SUM</span>(<span class="col">total</span>)                    <span class="kw">AS</span> <span class="col">venta_total</span>,
+    <span class="fn">AVG</span>(<span class="col">total</span>)                    <span class="kw">AS</span> <span class="col">ticket_promedio</span>,
+    <span class="fn">MIN</span>(<span class="col">total</span>)                    <span class="kw">AS</span> <span class="col">pedido_minimo</span>,
+    <span class="fn">MAX</span>(<span class="col">total</span>)                    <span class="kw">AS</span> <span class="col">pedido_maximo</span>
+<span class="kw">FROM</span> <span class="tbl">pedidos</span>
+<span class="kw">WHERE</span> <span class="col">estado</span> <span class="op">&lt;&gt;</span> <span class="str">'cancelado'</span>;</pre>
+  </div>
+
+  <div class="result-wrap">
+    <div class="result-label">Resultado esperado</div>
+    <table class="result">
+      <tr><th>total_pedidos</th><th>clientes_unicos</th><th>venta_total</th><th>ticket_promedio</th><th>pedido_minimo</th><th>pedido_maximo</th></tr>
+      <tr><td>3680</td><td>1842</td><td>178,430,220.40</td><td>48,486.47</td><td>189.50</td><td>498,240.00</td></tr>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 5.2 — Estadísticas de productos</span><span class="badge badge-agg">AGG</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*)                                    <span class="kw">AS</span> <span class="col">num_productos</span>,
+    <span class="fn">SUM</span>(<span class="col">stock</span>)                                  <span class="kw">AS</span> <span class="col">stock_total</span>,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">precio_venta</span>), <span class="num">2</span>)               <span class="kw">AS</span> <span class="col">precio_promedio</span>,
+    <span class="fn">SUM</span>(<span class="col">stock</span> <span class="op">*</span> <span class="col">precio_venta</span>)                  <span class="kw">AS</span> <span class="col">valor_inventario</span>
+<span class="kw">FROM</span> <span class="tbl">productos</span>
+<span class="kw">WHERE</span> <span class="col">activo</span> <span class="op">=</span> <span class="kw">TRUE</span>;</pre>
+  </div>
+
+  <!-- ==================== GROUP BY ==================== -->
+  <h2 id="groupby"><span class="num">6</span>GROUP BY — Agrupar resultados</h2>
+  <p><code>GROUP BY</code> divide las filas en grupos según el valor de una columna, y aplica las funciones de agregación a cada grupo.</p>
+
+  <div class="box box-info">
+    <span class="box-icon">💡</span>
+    <div><strong>Regla clave:</strong> Toda columna en el SELECT que NO sea una función de agregación DEBE aparecer en el GROUP BY.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 6.1 — Ventas por estado de pedido</span><span class="badge badge-agg">GROUP BY</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">estado</span>,
+    <span class="fn">COUNT</span>(*)                   <span class="kw">AS</span> <span class="col">cantidad</span>,
+    <span class="fn">SUM</span>(<span class="col">total</span>)                 <span class="kw">AS</span> <span class="col">total_ventas</span>,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(<span class="col">total</span>), <span class="num">2</span>)      <span class="kw">AS</span> <span class="col">promedio</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">GROUP BY</span> <span class="col">estado</span>
+<span class="kw">ORDER BY</span> <span class="col">total_ventas</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <div class="result-wrap">
+    <div class="result-label">Resultado esperado</div>
+    <table class="result">
+      <tr><th>estado</th><th>cantidad</th><th>total_ventas</th><th>promedio</th></tr>
+      <tr><td>entregado</td><td>1998</td><td>97,102,440.80</td><td>48,599.82</td></tr>
+      <tr><td>enviado</td><td>601</td><td>29,450,120.30</td><td>49,002.20</td></tr>
+      <tr><td>procesando</td><td>598</td><td>28,900,310.40</td><td>48,328.28</td></tr>
+      <tr><td>cancelado</td><td>320</td><td>14,200,180.00</td><td>44,375.56</td></tr>
+      <tr><td>pendiente</td><td>282</td><td>13,021,400.10</td><td>46,176.60</td></tr>
+      <tr><td>devuelto</td><td>201</td><td>9,200,310.60</td><td>45,772.69</td></tr>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 6.2 — Ventas por mes y año</span><span class="badge badge-agg">GROUP BY</span></div>
+    <pre><span class="cmt">-- En SQLite usa strftime; en PostgreSQL usa DATE_TRUNC o EXTRACT</span>
+<span class="kw">SELECT</span>
+    <span class="fn">strftime</span>(<span class="str">'%Y'</span>, <span class="col">fecha_pedido</span>)  <span class="kw">AS</span> <span class="col">anio</span>,
+    <span class="fn">strftime</span>(<span class="str">'%m'</span>, <span class="col">fecha_pedido</span>) <span class="kw">AS</span> <span class="col">mes</span>,
+    <span class="fn">COUNT</span>(*)                        <span class="kw">AS</span> <span class="col">pedidos</span>,
+    <span class="fn">SUM</span>(<span class="col">total</span>)                      <span class="kw">AS</span> <span class="col">ventas</span>
+<span class="kw">FROM</span>  <span class="tbl">pedidos</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span>, <span class="num">2</span>;
+
+<span class="cmt">-- PostgreSQL equivalente:</span>
+<span class="cmt">-- EXTRACT(YEAR FROM fecha_pedido) AS anio, EXTRACT(MONTH FROM fecha_pedido) AS mes</span></pre>
+  </div>
+
+  <!-- ==================== HAVING ==================== -->
+  <h2 id="having"><span class="num">7</span>HAVING — Filtrar grupos</h2>
+  <p><code>HAVING</code> es como <code>WHERE</code> pero actúa sobre grupos ya calculados. Se evalúa <em>después</em> del GROUP BY.</p>
+
+  <div class="box box-tip">
+    <span class="box-icon">✅</span>
+    <div><strong>WHERE vs HAVING:</strong> WHERE filtra filas individuales (antes de agrupar). HAVING filtra grupos (después de agrupar). Usa WHERE cuando puedas — es más eficiente.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 7.1 — Categorías con más de 20 productos</span><span class="badge badge-agg">HAVING</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">categoria_id</span>,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> <span class="col">num_productos</span>
+<span class="kw">FROM</span>   <span class="tbl">productos</span>
+<span class="kw">WHERE</span>  <span class="col">activo</span> <span class="op">=</span> <span class="kw">TRUE</span>
+<span class="kw">GROUP BY</span> <span class="col">categoria_id</span>
+<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(*) <span class="op">&gt;</span> <span class="num">20</span>
+<span class="kw">ORDER BY</span> <span class="col">num_productos</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 7.2 — Clientes con más de 5 pedidos</span><span class="badge badge-agg">HAVING</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">cliente_id</span>,
+    <span class="fn">COUNT</span>(*)    <span class="kw">AS</span> <span class="col">num_pedidos</span>,
+    <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">total_gastado</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">WHERE</span>  <span class="col">estado</span> <span class="op">&lt;&gt;</span> <span class="str">'cancelado'</span>
+<span class="kw">GROUP BY</span> <span class="col">cliente_id</span>
+<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(*) <span class="op">&gt;=</span> <span class="num">5</span>
+<span class="kw">ORDER BY</span> <span class="col">total_gastado</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>    <span class="num">15</span>;</pre>
+  </div>
+
+  <!-- ==================== JOINS ==================== -->
+  <h2 id="joins"><span class="num">8</span>JOINs — Combinar tablas</h2>
+  <p>Los JOINs permiten combinar datos de múltiples tablas usando una columna en común.</p>
+
+  <h2 id="inner"><span class="num">8a</span>INNER JOIN</h2>
+  <p>Solo devuelve filas donde existe coincidencia en <strong>ambas</strong> tablas.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.1 — Productos con su categoría</span><span class="badge badge-join">INNER JOIN</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">p</span>.<span class="col">producto_id</span>,
+    <span class="col">p</span>.<span class="col">nombre</span>        <span class="kw">AS</span> <span class="col">producto</span>,
+    <span class="col">p</span>.<span class="col">marca</span>,
+    <span class="col">c</span>.<span class="col">nombre</span>        <span class="kw">AS</span> <span class="col">categoria</span>,
+    <span class="col">p</span>.<span class="col">precio_venta</span>
+<span class="kw">FROM</span>        <span class="tbl">productos</span>   <span class="col">p</span>
+<span class="kw">INNER JOIN</span>  <span class="tbl">categorias</span>  <span class="col">c</span> <span class="kw">ON</span> <span class="col">p</span>.<span class="col">categoria_id</span> <span class="op">=</span> <span class="col">c</span>.<span class="col">categoria_id</span>
+<span class="kw">WHERE</span>       <span class="col">c</span>.<span class="col">nombre</span> <span class="op">=</span> <span class="str">'Smartphones'</span>
+<span class="kw">ORDER BY</span>    <span class="col">p</span>.<span class="col">precio_venta</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.2 — Pedidos con cliente y empleado</span><span class="badge badge-join">INNER JOIN</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">pe</span>.<span class="col">pedido_id</span>,
+    <span class="col">pe</span>.<span class="col">fecha_pedido</span>,
+    <span class="col">cl</span>.<span class="col">nombre</span>  <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">cl</span>.<span class="col">apellido</span>   <span class="kw">AS</span> <span class="col">cliente</span>,
+    <span class="col">em</span>.<span class="col">nombre</span>  <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">em</span>.<span class="col">apellido</span>   <span class="kw">AS</span> <span class="col">vendedor</span>,
+    <span class="col">pe</span>.<span class="col">total</span>,
+    <span class="col">pe</span>.<span class="col">estado</span>
+<span class="kw">FROM</span>        <span class="tbl">pedidos</span>   <span class="col">pe</span>
+<span class="kw">INNER JOIN</span>  <span class="tbl">clientes</span>  <span class="col">cl</span>  <span class="kw">ON</span> <span class="col">pe</span>.<span class="col">cliente_id</span>  <span class="op">=</span> <span class="col">cl</span>.<span class="col">cliente_id</span>
+<span class="kw">INNER JOIN</span>  <span class="tbl">empleados</span> <span class="col">em</span>  <span class="kw">ON</span> <span class="col">pe</span>.<span class="col">empleado_id</span> <span class="op">=</span> <span class="col">em</span>.<span class="col">empleado_id</span>
+<span class="kw">WHERE</span>       <span class="col">pe</span>.<span class="col">estado</span> <span class="op">=</span> <span class="str">'entregado'</span>
+<span class="kw">ORDER BY</span>    <span class="col">pe</span>.<span class="col">total</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>       <span class="num">10</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.3 — Detalle completo de un pedido (JOIN múltiple)</span><span class="badge badge-join">INNER JOIN</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">dp</span>.<span class="col">pedido_id</span>,
+    <span class="col">pr</span>.<span class="col">nombre</span>         <span class="kw">AS</span> <span class="col">producto</span>,
+    <span class="col">cat</span>.<span class="col">nombre</span>        <span class="kw">AS</span> <span class="col">categoria</span>,
+    <span class="col">dp</span>.<span class="col">cantidad</span>,
+    <span class="col">dp</span>.<span class="col">precio_unitario</span>,
+    <span class="col">dp</span>.<span class="col">cantidad</span> <span class="op">*</span> <span class="col">dp</span>.<span class="col">precio_unitario</span>  <span class="kw">AS</span> <span class="col">subtotal</span>
+<span class="kw">FROM</span>        <span class="tbl">detalle_pedidos</span>  <span class="col">dp</span>
+<span class="kw">INNER JOIN</span>  <span class="tbl">productos</span>        <span class="col">pr</span>   <span class="kw">ON</span> <span class="col">dp</span>.<span class="col">producto_id</span>  <span class="op">=</span> <span class="col">pr</span>.<span class="col">producto_id</span>
+<span class="kw">INNER JOIN</span>  <span class="tbl">categorias</span>       <span class="col">cat</span>  <span class="kw">ON</span> <span class="col">pr</span>.<span class="col">categoria_id</span> <span class="op">=</span> <span class="col">cat</span>.<span class="col">categoria_id</span>
+<span class="kw">WHERE</span>       <span class="col">dp</span>.<span class="col">pedido_id</span> <span class="op">=</span> <span class="num">1</span>;</pre>
+  </div>
+
+  <h2 id="left"><span class="num">8b</span>LEFT JOIN / RIGHT JOIN</h2>
+  <p><code>LEFT JOIN</code> devuelve <strong>todas</strong> las filas de la tabla izquierda, y solo las coincidentes de la derecha (rellena con NULL si no hay match).</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.4 — Clientes sin pedidos</span><span class="badge badge-join">LEFT JOIN</span></div>
+    <pre><span class="cmt">-- Todos los clientes, con o sin pedidos</span>
+<span class="kw">SELECT</span>
+    <span class="col">cl</span>.<span class="col">cliente_id</span>,
+    <span class="col">cl</span>.<span class="col">nombre</span>     <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">cl</span>.<span class="col">apellido</span>  <span class="kw">AS</span> <span class="col">cliente</span>,
+    <span class="fn">COUNT</span>(<span class="col">pe</span>.<span class="col">pedido_id</span>)   <span class="kw">AS</span> <span class="col">num_pedidos</span>,
+    <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(<span class="col">pe</span>.<span class="col">total</span>), <span class="num">0</span>) <span class="kw">AS</span> <span class="col">total_gastado</span>
+<span class="kw">FROM</span>       <span class="tbl">clientes</span>  <span class="col">cl</span>
+<span class="kw">LEFT JOIN</span>  <span class="tbl">pedidos</span>   <span class="col">pe</span>  <span class="kw">ON</span> <span class="col">cl</span>.<span class="col">cliente_id</span> <span class="op">=</span> <span class="col">pe</span>.<span class="col">cliente_id</span>
+<span class="kw">GROUP BY</span>   <span class="col">cl</span>.<span class="col">cliente_id</span>, <span class="col">cl</span>.<span class="col">nombre</span>, <span class="col">cl</span>.<span class="col">apellido</span>
+<span class="kw">ORDER BY</span>   <span class="col">num_pedidos</span> <span class="kw">ASC</span>;
+
+<span class="cmt">-- Solo clientes que NUNCA compraron:</span>
+<span class="kw">SELECT</span> <span class="col">cl</span>.*
+<span class="kw">FROM</span>      <span class="tbl">clientes</span> <span class="col">cl</span>
+<span class="kw">LEFT JOIN</span> <span class="tbl">pedidos</span>  <span class="col">pe</span> <span class="kw">ON</span> <span class="col">cl</span>.<span class="col">cliente_id</span> <span class="op">=</span> <span class="col">pe</span>.<span class="col">cliente_id</span>
+<span class="kw">WHERE</span>     <span class="col">pe</span>.<span class="col">pedido_id</span> <span class="kw">IS NULL</span>;</pre>
+  </div>
+
+  <h2 id="full"><span class="num">8c</span>FULL OUTER JOIN</h2>
+  <p>Devuelve todas las filas de ambas tablas, con NULL donde no hay coincidencia. <em>SQLite no lo soporta nativamente — simúlalo con UNION.</em></p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.5 — FULL OUTER (PostgreSQL / simulado SQLite)</span><span class="badge badge-join">FULL OUTER</span></div>
+    <pre><span class="cmt">-- PostgreSQL directo:</span>
+<span class="kw">SELECT</span> <span class="col">c</span>.<span class="col">nombre</span>, <span class="col">d</span>.<span class="col">nombre</span> <span class="kw">AS</span> <span class="col">departamento</span>
+<span class="kw">FROM</span>            <span class="tbl">categorias</span>    <span class="col">c</span>
+<span class="kw">FULL OUTER JOIN</span> <span class="tbl">departamentos</span> <span class="col">d</span> <span class="kw">ON</span> <span class="col">c</span>.<span class="col">categoria_id</span> <span class="op">=</span> <span class="col">d</span>.<span class="col">departamento_id</span>;
+
+<span class="cmt">-- SQLite — simular con LEFT UNION RIGHT:</span>
+<span class="kw">SELECT</span> <span class="col">cl</span>.<span class="col">cliente_id</span>, <span class="col">cl</span>.<span class="col">nombre</span>, <span class="col">pe</span>.<span class="col">pedido_id</span>
+<span class="kw">FROM</span>       <span class="tbl">clientes</span> <span class="col">cl</span>  <span class="kw">LEFT JOIN</span>  <span class="tbl">pedidos</span> <span class="col">pe</span> <span class="kw">ON</span> <span class="col">cl</span>.<span class="col">cliente_id</span> <span class="op">=</span> <span class="col">pe</span>.<span class="col">cliente_id</span>
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> <span class="col">cl</span>.<span class="col">cliente_id</span>, <span class="col">cl</span>.<span class="col">nombre</span>, <span class="col">pe</span>.<span class="col">pedido_id</span>
+<span class="kw">FROM</span>       <span class="tbl">pedidos</span>  <span class="col">pe</span>  <span class="kw">LEFT JOIN</span>  <span class="tbl">clientes</span> <span class="col">cl</span> <span class="kw">ON</span> <span class="col">pe</span>.<span class="col">cliente_id</span> <span class="op">=</span> <span class="col">cl</span>.<span class="col">cliente_id</span>;</pre>
+  </div>
+
+  <h2 id="self"><span class="num">8d</span>SELF JOIN</h2>
+  <p>Unir una tabla consigo misma. Útil para relaciones jerárquicas como empleado-jefe.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 8.6 — Empleado y su jefe directo</span><span class="badge badge-join">SELF JOIN</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">e</span>.<span class="col">empleado_id</span>,
+    <span class="col">e</span>.<span class="col">nombre</span>   <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">e</span>.<span class="col">apellido</span>  <span class="kw">AS</span> <span class="col">empleado</span>,
+    <span class="col">e</span>.<span class="col">puesto</span>,
+    <span class="col">j</span>.<span class="col">nombre</span>   <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">j</span>.<span class="col">apellido</span>  <span class="kw">AS</span> <span class="col">jefe</span>
+<span class="kw">FROM</span>       <span class="tbl">empleados</span> <span class="col">e</span>
+<span class="kw">LEFT JOIN</span>  <span class="tbl">empleados</span> <span class="col">j</span>  <span class="kw">ON</span> <span class="col">e</span>.<span class="col">jefe_id</span> <span class="op">=</span> <span class="col">j</span>.<span class="col">empleado_id</span>
+<span class="kw">ORDER BY</span>  <span class="col">e</span>.<span class="col">departamento_id</span>, <span class="col">e</span>.<span class="col">salario</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <!-- ==================== SUBQUERIES ==================== -->
+  <h2 id="subqueries"><span class="num">9</span>Subconsultas</h2>
+  <p>Una subconsulta es una consulta dentro de otra. Puede ir en el SELECT, FROM, WHERE o HAVING.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 9.1 — Subconsulta en WHERE</span><span class="badge badge-sub">SUBQUERY</span></div>
+    <pre><span class="cmt">-- Productos con precio mayor al promedio de su categoría</span>
+<span class="kw">SELECT</span> <span class="col">p1</span>.<span class="col">nombre</span>, <span class="col">p1</span>.<span class="col">precio_venta</span>, <span class="col">p1</span>.<span class="col">categoria_id</span>
+<span class="kw">FROM</span>  <span class="tbl">productos</span> <span class="col">p1</span>
+<span class="kw">WHERE</span> <span class="col">p1</span>.<span class="col">precio_venta</span> <span class="op">&gt;</span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">p2</span>.<span class="col">precio_venta</span>)
+    <span class="kw">FROM</span>  <span class="tbl">productos</span> <span class="col">p2</span>
+    <span class="kw">WHERE</span> <span class="col">p2</span>.<span class="col">categoria_id</span> <span class="op">=</span> <span class="col">p1</span>.<span class="col">categoria_id</span>
+);
+
+<span class="cmt">-- Clientes que han gastado más que el promedio</span>
+<span class="kw">SELECT</span> <span class="col">cliente_id</span>, <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">gastado</span>
+<span class="kw">FROM</span>   <span class="tbl">pedidos</span>
+<span class="kw">GROUP BY</span> <span class="col">cliente_id</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(<span class="col">total</span>) <span class="op">&gt;</span> (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(<span class="col">total_por_cliente</span>)
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">total_por_cliente</span>
+        <span class="kw">FROM</span>  <span class="tbl">pedidos</span>
+        <span class="kw">GROUP BY</span> <span class="col">cliente_id</span>
+    ) <span class="col">sub</span>
+);</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 9.2 — Subconsulta en FROM (tabla derivada)</span><span class="badge badge-sub">SUBQUERY</span></div>
+    <pre><span class="cmt">-- Ranking de categorías por volumen de ventas</span>
+<span class="kw">SELECT</span>
+    <span class="col">resumen</span>.<span class="col">categoria_id</span>,
+    <span class="col">resumen</span>.<span class="col">total_vendido</span>,
+    <span class="col">resumen</span>.<span class="col">unidades</span>
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">pr</span>.<span class="col">categoria_id</span>,
+        <span class="fn">SUM</span>(<span class="col">dp</span>.<span class="col">cantidad</span> <span class="op">*</span> <span class="col">dp</span>.<span class="col">precio_unitario</span>)  <span class="kw">AS</span> <span class="col">total_vendido</span>,
+        <span class="fn">SUM</span>(<span class="col">dp</span>.<span class="col">cantidad</span>)                          <span class="kw">AS</span> <span class="col">unidades</span>
+    <span class="kw">FROM</span>        <span class="tbl">detalle_pedidos</span> <span class="col">dp</span>
+    <span class="kw">INNER JOIN</span>  <span class="tbl">productos</span>        <span class="col">pr</span> <span class="kw">ON</span> <span class="col">dp</span>.<span class="col">producto_id</span> <span class="op">=</span> <span class="col">pr</span>.<span class="col">producto_id</span>
+    <span class="kw">GROUP BY</span>    <span class="col">pr</span>.<span class="col">categoria_id</span>
+) <span class="col">resumen</span>
+<span class="kw">ORDER BY</span> <span class="col">resumen</span>.<span class="col">total_vendido</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <!-- ==================== CTEs ==================== -->
+  <h2 id="cte"><span class="num">10</span>CTEs — WITH (Common Table Expressions)</h2>
+  <p>Las CTEs definen una "consulta nombrada" que puedes referenciar dentro de la consulta principal. Son más legibles que las subconsultas anidadas.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 10.1 — CTE simple</span><span class="badge badge-adv">CTE</span></div>
+    <pre><span class="kw">WITH</span> <span class="col">ventas_por_cliente</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">cliente_id</span>,
+        <span class="fn">COUNT</span>(*)    <span class="kw">AS</span> <span class="col">num_pedidos</span>,
+        <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">total_gastado</span>
+    <span class="kw">FROM</span> <span class="tbl">pedidos</span>
+    <span class="kw">WHERE</span> <span class="col">estado</span> <span class="op">&lt;&gt;</span> <span class="str">'cancelado'</span>
+    <span class="kw">GROUP BY</span> <span class="col">cliente_id</span>
+)
+<span class="kw">SELECT</span>
+    <span class="col">cl</span>.<span class="col">nombre</span> <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">cl</span>.<span class="col">apellido</span>  <span class="kw">AS</span> <span class="col">cliente</span>,
+    <span class="col">cl</span>.<span class="col">ciudad</span>,
+    <span class="col">v</span>.<span class="col">num_pedidos</span>,
+    <span class="col">v</span>.<span class="col">total_gastado</span>
+<span class="kw">FROM</span>       <span class="col">ventas_por_cliente</span>  <span class="col">v</span>
+<span class="kw">INNER JOIN</span> <span class="tbl">clientes</span>            <span class="col">cl</span>  <span class="kw">ON</span> <span class="col">v</span>.<span class="col">cliente_id</span> <span class="op">=</span> <span class="col">cl</span>.<span class="col">cliente_id</span>
+<span class="kw">WHERE</span>      <span class="col">v</span>.<span class="col">num_pedidos</span> <span class="op">&gt;=</span> <span class="num">5</span>
+<span class="kw">ORDER BY</span>   <span class="col">v</span>.<span class="col">total_gastado</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>      <span class="num">20</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 10.2 — CTEs múltiples encadenadas</span><span class="badge badge-adv">CTE</span></div>
+    <pre><span class="kw">WITH</span>
+<span class="cmt">-- Paso 1: ventas brutas por producto</span>
+<span class="col">ventas_producto</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">dp</span>.<span class="col">producto_id</span>,
+        <span class="fn">SUM</span>(<span class="col">dp</span>.<span class="col">cantidad</span>)                         <span class="kw">AS</span> <span class="col">unidades</span>,
+        <span class="fn">SUM</span>(<span class="col">dp</span>.<span class="col">cantidad</span> <span class="op">*</span> <span class="col">dp</span>.<span class="col">precio_unitario</span>)  <span class="kw">AS</span> <span class="col">ingresos</span>
+    <span class="kw">FROM</span> <span class="tbl">detalle_pedidos</span> <span class="col">dp</span>
+    <span class="kw">GROUP BY</span> <span class="col">dp</span>.<span class="col">producto_id</span>
+),
+<span class="cmt">-- Paso 2: enriquecer con categoría</span>
+<span class="col">ventas_enriquecidas</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">vp</span>.*,
+        <span class="col">pr</span>.<span class="col">nombre</span>         <span class="kw">AS</span> <span class="col">producto</span>,
+        <span class="col">cat</span>.<span class="col">nombre</span>       <span class="kw">AS</span> <span class="col">categoria</span>,
+        <span class="col">pr</span>.<span class="col">precio_venta</span>  <span class="kw">AS</span> <span class="col">precio</span>
+    <span class="kw">FROM</span>        <span class="col">ventas_producto</span> <span class="col">vp</span>
+    <span class="kw">INNER JOIN</span>  <span class="tbl">productos</span>        <span class="col">pr</span>  <span class="kw">ON</span> <span class="col">vp</span>.<span class="col">producto_id</span>  <span class="op">=</span> <span class="col">pr</span>.<span class="col">producto_id</span>
+    <span class="kw">INNER JOIN</span>  <span class="tbl">categorias</span>       <span class="col">cat</span> <span class="kw">ON</span> <span class="col">pr</span>.<span class="col">categoria_id</span> <span class="op">=</span> <span class="col">cat</span>.<span class="col">categoria_id</span>
+)
+<span class="kw">SELECT</span> <span class="col">categoria</span>, <span class="col">producto</span>, <span class="col">unidades</span>, <span class="col">ingresos</span>
+<span class="kw">FROM</span>   <span class="col">ventas_enriquecidas</span>
+<span class="kw">ORDER BY</span> <span class="col">ingresos</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>  <span class="num">15</span>;</pre>
+  </div>
+
+  <!-- ==================== WINDOW FUNCTIONS ==================== -->
+  <h2 id="window"><span class="num">11</span>Funciones de Ventana</h2>
+  <p>Las funciones de ventana calculan valores sobre un "grupo" de filas relacionadas <strong>sin colapsar las filas</strong> en una sola. Usan la cláusula <code>OVER()</code>.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Sintaxis general</span><span class="badge badge-adv">WINDOW</span></div>
+    <pre><span class="fn">FUNCION</span>() <span class="kw">OVER</span> (
+    [<span class="kw">PARTITION BY</span> <span class="col">columna</span>]   <span class="cmt">-- opcional: dividir en grupos</span>
+    [<span class="kw">ORDER BY</span>     <span class="col">columna</span>]   <span class="cmt">-- opcional: ordenar dentro del grupo</span>
+    [<span class="kw">ROWS BETWEEN</span> ...]        <span class="cmt">-- opcional: ventana deslizante</span>
+)</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 11.1 — Ranking con ROW_NUMBER y RANK</span><span class="badge badge-adv">WINDOW</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">nombre</span>,
+    <span class="col">apellido</span>,
+    <span class="col">departamento_id</span>,
+    <span class="col">salario</span>,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> <span class="col">departamento_id</span> <span class="kw">ORDER BY</span> <span class="col">salario</span> <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="col">posicion</span>,
+    <span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> <span class="col">departamento_id</span> <span class="kw">ORDER BY</span> <span class="col">salario</span> <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="col">rank_salario</span>,
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> <span class="col">departamento_id</span> <span class="kw">ORDER BY</span> <span class="col">salario</span> <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="col">dense_rank</span>
+<span class="kw">FROM</span>  <span class="tbl">empleados</span>
+<span class="kw">ORDER BY</span> <span class="col">departamento_id</span>, <span class="col">posicion</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 11.2 — TOP 3 por departamento</span><span class="badge badge-adv">WINDOW</span></div>
+    <pre><span class="kw">WITH</span> <span class="col">ranking</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">departamento_id</span>, <span class="col">salario</span>,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> <span class="col">departamento_id</span> <span class="kw">ORDER BY</span> <span class="col">salario</span> <span class="kw">DESC</span>) <span class="kw">AS</span> <span class="col">rn</span>
+    <span class="kw">FROM</span> <span class="tbl">empleados</span>
+)
+<span class="kw">SELECT</span> <span class="col">departamento_id</span>, <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">salario</span>
+<span class="kw">FROM</span>  <span class="col">ranking</span>
+<span class="kw">WHERE</span> <span class="col">rn</span> <span class="op">&lt;=</span> <span class="num">3</span>
+<span class="kw">ORDER BY</span> <span class="col">departamento_id</span>, <span class="col">salario</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 11.3 — Acumulados y promedios móviles</span><span class="badge badge-adv">WINDOW</span></div>
+    <pre><span class="kw">WITH</span> <span class="col">ventas_diarias</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="col">fecha_pedido</span>,
+        <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">venta_dia</span>
+    <span class="kw">FROM</span> <span class="tbl">pedidos</span>
+    <span class="kw">WHERE</span> <span class="col">estado</span> <span class="op">&lt;&gt;</span> <span class="str">'cancelado'</span>
+    <span class="kw">GROUP BY</span> <span class="col">fecha_pedido</span>
+)
+<span class="kw">SELECT</span>
+    <span class="col">fecha_pedido</span>,
+    <span class="col">venta_dia</span>,
+    <span class="fn">SUM</span>(<span class="col">venta_dia</span>)  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="col">fecha_pedido</span>)  <span class="kw">AS</span> <span class="col">acumulado</span>,
+    <span class="fn">AVG</span>(<span class="col">venta_dia</span>)  <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> <span class="col">fecha_pedido</span>
+        <span class="kw">ROWS BETWEEN</span> <span class="num">6</span> <span class="kw">PRECEDING AND CURRENT ROW</span>
+    )                                               <span class="kw">AS</span> <span class="col">media_movil_7d</span>
+<span class="kw">FROM</span>  <span class="col">ventas_diarias</span>
+<span class="kw">ORDER BY</span> <span class="col">fecha_pedido</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 11.4 — LAG y LEAD (comparar con fila anterior/siguiente)</span><span class="badge badge-adv">WINDOW</span></div>
+    <pre><span class="kw">WITH</span> <span class="col">ventas_mes</span> <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">strftime</span>(<span class="str">'%Y-%m'</span>, <span class="col">fecha_pedido</span>) <span class="kw">AS</span> <span class="col">mes</span>,
+        <span class="fn">SUM</span>(<span class="col">total</span>) <span class="kw">AS</span> <span class="col">venta</span>
+    <span class="kw">FROM</span> <span class="tbl">pedidos</span>
+    <span class="kw">WHERE</span> <span class="col">estado</span> <span class="op">&lt;&gt;</span> <span class="str">'cancelado'</span>
+    <span class="kw">GROUP BY</span> <span class="num">1</span>
+)
+<span class="kw">SELECT</span>
+    <span class="col">mes</span>,
+    <span class="col">venta</span>,
+    <span class="fn">LAG</span>(<span class="col">venta</span>)  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="col">mes</span>)  <span class="kw">AS</span> <span class="col">mes_anterior</span>,
+    <span class="fn">ROUND</span>((<span class="col">venta</span> <span class="op">-</span> <span class="fn">LAG</span>(<span class="col">venta</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="col">mes</span>))
+         <span class="op">/</span> <span class="fn">LAG</span>(<span class="col">venta</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="col">mes</span>) <span class="op">*</span> <span class="num">100</span>, <span class="num">2</span>) <span class="kw">AS</span> <span class="col">cambio_pct</span>
+<span class="kw">FROM</span> <span class="col">ventas_mes</span>
+<span class="kw">ORDER BY</span> <span class="col">mes</span>;</pre>
+  </div>
+
+  <!-- ==================== CASE ==================== -->
+  <h2 id="case"><span class="num">12</span>CASE — Lógica condicional</h2>
+  <p><code>CASE</code> es el IF/ELSE de SQL. Permite calcular valores condicionales dentro de una consulta.</p>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 12.1 — Categorizar datos</span><span class="badge badge-adv">CASE</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">nombre</span>,
+    <span class="col">precio_venta</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="col">precio_venta</span> <span class="op">&lt;</span>  <span class="num">500</span>   <span class="kw">THEN</span> <span class="str">'Económico'</span>
+        <span class="kw">WHEN</span> <span class="col">precio_venta</span> <span class="op">&lt;</span>  <span class="num">3000</span>  <span class="kw">THEN</span> <span class="str">'Gama Media'</span>
+        <span class="kw">WHEN</span> <span class="col">precio_venta</span> <span class="op">&lt;</span>  <span class="num">10000</span> <span class="kw">THEN</span> <span class="str">'Gama Alta'</span>
+        <span class="kw">ELSE</span>                              <span class="str">'Premium'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="col">segmento</span>,
+    <span class="col">stock</span>,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="col">stock</span> <span class="op">=</span> <span class="num">0</span>             <span class="kw">THEN</span> <span class="str">'Sin stock'</span>
+        <span class="kw">WHEN</span> <span class="col">stock</span> <span class="op">&lt;</span> <span class="col">stock_minimo</span>  <span class="kw">THEN</span> <span class="str">'Stock bajo'</span>
+        <span class="kw">ELSE</span>                              <span class="str">'Disponible'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> <span class="col">estado_stock</span>
+<span class="kw">FROM</span>  <span class="tbl">productos</span>
+<span class="kw">ORDER BY</span> <span class="col">precio_venta</span>;</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 12.2 — CASE en GROUP BY (pivot)</span><span class="badge badge-adv">CASE</span></div>
+    <pre><span class="cmt">-- Contar pedidos por estado usando columnas separadas</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> <span class="col">estado</span> <span class="op">=</span> <span class="str">'entregado'</span>   <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>) <span class="kw">AS</span> <span class="col">entregados</span>,
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> <span class="col">estado</span> <span class="op">=</span> <span class="str">'cancelado'</span>   <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>) <span class="kw">AS</span> <span class="col">cancelados</span>,
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> <span class="col">estado</span> <span class="op">=</span> <span class="str">'procesando'</span>  <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>) <span class="kw">AS</span> <span class="col">procesando</span>,
+    <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> <span class="col">estado</span> <span class="op">=</span> <span class="str">'pendiente'</span>   <span class="kw">THEN</span> <span class="num">1</span> <span class="kw">END</span>) <span class="kw">AS</span> <span class="col">pendientes</span>,
+    <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> <span class="col">metodo_pago</span> <span class="op">=</span> <span class="str">'tarjeta_credito'</span> <span class="kw">THEN</span> <span class="col">total</span> <span class="kw">ELSE</span> <span class="num">0</span> <span class="kw">END</span>) <span class="kw">AS</span> <span class="col">venta_credito</span>
+<span class="kw">FROM</span>  <span class="tbl">pedidos</span>;</pre>
+  </div>
+
+  <!-- ==================== STRING ==================== -->
+  <h2 id="string"><span class="num">13</span>Funciones de Cadena de texto</h2>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 13.1 — Manipulación de texto</span><span class="badge badge-adv">STRING</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">nombre</span>,
+    <span class="col">apellido</span>,
+    <span class="fn">UPPER</span>(<span class="col">nombre</span>)                                    <span class="kw">AS</span> <span class="col">nombre_upper</span>,
+    <span class="fn">LOWER</span>(<span class="col">apellido</span>)                                   <span class="kw">AS</span> <span class="col">apellido_lower</span>,
+    <span class="fn">LENGTH</span>(<span class="col">email</span>)                                     <span class="kw">AS</span> <span class="col">long_email</span>,
+    <span class="fn">SUBSTR</span>(<span class="col">email</span>, <span class="num">1</span>, <span class="fn">INSTR</span>(<span class="col">email</span>, <span class="str">'@'</span>) <span class="op">-</span> <span class="num">1</span>)         <span class="kw">AS</span> <span class="col">usuario_email</span>,
+    <span class="col">nombre</span> <span class="op">||</span> <span class="str">' '</span> <span class="op">||</span> <span class="col">apellido</span>                         <span class="kw">AS</span> <span class="col">nombre_completo</span>,
+    <span class="fn">REPLACE</span>(<span class="col">telefono</span>, <span class="str">' '</span>, <span class="str">''</span>)                       <span class="kw">AS</span> <span class="col">tel_limpio</span>
+<span class="kw">FROM</span>  <span class="tbl">clientes</span>
+<span class="kw">LIMIT</span>  <span class="num">10</span>;</pre>
+  </div>
+
+  <!-- ==================== DATES ==================== -->
+  <h2 id="date"><span class="num">14</span>Funciones de Fecha</h2>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 14.1 — Cálculos con fechas (SQLite)</span><span class="badge badge-adv">DATE</span></div>
+    <pre><span class="kw">SELECT</span>
+    <span class="col">pedido_id</span>,
+    <span class="col">fecha_pedido</span>,
+    <span class="col">fecha_entrega</span>,
+    <span class="fn">julianday</span>(<span class="col">fecha_entrega</span>) <span class="op">-</span> <span class="fn">julianday</span>(<span class="col">fecha_pedido</span>)   <span class="kw">AS</span> <span class="col">dias_entrega</span>,
+    <span class="fn">strftime</span>(<span class="str">'%Y'</span>, <span class="col">fecha_pedido</span>)                        <span class="kw">AS</span> <span class="col">anio</span>,
+    <span class="fn">strftime</span>(<span class="str">'%m'</span>, <span class="col">fecha_pedido</span>)                        <span class="kw">AS</span> <span class="col">mes</span>,
+    <span class="fn">strftime</span>(<span class="str">'%w'</span>, <span class="col">fecha_pedido</span>)                        <span class="kw">AS</span> <span class="col">dia_semana</span>
+<span class="kw">FROM</span>  <span class="tbl">pedidos</span>
+<span class="kw">WHERE</span> <span class="col">estado</span> <span class="op">=</span> <span class="str">'entregado'</span>
+  <span class="kw">AND</span> <span class="fn">julianday</span>(<span class="col">fecha_entrega</span>) <span class="op">-</span> <span class="fn">julianday</span>(<span class="col">fecha_pedido</span>) <span class="op">&gt;</span> <span class="num">7</span>;
+
+<span class="cmt">-- PostgreSQL equivalente:</span>
+<span class="cmt">-- (fecha_entrega - fecha_pedido) AS dias_entrega</span>
+<span class="cmt">-- EXTRACT(YEAR FROM fecha_pedido) AS anio</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="header"><span class="label">Ejemplo 14.2 — Antigüedad de clientes y empleados</span><span class="badge badge-adv">DATE</span></div>
+    <pre><span class="cmt">-- Empleados contratados hace más de 2 años</span>
+<span class="kw">SELECT</span>
+    <span class="col">nombre</span>, <span class="col">apellido</span>, <span class="col">puesto</span>, <span class="col">fecha_contrato</span>,
+    <span class="fn">ROUND</span>((<span class="fn">julianday</span>(<span class="str">'now'</span>) <span class="op">-</span> <span class="fn">julianday</span>(<span class="col">fecha_contrato</span>)) <span class="op">/</span> <span class="num">365.25</span>, <span class="num">1</span>) <span class="kw">AS</span> <span class="col">antiguedad_anios</span>
+<span class="kw">FROM</span>  <span class="tbl">empleados</span>
+<span class="kw">WHERE</span> <span class="fn">julianday</span>(<span class="str">'now'</span>) <span class="op">-</span> <span class="fn">julianday</span>(<span class="col">fecha_contrato</span>) <span class="op">&gt;</span> <span class="num">730</span>
+<span class="kw">ORDER BY</span> <span class="col">antiguedad_anios</span> <span class="kw">DESC</span>;</pre>
+  </div>
+
+  <!-- ==================== EJERCICIOS ==================== -->
+  <h2 id="ejercicios"><span class="num">15</span>Ejercicios por Nivel</h2>
+
+  <div class="exercise">
+    <h4>Nivel 1 — Básico</h4>
+    <ol>
+      <li>Lista todos los productos de la categoría "Laptops" (categoria_id = 2) ordenados por precio de mayor a menor.</li>
+      <li>¿Cuántos clientes hay registrados en cada estado? Muestra el estado y la cantidad.</li>
+      <li>Muestra el nombre, apellido y salario de los empleados del departamento de Ventas (departamento_id = 1) cuyo salario supera los $40,000.</li>
+      <li>¿Cuáles son los 10 productos con menor stock (mayor a 0)?</li>
+      <li>Lista todos los pedidos del mes de enero de 2025 con su total y estado.</li>
+    </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>Nivel 2 — Intermedio</h4>
+    <ol>
+      <li>Muestra el total de ventas (sum) y el número de pedidos por método de pago, solo para pedidos entregados.</li>
+      <li>Lista los productos que tienen stock por debajo de su stock_mínimo. Incluye nombre, marca, stock actual y stock_mínimo.</li>
+      <li>¿Cuál es el ticket promedio por tipo de cliente? Excluye cancelados.</li>
+      <li>Encuentra los 5 empleados con mayor salario de cada departamento.</li>
+      <li>Lista los clientes que compraron más de 3 veces en un solo mes (cualquier mes).</li>
+    </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>Nivel 3 — Avanzado</h4>
+    <ol>
+      <li>Calcula el margen de ganancia real por categoría: <code>(precio_venta - precio_compra) / precio_compra * 100</code> promedio, ponderado por unidades vendidas.</li>
+      <li>Identifica los clientes que compraron en 2023 pero NO compraron en 2024. Usa subconsultas o NOT EXISTS.</li>
+      <li>Genera un reporte de crecimiento mensual de ventas: muestra el mes, las ventas del mes, las ventas del mes anterior y el porcentaje de cambio. Usa funciones de ventana LAG.</li>
+      <li>Encuentra los "mejores vendedores" por región: el empleado con mayor suma de ventas en cada region_id. Usa CTE y ROW_NUMBER.</li>
+      <li>Crea un análisis RFM básico (Recency, Frequency, Monetary) para cada cliente: días desde la última compra, número total de pedidos y monto total gastado.</li>
+    </ol>
+  </div>
+
+  <div class="box box-tip">
+    <span class="box-icon">🎯</span>
+    <div><strong>Consejo final:</strong> Practica cada consulta modificándola: cambia los filtros, agrega columnas, prueba con diferentes JOINs. El músculo de SQL se desarrolla escribiendo muchas consultas, no solo leyéndolas.</div>
+  </div>
+
+  <p style="margin-top: 60px; color: var(--text3); font-size: 13px; border-top: 1px solid var(--border); padding-top: 24px;">
+    Guía SQL — TechStore DB · 15,555 registros de práctica · Compatible con SQLite y PostgreSQL
+  </p>
+
+</main>
+</body>
+</html>
