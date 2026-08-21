@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía progresiva · Carrito de compras con localStorage y JavaScript</title>
+
+<!-- Bootstrap 5.3 (última versión estable) vía CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #FAFAF6;
+    --panel: #FFFFFF;
+    --text: #1B1B1F;
+    --muted: #5B5B63;
+    --line: #E7E5DC;
+    --accent: #3654FF;
+    --accent-soft: #EDEFFF;
+    --warn: #FF6B4A;
+    --warn-soft: #FFEDE7;
+    --good: #1F9D55;
+    --good-soft: #E8F7EE;
+    --bad: #E0393E;
+    --bad-soft: #FDEBEC;
+    --code-bg: #14141C;
+    --code-text: #E4E4EF;
+    --code-key: #7FB6FF;
+    --code-str: #9CE0A4;
+    --code-com: #7A7A8C;
+    --radius: 14px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', system-ui, sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,h4,.display-font{
+    font-family:'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing:-0.01em;
+  }
+  code, pre, .mono{ font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:
+      radial-gradient(1200px 500px at 15% -10%, var(--accent-soft), transparent 60%),
+      var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:5rem 0 4rem;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:.5rem;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent); background:var(--accent-soft);
+    border:1px solid #d6dbff; padding:.3rem .7rem; border-radius:100px;
+  }
+  .hero h1{ font-size:clamp(2.1rem, 4vw, 3.2rem); font-weight:700; margin:1.1rem 0 1rem; }
+  .hero p.lead{ color:var(--muted); max-width:640px; font-size:1.08rem; }
+
+  /* ---------- Sticky mini navbar demo (signature element) ---------- */
+  .mini-shop-bar{
+    position:sticky; top:0; z-index:1030;
+    background:rgba(250,250,246,.9); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .mini-shop-bar .cart-pill{
+    position:relative; background:var(--panel); border:1px solid var(--line);
+    border-radius:100px; padding:.4rem .9rem .4rem .7rem;
+    display:inline-flex; align-items:center; gap:.5rem; font-size:.9rem;
+  }
+  .cart-badge{
+    background:var(--accent); color:#fff; font-size:.68rem; font-weight:600;
+    min-width:1.15rem; height:1.15rem; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center; padding:0 .3rem;
+  }
+
+  /* ---------- Layout: progress map + content ---------- */
+  .layout{ display:grid; grid-template-columns:230px 1fr; gap:2.5rem; align-items:start; }
+  @media (max-width: 991px){ .layout{ grid-template-columns:1fr; } .progress-map{ display:none; } }
+
+  .progress-map{
+    position:sticky; top:5.2rem; max-height:calc(100vh - 6rem); overflow-y:auto;
+    padding-right:.5rem;
+  }
+  .progress-map .pm-title{
+    font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
+    margin-bottom:.9rem; font-family:'JetBrains Mono', monospace;
+  }
+  .progress-map a{
+    display:flex; gap:.6rem; align-items:baseline; text-decoration:none;
+    color:var(--muted); font-size:.86rem; padding:.32rem 0; border-left:2px solid var(--line);
+    padding-left:.85rem; margin-left:.05rem; transition:.15s;
+  }
+  .progress-map a .pm-num{ font-family:'JetBrains Mono', monospace; color:#B7B6AE; font-size:.76rem; }
+  .progress-map a.active{ color:var(--text); font-weight:600; border-left-color:var(--accent); }
+  .progress-map a.active .pm-num{ color:var(--accent); }
+  .progress-map a:hover{ color:var(--text); }
+
+  /* ---------- Sections ---------- */
+  section.step{ padding:3.2rem 0; border-bottom:1px solid var(--line); scroll-margin-top:5.5rem; }
+  section.step:last-of-type{ border-bottom:none; }
+  .step-kicker{
+    font-family:'JetBrains Mono', monospace; color:var(--accent); font-size:.85rem;
+    display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem;
+  }
+  .step-kicker .num{
+    background:var(--accent); color:#fff; width:1.9rem; height:1.9rem; border-radius:8px;
+    display:inline-flex; align-items:center; justify-content:center; font-weight:600; font-size:.85rem;
+  }
+  .step h2{ font-size:1.65rem; font-weight:700; margin-bottom:1rem; }
+  .step h3{ font-size:1.15rem; font-weight:600; margin:1.6rem 0 .7rem; }
+
+  /* ---------- Callouts ---------- */
+  .callout{ border-radius:var(--radius); padding:1.1rem 1.3rem; margin:1.1rem 0; border:1px solid; font-size:.95rem; }
+  .callout .callout-title{ font-weight:700; display:flex; gap:.5rem; align-items:center; margin-bottom:.3rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.04em; }
+  .callout.why{ background:var(--accent-soft); border-color:#d6dbff; }
+  .callout.why .callout-title{ color:var(--accent); }
+  .callout.good{ background:var(--good-soft); border-color:#c7ecd4; }
+  .callout.good .callout-title{ color:var(--good); }
+  .callout.bad{ background:var(--bad-soft); border-color:#f7cfd1; }
+  .callout.bad .callout-title{ color:var(--bad); }
+
+  /* ---------- Code blocks ---------- */
+  .code-window{ border-radius:var(--radius); overflow:hidden; margin:1.1rem 0; border:1px solid #24242f; }
+  .code-window .code-topbar{
+    background:#1b1b26; padding:.55rem .9rem; display:flex; align-items:center; gap:.4rem;
+  }
+  .code-window .dot{ width:.6rem; height:.6rem; border-radius:50%; }
+  .code-window .dot.r{ background:#ff5f57; } .code-window .dot.y{ background:#febc2e; } .code-window .dot.g{ background:#28c840; }
+  .code-window .code-label{ margin-left:.6rem; color:#8a8a9c; font-size:.76rem; font-family:'JetBrains Mono', monospace; }
+  .code-window pre{
+    background:var(--code-bg); color:var(--code-text); margin:0; padding:1.1rem 1.3rem;
+    font-size:.84rem; overflow-x:auto; line-height:1.6;
+  }
+  .code-window.bad-code .code-topbar{ background:#2b1418; }
+  .code-window.bad-code pre{ background:#1c0e10; }
+
+  /* ---------- Comparison tables ---------- */
+  .table-compare{ font-size:.9rem; }
+  .table-compare thead th{
+    background:#111; color:#fff; font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em;
+  }
+  .table-compare td, .table-compare th{ vertical-align:middle; }
+  .badge-soft-good{ background:var(--good-soft); color:var(--good); }
+  .badge-soft-bad{ background:var(--bad-soft); color:var(--bad); }
+  .badge-soft-neutral{ background:#EFEFEF; color:#444; }
+
+  /* ---------- Demo shell ---------- */
+  .demo-shell{
+    border:1px solid var(--line); border-radius:20px; background:var(--panel);
+    box-shadow:0 20px 50px -30px rgba(0,0,0,.25); overflow:hidden;
+  }
+  .demo-topbar{
+    background:#111; color:#fff; padding:.9rem 1.3rem; display:flex; align-items:center; justify-content:between; gap:1rem;
+  }
+  .demo-body{ padding:1.6rem; background:#fff; }
+  .product-card{ border:1px solid var(--line); border-radius:16px; overflow:hidden; height:100%; transition:.2s; background:#fff; }
+  .product-card:hover{ transform:translateY(-3px); box-shadow:0 16px 34px -22px rgba(0,0,0,.35); }
+  .product-card img{ width:100%; aspect-ratio:1/1; object-fit:cover; cursor:pointer; }
+  .product-card .price{ font-weight:700; font-family:'Space Grotesk', sans-serif; }
+  .stock-chip{ font-size:.72rem; padding:.15rem .5rem; border-radius:100px; }
+
+  footer{ background:#111; color:#c9c9d2; padding:3rem 0; font-size:.9rem; }
+  footer a{ color:#fff; }
+
+  ::selection{ background:var(--accent); color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- ============ MINI BARRA "TIENDA" (demuestra el ícono+contador desde el inicio) ============ -->
+<div class="mini-shop-bar py-2">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="mono small text-muted">guia-carrito-compras.html</span>
+    <button class="cart-pill" id="demoTopCartBtn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">
+      <i class="bi bi-cart3"></i>
+      <span>Carrito</span>
+      <span class="cart-badge" id="cartCountTop">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow"><i class="bi bi-terminal"></i> Guía progresiva · Front-end</span>
+    <h1>Cómo construir un carrito de compras con <span style="color:var(--accent)">localStorage</span> y JavaScript</h1>
+    <p class="lead">
+      Paso a paso vamos a construir un catálogo de productos leído desde un archivo <code>.json</code>,
+      una vista de detalle, un carrito persistente en el navegador con <code>localStorage</code>,
+      un ícono con contador de artículos y un checkout — todo con Bootstrap 5.3 y JavaScript nativo,
+      explicando <strong>qué</strong> hace cada función, <strong>por qué</strong> se usa y qué alternativas existen.
+    </p>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+      <span class="badge text-bg-light border">Sin frameworks</span>
+      <span class="badge text-bg-light border">Bootstrap 5.3.3</span>
+      <span class="badge text-bg-light border">JavaScript ES6+</span>
+      <span class="badge text-bg-light border">Demo funcional incluida</span>
+    </div>
+  </div>
+</header>
+
+<div class="container py-5">
+  <div class="layout">
+
+    <!-- ============ MAPA DE PROGRESO (sidebar) ============ -->
+    <nav class="progress-map" id="progressMap">
+      <div class="pm-title">Mapa de la guía</div>
+      <a href="#paso-00"><span class="pm-num">00</span> Qué vamos a construir</a>
+      <a href="#paso-01"><span class="pm-num">01</span> Los datos: products.json</a>
+      <a href="#paso-02"><span class="pm-num">02</span> Bootstrap y estructura HTML</a>
+      <a href="#paso-03"><span class="pm-num">03</span> Pintar el listado de productos</a>
+      <a href="#paso-04"><span class="pm-num">04</span> Vista de detalle de producto</a>
+      <a href="#paso-05"><span class="pm-num">05</span> Fundamentos de localStorage</a>
+      <a href="#paso-06"><span class="pm-num">06</span> Modelo de datos del carrito</a>
+      <a href="#paso-07"><span class="pm-num">07</span> Ícono del carrito y contador</a>
+      <a href="#paso-08"><span class="pm-num">08</span> Vista del carrito y totales</a>
+      <a href="#paso-09"><span class="pm-num">09</span> Checkout</a>
+      <a href="#paso-10"><span class="pm-num">10</span> Demo funcional completa</a>
+      <a href="#paso-11"><span class="pm-num">11</span> Antipatrones — resumen</a>
+      <a href="#paso-12"><span class="pm-num">12</span> Siguientes pasos</a>
+    </nav>
+
+    <!-- ============ CONTENIDO ============ -->
+    <main>
+
+      <!-- PASO 00 -->
+      <section class="step" id="paso-00">
+        <div class="step-kicker"><span class="num">00</span> INTRODUCCIÓN</div>
+        <h2>Qué vamos a construir y por qué en este orden</h2>
+        <p>
+          Un carrito de compras "solo front-end" (sin backend ni base de datos) tiene cuatro piezas que dependen
+          unas de otras. Por eso la guía avanza en este orden: primero los <strong>datos</strong> (de dónde salen los productos),
+          luego cómo se <strong>muestran</strong>, luego cómo se <strong>guardan las decisiones del usuario</strong> (localStorage)
+          y por último cómo esas decisiones se <strong>reflejan en la interfaz</strong> (ícono, vista de carrito, checkout).
+        </p>
+        <div class="row g-3 mt-2">
+          <div class="col-md-3 col-6">
+            <div class="border rounded-3 p-3 h-100">
+              <i class="bi bi-filetype-json fs-4" style="color:var(--accent)"></i>
+              <div class="fw-semibold mt-2 small">1. Datos</div>
+              <div class="text-muted small">products.json</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="border rounded-3 p-3 h-100">
+              <i class="bi bi-grid fs-4" style="color:var(--accent)"></i>
+              <div class="fw-semibold mt-2 small">2. Vistas</div>
+              <div class="text-muted small">Listado + detalle</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="border rounded-3 p-3 h-100">
+              <i class="bi bi-hdd fs-4" style="color:var(--accent)"></i>
+              <div class="fw-semibold mt-2 small">3. Persistencia</div>
+              <div class="text-muted small">localStorage</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="border rounded-3 p-3 h-100">
+              <i class="bi bi-bag-check fs-4" style="color:var(--accent)"></i>
+              <div class="fw-semibold mt-2 small">4. Interfaz</div>
+              <div class="text-muted small">Ícono + checkout</div>
+            </div>
+          </div>
+        </div>
+        <div class="callout why mt-4">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué localStorage y no un backend</div>
+          Para aprender el flujo completo de un carrito (agregar, quitar, persistir, mostrar totales) no necesitas
+          un servidor. <code>localStorage</code> permite que el carrito sobreviva a recargar la página o cerrar la
+          pestaña, que es la señal mínima de "carrito persistente" que un usuario espera. Cuando el proyecto
+          necesite usuarios reales, inventario compartido o pagos, ese carrito se migra a un backend
+          (ver <a href="#paso-12">paso 12</a>).
+        </div>
+      </section>
+
+      <!-- PASO 01 -->
+      <section class="step" id="paso-01">
+        <div class="step-kicker"><span class="num">01</span> DATOS</div>
+        <h2>Los productos viven en un archivo <code>products.json</code></h2>
+        <p>
+          En lugar de "quemar" los productos dentro del HTML o del JavaScript, los separamos en un archivo de datos.
+          Cada producto es un objeto con, como mínimo, un <code>id</code> único, nombre, precio, stock y un
+          <code>imagen</code> con la URL de su foto.
+        </p>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">products.json</span></div>
+          <pre>[
+  {
+    "id": "p01",
+    "nombre": "Teclado mecánico Aurora 65%",
+    "categoria": "Periféricos",
+    "precio": 289000,
+    "stock": 14,
+    "imagen": "https://picsum.photos/seed/aurora-teclado/600/600",
+    "descripcion": "Teclado mecánico compacto, switches en caliente y RGB por tecla."
+  },
+  {
+    "id": "p02",
+    "nombre": "Mouse ergonómico Nimbus",
+    "categoria": "Periféricos",
+    "precio": 129000,
+    "stock": 27,
+    "imagen": "https://picsum.photos/seed/nimbus-mouse/600/600",
+    "descripcion": "Mouse inalámbrico de baja latencia, 26000 DPI."
+  }
+]</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué separar datos de la interfaz</div>
+          Si mañana cambian los precios o llega un producto nuevo, alguien edita un archivo de datos —no busca
+          etiquetas <code>&lt;div&gt;</code> repetidas en el HTML—. Esto también es lo que hace posible que, más
+          adelante, ese mismo JSON pueda salir de una API real sin tocar el código que dibuja la interfaz.
+        </div>
+
+        <h3>Leer el JSON con <code>fetch</code></h3>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>async function cargarProductos() {
+  const respuesta = await fetch('./products.json');   // 1. Pide el archivo
+  if (!respuesta.ok) {                                  // 2. Verifica que llegó bien (status 200-299)
+    throw new Error('No se pudo cargar el catálogo');
+  }
+  const productos = await respuesta.json();             // 3. Convierte el texto JSON en un array de objetos JS
+  return productos;
+}</pre>
+        </div>
+        <p>
+          <code>fetch</code> devuelve una <em>Promise</em>, por eso se usa <code>await</code> dentro de una función
+          <code>async</code>: el navegador sigue respondiendo mientras espera la respuesta, en lugar de congelarse.
+        </p>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: ignorar los errores</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ Si el archivo no existe o el servidor responde 404,
+// esto sigue intentando leer un JSON que no llegó y el error
+// se ve como un fallo "misterioso" más adelante en el código.
+fetch('./products.json')
+  .then(r => r.json())
+  .then(productos => pintarProductos(productos));</pre>
+          </div>
+          Falta comprobar <code>respuesta.ok</code> y falta un <code>.catch()</code> (o un <code>try/catch</code>)
+          para mostrarle algo al usuario si la carga falla, en vez de dejar la pantalla en blanco.
+        </div>
+
+        <h3>Alternativas para obtener los datos</h3>
+        <table class="table table-bordered table-compare align-middle">
+          <thead>
+            <tr><th>Opción</th><th>Cuándo usarla</th><th>Ventaja principal</th><th>Limitación</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>fetch()</code></td>
+              <td>Estándar actual, este proyecto</td>
+              <td><span class="badge badge-soft-good">Nativo, basado en Promises</span></td>
+              <td>API algo verbosa para casos simples</td>
+            </tr>
+            <tr>
+              <td><code>XMLHttpRequest</code></td>
+              <td>Mantenimiento de código legado</td>
+              <td>Soporte en navegadores muy antiguos</td>
+              <td><span class="badge badge-soft-bad">Sintaxis basada en callbacks, más código</span></td>
+            </tr>
+            <tr>
+              <td>Librería <code>axios</code></td>
+              <td>Proyectos grandes con muchas llamadas a APIs</td>
+              <td>Interceptores, cancelación, JSON automático</td>
+              <td>Dependencia externa que hay que instalar</td>
+            </tr>
+            <tr>
+              <td>Importar el JSON como módulo (<code>import data from './products.json'</code>)</td>
+              <td>Proyectos con bundler (Vite, Webpack)</td>
+              <td>Datos disponibles sin esperar una petición</td>
+              <td>No sirve si el catálogo cambia sin recompilar</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-muted small">
+          Nota de esta guía: si abres el HTML final con doble clic (<code>file://</code>), el navegador bloquea
+          <code>fetch</code> a archivos locales por seguridad (CORS). La demo del <a href="#paso-10">paso 10</a>
+          incluye un respaldo automático para que funcione igual; en un proyecto real esto no ocurre porque el
+          sitio se sirve por <code>http</code> (Live Server, Vite, un servidor real, etc.).
+        </p>
+      </section>
+
+      <!-- PASO 02 -->
+      <section class="step" id="paso-02">
+        <div class="step-kicker"><span class="num">02</span> ESTRUCTURA</div>
+        <h2>Bootstrap 5.3 y el esqueleto HTML</h2>
+        <p>
+          Bootstrap aporta la grilla, las tarjetas, el <em>offcanvas</em> del carrito y los modales del checkout,
+          para no reinventar CSS de layout. Se agrega por CDN, que es la forma más rápida de empezar sin
+          instalar nada.
+        </p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html — &lt;head&gt;</span></div>
+          <pre>&lt;link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"&gt;
+
+&lt;!-- al final del body, para que el DOM ya exista cuando se ejecute --&gt;
+&lt;script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"&gt;
+&lt;/script&gt;</pre>
+        </div>
+
+        <h3>CDN vs. instalación local (npm)</h3>
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Opción</th><th>Ventaja</th><th>Limitación</th><th>Recomendado para</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>CDN (<code>&lt;link&gt;</code> / <code>&lt;script&gt;</code>)</td>
+              <td><span class="badge badge-soft-good">Cero configuración, cachea entre sitios</span></td>
+              <td>Depende de internet; sin control de versión exacto si no se fija</td>
+              <td>Prototipos, guías, sitios estáticos simples</td>
+            </tr>
+            <tr>
+              <td><code>npm install bootstrap</code></td>
+              <td>Funciona sin conexión, integrable con un bundler y Sass</td>
+              <td>Requiere Node.js y proceso de build</td>
+              <td>Aplicaciones de producción</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué el JS de Bootstrap va antes de cerrar <code>&lt;/body&gt;</code></div>
+          El HTML se procesa de arriba hacia abajo. Si el <code>&lt;script&gt;</code> se coloca en el
+          <code>&lt;head&gt;</code>, el navegador intentaría ejecutar código que manipula elementos
+          (como el <em>offcanvas</em> del carrito) antes de que esos elementos existan en el DOM.
+        </div>
+
+        <h3>Esqueleto de las tres vistas</h3>
+        <p>Usamos <strong>una sola página</strong> con secciones que se muestran u ocultan (más simple que enrutar
+        varias páginas para este alcance):</p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html — &lt;body&gt;</span></div>
+          <pre>&lt;section id="vista-listado"&gt;    &lt;!-- grilla de productos --&gt;   &lt;/section&gt;
+&lt;section id="vista-detalle" hidden&gt; &lt;!-- un producto ampliado --&gt; &lt;/section&gt;
+
+&lt;div class="offcanvas offcanvas-end" id="offcanvasCart"&gt;
+  &lt;!-- carrito lateral --&gt;
+&lt;/div&gt;
+
+&lt;div class="modal" id="modalCheckout"&gt;
+  &lt;!-- formulario de checkout --&gt;
+&lt;/div&gt;</pre>
+        </div>
+      </section>
+
+      <!-- PASO 03 -->
+      <section class="step" id="paso-03">
+        <div class="step-kicker"><span class="num">03</span> LISTADO</div>
+        <h2>Pintar el listado de productos con JavaScript</h2>
+        <p>Con los productos ya cargados (paso 01), se recorren y se genera una tarjeta Bootstrap por cada uno.</p>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>function pintarProductos(productos) {
+  const contenedor = document.getElementById('grid-productos');
+
+  contenedor.innerHTML = productos.map(p => `
+    &lt;div class="col-md-4 col-6"&gt;
+      &lt;div class="product-card" data-id="${p.id}"&gt;
+        &lt;img src="${p.imagen}" alt="${p.nombre}"&gt;
+        &lt;div class="p-3"&gt;
+          &lt;h3 class="h6"&gt;${p.nombre}&lt;/h3&gt;
+          &lt;p class="price"&gt;${formatearPrecio(p.precio)}&lt;/p&gt;
+          &lt;button class="btn btn-dark btn-sm btn-agregar"&gt;Agregar&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `).join('');
+}</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>Array.prototype.map</code> + <code>join('')</code></div>
+          <code>map</code> transforma cada producto en un trozo de HTML (string), y <code>join('')</code> los une
+          en un solo string sin separadores. Es una forma declarativa de decir "por cada producto, esta plantilla",
+          en lugar de ir concatenando HTML manualmente en un bucle.
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: interpolar datos sin control (XSS)</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ Si "nombre" viniera de un usuario (no de tu propio JSON),
+// esto ejecutaría cualquier &lt;script&gt; que contenga el texto.
+contenedor.innerHTML += `&lt;h3&gt;${productoDelUsuario.nombre}&lt;/h3&gt;`;</pre>
+          </div>
+          Para datos que tú controlas (tu propio <code>products.json</code>) esto es aceptable. Si el contenido
+          viniera de un formulario o de otro usuario, se debe sanitizar o usar <code>textContent</code> en vez de
+          <code>innerHTML</code>.
+        </div>
+
+        <h3><code>innerHTML</code> vs. <code>createElement</code> vs. plantillas (<code>&lt;template&gt;</code>)</h3>
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Técnica</th><th>Legibilidad</th><th>Seguridad</th><th>Rendimiento</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>innerHTML</code> + template literals</td>
+              <td><span class="badge badge-soft-good">Alta</span></td>
+              <td><span class="badge badge-soft-bad">Requiere cuidado con XSS</span></td>
+              <td>Bueno para listas medianas</td>
+            </tr>
+            <tr>
+              <td><code>document.createElement</code> + <code>appendChild</code></td>
+              <td>Media (más líneas)</td>
+              <td><span class="badge badge-soft-good">Más seguro por defecto</span></td>
+              <td>Mejor en listas muy grandes o que cambian mucho</td>
+            </tr>
+            <tr>
+              <td>Elemento <code>&lt;template&gt;</code> + <code>cloneNode</code></td>
+              <td>Media</td>
+              <td><span class="badge badge-soft-good">Seguro</span></td>
+              <td>Muy bueno, reutiliza una estructura ya parseada</td>
+            </tr>
+            <tr>
+              <td>Un framework (React, Vue, Svelte…)</td>
+              <td><span class="badge badge-soft-good">Alta a gran escala</span></td>
+              <td>Seguro por defecto (escapan variables)</td>
+              <td>Óptimo con actualizaciones frecuentes de UI</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Delegación de eventos: un solo listener para todas las tarjetas</h3>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>// En vez de poner un listener por cada botón "Agregar" (que además
+// se perdería cada vez que se vuelve a pintar el listado), se escucha
+// el contenedor completo y se revisa qué se hizo clic.
+document.getElementById('grid-productos').addEventListener('click', (evento) => {
+  const boton = evento.target.closest('.btn-agregar');
+  if (!boton) return;                       // el clic no fue en un botón "Agregar"
+  const tarjeta = boton.closest('.product-card');
+  agregarAlCarrito(tarjeta.dataset.id);
+});</pre>
+        </div>
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué delegación y no un listener por botón</div>
+          Cada vez que <code>pintarProductos</code> vuelve a ejecutarse (por ejemplo, al filtrar), los botones
+          viejos se destruyen y se crean unos nuevos. Un listener puesto directamente sobre un botón desaparece
+          con él. El contenedor padre, en cambio, no se vuelve a crear, así que su listener sigue funcionando para
+          cualquier botón —incluso los nuevos— gracias al <em>event bubbling</em>.
+        </div>
+      </section>
+
+      <!-- PASO 04 -->
+      <section class="step" id="paso-04">
+        <div class="step-kicker"><span class="num">04</span> DETALLE</div>
+        <h2>Vista de detalle de producto</h2>
+        <p>
+          Al hacer clic en una tarjeta o en su imagen, se necesita saber <em>qué producto</em> mostrar en grande.
+          Como no hay backend ni framework de rutas, hay tres formas comunes de "recordar" cuál producto se eligió:
+        </p>
+
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Técnica</th><th>Cómo funciona</th><th>Ventaja</th><th>Limitación</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Parámetro de URL <code>?id=p03</code></td>
+              <td><code>new URLSearchParams(location.search)</code></td>
+              <td><span class="badge badge-soft-good">Se puede compartir el link del producto</span></td>
+              <td>Necesita recargar o leer la URL al iniciar</td>
+            </tr>
+            <tr>
+              <td>Hash <code>#/producto/p03</code></td>
+              <td>Escuchando <code>window.onhashchange</code></td>
+              <td>No recarga la página, funciona sin servidor</td>
+              <td>URLs menos "limpias"</td>
+            </tr>
+            <tr>
+              <td>Variable en memoria + mostrar/ocultar sección</td>
+              <td>Guardar el producto elegido en una variable JS</td>
+              <td><span class="badge badge-soft-good">Simple, la usaremos aquí</span></td>
+              <td>Se pierde el detalle al recargar (no es "linkeable")</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>let productoActual = null;
+
+function mostrarDetalle(idProducto) {
+  productoActual = catalogo.find(p => p.id === idProducto);
+  if (!productoActual) return;
+
+  document.getElementById('detalle-imagen').src = productoActual.imagen;
+  document.getElementById('detalle-nombre').textContent = productoActual.nombre;
+  document.getElementById('detalle-precio').textContent = formatearPrecio(productoActual.precio);
+  document.getElementById('detalle-descripcion').textContent = productoActual.descripcion;
+
+  document.getElementById('vista-listado').hidden = true;
+  document.getElementById('vista-detalle').hidden = false;
+}</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>Array.prototype.find</code></div>
+          <code>find</code> recorre el arreglo y devuelve el <strong>primer</strong> elemento que cumple la
+          condición (o <code>undefined</code> si ninguno la cumple). Es la herramienta correcta cuando se busca
+          "el" elemento por un identificador único, a diferencia de <code>filter</code>, que devolvería un arreglo
+          aunque solo exista una coincidencia.
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: buscar por posición en vez de por id</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ Si el catálogo cambia de orden (filtros, ordenar por precio…)
+// el índice ya no corresponde al mismo producto.
+function mostrarDetalle(indice) {
+  productoActual = catalogo[indice];
+}</pre>
+          </div>
+          Usar el <code>id</code> del producto (y no su posición en el arreglo) evita este tipo de bug silencioso.
+        </div>
+      </section>
+
+      <!-- PASO 05 -->
+      <section class="step" id="paso-05">
+        <div class="step-kicker"><span class="num">05</span> PERSISTENCIA</div>
+        <h2>Fundamentos de <code>localStorage</code></h2>
+        <p>
+          <code>localStorage</code> es un almacén clave-valor que el navegador guarda <strong>por origen</strong>
+          (protocolo + dominio + puerto) y que persiste aunque se cierre la pestaña o el navegador. Solo guarda
+          <strong>strings</strong>, así que los objetos/arreglos se convierten con <code>JSON.stringify</code> al
+          guardar y con <code>JSON.parse</code> al leer.
+        </p>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">consola del navegador</span></div>
+          <pre>localStorage.setItem('color-favorito', 'azul');   // guardar un string
+localStorage.getItem('color-favorito');           // → "azul"
+
+const carrito = [{ id: 'p01', cantidad: 2 }];
+localStorage.setItem('carrito', JSON.stringify(carrito)); // objeto → string
+const leido = JSON.parse(localStorage.getItem('carrito')); // string → objeto
+
+localStorage.removeItem('color-favorito');        // borrar una clave
+localStorage.clear();                             // borrar todo lo del origen</pre>
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: guardar el objeto directamente</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ localStorage convierte cualquier valor a string automáticamente,
+// pero para un objeto lo convierte al texto inútil "[object Object]".
+localStorage.setItem('carrito', carrito);
+localStorage.getItem('carrito'); // → "[object Object]"  (se perdió la información)</pre>
+          </div>
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: leer sin comprobar que exista</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ La primera vez que alguien visita el sitio, la clave "carrito"
+// no existe todavía: getItem devuelve null, y JSON.parse(null) explota
+// de forma silenciosa en algunos casos o devuelve null en otros.
+const carrito = JSON.parse(localStorage.getItem('carrito'));
+carrito.push(nuevoItem); // 💥 Error: Cannot read properties of null</pre>
+          </div>
+          <div class="code-window mt-2 mb-0">
+            <pre>// ✅ Siempre con un valor por defecto:
+const carrito = JSON.parse(localStorage.getItem('carrito')) || [];</pre>
+          </div>
+        </div>
+
+        <h3>localStorage vs. otras formas de guardar datos en el navegador</h3>
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Mecanismo</th><th>Persiste tras cerrar el navegador</th><th>Capacidad aprox.</th><th>Se envía al servidor</th><th>Cuándo usarlo</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>localStorage</strong></td>
+              <td><span class="badge badge-soft-good">Sí</span></td>
+              <td>5–10 MB</td>
+              <td>No</td>
+              <td>Preferencias, carrito, borradores — este proyecto</td>
+            </tr>
+            <tr>
+              <td>sessionStorage</td>
+              <td><span class="badge badge-soft-bad">No (solo dura la pestaña)</span></td>
+              <td>5–10 MB</td>
+              <td>No</td>
+              <td>Datos temporales de un solo flujo (ej. pasos de un wizard)</td>
+            </tr>
+            <tr>
+              <td>Cookies</td>
+              <td>Sí (configurable con expiración)</td>
+              <td>~4 KB</td>
+              <td><span class="badge badge-soft-bad">Sí, en cada petición</span></td>
+              <td>Sesiones de autenticación, datos que el servidor necesita leer</td>
+            </tr>
+            <tr>
+              <td>IndexedDB</td>
+              <td>Sí</td>
+              <td>Cientos de MB o más</td>
+              <td>No</td>
+              <td>Grandes volúmenes de datos, apps offline complejas</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué localStorage y no cookies para el carrito</div>
+          Las cookies viajan en cada petición HTTP al servidor, lo cual es innecesario (y más lento) para datos
+          que solo le importan al navegador. Además su límite de ~4KB se queda corto si el carrito crece.
+          <code>localStorage</code> es más grande, no viaja por la red y es más simple de leer/escribir con JS.
+        </div>
+      </section>
+
+      <!-- PASO 06 -->
+      <section class="step" id="paso-06">
+        <div class="step-kicker"><span class="num">06</span> MODELO DE DATOS</div>
+        <h2>Cómo modelar el carrito</h2>
+        <p>Dos formas de guardar el carrito en <code>localStorage</code>:</p>
+
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Modelo</th><th>Ejemplo</th><th>Problema / ventaja</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="badge-soft-bad" style="display:table-cell;">❌ Guardar el producto completo</td>
+              <td><pre class="mono small mb-0">[{ id:"p01", nombre:"Teclado...",
+  precio:289000, imagen:"...", cantidad:2 }]</pre></td>
+              <td>Duplica datos que ya están en <code>products.json</code>. Si el precio cambia en el catálogo,
+              el carrito queda con el precio viejo ("desincronizado").</td>
+            </tr>
+            <tr>
+              <td class="badge-soft-good" style="display:table-cell;">✅ Guardar solo id + cantidad</td>
+              <td><pre class="mono small mb-0">[{ id:"p01", cantidad:2 },
+ { id:"p04", cantidad:1 }]</pre></td>
+              <td>El carrito es una lista mínima. Nombre, precio e imagen se buscan en el catálogo
+              (<code>find</code>) cada vez que hay que <em>mostrar</em> el carrito, así siempre están al día.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">carrito.js</span></div>
+          <pre>const CLAVE_CARRITO = 'carrito';
+
+function obtenerCarrito() {
+  return JSON.parse(localStorage.getItem(CLAVE_CARRITO)) || [];
+}
+
+function guardarCarrito(carrito) {
+  localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  document.dispatchEvent(new CustomEvent('carrito:actualizado', { detail: carrito }));
+}
+
+function agregarAlCarrito(idProducto, cantidad = 1) {
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === idProducto);
+
+  if (item) {
+    item.cantidad += cantidad;          // ya estaba: solo sube la cantidad
+  } else {
+    carrito.push({ id: idProducto, cantidad }); // no estaba: se agrega
+  }
+  guardarCarrito(carrito);
+}
+
+function quitarDelCarrito(idProducto) {
+  const carrito = obtenerCarrito().filter(i => i.id !== idProducto);
+  guardarCarrito(carrito);
+}
+
+function cambiarCantidad(idProducto, nuevaCantidad) {
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === idProducto);
+  if (!item) return;
+
+  if (nuevaCantidad &lt;= 0) {
+    return quitarDelCarrito(idProducto);
+  }
+  item.cantidad = nuevaCantidad;
+  guardarCarrito(carrito);
+}</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué centralizar todo en <code>guardarCarrito()</code></div>
+          Cada función que cambia el carrito (agregar, quitar, cambiar cantidad) termina llamando a la misma
+          función <code>guardarCarrito</code>. Así hay un solo lugar responsable de escribir en
+          <code>localStorage</code> y de avisar al resto de la interfaz que algo cambió, en vez de repetir
+          <code>localStorage.setItem(...)</code> en cada función (y arriesgarse a olvidarlo en alguna).
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: permitir duplicados</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ Sin buscar si el producto ya está, cada clic en "Agregar"
+// crea una línea nueva en vez de sumar la cantidad.
+function agregarAlCarrito(idProducto) {
+  const carrito = obtenerCarrito();
+  carrito.push({ id: idProducto, cantidad: 1 });
+  guardarCarrito(carrito);
+}
+// Resultado: el mismo producto aparece 3 veces en el carrito
+// en vez de una vez con cantidad 3.</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 07 -->
+      <section class="step" id="paso-07">
+        <div class="step-kicker"><span class="num">07</span> INTERFAZ</div>
+        <h2>Ícono del carrito con contador de artículos</h2>
+        <p>
+          El número sobre el ícono del carrito (el mismo que ves arriba, en la barra de esta guía) tiene que
+          actualizarse cada vez que el carrito cambia, sin importar desde qué parte del código haya cambiado.
+        </p>
+
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Estrategia para refrescar el contador</th><th>Cómo funciona</th><th>Cuándo conviene</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Llamar a <code>actualizarContador()</code> manualmente al final de cada función del carrito</td>
+              <td>Cada función (agregar, quitar…) invoca la actualización</td>
+              <td>Proyectos pequeños; fácil de seguir pero fácil de olvidar una llamada</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-soft-good">Evento personalizado</span> (<code>CustomEvent</code>)</td>
+              <td><code>guardarCarrito</code> emite un evento; cualquier parte de la UI que necesite reaccionar
+              se suscribe una vez</td>
+              <td>La usada en esta guía: desacopla "qué cambió" de "quién debe reaccionar"</td>
+            </tr>
+            <tr>
+              <td>Evento nativo <code>storage</code></td>
+              <td>Se dispara solo cuando <em>otra pestaña</em> modifica el mismo localStorage</td>
+              <td>Sincronizar el carrito entre varias pestañas abiertas del mismo sitio</td>
+            </tr>
+            <tr>
+              <td>Sondeo (<code>setInterval</code> revisando localStorage)</td>
+              <td>Se revisa el valor cada cierto tiempo</td>
+              <td><span class="badge badge-soft-bad">No recomendado</span>: gasta recursos comprobando algo que ya se sabe cuándo cambia</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">ui-carrito.js</span></div>
+          <pre>function actualizarContador() {
+  const carrito = obtenerCarrito();
+  const totalArticulos = carrito.reduce((suma, item) => suma + item.cantidad, 0);
+
+  document.querySelectorAll('.cart-badge').forEach(el => {
+    el.textContent = totalArticulos;
+  });
+}
+
+// Se suscribe UNA vez al evento personalizado emitido en guardarCarrito()
+document.addEventListener('carrito:actualizado', actualizarContador);
+
+// Y también al cargar la página, para reflejar lo que ya había en localStorage
+document.addEventListener('DOMContentLoaded', actualizarContador);</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>reduce</code> para el total y no la longitud del arreglo</div>
+          <code>carrito.length</code> contaría "2 productos distintos" como 2, aunque uno tenga cantidad 5.
+          <code>reduce</code> suma la propiedad <code>cantidad</code> de cada línea, dando el número real de
+          artículos en el carrito (que es lo que el usuario espera ver en el ícono).
+        </div>
+      </section>
+
+      <!-- PASO 08 -->
+      <section class="step" id="paso-08">
+        <div class="step-kicker"><span class="num">08</span> INTERFAZ</div>
+        <h2>Vista del carrito y cálculo de totales</h2>
+        <p>Para mostrar el carrito, se combina la lista mínima guardada en <code>localStorage</code> con los
+        datos completos del catálogo:</p>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">ui-carrito.js</span></div>
+          <pre>function pintarVistaCarrito() {
+  const carrito = obtenerCarrito();
+
+  const lineas = carrito.map(item => {
+    const producto = catalogo.find(p => p.id === item.id);
+    if (!producto) return '';                 // por si el producto ya no existe en el catálogo
+    const subtotal = producto.precio * item.cantidad;
+    return `
+      &lt;div class="d-flex justify-content-between align-items-center border-bottom py-2"&gt;
+        &lt;div&gt;
+          &lt;div class="fw-semibold"&gt;${producto.nombre}&lt;/div&gt;
+          &lt;div class="text-muted small"&gt;${formatearPrecio(producto.precio)} × ${item.cantidad}&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="fw-bold"&gt;${formatearPrecio(subtotal)}&lt;/div&gt;
+      &lt;/div&gt;`;
+  }).join('');
+
+  const total = carrito.reduce((suma, item) => {
+    const producto = catalogo.find(p => p.id === item.id);
+    return producto ? suma + producto.precio * item.cantidad : suma;
+  }, 0);
+
+  document.getElementById('lineas-carrito').innerHTML = lineas || '&lt;p class="text-muted"&gt;Tu carrito está vacío.&lt;/p&gt;';
+  document.getElementById('total-carrito').textContent = formatearPrecio(total);
+}</pre>
+        </div>
+
+        <h3><code>reduce</code> vs. un bucle <code>for</code> para el total</h3>
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Enfoque</th><th>Código</th><th>Cuándo preferirlo</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>reduce</code></td>
+              <td><pre class="mono small mb-0">carrito.reduce((s,i)=>s+i.cantidad*precio(i),0)</pre></td>
+              <td>Expresa "acumular un valor" en una sola línea; ideal para sumas, promedios, agrupaciones</td>
+            </tr>
+            <tr>
+              <td><code>for</code> / <code>for...of</code></td>
+              <td><pre class="mono small mb-0">let t=0; for(const i of carrito){ t+=... }</pre></td>
+              <td>Más explícito para quien recién aprende, o cuando la lógica del acumulador es compleja
+              (varias condiciones, side-effects)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: guardar el total en localStorage</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ Guardar un total "congelado" obliga a recordar actualizarlo
+// cada vez que cambia el carrito, y es fácil que quede desactualizado.
+localStorage.setItem('total', '1450000');</pre>
+          </div>
+          El total <strong>se calcula</strong> a partir del carrito y el catálogo cada vez que se necesita
+          mostrar; nunca se guarda como un valor aparte que pueda quedar desincronizado.
+        </div>
+      </section>
+
+      <!-- PASO 09 -->
+      <section class="step" id="paso-09">
+        <div class="step-kicker"><span class="num">09</span> CHECKOUT</div>
+        <h2>Checkout: de "carrito" a "pedido"</h2>
+        <p>
+          El checkout de esta guía es una simulación: valida un formulario, "confirma" el pedido y vacía el
+          carrito. En un proyecto real, aquí es donde entraría un backend y una pasarela de pago
+          (ver <a href="#paso-12">paso 12</a>).
+        </p>
+
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">checkout.js</span></div>
+          <pre>function confirmarPedido(evento) {
+  evento.preventDefault();                    // evita que el formulario recargue la página
+
+  const formulario = evento.target;
+  if (!formulario.checkValidity()) {           // usa la validación nativa de HTML5
+    formulario.classList.add('was-validated'); // Bootstrap resalta los campos inválidos
+    return;
+  }
+
+  const carrito = obtenerCarrito();
+  if (carrito.length === 0) return;
+
+  // Aquí, en un proyecto real, se enviaría el pedido a un servidor:
+  // await fetch('/api/pedidos', { method: 'POST', body: JSON.stringify({...}) })
+
+  localStorage.removeItem(CLAVE_CARRITO);      // se vacía el carrito
+  document.dispatchEvent(new CustomEvent('carrito:actualizado', { detail: [] }));
+  mostrarConfirmacion();
+}</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué validar con <code>checkValidity()</code> antes de "enviar"</div>
+          HTML5 ya sabe validar campos requeridos, formato de email, etc. usando atributos como
+          <code>required</code> y <code>type="email"</code>. Reutilizar esa validación nativa (en vez de escribir
+          expresiones regulares a mano) reduce código y errores; Bootstrap solo se encarga de que se vea bien.
+        </div>
+
+        <div class="callout bad">
+          <div class="callout-title"><i class="bi bi-exclamation-triangle"></i> Antiejemplo: confiar en el precio que envía el navegador</div>
+          <div class="code-window bad-code mt-2 mb-0">
+            <pre>// ❌ En un checkout real conectado a un servidor, nunca se debe
+// confiar en el total calculado en el navegador: cualquiera puede
+// abrir la consola y cambiarlo antes de enviarlo.
+fetch('/api/pedidos', {
+  method: 'POST',
+  body: JSON.stringify({ total: totalMostradoEnPantalla }) // ❌ inseguro
+});</pre>
+          </div>
+          El servidor debe recalcular el total a partir de los <code>id</code> y cantidades recibidas, usando sus
+          propios precios — el front-end solo calcula para <em>mostrarle</em> el total al usuario.
+        </div>
+      </section>
+
+      <!-- PASO 10: DEMO FUNCIONAL -->
+      <section class="step" id="paso-10">
+        <div class="step-kicker"><span class="num">10</span> DEMO</div>
+        <h2>Demo funcional completa</h2>
+        <p>
+          Todo lo anterior, unido y funcionando de verdad en esta misma página: listado desde JSON, detalle,
+          carrito con <code>localStorage</code>, ícono con contador y checkout. Prueba a agregar productos,
+          recargar la página y ver que el carrito sigue ahí.
+        </p>
+
+        <div class="demo-shell my-4">
+          <div class="demo-topbar">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-shop"></i>
+              <span class="fw-semibold small">Tienda de demostración</span>
+            </div>
+            <div class="ms-auto">
+              <button class="btn btn-sm btn-light position-relative" id="cartBtn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">
+                <i class="bi bi-cart3"></i> Carrito
+                <span class="badge rounded-pill bg-primary cart-badge-demo" id="cartCountDemo">0</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="demo-body">
+
+            <!-- Vista listado -->
+            <div id="vista-listado">
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h5 class="mb-0">Catálogo</h5>
+                <select class="form-select form-select-sm w-auto" id="filtroCategoria">
+                  <option value="">Todas las categorías</option>
+                </select>
+              </div>
+              <div class="row g-3" id="grid-productos">
+                <div class="col-12 text-muted small">Cargando productos…</div>
+              </div>
+            </div>
+
+            <!-- Vista detalle -->
+            <div id="vista-detalle" hidden>
+              <button class="btn btn-link ps-0 mb-2" id="btnVolver"><i class="bi bi-arrow-left"></i> Volver al catálogo</button>
+              <div class="row g-4">
+                <div class="col-md-5">
+                  <img id="detalle-imagen" class="img-fluid rounded-3 border" alt="">
+                </div>
+                <div class="col-md-7">
+                  <span class="badge text-bg-light border" id="detalle-categoria"></span>
+                  <h3 class="mt-2" id="detalle-nombre"></h3>
+                  <p class="text-muted" id="detalle-descripcion"></p>
+                  <p class="fs-4 fw-bold" id="detalle-precio"></p>
+                  <p class="small" id="detalle-stock"></p>
+                  <div class="d-flex align-items-center gap-2 mt-3">
+                    <input type="number" id="detalle-cantidad" class="form-control" style="width:90px" value="1" min="1">
+                    <button class="btn btn-dark" id="btnAgregarDetalle"><i class="bi bi-bag-plus"></i> Agregar al carrito</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Offcanvas: carrito -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCart">
+          <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title"><i class="bi bi-cart3"></i> Tu carrito</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+          </div>
+          <div class="offcanvas-body d-flex flex-column">
+            <div id="lineas-carrito" class="flex-grow-1"></div>
+            <div class="border-top pt-3 mt-2">
+              <div class="d-flex justify-content-between fw-bold fs-5">
+                <span>Total</span>
+                <span id="total-carrito">$0</span>
+              </div>
+              <button class="btn btn-dark w-100 mt-3" id="btnIrCheckout" data-bs-dismiss="offcanvas" data-bs-toggle="modal" data-bs-target="#modalCheckout">
+                Ir a checkout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal: checkout -->
+        <div class="modal fade" id="modalCheckout" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <form id="formCheckout" class="needs-validation" novalidate>
+                <div class="modal-header">
+                  <h5 class="modal-title"><i class="bi bi-bag-check"></i> Checkout</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <div id="resumenCheckout" class="mb-3 small border rounded-3 p-2 bg-light"></div>
+                  <div class="mb-3">
+                    <label class="form-label">Nombre completo</label>
+                    <input type="text" class="form-control" required>
+                    <div class="invalid-feedback">Este campo es obligatorio.</div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" required>
+                    <div class="invalid-feedback">Ingresa un correo válido.</div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Dirección de envío</label>
+                    <input type="text" class="form-control" required>
+                    <div class="invalid-feedback">Este campo es obligatorio.</div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-dark w-100">Confirmar pedido</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal: confirmación -->
+        <div class="modal fade" id="modalConfirmacion" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content text-center p-4">
+              <i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem"></i>
+              <h5 class="mt-3">¡Pedido confirmado!</h5>
+              <p class="text-muted small mb-3">Tu carrito quedó vacío en localStorage — recarga la página y compruébalo.</p>
+              <button class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-muted small mt-3">
+          <i class="bi bi-info-circle"></i> Esta demo intenta leer <code>products.json</code> con <code>fetch</code>;
+          si el navegador lo bloquea por abrir el archivo con <code>file://</code>, usa automáticamente una copia
+          embebida de los mismos datos, para que puedas ver el flujo completo sin montar un servidor.
+        </p>
+      </section>
+
+      <!-- PASO 11 -->
+      <section class="step" id="paso-11">
+        <div class="step-kicker"><span class="num">11</span> RESUMEN</div>
+        <h2>Antipatrones a evitar — tabla resumen</h2>
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>❌ Antipatrón</th><th>Por qué falla</th><th>✅ En su lugar</th></tr></thead>
+          <tbody>
+            <tr><td>Guardar objetos sin <code>JSON.stringify</code></td><td>Se guarda el texto <code>"[object Object]"</code></td><td>Serializar con <code>JSON.stringify</code> / <code>JSON.parse</code></td></tr>
+            <tr><td>Leer localStorage sin valor por defecto</td><td>Falla la primera visita (no existe la clave)</td><td><code>JSON.parse(localStorage.getItem(k)) || []</code></td></tr>
+            <tr><td>Guardar el producto completo en el carrito</td><td>Datos duplicados y desincronizados con el catálogo</td><td>Guardar solo <code>{id, cantidad}</code> y cruzar con el catálogo al mostrar</td></tr>
+            <tr><td>Permitir duplicados al "agregar"</td><td>El mismo producto aparece varias veces en vez de sumar cantidad</td><td>Buscar con <code>find</code> antes de decidir sumar o insertar</td></tr>
+            <tr><td>Actualizar el contador manualmente en cada función</td><td>Fácil de olvidar en alguna función nueva</td><td>Evento personalizado <code>carrito:actualizado</code></td></tr>
+            <tr><td>Confiar en el total calculado en el navegador para cobrar</td><td>Cualquiera puede modificarlo desde la consola</td><td>El servidor recalcula el total con sus propios precios</td></tr>
+            <tr><td>Ignorar errores de <code>fetch</code></td><td>Pantalla en blanco sin explicación si falla la carga</td><td>Verificar <code>response.ok</code> y manejar el <code>catch</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- PASO 12 -->
+      <section class="step" id="paso-12">
+        <div class="step-kicker"><span class="num">12</span> CIERRE</div>
+        <h2>Siguientes pasos</h2>
+        <p>Este carrito con <code>localStorage</code> es suficiente para portafolios, prototipos y aprendizaje.
+        Para un e-commerce real, la evolución típica es:</p>
+        <ul>
+          <li><strong>Backend + base de datos</strong>: mover el catálogo y el carrito a un servidor (Node/Express, Django, Laravel…) para compartir inventario real entre usuarios.</li>
+          <li><strong>Autenticación</strong>: para que el carrito se asocie a una cuenta y no solo a un navegador.</li>
+          <li><strong>Pasarela de pago</strong> (Stripe, MercadoPago, PayU…): el cobro nunca debe depender solo del front-end.</li>
+          <li><strong>Framework de UI</strong> (React/Vue/Svelte) si la interfaz crece mucho: facilita mantener sincronizados muchos componentes que dependen del mismo estado.</li>
+        </ul>
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> El concepto que no cambia</div>
+          Aunque cambie dónde vive el carrito (localStorage → servidor), la idea central se mantiene: guardar una
+          lista mínima de <code>{id, cantidad}</code> y cruzarla con los datos del catálogo cada vez que hay que
+          mostrarla o cobrarla.
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="container d-flex flex-wrap justify-content-between gap-3">
+    <div>Guía progresiva de carrito de compras · JavaScript + localStorage + Bootstrap 5.3</div>
+    <div class="text-muted">Archivos: <code>guia-carrito-compras.html</code> · <code>products.json</code></div>
+  </div>
+</footer>
+
+<!-- Bootstrap Bundle (incluye Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ======================================================================
+   DEMO FUNCIONAL — mismo código explicado en los pasos 01 a 09,
+   aplicado de verdad sobre esta página.
+   ====================================================================== */
+
+const CLAVE_CARRITO = 'carrito_demo_guia';
+
+// Copia embebida de products.json, usada SOLO si fetch falla (ver nota del paso 01)
+const PRODUCTOS_RESPALDO = [
+  {"id":"p01","nombre":"Teclado mecánico Aurora 65%","categoria":"Periféricos","precio":289000,"stock":14,"imagen":"https://picsum.photos/seed/aurora-teclado/600/600","descripcion":"Teclado mecánico compacto formato 65%, switches intercambiables en caliente y retroiluminación RGB por tecla."},
+  {"id":"p02","nombre":"Mouse ergonómico Nimbus","categoria":"Periféricos","precio":129000,"stock":27,"imagen":"https://picsum.photos/seed/nimbus-mouse/600/600","descripcion":"Mouse inalámbrico de baja latencia con sensor óptico de 26000 DPI y batería de 70 horas."},
+  {"id":"p03","nombre":"Monitor UltraWide Horizon 34\"","categoria":"Pantallas","precio":1750000,"stock":6,"imagen":"https://picsum.photos/seed/horizon-monitor/600/600","descripcion":"Panel IPS curvo 21:9, 144Hz, calibrado de fábrica para diseño y desarrollo."},
+  {"id":"p04","nombre":"Audífonos Halo ANC","categoria":"Audio","precio":459000,"stock":19,"imagen":"https://picsum.photos/seed/halo-audifonos/600/600","descripcion":"Cancelación activa de ruido, 32 horas de batería y modo transparencia adaptativo."},
+  {"id":"p05","nombre":"Webcam Lucent 4K","categoria":"Video","precio":349000,"stock":11,"imagen":"https://picsum.photos/seed/lucent-webcam/600/600","descripcion":"Grabación 4K a 30fps, enfoque automático y corrección de luz en tiempo real."},
+  {"id":"p06","nombre":"Hub USB-C Nexus 8-en-1","categoria":"Conectividad","precio":219000,"stock":32,"imagen":"https://picsum.photos/seed/nexus-hub/600/600","descripcion":"HDMI 4K, lector SD/microSD, 3 puertos USB 3.0 y carga PD de hasta 100W."},
+  {"id":"p07","nombre":"Silla ergonómica Meridian","categoria":"Mobiliario","precio":1290000,"stock":4,"imagen":"https://picsum.photos/seed/meridian-silla/600/600","descripcion":"Soporte lumbar ajustable, reposabrazos 4D y malla transpirable de alta densidad."},
+  {"id":"p08","nombre":"Micrófono condensador Vega","categoria":"Audio","precio":389000,"stock":9,"imagen":"https://picsum.photos/seed/vega-microfono/600/600","descripcion":"Patrón cardioide, filtro pop integrado y salida de auriculares con monitoreo cero-latencia."}
+];
+
+let catalogo = [];
+let productoActual = null;
+
+// ---------- PASO 01: cargar datos ----------
+async function cargarProductos() {
+  try {
+    const respuesta = await fetch('./products.json');
+    if (!respuesta.ok) throw new Error('respuesta no ok');
+    catalogo = await respuesta.json();
+  } catch (error) {
+    catalogo = PRODUCTOS_RESPALDO; // respaldo si fetch falla (p.ej. file://)
+  }
+  poblarFiltroCategorias();
+  pintarProductos(catalogo);
+}
+
+function formatearPrecio(valor) {
+  return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+}
+
+function poblarFiltroCategorias() {
+  const select = document.getElementById('filtroCategoria');
+  const categorias = [...new Set(catalogo.map(p => p.categoria))];
+  categorias.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat; opt.textContent = cat;
+    select.appendChild(opt);
+  });
+}
+
+// ---------- PASO 03: pintar listado ----------
+function pintarProductos(productos) {
+  const contenedor = document.getElementById('grid-productos');
+  if (productos.length === 0) {
+    contenedor.innerHTML = '<div class="col-12 text-muted small">No hay productos en esta categoría.</div>';
+    return;
+  }
+  contenedor.innerHTML = productos.map(p => `
+    <div class="col-md-4 col-sm-6">
+      <div class="product-card" data-id="${p.id}">
+        <img src="${p.imagen}" alt="${p.nombre}" class="img-abrir-detalle">
+        <div class="p-3">
+          <span class="badge text-bg-light border mb-1">${p.categoria}</span>
+          <h3 class="h6 mb-1 nombre-abrir-detalle" role="button">${p.nombre}</h3>
+          <p class="price mb-2">${formatearPrecio(p.precio)}</p>
+          <button class="btn btn-dark btn-sm w-100 btn-agregar">
+            <i class="bi bi-bag-plus"></i> Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('filtroCategoria').addEventListener('change', (e) => {
+  const cat = e.target.value;
+  pintarProductos(cat ? catalogo.filter(p => p.categoria === cat) : catalogo);
+});
+
+// Delegación de eventos sobre la grilla: abrir detalle o agregar directo
+document.getElementById('grid-productos').addEventListener('click', (evento) => {
+  const tarjeta = evento.target.closest('.product-card');
+  if (!tarjeta) return;
+  const id = tarjeta.dataset.id;
+
+  if (evento.target.closest('.btn-agregar')) {
+    agregarAlCarrito(id, 1);
+    return;
+  }
+  if (evento.target.closest('.img-abrir-detalle') || evento.target.closest('.nombre-abrir-detalle')) {
+    mostrarDetalle(id);
+  }
+});
+
+// ---------- PASO 04: vista de detalle ----------
+function mostrarDetalle(idProducto) {
+  productoActual = catalogo.find(p => p.id === idProducto);
+  if (!productoActual) return;
+
+  document.getElementById('detalle-imagen').src = productoActual.imagen;
+  document.getElementById('detalle-categoria').textContent = productoActual.categoria;
+  document.getElementById('detalle-nombre').textContent = productoActual.nombre;
+  document.getElementById('detalle-descripcion').textContent = productoActual.descripcion;
+  document.getElementById('detalle-precio').textContent = formatearPrecio(productoActual.precio);
+  document.getElementById('detalle-stock').textContent = `${productoActual.stock} unidades disponibles`;
+  document.getElementById('detalle-cantidad').value = 1;
+
+  document.getElementById('vista-listado').hidden = true;
+  document.getElementById('vista-detalle').hidden = false;
+  document.getElementById('vista-detalle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('btnVolver').addEventListener('click', () => {
+  document.getElementById('vista-detalle').hidden = true;
+  document.getElementById('vista-listado').hidden = false;
+});
+
+document.getElementById('btnAgregarDetalle').addEventListener('click', () => {
+  if (!productoActual) return;
+  const cantidad = Math.max(1, parseInt(document.getElementById('detalle-cantidad').value, 10) || 1);
+  agregarAlCarrito(productoActual.id, cantidad);
+});
+
+// ---------- PASO 05 y 06: localStorage + modelo del carrito ----------
+function obtenerCarrito() {
+  return JSON.parse(localStorage.getItem(CLAVE_CARRITO)) || [];
+}
+
+function guardarCarrito(carrito) {
+  localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  document.dispatchEvent(new CustomEvent('carrito:actualizado', { detail: carrito }));
+}
+
+function agregarAlCarrito(idProducto, cantidad = 1) {
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === idProducto);
+  if (item) { item.cantidad += cantidad; } else { carrito.push({ id: idProducto, cantidad }); }
+  guardarCarrito(carrito);
+}
+
+function quitarDelCarrito(idProducto) {
+  guardarCarrito(obtenerCarrito().filter(i => i.id !== idProducto));
+}
+
+function cambiarCantidad(idProducto, nuevaCantidad) {
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === idProducto);
+  if (!item) return;
+  if (nuevaCantidad <= 0) return quitarDelCarrito(idProducto);
+  item.cantidad = nuevaCantidad;
+  guardarCarrito(carrito);
+}
+
+// ---------- PASO 07: ícono + contador ----------
+function actualizarContador() {
+  const total = obtenerCarrito().reduce((suma, item) => suma + item.cantidad, 0);
+  document.getElementById('cartCountTop').textContent = total;
+  document.getElementById('cartCountDemo').textContent = total;
+}
+
+// ---------- PASO 08: vista del carrito ----------
+function pintarVistaCarrito() {
+  const carrito = obtenerCarrito();
+  const contenedor = document.getElementById('lineas-carrito');
+
+  if (carrito.length === 0) {
+    contenedor.innerHTML = '<p class="text-muted small">Tu carrito está vacío. Agrega algún producto del catálogo.</p>';
+    document.getElementById('total-carrito').textContent = formatearPrecio(0);
+    return;
+  }
+
+  contenedor.innerHTML = carrito.map(item => {
+    const producto = catalogo.find(p => p.id === item.id);
+    if (!producto) return '';
+    const subtotal = producto.precio * item.cantidad;
+    return `
+      <div class="d-flex gap-2 border-bottom py-2" data-id="${item.id}">
+        <img src="${producto.imagen}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px">
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">${producto.nombre}</div>
+          <div class="text-muted small">${formatearPrecio(producto.precio)}</div>
+          <div class="d-flex align-items-center gap-2 mt-1">
+            <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-restar">−</button>
+            <span class="small">${item.cantidad}</span>
+            <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-sumar">+</button>
+            <button class="btn btn-sm btn-link text-danger ms-auto btn-quitar">Quitar</button>
+          </div>
+        </div>
+        <div class="fw-bold small">${formatearPrecio(subtotal)}</div>
+      </div>`;
+  }).join('');
+
+  const total = carrito.reduce((suma, item) => {
+    const producto = catalogo.find(p => p.id === item.id);
+    return producto ? suma + producto.precio * item.cantidad : suma;
+  }, 0);
+  document.getElementById('total-carrito').textContent = formatearPrecio(total);
+}
+
+document.getElementById('lineas-carrito').addEventListener('click', (evento) => {
+  const linea = evento.target.closest('[data-id]');
+  if (!linea) return;
+  const id = linea.dataset.id;
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === id);
+  if (!item) return;
+
+  if (evento.target.closest('.btn-sumar')) cambiarCantidad(id, item.cantidad + 1);
+  if (evento.target.closest('.btn-restar')) cambiarCantidad(id, item.cantidad - 1);
+  if (evento.target.closest('.btn-quitar')) quitarDelCarrito(id);
+});
+
+// Cualquier cambio del carrito refresca contador + vista de carrito (si está abierta)
+document.addEventListener('carrito:actualizado', () => {
+  actualizarContador();
+  pintarVistaCarrito();
+});
+
+// ---------- PASO 09: checkout ----------
+document.getElementById('btnIrCheckout').addEventListener('click', () => {
+  const carrito = obtenerCarrito();
+  const total = document.getElementById('total-carrito').textContent;
+  const cantidadArticulos = carrito.reduce((s, i) => s + i.cantidad, 0);
+  document.getElementById('resumenCheckout').innerHTML =
+    `<i class="bi bi-bag"></i> ${cantidadArticulos} artículo(s) · Total a pagar: <strong>${total}</strong>`;
+});
+
+document.getElementById('formCheckout').addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  const formulario = evento.target;
+  if (!formulario.checkValidity()) {
+    formulario.classList.add('was-validated');
+    return;
+  }
+  if (obtenerCarrito().length === 0) return;
+
+  localStorage.removeItem(CLAVE_CARRITO);
+  document.dispatchEvent(new CustomEvent('carrito:actualizado', { detail: [] }));
+
+  bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+  new bootstrap.Modal(document.getElementById('modalConfirmacion')).show();
+  formulario.reset();
+  formulario.classList.remove('was-validated');
+});
+
+// ---------- Inicialización ----------
+document.addEventListener('DOMContentLoaded', () => {
+  cargarProductos();
+  actualizarContador();
+  pintarVistaCarrito();
+});
+
+/* ======================================================================
+   Extras de la guía: mapa de progreso con scrollspy propio (signature UI)
+   ====================================================================== */
+const enlacesMapa = document.querySelectorAll('#progressMap a');
+const secciones = document.querySelectorAll('section.step');
+
+const observador = new IntersectionObserver((entradas) => {
+  entradas.forEach(entrada => {
+    if (entrada.isIntersecting) {
+      const id = entrada.target.getAttribute('id');
+      enlacesMapa.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+    }
+  });
+}, { rootMargin: '-15% 0px -70% 0px' });
+
+secciones.forEach(s => observador.observe(s));
+</script>
+</body>
+</html>
