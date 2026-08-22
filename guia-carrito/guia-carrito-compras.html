@@ -387,12 +387,84 @@ fetch('./products.json')
             </tr>
           </tbody>
         </table>
-        <p class="text-muted small">
-          Nota de esta guía: si abres el HTML final con doble clic (<code>file://</code>), el navegador bloquea
-          <code>fetch</code> a archivos locales por seguridad (CORS). La demo del <a href="#paso-10">paso 10</a>
-          incluye un respaldo automático para que funcione igual; en un proyecto real esto no ocurre porque el
-          sitio se sirve por <code>http</code> (Live Server, Vite, un servidor real, etc.).
+        <h3>Versión con manejo de errores (la que usa la demo de esta guía)</h3>
+        <p>
+          La función anterior es la idea central, pero deja el programa "roto" si <code>fetch</code> falla —por
+          ejemplo, si abres el archivo con doble clic (<code>file://</code>) en vez de con un servidor—. Una
+          versión más robusta atrapa el error y devuelve datos de respaldo en vez de dejar la página en blanco:
         </p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>async function cargarProductos() {
+  try {
+    const respuesta = await fetch('./products.json');
+    if (!respuesta.ok) throw new Error('respuesta no ok');
+    return await respuesta.json();
+  } catch (error) {
+    console.warn('No se pudo leer products.json, se usa un respaldo local:', error);
+    return PRODUCTOS_RESPALDO; // un arreglo con los mismos datos, copiado dentro del propio app.js
+  }
+}</pre>
+        </div>
+        <p class="text-muted small">
+          Esta es la versión que usa la demo del <a href="#paso-10">paso 10</a> de esta guía. En un proyecto real,
+          servido siempre por <code>http</code>, el <code>catch</code> casi nunca se activa; aquí lo agregamos
+          para que puedas abrir el archivo final directamente y verlo funcionar sin montar un servidor.
+        </p>
+        <p>
+          Tener la función no sirve de nada si nunca se ejecuta. Se necesita: (1) una variable donde guardar el
+          resultado, para poder usarlo desde cualquier otra función de la app, y (2) un punto de entrada que llame
+          a <code>cargarProductos()</code> en cuanto la página cargue.
+        </p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>let catalogo = []; // aquí quedan los productos ya cargados, disponibles para TODA la app
+
+async function iniciarApp() {
+  catalogo = await cargarProductos();  // espera a que el fetch termine...
+  console.log(catalogo);               // ...y de momento solo los mostramos en la consola
+}
+
+// Se llama iniciarApp() en cuanto el HTML terminó de cargar en el navegador
+document.addEventListener('DOMContentLoaded', iniciarApp);</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué esperar a <code>DOMContentLoaded</code></div>
+          Este evento se dispara cuando el navegador terminó de leer todo el HTML (aunque las imágenes todavía
+          estén cargando). Llamar a <code>iniciarApp</code> ahí garantiza que elementos como
+          <code>#grid-productos</code> ya existan en el DOM antes de que el código intente usarlos — algo que en
+          los próximos pasos sí nos hará falta, cuando <code>iniciarApp</code> empiece a pintar cosas en pantalla.
+        </div>
+
+        <table class="table table-bordered table-compare">
+          <thead><tr><th>Forma de ejecutar el código de inicio</th><th>Cuándo se dispara</th><th>Uso típico</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>document.addEventListener('DOMContentLoaded', fn)</code></td>
+              <td>HTML listo, sin esperar imágenes/CSS externo</td>
+              <td><span class="badge badge-soft-good">La usada aquí</span>: es el momento correcto para buscar elementos por <code>id</code></td>
+            </tr>
+            <tr>
+              <td><code>window.addEventListener('load', fn)</code></td>
+              <td>Página completamente cargada, incluidas imágenes</td>
+              <td>Cuando se necesita medir o depender de recursos externos ya cargados</td>
+            </tr>
+            <tr>
+              <td>Script simplemente al final del <code>&lt;body&gt;</code>, sin evento</td>
+              <td>En cuanto el navegador llega a esa línea</td>
+              <td>Funciona en la práctica porque el HTML ya se leyó completo antes de esa línea, pero es menos explícito sobre la intención</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 01</div>
+          Abre la consola del navegador (F12 → pestaña "Console") y recarga la página: deberías ver el arreglo con
+          los 8 productos impreso ahí. Todavía no se ve nada en la pantalla —eso es normal, <code>iniciarApp</code>
+          por ahora solo guarda los datos en <code>catalogo</code>; en el paso 03 la completamos para que además
+          los dibuje en pantalla.
+        </div>
       </section>
 
       <!-- PASO 02 -->
@@ -442,21 +514,58 @@ fetch('./products.json')
           (como el <em>offcanvas</em> del carrito) antes de que esos elementos existan en el DOM.
         </div>
 
-        <h3>Esqueleto de las tres vistas</h3>
-        <p>Usamos <strong>una sola página</strong> con secciones que se muestran u ocultan (más simple que enrutar
-        varias páginas para este alcance):</p>
+        <h3>El esqueleto: dos vistas que se muestran u ocultan</h3>
+        <p>
+          Usamos <strong>una sola página</strong> con dos contenedores: uno para el listado de productos y otro
+          para el detalle de un producto. Solo uno de los dos es visible a la vez, usando el atributo HTML
+          <code>hidden</code>. Más adelante (pasos 07 a 09) agregaremos el ícono del carrito, el panel lateral del
+          carrito y el checkout — por ahora dejamos ese espacio reservado como comentario para no adelantar código
+          que todavía no se explica.
+        </p>
+        <p>Este es el <code>&lt;body&gt;</code> completo con el que vamos a trabajar desde aquí. Los <code>id</code>
+        que ves (<code>vista-listado</code>, <code>grid-productos</code>, <code>vista-detalle</code>...) son los
+        mismos que usaremos en <strong>todo</strong> el JavaScript de los siguientes pasos — cópialos tal cual.</p>
+
         <div class="code-window">
           <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html — &lt;body&gt;</span></div>
-          <pre>&lt;section id="vista-listado"&gt;    &lt;!-- grilla de productos --&gt;   &lt;/section&gt;
-&lt;section id="vista-detalle" hidden&gt; &lt;!-- un producto ampliado --&gt; &lt;/section&gt;
+          <pre>&lt;body&gt;
 
-&lt;div class="offcanvas offcanvas-end" id="offcanvasCart"&gt;
-  &lt;!-- carrito lateral --&gt;
-&lt;/div&gt;
+  &lt;!-- ============ VISTA 1: LISTADO DE PRODUCTOS ============ --&gt;
+  &lt;div id="vista-listado" class="container py-4"&gt;
+    &lt;h1 class="h4 mb-3"&gt;Catálogo&lt;/h1&gt;
+    &lt;div class="row g-3" id="grid-productos"&gt;
+      &lt;!-- Paso 03: aquí se insertan las tarjetas de producto por JavaScript --&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-&lt;div class="modal" id="modalCheckout"&gt;
-  &lt;!-- formulario de checkout --&gt;
-&lt;/div&gt;</pre>
+  &lt;!-- ============ VISTA 2: DETALLE DE UN PRODUCTO ============ --&gt;
+  &lt;div id="vista-detalle" class="container py-4" hidden&gt;
+    &lt;!-- Paso 04: aquí van la imagen, el nombre, el precio, etc. --&gt;
+  &lt;/div&gt;
+
+  &lt;!-- Paso 07: aquí irá el ícono del carrito en la barra de navegación --&gt;
+  &lt;!-- Paso 08: aquí irá el &lt;div class="offcanvas"&gt; del carrito --&gt;
+  &lt;!-- Paso 09: aquí irán los &lt;div class="modal"&gt; del checkout y la confirmación --&gt;
+
+  &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+  &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;</pre>
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>hidden</code> y no <code>display:none</code> en CSS</div>
+          <code>hidden</code> es un atributo HTML estándar: cualquiera que lea el marcado entiende de inmediato
+          que esa vista empieza oculta, sin tener que ir a buscar una regla CSS. Alternar visibilidad después es
+          tan simple como <code>elemento.hidden = true</code> o <code>elemento.hidden = false</code> desde
+          JavaScript — lo usaremos en el paso 04.
+        </div>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 02</div>
+          Guarda este <code>&lt;body&gt;</code> en un archivo <code>index.html</code> (con el <code>&lt;head&gt;</code>
+          del bloque anterior) y crea un archivo vacío <code>app.js</code> al lado. Al abrirlo en el navegador
+          deberías ver el título "Catálogo" y nada más — todavía no hay productos ni JavaScript. Eso es correcto:
+          lo llenamos en el siguiente paso.
         </div>
       </section>
 
@@ -464,27 +573,46 @@ fetch('./products.json')
       <section class="step" id="paso-03">
         <div class="step-kicker"><span class="num">03</span> LISTADO</div>
         <h2>Pintar el listado de productos con JavaScript</h2>
-        <p>Con los productos ya cargados (paso 01), se recorren y se genera una tarjeta Bootstrap por cada uno.</p>
+        <p>Con los productos ya cargados (paso 01) dentro de una variable <code>catalogo</code>, se recorren y se
+        genera una tarjeta Bootstrap por cada uno, insertándolas dentro de <code>#grid-productos</code>
+        (el contenedor que dejamos listo en el paso 02).</p>
 
         <div class="code-window">
           <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
-          <pre>function pintarProductos(productos) {
+          <pre>let catalogo = []; // aquí guardaremos los productos ya cargados (paso 01)
+
+function formatearPrecio(valor) {
+  return valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+}
+
+function pintarProductos(productos) {
   const contenedor = document.getElementById('grid-productos');
 
+  if (productos.length === 0) {
+    contenedor.innerHTML = '&lt;p class="text-muted"&gt;No hay productos para mostrar.&lt;/p&gt;';
+    return;
+  }
+
   contenedor.innerHTML = productos.map(p => `
-    &lt;div class="col-md-4 col-6"&gt;
+    &lt;div class="col-md-4 col-sm-6"&gt;
       &lt;div class="product-card" data-id="${p.id}"&gt;
-        &lt;img src="${p.imagen}" alt="${p.nombre}"&gt;
+        &lt;img src="${p.imagen}" alt="${p.nombre}" class="img-abrir-detalle"&gt;
         &lt;div class="p-3"&gt;
-          &lt;h3 class="h6"&gt;${p.nombre}&lt;/h3&gt;
-          &lt;p class="price"&gt;${formatearPrecio(p.precio)}&lt;/p&gt;
-          &lt;button class="btn btn-dark btn-sm btn-agregar"&gt;Agregar&lt;/button&gt;
+          &lt;span class="badge text-bg-light border mb-1"&gt;${p.categoria}&lt;/span&gt;
+          &lt;h3 class="h6 mb-1 nombre-abrir-detalle" role="button"&gt;${p.nombre}&lt;/h3&gt;
+          &lt;p class="price mb-2"&gt;${formatearPrecio(p.precio)}&lt;/p&gt;
+          &lt;button class="btn btn-dark btn-sm w-100 btn-agregar"&gt;Agregar&lt;/button&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
   `).join('');
 }</pre>
         </div>
+
+        <p class="text-muted small">
+          Nota: <code>catalogo</code> y <code>formatearPrecio</code> se declaran una sola vez y se reutilizan en
+          los pasos siguientes (detalle, carrito, checkout); no hace falta volver a escribirlos.
+        </p>
 
         <div class="callout why">
           <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>Array.prototype.map</code> + <code>join('')</code></div>
@@ -537,16 +665,26 @@ contenedor.innerHTML += `&lt;h3&gt;${productoDelUsuario.nombre}&lt;/h3&gt;`;</pr
         </table>
 
         <h3>Delegación de eventos: un solo listener para todas las tarjetas</h3>
+        <p>Una tarjeta tiene dos acciones posibles: hacer clic en <strong>"Agregar"</strong> (lo resolvemos ya
+        mismo, en el paso 06) o hacer clic en la <strong>imagen/nombre</strong> para abrir el detalle (la función
+        <code>mostrarDetalle</code> la escribimos en el paso 04 — aquí solo dejamos lista la conexión).</p>
         <div class="code-window">
           <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
-          <pre>// En vez de poner un listener por cada botón "Agregar" (que además
-// se perdería cada vez que se vuelve a pintar el listado), se escucha
-// el contenedor completo y se revisa qué se hizo clic.
+          <pre>// En vez de poner un listener por cada botón/tarjeta (que además se
+// perdería cada vez que se vuelve a pintar el listado), se escucha
+// el contenedor completo UNA sola vez y se revisa qué se hizo clic.
 document.getElementById('grid-productos').addEventListener('click', (evento) => {
-  const boton = evento.target.closest('.btn-agregar');
-  if (!boton) return;                       // el clic no fue en un botón "Agregar"
-  const tarjeta = boton.closest('.product-card');
-  agregarAlCarrito(tarjeta.dataset.id);
+  const tarjeta = evento.target.closest('.product-card');
+  if (!tarjeta) return;                     // el clic no fue dentro de ninguna tarjeta
+  const id = tarjeta.dataset.id;
+
+  if (evento.target.closest('.btn-agregar')) {
+    agregarAlCarrito(id, 1);                // función del paso 06
+    return;
+  }
+  if (evento.target.closest('.img-abrir-detalle') || evento.target.closest('.nombre-abrir-detalle')) {
+    mostrarDetalle(id);                     // función del paso 04
+  }
 });</pre>
         </div>
         <div class="callout why">
@@ -554,7 +692,76 @@ document.getElementById('grid-productos').addEventListener('click', (evento) => 
           Cada vez que <code>pintarProductos</code> vuelve a ejecutarse (por ejemplo, al filtrar), los botones
           viejos se destruyen y se crean unos nuevos. Un listener puesto directamente sobre un botón desaparece
           con él. El contenedor padre, en cambio, no se vuelve a crear, así que su listener sigue funcionando para
-          cualquier botón —incluso los nuevos— gracias al <em>event bubbling</em>.
+          cualquier botón o tarjeta —incluso los nuevos— gracias al <em>event bubbling</em> (el clic "burbujea"
+          desde el elemento exacto hasta sus contenedores).
+        </div>
+
+        <h3>Extra opcional: filtrar por categoría</h3>
+        <p>No es indispensable para tener un carrito funcional, pero es una buena forma de practicar
+        <code>filter</code>. Agrega este <code>&lt;select&gt;</code> justo encima de <code>#grid-productos</code>
+        (dentro de <code>#vista-listado</code>):</p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html</span></div>
+          <pre>&lt;select class="form-select form-select-sm w-auto mb-3" id="filtroCategoria"&gt;
+  &lt;option value=""&gt;Todas las categorías&lt;/option&gt;
+&lt;/select&gt;</pre>
+        </div>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>function poblarFiltroCategorias() {
+  const select = document.getElementById('filtroCategoria');
+  const categorias = [...new Set(catalogo.map(p => p.categoria))]; // categorías sin repetir
+  categorias.forEach(cat => {
+    const opcion = document.createElement('option');
+    opcion.value = cat;
+    opcion.textContent = cat;
+    select.appendChild(opcion);
+  });
+}
+
+document.getElementById('filtroCategoria').addEventListener('change', (evento) => {
+  const categoriaElegida = evento.target.value;
+  const productosFiltrados = categoriaElegida
+    ? catalogo.filter(p => p.categoria === categoriaElegida)
+    : catalogo;
+  pintarProductos(productosFiltrados);
+});</pre>
+        </div>
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>new Set(...)</code> para las categorías</div>
+          <code>Set</code> es una colección que no admite valores repetidos. Convertir el arreglo de categorías en
+          un <code>Set</code> y luego de vuelta en arreglo con <code>[...set]</code> es la forma más corta de
+          "quitar duplicados" sin escribir un bucle manual con condicionales.
+        </div>
+
+        <h3>Completar <code>iniciarApp()</code> para que pinte el listado</h3>
+        <p>
+          En el paso 01 dejamos <code>iniciarApp</code> mostrando los productos solo en la consola, porque
+          <code>pintarProductos</code> todavía no existía. Ahora que ya la escribimos, se actualiza esa misma
+          función para que además dibuje las tarjetas y llene el filtro:
+        </p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>async function iniciarApp() {
+  catalogo = await cargarProductos();  // paso 01
+  poblarFiltroCategorias();            // este paso
+  pintarProductos(catalogo);           // este paso
+}
+
+document.addEventListener('DOMContentLoaded', iniciarApp);</pre>
+        </div>
+        <p class="text-muted small">
+          Esto <strong>reemplaza</strong> la versión de <code>iniciarApp</code> del paso 01 (la del
+          <code>console.log</code>) — no se escriben las dos, solo queda esta versión más completa. El listener
+          <code>document.addEventListener('DOMContentLoaded', iniciarApp)</code> ya estaba puesto desde el paso 01
+          y no cambia.
+        </p>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 03</div>
+          Recarga la página: ahora sí deberías ver las tarjetas de producto en pantalla (y el selector de
+          categorías lleno). El botón "Agregar" y el clic sobre la imagen todavía no hacen nada visible: eso
+          llega en los pasos 04 y 06.
         </div>
       </section>
 
@@ -591,22 +798,70 @@ document.getElementById('grid-productos').addEventListener('click', (evento) => 
           </tbody>
         </table>
 
+        <h3>El HTML del detalle</h3>
+        <p>Reemplaza el comentario <code>&lt;!-- Paso 04 --&gt;</code> que dejamos dentro de
+        <code>#vista-detalle</code> en el paso 02 por este contenido. Cada <code>id</code> es el "gancho" que la
+        función <code>mostrarDetalle</code> va a rellenar a continuación:</p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html — dentro de #vista-detalle</span></div>
+          <pre>&lt;button class="btn btn-link ps-0 mb-2" id="btnVolver"&gt;
+  &lt;i class="bi bi-arrow-left"&gt;&lt;/i&gt; Volver al catálogo
+&lt;/button&gt;
+
+&lt;div class="row g-4"&gt;
+  &lt;div class="col-md-5"&gt;
+    &lt;img id="detalle-imagen" class="img-fluid rounded-3 border" alt=""&gt;
+  &lt;/div&gt;
+  &lt;div class="col-md-7"&gt;
+    &lt;span class="badge text-bg-light border" id="detalle-categoria"&gt;&lt;/span&gt;
+    &lt;h3 class="mt-2" id="detalle-nombre"&gt;&lt;/h3&gt;
+    &lt;p class="text-muted" id="detalle-descripcion"&gt;&lt;/p&gt;
+    &lt;p class="fs-4 fw-bold" id="detalle-precio"&gt;&lt;/p&gt;
+    &lt;p class="small" id="detalle-stock"&gt;&lt;/p&gt;
+
+    &lt;div class="d-flex align-items-center gap-2 mt-3"&gt;
+      &lt;input type="number" id="detalle-cantidad" class="form-control" style="width:90px" value="1" min="1"&gt;
+      &lt;button class="btn btn-dark" id="btnAgregarDetalle"&gt;
+        &lt;i class="bi bi-bag-plus"&gt;&lt;/i&gt; Agregar al carrito
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+
+        <h3>La función que rellena esos campos</h3>
         <div class="code-window">
           <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
-          <pre>let productoActual = null;
+          <pre>let productoActual = null; // el producto que se está mostrando en el detalle
 
 function mostrarDetalle(idProducto) {
   productoActual = catalogo.find(p => p.id === idProducto);
   if (!productoActual) return;
 
   document.getElementById('detalle-imagen').src = productoActual.imagen;
+  document.getElementById('detalle-categoria').textContent = productoActual.categoria;
   document.getElementById('detalle-nombre').textContent = productoActual.nombre;
-  document.getElementById('detalle-precio').textContent = formatearPrecio(productoActual.precio);
   document.getElementById('detalle-descripcion').textContent = productoActual.descripcion;
+  document.getElementById('detalle-precio').textContent = formatearPrecio(productoActual.precio);
+  document.getElementById('detalle-stock').textContent = `${productoActual.stock} unidades disponibles`;
+  document.getElementById('detalle-cantidad').value = 1; // reinicia la cantidad cada vez que se abre
 
   document.getElementById('vista-listado').hidden = true;
   document.getElementById('vista-detalle').hidden = false;
-}</pre>
+}
+
+// Botón "Volver al catálogo"
+document.getElementById('btnVolver').addEventListener('click', () => {
+  document.getElementById('vista-detalle').hidden = true;
+  document.getElementById('vista-listado').hidden = false;
+});
+
+// Botón "Agregar al carrito" DESDE el detalle (respeta la cantidad elegida)
+document.getElementById('btnAgregarDetalle').addEventListener('click', () => {
+  if (!productoActual) return;
+  const cantidad = Math.max(1, parseInt(document.getElementById('detalle-cantidad').value, 10) || 1);
+  agregarAlCarrito(productoActual.id, cantidad); // función del paso 06
+});</pre>
         </div>
 
         <div class="callout why">
@@ -615,6 +870,13 @@ function mostrarDetalle(idProducto) {
           condición (o <code>undefined</code> si ninguno la cumple). Es la herramienta correcta cuando se busca
           "el" elemento por un identificador único, a diferencia de <code>filter</code>, que devolvería un arreglo
           aunque solo exista una coincidencia.
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>Math.max(1, parseInt(...) || 1)</code></div>
+          <code>parseInt</code> puede devolver <code>NaN</code> si el campo está vacío o tiene texto no numérico;
+          <code>|| 1</code> cubre ese caso. <code>Math.max(1, ...)</code> evita que alguien escriba <code>0</code>
+          o un número negativo en el campo de cantidad y rompa el cálculo del total más adelante.
         </div>
 
         <div class="callout bad">
@@ -627,6 +889,14 @@ function mostrarDetalle(indice) {
 }</pre>
           </div>
           Usar el <code>id</code> del producto (y no su posición en el arreglo) evita este tipo de bug silencioso.
+        </div>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 04</div>
+          Haz clic en la imagen o el nombre de cualquier tarjeta: debería reemplazarse el listado por la vista de
+          detalle con los datos correctos, y "Volver al catálogo" debe regresarte al listado. El botón
+          "Agregar al carrito" del detalle todavía no hace nada visible —eso llega en el paso 06, cuando exista
+          <code>agregarAlCarrito</code>—.
         </div>
       </section>
 
@@ -851,8 +1121,29 @@ function agregarAlCarrito(idProducto) {
           </tbody>
         </table>
 
+        <h3>El HTML del ícono</h3>
+        <p>Agrega este botón donde quieras mostrar el carrito (por ejemplo, en una barra superior antes de
+        <code>#vista-listado</code>). El número dentro del <code>&lt;span&gt;</code> es el que se va a actualizar
+        con JavaScript — fíjate que usa la clase <code>cart-badge</code>, no un <code>id</code>: así el mismo
+        contador puede repetirse en más de un lugar de la página (por ejemplo arriba y en un menú) y los dos se
+        actualizan a la vez.</p>
         <div class="code-window">
-          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">ui-carrito.js</span></div>
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html</span></div>
+          <pre>&lt;button class="btn btn-light position-relative" id="cartBtn"
+        data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"&gt;
+  &lt;i class="bi bi-cart3"&gt;&lt;/i&gt; Carrito
+  &lt;span class="badge rounded-pill bg-dark cart-badge"&gt;0&lt;/span&gt;
+&lt;/button&gt;</pre>
+        </div>
+        <p class="text-muted small">
+          <code>data-bs-toggle="offcanvas"</code> y <code>data-bs-target="#offcanvasCart"</code> son atributos de
+          Bootstrap: le dicen al botón que, al hacer clic, debe abrir el panel lateral con ese <code>id</code>
+          —el que construimos en el paso 08—. No hace falta escribir JavaScript para eso, Bootstrap ya lo maneja.
+        </p>
+
+        <h3>El JavaScript que mantiene el número al día</h3>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
           <pre>function actualizarContador() {
   const carrito = obtenerCarrito();
   const totalArticulos = carrito.reduce((suma, item) => suma + item.cantidad, 0);
@@ -875,31 +1166,80 @@ document.addEventListener('DOMContentLoaded', actualizarContador);</pre>
           <code>reduce</code> suma la propiedad <code>cantidad</code> de cada línea, dando el número real de
           artículos en el carrito (que es lo que el usuario espera ver en el ícono).
         </div>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 07</div>
+          Agrega algún producto desde el listado o el detalle y el número del botón "Carrito" debe cambiar de 0 a
+          la cantidad correspondiente, incluso si recargas la página (porque <code>actualizarContador</code> se
+          ejecuta también en <code>DOMContentLoaded</code>, leyendo lo que ya había en <code>localStorage</code>).
+        </div>
       </section>
 
       <!-- PASO 08 -->
       <section class="step" id="paso-08">
         <div class="step-kicker"><span class="num">08</span> INTERFAZ</div>
         <h2>Vista del carrito y cálculo de totales</h2>
-        <p>Para mostrar el carrito, se combina la lista mínima guardada en <code>localStorage</code> con los
-        datos completos del catálogo:</p>
+        <p>El carrito se muestra en un panel lateral de Bootstrap (<em>offcanvas</em>) que ya sabemos abrir desde
+        el botón del paso 07. Para pintarlo, se combina la lista mínima guardada en <code>localStorage</code> con
+        los datos completos del catálogo.</p>
 
+        <h3>El HTML del panel lateral</h3>
+        <p>Reemplaza el comentario del paso 08 que dejamos en el paso 02 (justo después de <code>&lt;/div&gt;</code>
+        de <code>#vista-detalle</code>) por este bloque:</p>
         <div class="code-window">
-          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">ui-carrito.js</span></div>
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html</span></div>
+          <pre>&lt;div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasCart"&gt;
+  &lt;div class="offcanvas-header border-bottom"&gt;
+    &lt;h5 class="offcanvas-title"&gt;&lt;i class="bi bi-cart3"&gt;&lt;/i&gt; Tu carrito&lt;/h5&gt;
+    &lt;button type="button" class="btn-close" data-bs-dismiss="offcanvas"&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="offcanvas-body d-flex flex-column"&gt;
+    &lt;div id="lineas-carrito" class="flex-grow-1"&gt;&lt;!-- aquí se insertan los productos del carrito --&gt;&lt;/div&gt;
+    &lt;div class="border-top pt-3 mt-2"&gt;
+      &lt;div class="d-flex justify-content-between fw-bold fs-5"&gt;
+        &lt;span&gt;Total&lt;/span&gt;
+        &lt;span id="total-carrito"&gt;$0&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;button class="btn btn-dark w-100 mt-3" id="btnIrCheckout"
+              data-bs-dismiss="offcanvas" data-bs-toggle="modal" data-bs-target="#modalCheckout"&gt;
+        Ir a checkout
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+
+        <h3>Pintar las líneas del carrito</h3>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
           <pre>function pintarVistaCarrito() {
   const carrito = obtenerCarrito();
+  const contenedor = document.getElementById('lineas-carrito');
 
-  const lineas = carrito.map(item => {
+  if (carrito.length === 0) {
+    contenedor.innerHTML = '&lt;p class="text-muted small"&gt;Tu carrito está vacío.&lt;/p&gt;';
+    document.getElementById('total-carrito').textContent = formatearPrecio(0);
+    return;
+  }
+
+  contenedor.innerHTML = carrito.map(item => {
     const producto = catalogo.find(p => p.id === item.id);
     if (!producto) return '';                 // por si el producto ya no existe en el catálogo
     const subtotal = producto.precio * item.cantidad;
     return `
-      &lt;div class="d-flex justify-content-between align-items-center border-bottom py-2"&gt;
-        &lt;div&gt;
-          &lt;div class="fw-semibold"&gt;${producto.nombre}&lt;/div&gt;
-          &lt;div class="text-muted small"&gt;${formatearPrecio(producto.precio)} × ${item.cantidad}&lt;/div&gt;
+      &lt;div class="d-flex gap-2 border-bottom py-2" data-id="${item.id}"&gt;
+        &lt;img src="${producto.imagen}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px"&gt;
+        &lt;div class="flex-grow-1"&gt;
+          &lt;div class="fw-semibold small"&gt;${producto.nombre}&lt;/div&gt;
+          &lt;div class="text-muted small"&gt;${formatearPrecio(producto.precio)}&lt;/div&gt;
+          &lt;div class="d-flex align-items-center gap-2 mt-1"&gt;
+            &lt;button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-restar"&gt;−&lt;/button&gt;
+            &lt;span class="small"&gt;${item.cantidad}&lt;/span&gt;
+            &lt;button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-sumar"&gt;+&lt;/button&gt;
+            &lt;button class="btn btn-sm btn-link text-danger ms-auto btn-quitar"&gt;Quitar&lt;/button&gt;
+          &lt;/div&gt;
         &lt;/div&gt;
-        &lt;div class="fw-bold"&gt;${formatearPrecio(subtotal)}&lt;/div&gt;
+        &lt;div class="fw-bold small"&gt;${formatearPrecio(subtotal)}&lt;/div&gt;
       &lt;/div&gt;`;
   }).join('');
 
@@ -907,10 +1247,38 @@ document.addEventListener('DOMContentLoaded', actualizarContador);</pre>
     const producto = catalogo.find(p => p.id === item.id);
     return producto ? suma + producto.precio * item.cantidad : suma;
   }, 0);
-
-  document.getElementById('lineas-carrito').innerHTML = lineas || '&lt;p class="text-muted"&gt;Tu carrito está vacío.&lt;/p&gt;';
   document.getElementById('total-carrito').textContent = formatearPrecio(total);
-}</pre>
+}
+
+// Se repinta cada vez que el carrito cambia (mismo evento del paso 07)
+document.addEventListener('carrito:actualizado', pintarVistaCarrito);
+document.addEventListener('DOMContentLoaded', pintarVistaCarrito);</pre>
+        </div>
+
+        <h3>Botones +, − y "Quitar" dentro del carrito</h3>
+        <p>Igual que en el paso 03, un solo listener sobre el contenedor <code>#lineas-carrito</code> maneja los
+        tres botones de todas las líneas, aunque se vuelvan a pintar constantemente:</p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>document.getElementById('lineas-carrito').addEventListener('click', (evento) => {
+  const linea = evento.target.closest('[data-id]');
+  if (!linea) return;
+  const id = linea.dataset.id;
+  const carrito = obtenerCarrito();
+  const item = carrito.find(i => i.id === id);
+  if (!item) return;
+
+  if (evento.target.closest('.btn-sumar'))  cambiarCantidad(id, item.cantidad + 1); // paso 06
+  if (evento.target.closest('.btn-restar')) cambiarCantidad(id, item.cantidad - 1); // paso 06
+  if (evento.target.closest('.btn-quitar')) quitarDelCarrito(id);                   // paso 06
+});</pre>
+        </div>
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué leer el <code>id</code> desde <code>data-id</code></div>
+          Cada línea del carrito lleva el atributo <code>data-id="${item.id}"</code> (ver el HTML generado arriba).
+          <code>evento.target.closest('[data-id]')</code> sube desde el botón exacto que se clickeó hasta
+          encontrar ese contenedor, y <code>linea.dataset.id</code> lee el atributo — así los tres botones de una
+          misma línea siempre operan sobre el producto correcto, sin importar el orden en que se repinte la lista.
         </div>
 
         <h3><code>reduce</code> vs. un bucle <code>for</code> para el total</h3>
@@ -941,6 +1309,12 @@ localStorage.setItem('total', '1450000');</pre>
           El total <strong>se calcula</strong> a partir del carrito y el catálogo cada vez que se necesita
           mostrar; nunca se guarda como un valor aparte que pueda quedar desincronizado.
         </div>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 08</div>
+          Abre el carrito con el botón del paso 07: debes ver las líneas de lo que agregaste, con sus botones
+          +, − y "Quitar" funcionando y el total actualizándose en tiempo real.
+        </div>
       </section>
 
       <!-- PASO 09 -->
@@ -953,9 +1327,83 @@ localStorage.setItem('total', '1450000');</pre>
           (ver <a href="#paso-12">paso 12</a>).
         </p>
 
+        <h3>El HTML de los dos modales</h3>
+        <p>Reemplaza el último comentario del paso 02 por estos dos <code>&lt;div class="modal"&gt;</code>: uno
+        para el formulario y otro, más simple, para la confirmación final.</p>
         <div class="code-window">
-          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">checkout.js</span></div>
-          <pre>function confirmarPedido(evento) {
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">index.html</span></div>
+          <pre>&lt;!-- Modal: checkout --&gt;
+&lt;div class="modal fade" id="modalCheckout" tabindex="-1"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;form id="formCheckout" class="needs-validation" novalidate&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;h5 class="modal-title"&gt;&lt;i class="bi bi-bag-check"&gt;&lt;/i&gt; Checkout&lt;/h5&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="modal"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-body"&gt;
+          &lt;div id="resumenCheckout" class="mb-3 small border rounded-3 p-2 bg-light"&gt;&lt;/div&gt;
+
+          &lt;div class="mb-3"&gt;
+            &lt;label class="form-label"&gt;Nombre completo&lt;/label&gt;
+            &lt;input type="text" class="form-control" required&gt;
+            &lt;div class="invalid-feedback"&gt;Este campo es obligatorio.&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class="mb-3"&gt;
+            &lt;label class="form-label"&gt;Correo electrónico&lt;/label&gt;
+            &lt;input type="email" class="form-control" required&gt;
+            &lt;div class="invalid-feedback"&gt;Ingresa un correo válido.&lt;/div&gt;
+          &lt;/div&gt;
+          &lt;div class="mb-3"&gt;
+            &lt;label class="form-label"&gt;Dirección de envío&lt;/label&gt;
+            &lt;input type="text" class="form-control" required&gt;
+            &lt;div class="invalid-feedback"&gt;Este campo es obligatorio.&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-footer"&gt;
+          &lt;button type="submit" class="btn btn-dark w-100"&gt;Confirmar pedido&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Modal: confirmación --&gt;
+&lt;div class="modal fade" id="modalConfirmacion" tabindex="-1"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content text-center p-4"&gt;
+      &lt;i class="bi bi-check-circle-fill text-success" style="font-size:2.5rem"&gt;&lt;/i&gt;
+      &lt;h5 class="mt-3"&gt;¡Pedido confirmado!&lt;/h5&gt;
+      &lt;p class="text-muted small mb-3"&gt;Tu carrito quedó vacío en localStorage.&lt;/p&gt;
+      &lt;button class="btn btn-dark" data-bs-dismiss="modal"&gt;Cerrar&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+        </div>
+        <p class="text-muted small">
+          El botón "Ir a checkout" del paso 08 ya lleva <code>data-bs-toggle="modal" data-bs-target="#modalCheckout"</code>,
+          así que Bootstrap se encarga de abrir este modal — no hace falta JavaScript para eso.
+        </p>
+
+        <h3>Mostrar un resumen antes de pagar</h3>
+        <p>Justo antes de que el modal se abra (evento <code>show.bs.modal</code> de Bootstrap, o más simple: en
+        el propio clic del botón "Ir a checkout"), se arma un resumen con lo que hay en el carrito:</p>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>document.getElementById('btnIrCheckout').addEventListener('click', () => {
+  const carrito = obtenerCarrito();
+  const total = document.getElementById('total-carrito').textContent;
+  const cantidadArticulos = carrito.reduce((s, i) => s + i.cantidad, 0);
+
+  document.getElementById('resumenCheckout').innerHTML =
+    `&lt;i class="bi bi-bag"&gt;&lt;/i&gt; ${cantidadArticulos} artículo(s) · Total a pagar: &lt;strong&gt;${total}&lt;/strong&gt;`;
+});</pre>
+        </div>
+
+        <h3>Validar y "confirmar" el pedido</h3>
+        <div class="code-window">
+          <div class="code-topbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="code-label">app.js</span></div>
+          <pre>document.getElementById('formCheckout').addEventListener('submit', (evento) => {
   evento.preventDefault();                    // evita que el formulario recargue la página
 
   const formulario = evento.target;
@@ -964,16 +1412,20 @@ localStorage.setItem('total', '1450000');</pre>
     return;
   }
 
-  const carrito = obtenerCarrito();
-  if (carrito.length === 0) return;
+  if (obtenerCarrito().length === 0) return;
 
   // Aquí, en un proyecto real, se enviaría el pedido a un servidor:
   // await fetch('/api/pedidos', { method: 'POST', body: JSON.stringify({...}) })
 
   localStorage.removeItem(CLAVE_CARRITO);      // se vacía el carrito
   document.dispatchEvent(new CustomEvent('carrito:actualizado', { detail: [] }));
-  mostrarConfirmacion();
-}</pre>
+
+  bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+  new bootstrap.Modal(document.getElementById('modalConfirmacion')).show();
+
+  formulario.reset();
+  formulario.classList.remove('was-validated');
+});</pre>
         </div>
 
         <div class="callout why">
@@ -981,6 +1433,14 @@ localStorage.setItem('total', '1450000');</pre>
           HTML5 ya sabe validar campos requeridos, formato de email, etc. usando atributos como
           <code>required</code> y <code>type="email"</code>. Reutilizar esa validación nativa (en vez de escribir
           expresiones regulares a mano) reduce código y errores; Bootstrap solo se encarga de que se vea bien.
+        </div>
+
+        <div class="callout why">
+          <div class="callout-title"><i class="bi bi-lightbulb"></i> Por qué <code>bootstrap.Modal.getInstance(...)</code></div>
+          Cuando un modal se abre con <code>data-bs-toggle="modal"</code>, Bootstrap crea automáticamente una
+          instancia de JavaScript asociada a ese elemento. <code>getInstance</code> recupera esa instancia ya
+          existente (en vez de crear una nueva) para poder llamar <code>.hide()</code> sobre ella y cerrar el
+          modal de checkout justo antes de mostrar el de confirmación.
         </div>
 
         <div class="callout bad">
@@ -997,6 +1457,13 @@ fetch('/api/pedidos', {
           El servidor debe recalcular el total a partir de los <code>id</code> y cantidades recibidas, usando sus
           propios precios — el front-end solo calcula para <em>mostrarle</em> el total al usuario.
         </div>
+
+        <div class="callout good">
+          <div class="callout-title"><i class="bi bi-check-circle"></i> Checkpoint del paso 09</div>
+          Llena el formulario de checkout y confirma: el modal de checkout debe cerrarse, aparecer el de
+          "¡Pedido confirmado!", y el ícono del carrito debe volver a 0. Si intentas confirmar dejando algún
+          campo vacío, Bootstrap debe resaltarlo en rojo en vez de dejarte continuar.
+        </div>
       </section>
 
       <!-- PASO 10: DEMO FUNCIONAL -->
@@ -1004,9 +1471,11 @@ fetch('/api/pedidos', {
         <div class="step-kicker"><span class="num">10</span> DEMO</div>
         <h2>Demo funcional completa</h2>
         <p>
-          Todo lo anterior, unido y funcionando de verdad en esta misma página: listado desde JSON, detalle,
-          carrito con <code>localStorage</code>, ícono con contador y checkout. Prueba a agregar productos,
-          recargar la página y ver que el carrito sigue ahí.
+          Esto es exactamente el mismo HTML y el mismo JavaScript de los pasos 01 a 09, ensamblados en un solo
+          archivo y funcionando de verdad en esta misma página: listado desde JSON, detalle, carrito con
+          <code>localStorage</code>, ícono con contador y checkout. Si fuiste copiando cada bloque de código en tu
+          propio <code>index.html</code> / <code>app.js</code>, deberías llegar exactamente a este resultado.
+          Prueba a agregar productos, recargar la página y comprobar que el carrito sigue ahí.
         </p>
 
         <div class="demo-shell my-4">
@@ -1018,7 +1487,7 @@ fetch('/api/pedidos', {
             <div class="ms-auto">
               <button class="btn btn-sm btn-light position-relative" id="cartBtn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">
                 <i class="bi bi-cart3"></i> Carrito
-                <span class="badge rounded-pill bg-primary cart-badge-demo" id="cartCountDemo">0</span>
+                <span class="badge rounded-pill bg-primary cart-badge" id="cartCountDemo">0</span>
               </button>
             </div>
           </div>
@@ -1212,16 +1681,16 @@ let catalogo = [];
 let productoActual = null;
 
 // ---------- PASO 01: cargar datos ----------
+// cargarProductos() SOLO se encarga de traer los datos y devolverlos;
+// no toca el DOM ni decide qué hacer con ellos (eso es trabajo de iniciarApp).
 async function cargarProductos() {
   try {
     const respuesta = await fetch('./products.json');
     if (!respuesta.ok) throw new Error('respuesta no ok');
-    catalogo = await respuesta.json();
+    return await respuesta.json();
   } catch (error) {
-    catalogo = PRODUCTOS_RESPALDO; // respaldo si fetch falla (p.ej. file://)
+    return PRODUCTOS_RESPALDO; // respaldo si fetch falla (p.ej. al abrir con file://)
   }
-  poblarFiltroCategorias();
-  pintarProductos(catalogo);
 }
 
 function formatearPrecio(valor) {
@@ -1342,10 +1811,14 @@ function cambiarCantidad(idProducto, nuevaCantidad) {
 }
 
 // ---------- PASO 07: ícono + contador ----------
+// Exactamente el mismo código explicado en el paso 07: una sola función,
+// una sola clase ".cart-badge", sin importar cuántos botones de carrito
+// haya en la página (aquí hay dos: el de esta guía y el de la tienda demo).
 function actualizarContador() {
-  const total = obtenerCarrito().reduce((suma, item) => suma + item.cantidad, 0);
-  document.getElementById('cartCountTop').textContent = total;
-  document.getElementById('cartCountDemo').textContent = total;
+  const totalArticulos = obtenerCarrito().reduce((suma, item) => suma + item.cantidad, 0);
+  document.querySelectorAll('.cart-badge').forEach(el => {
+    el.textContent = totalArticulos;
+  });
 }
 
 // ---------- PASO 08: vista del carrito ----------
@@ -1434,8 +1907,17 @@ document.getElementById('formCheckout').addEventListener('submit', (evento) => {
 });
 
 // ---------- Inicialización ----------
+// Mismo iniciarApp() explicado en los pasos 01 y 03: carga los productos,
+// llena el filtro y pinta el listado. Los demás módulos (contador, carrito)
+// ya se mantienen al día solos gracias al evento 'carrito:actualizado'.
+async function iniciarApp() {
+  catalogo = await cargarProductos();
+  poblarFiltroCategorias();
+  pintarProductos(catalogo);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  cargarProductos();
+  iniciarApp();
   actualizarContador();
   pintarVistaCarrito();
 });
