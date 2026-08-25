@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de CSS — Del selector al layout responsive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #10142a;
+    --surface: #171c3a;
+    --surface-2: #212748;
+    --line: rgba(255,255,255,0.09);
+    --text: #e8ecfb;
+    --text-dim: #98a1c9;
+    --accent: #4d8dff;
+    --accent-soft: rgba(77,141,255,0.14);
+    --accent-2: #f5a623;
+    --sel: #7ec8ff;
+    --prop: #ffb37a;
+    --val: #a7e3a0;
+    --com: #6f76a3;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(77,141,255,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(245,166,35,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(16,20,42,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1040px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800;}
+  .brand .chip{
+    background:var(--accent); color:#0a0e22; padding:2px 8px; border-radius:6px;
+    font-size:.72rem; font-weight:800;
+  }
+  .toc{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{
+    color:var(--text-dim); text-decoration:none; font-size:.8rem; white-space:nowrap;
+    padding:6px 10px; border-radius:8px; transition:.15s;
+  }
+  .toc a:hover{color:var(--text); background:var(--surface-2);}
+
+  .hero{max-width:1040px; margin:0 auto; padding:72px 24px 40px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; color:var(--accent);
+    font-family:'JetBrains Mono',monospace; font-size:.82rem; font-weight:700;
+    background:var(--accent-soft); padding:6px 12px; border-radius:999px; margin-bottom:22px;
+  }
+  .hero h1{font-size:clamp(2.1rem,5vw,3.4rem); line-height:1.08; margin:0 0 18px; font-weight:800; letter-spacing:-0.01em;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:var(--text-dim); font-size:1.08rem; max-width:640px; margin:0 0 28px;}
+  .hero-tags{display:flex; flex-wrap:wrap; gap:8px;}
+  .hero-tags .tagchip{
+    font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--sel);
+    background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:8px;
+  }
+
+  main{max-width:1040px; margin:0 auto; padding:20px 24px 100px;}
+  section.topic{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:36px; margin-bottom:28px; scroll-margin-top:90px;
+    position:relative; overflow:hidden;
+  }
+  section.topic::before{
+    content:""; position:absolute; top:0; left:0; width:4px; height:100%;
+    background:linear-gradient(var(--accent),var(--accent-2));
+  }
+  .tag-badge{
+    display:inline-flex; align-items:center; font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:.95rem; color:var(--sel);
+    background:#0e1226; border:1px solid var(--line); padding:5px 12px; border-radius:8px;
+    margin-bottom:14px;
+  }
+  section.topic h2{font-size:1.5rem; margin:0 0 14px; font-weight:700;}
+  section.topic p{color:var(--text-dim); margin:0 0 16px;}
+  section.topic ul{color:var(--text-dim); padding-left:20px; margin:0 0 16px;}
+  section.topic li{margin-bottom:6px;}
+  section.topic code.inline{
+    font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--sel);
+    padding:2px 6px; border-radius:5px; font-size:.88em;
+  }
+
+  .code-window{background:#0b0e1f; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:18px 0;}
+  .code-window .bar{display:flex; gap:6px; padding:10px 14px; background:#080a18; border-bottom:1px solid var(--line);}
+  .code-window .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .code-window pre{margin:0; padding:16px; overflow-x:auto;}
+  .code-window code{font-family:'JetBrains Mono',monospace; font-size:.86rem; line-height:1.6;}
+  .sel{color:var(--sel);} .prop{color:var(--prop);} .val{color:var(--val);} .com{color:var(--com);} .pu{color:var(--text-dim);}
+
+  .exercise{
+    background:var(--surface-2); border:1px dashed rgba(77,141,255,0.4); border-radius:14px;
+    padding:22px; margin-top:20px;
+  }
+  .exercise-head{
+    display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace;
+    font-weight:700; color:var(--accent); margin-bottom:10px; font-size:.95rem;
+  }
+  .exercise-head .num{
+    width:24px; height:24px; border-radius:50%; background:var(--accent); color:#0a0e22;
+    display:flex; align-items:center; justify-content:center; font-size:.78rem;
+  }
+  .exercise p{color:var(--text-dim); margin:0 0 14px; font-size:.95rem;}
+  .lab{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:720px){.lab{grid-template-columns:1fr;}}
+  .lab textarea{
+    width:100%; height:260px; resize:vertical; background:#0b0e1f; color:#e8ecfb;
+    font-family:'JetBrains Mono',monospace; font-size:.8rem; border:1px solid var(--line);
+    border-radius:10px; padding:12px; line-height:1.55;
+  }
+  .lab textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .lab .frame-wrap{background:#fff; border-radius:10px; border:1px solid var(--line); overflow:hidden; min-height:260px;}
+  .lab iframe{width:100%; height:260px; border:0; display:block;}
+  .lab-controls{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .run-btn{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.82rem;
+    background:var(--accent); color:#0a0e22; border:0; padding:9px 16px; border-radius:8px;
+    cursor:pointer; transition:.15s;
+  }
+  .run-btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  details{margin-top:6px;}
+  summary{cursor:pointer; color:var(--accent-2); font-size:.85rem; font-family:'JetBrains Mono',monospace; font-weight:600; user-select:none;}
+  details pre{margin-top:10px; background:#0b0e1f; border:1px solid var(--line); border-radius:10px; padding:14px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:.8rem;}
+
+  footer{max-width:1040px; margin:0 auto; padding:20px 24px 70px; color:var(--text-dim); font-size:.88rem; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="chip">{ }</span> Guía de CSS</div>
+    <nav class="toc">
+      <a href="#s1">1. Intro</a>
+      <a href="#s2">2. Selectores</a>
+      <a href="#s3">3. Caja</a>
+      <a href="#s4">4. Color/Texto</a>
+      <a href="#s5">5. Flexbox</a>
+      <a href="#s6">6. Grid</a>
+      <a href="#s7">7. Posición</a>
+      <a href="#s8">8. Responsive</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">● Guía práctica — CSS3</div>
+  <h1>Dale estilo a tu HTML con <span>CSS</span>.</h1>
+  <p>Igual que la guía de HTML: teoría breve + laboratorio en vivo. Aquí el <code class="inline" style="background:var(--surface); color:var(--sel)">HTML</code> ya viene armado — tu trabajo es escribir el CSS y ver cómo cambia el resultado al instante.</p>
+  <div class="hero-tags">
+    <span class="tagchip">selector { }</span>
+    <span class="tagchip">.clase</span>
+    <span class="tagchip">#id</span>
+    <span class="tagchip">display: flex</span>
+    <span class="tagchip">@media</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- 1 -->
+  <section class="topic" id="s1">
+    <div class="tag-badge">01 · sintaxis</div>
+    <h2>¿Qué es CSS y cómo se vincula?</h2>
+    <p>CSS (Cascading Style Sheets) define la <strong>presentación</strong> de un documento HTML: colores, tamaños, espaciados, posiciones. Una regla CSS tiene un <em>selector</em> (a qué elementos aplica) y un bloque de <em>declaraciones</em> (propiedad: valor;).</p>
+    <ul>
+      <li><strong>Externo</strong> (recomendado): <code class="inline">&lt;link rel="stylesheet" href="estilos.css"&gt;</code> dentro del <code class="inline">&lt;head&gt;</code>.</li>
+      <li><strong>Interno</strong>: un bloque <code class="inline">&lt;style&gt;</code> dentro del <code class="inline">&lt;head&gt;</code>.</li>
+      <li><strong>En línea</strong>: atributo <code class="inline">style="..."</code> en la propia etiqueta (evítalo salvo casos puntuales).</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">p</span> <span class="pu">{</span>
+  <span class="prop">color</span>: <span class="val">navy</span>;
+  <span class="prop">font-size</span>: <span class="val">18px</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">1</span> Laboratorio: primeras reglas</div>
+      <p>Este documento ya tiene un <code class="inline">&lt;h1&gt;</code> y un <code class="inline">&lt;p&gt;</code>. Escribe CSS dentro de <code class="inline">&lt;style&gt;</code> para poner el <code class="inline">h1</code> en color <code class="inline">tomato</code> y el <code class="inline">p</code> con <code class="inline">font-size: 20px</code>.</p>
+      <div class="lab">
+        <textarea id="ex1-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Título de prueba&lt;/h1&gt;
+  &lt;p&gt;Este es un párrafo de ejemplo.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex1-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex1')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;style&gt;
+h1 { color: tomato; }
+p { font-size: 20px; }
+&lt;/style&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="topic" id="s2">
+    <div class="tag-badge">02 · selectores</div>
+    <h2>Selectores</h2>
+    <p>Elegir bien el selector es la mitad del trabajo en CSS:</p>
+    <ul>
+      <li><code class="inline">elemento</code>: aplica a todas las etiquetas de ese tipo. Ej: <code class="inline">p { }</code>.</li>
+      <li><code class="inline">.clase</code>: aplica a elementos con <code class="inline">class="clase"</code>. Se puede reutilizar en varios elementos.</li>
+      <li><code class="inline">#id</code>: aplica a un único elemento con ese <code class="inline">id</code>.</li>
+      <li><code class="inline">A B</code>: selector descendiente (B dentro de A). <code class="inline">A &gt; B</code>: hijo directo.</li>
+      <li>Pseudo-clases: <code class="inline">:hover</code>, <code class="inline">:first-child</code>, <code class="inline">:nth-child()</code>.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="com">/* clase */</span>
+<span class="sel">.destacado</span> <span class="pu">{</span> <span class="prop">background</span>: <span class="val">yellow</span>; <span class="pu">}</span>
+
+<span class="com">/* id */</span>
+<span class="sel">#logo</span> <span class="pu">{</span> <span class="prop">width</span>: <span class="val">120px</span>; <span class="pu">}</span>
+
+<span class="com">/* pseudo-clase */</span>
+<span class="sel">a:hover</span> <span class="pu">{</span> <span class="prop">color</span>: <span class="val">crimson</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">2</span> Laboratorio: clases e id</div>
+      <p>Hay tres <code class="inline">&lt;li&gt;</code>; uno tiene <code class="inline">class="destacado"</code> y otro <code class="inline">id="especial"</code>. Dale fondo amarillo a <code class="inline">.destacado</code> y texto en negrita a <code class="inline">#especial</code>.</p>
+      <div class="lab">
+        <textarea id="ex2-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Normal&lt;/li&gt;
+    &lt;li class="destacado"&gt;Destacado&lt;/li&gt;
+    &lt;li id="especial"&gt;Especial&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex2-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex2')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;style&gt;
+.destacado { background: yellow; }
+#especial { font-weight: bold; }
+&lt;/style&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="topic" id="s3">
+    <div class="tag-badge">03 · box model</div>
+    <h2>El modelo de caja (box model)</h2>
+    <p>Todo elemento HTML es una caja rectangular formada por cuatro capas, de adentro hacia afuera:</p>
+    <ul>
+      <li><strong>content</strong>: el contenido (texto, imagen).</li>
+      <li><strong>padding</strong>: espacio interno entre el contenido y el borde.</li>
+      <li><strong>border</strong>: el borde de la caja.</li>
+      <li><strong>margin</strong>: espacio externo, entre esta caja y las demás.</li>
+    </ul>
+    <p>Con <code class="inline">box-sizing: border-box</code>, el <code class="inline">width</code> incluye padding y border (evita sorpresas de tamaño). Es una práctica casi universal.</p>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">.caja</span> <span class="pu">{</span>
+  <span class="prop">box-sizing</span>: <span class="val">border-box</span>;
+  <span class="prop">width</span>: <span class="val">200px</span>;
+  <span class="prop">padding</span>: <span class="val">16px</span>;
+  <span class="prop">border</span>: <span class="val">2px solid #333</span>;
+  <span class="prop">margin</span>: <span class="val">12px</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">3</span> Laboratorio: construye una caja</div>
+      <p>Al <code class="inline">.card</code> dale: <code class="inline">width: 220px</code>, <code class="inline">padding: 20px</code>, <code class="inline">border: 3px solid #4d8dff</code> y <code class="inline">margin: 20px</code>. Usa <code class="inline">box-sizing: border-box</code>.</p>
+      <div class="lab">
+        <textarea id="ex3-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="card"&gt;Soy una tarjeta&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex3-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex3')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;style&gt;
+.card {
+  box-sizing: border-box;
+  width: 220px;
+  padding: 20px;
+  border: 3px solid #4d8dff;
+  margin: 20px;
+}
+&lt;/style&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="topic" id="s4">
+    <div class="tag-badge">04 · color y tipografía</div>
+    <h2>Colores, tipografía y fondos</h2>
+    <ul>
+      <li>Colores: nombres (<code class="inline">tomato</code>), hex (<code class="inline">#ff6347</code>), <code class="inline">rgb()</code> o <code class="inline">rgba()</code> con transparencia.</li>
+      <li>Tipografía: <code class="inline">font-family</code>, <code class="inline">font-size</code>, <code class="inline">font-weight</code>, <code class="inline">line-height</code>, <code class="inline">text-align</code>.</li>
+      <li>Fondos: <code class="inline">background-color</code>, <code class="inline">background-image</code>, <code class="inline">background-size: cover</code>.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">body</span> <span class="pu">{</span>
+  <span class="prop">font-family</span>: <span class="val">"Segoe UI", sans-serif</span>;
+  <span class="prop">color</span>: <span class="val">#222</span>;
+  <span class="prop">background-color</span>: <span class="val">#f4f4f4</span>;
+<span class="pu">}</span>
+
+<span class="sel">h1</span> <span class="pu">{</span>
+  <span class="prop">font-weight</span>: <span class="val">700</span>;
+  <span class="prop">text-align</span>: <span class="val">center</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">4</span> Laboratorio: estilo de texto</div>
+      <p>Dale a <code class="inline">body</code> fondo <code class="inline">#1e1e2e</code> y texto blanco. Centra el <code class="inline">h1</code> y ponle <code class="inline">font-size: 40px</code>.</p>
+      <div class="lab">
+        <textarea id="ex4-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Modo oscuro&lt;/h1&gt;
+  &lt;p&gt;Un párrafo de ejemplo para probar colores.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex4-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex4')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;style&gt;
+body { background-color: #1e1e2e; color: white; }
+h1 { text-align: center; font-size: 40px; }
+&lt;/style&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="topic" id="s5">
+    <div class="tag-badge">05 · display: flex</div>
+    <h2>Flexbox</h2>
+    <p>Flexbox organiza elementos en una fila o columna, repartiendo espacio y alineando con facilidad. Se activa en el <strong>contenedor</strong> con <code class="inline">display: flex</code>:</p>
+    <ul>
+      <li><code class="inline">flex-direction</code>: <code class="inline">row</code> (por defecto) o <code class="inline">column</code>.</li>
+      <li><code class="inline">justify-content</code>: alinea en el eje principal (<code class="inline">center</code>, <code class="inline">space-between</code>...).</li>
+      <li><code class="inline">align-items</code>: alinea en el eje cruzado (<code class="inline">center</code>, <code class="inline">stretch</code>...).</li>
+      <li><code class="inline">gap</code>: espacio entre elementos hijos.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">.contenedor</span> <span class="pu">{</span>
+  <span class="prop">display</span>: <span class="val">flex</span>;
+  <span class="prop">justify-content</span>: <span class="val">space-between</span>;
+  <span class="prop">align-items</span>: <span class="val">center</span>;
+  <span class="prop">gap</span>: <span class="val">12px</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">5</span> Laboratorio: barra de navegación</div>
+      <p>Haz que <code class="inline">.navbar</code> use flexbox para poner sus 3 enlaces en fila, separados con <code class="inline">justify-content: space-around</code>, y centrados verticalmente.</p>
+      <div class="lab">
+        <textarea id="ex5-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+.navbar { height: 60px; background: #212748; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="navbar"&gt;
+    &lt;a href="#"&gt;Inicio&lt;/a&gt;
+    &lt;a href="#"&gt;Servicios&lt;/a&gt;
+    &lt;a href="#"&gt;Contacto&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex5-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex5')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>.navbar {
+  height: 60px;
+  background: #212748;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="topic" id="s6">
+    <div class="tag-badge">06 · display: grid</div>
+    <h2>CSS Grid</h2>
+    <p>Grid organiza contenido en dos dimensiones (filas <em>y</em> columnas a la vez), ideal para layouts completos:</p>
+    <ul>
+      <li><code class="inline">display: grid</code> activa la cuadrícula en el contenedor.</li>
+      <li><code class="inline">grid-template-columns: 1fr 1fr 1fr</code>: 3 columnas de ancho igual (<code class="inline">fr</code> = fracción del espacio disponible).</li>
+      <li><code class="inline">gap</code>: separación entre celdas.</li>
+      <li><code class="inline">grid-template-columns: repeat(3, 1fr)</code> es un atajo equivalente al ejemplo anterior.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">.galeria</span> <span class="pu">{</span>
+  <span class="prop">display</span>: <span class="val">grid</span>;
+  <span class="prop">grid-template-columns</span>: <span class="val">repeat(3, 1fr)</span>;
+  <span class="prop">gap</span>: <span class="val">10px</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">6</span> Laboratorio: galería en cuadrícula</div>
+      <p>Convierte <code class="inline">.galeria</code> en un grid de 3 columnas iguales con <code class="inline">gap: 10px</code>, para que las 6 cajas se acomoden en 2 filas.</p>
+      <div class="lab">
+        <textarea id="ex6-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+.item { background: #4d8dff; color: white; height: 60px;
+  display: flex; align-items: center; justify-content: center; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="galeria"&gt;
+    &lt;div class="item"&gt;1&lt;/div&gt;
+    &lt;div class="item"&gt;2&lt;/div&gt;
+    &lt;div class="item"&gt;3&lt;/div&gt;
+    &lt;div class="item"&gt;4&lt;/div&gt;
+    &lt;div class="item"&gt;5&lt;/div&gt;
+    &lt;div class="item"&gt;6&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex6-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex6')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>.galeria {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="topic" id="s7">
+    <div class="tag-badge">07 · position</div>
+    <h2>Posicionamiento</h2>
+    <ul>
+      <li><code class="inline">static</code>: valor por defecto, sigue el flujo normal.</li>
+      <li><code class="inline">relative</code>: se desplaza respecto a su posición original, sin sacar a los demás del flujo.</li>
+      <li><code class="inline">absolute</code>: se posiciona respecto al ancestro posicionado más cercano (o al documento).</li>
+      <li><code class="inline">fixed</code>: se posiciona respecto a la ventana; no se mueve al hacer scroll.</li>
+      <li><code class="inline">sticky</code>: se comporta como <code class="inline">relative</code> hasta cierto punto de scroll, luego queda "pegado".</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">.badge</span> <span class="pu">{</span>
+  <span class="prop">position</span>: <span class="val">absolute</span>;
+  <span class="prop">top</span>: <span class="val">8px</span>;
+  <span class="prop">right</span>: <span class="val">8px</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">7</span> Laboratorio: insignia posicionada</div>
+      <p>El <code class="inline">.tarjeta</code> ya tiene <code class="inline">position: relative</code>. Coloca <code class="inline">.badge</code> con <code class="inline">position: absolute</code> en la esquina superior derecha (<code class="inline">top: 8px; right: 8px;</code>).</p>
+      <div class="lab">
+        <textarea id="ex7-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+.tarjeta { position: relative; width: 200px; height: 120px;
+  background: #212748; }
+.badge { background: #f5a623; color: #10142a; padding: 4px 8px;
+  border-radius: 6px; font-weight: bold; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="tarjeta"&gt;
+    &lt;span class="badge"&gt;Nuevo&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex7-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex7')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f5a623;
+  color: #10142a;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: bold;
+}</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="topic" id="s8">
+    <div class="tag-badge">08 · @media</div>
+    <h2>Diseño responsive</h2>
+    <p>Un sitio responsive se adapta a distintos tamaños de pantalla:</p>
+    <ul>
+      <li><strong>Unidades relativas</strong>: <code class="inline">%</code>, <code class="inline">em</code>, <code class="inline">rem</code>, <code class="inline">vw</code>/<code class="inline">vh</code>, en vez de valores fijos en <code class="inline">px</code> cuando sea posible.</li>
+      <li><strong>Media queries</strong>: aplican reglas CSS solo cuando se cumple una condición de pantalla.</li>
+      <li>Regla práctica: diseña primero para móvil ("mobile-first") y añade reglas para pantallas más grandes con <code class="inline">min-width</code>.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="sel">.columnas</span> <span class="pu">{</span>
+  <span class="prop">display</span>: <span class="val">grid</span>;
+  <span class="prop">grid-template-columns</span>: <span class="val">1fr</span>;
+<span class="pu">}</span>
+
+<span class="com">/* en pantallas de 600px o más, 2 columnas */</span>
+<span class="sel">@media (min-width: 600px)</span> <span class="pu">{</span>
+  <span class="sel">.columnas</span> <span class="pu">{</span>
+    <span class="prop">grid-template-columns</span>: <span class="val">1fr 1fr</span>;
+  <span class="pu">}</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">8</span> Reto final: layout adaptable</div>
+      <p>Haz que <code class="inline">.columnas</code> sea de 1 sola columna por defecto (para móvil), y que a partir de <code class="inline">min-width: 500px</code> pase a 2 columnas. Redimensiona la ventana del navegador (o el iframe) para comprobarlo — aquí puedes probarlo cambiando el ancho del <code class="inline">body</code> mentalmente, ¡el código es lo que importa!</p>
+      <div class="lab">
+        <textarea id="ex8-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+.item { background: #4d8dff; color: white; padding: 20px;
+  text-align: center; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="columnas"&gt;
+    &lt;div class="item"&gt;A&lt;/div&gt;
+    &lt;div class="item"&gt;B&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex8-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex8')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>.columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 500px) {
+  .columnas {
+    grid-template-columns: 1fr 1fr;
+  }
+}</code></pre></details>
+    </div>
+  </section>
+
+</main>
+
+<footer>Guía de CSS · Ya completaste HTML + CSS. El siguiente paso natural es JavaScript.</footer>
+
+<script>
+function runEx(id){
+  const code = document.getElementById(id+'-code').value;
+  document.getElementById(id+'-frame').srcdoc = code;
+}
+window.addEventListener('DOMContentLoaded', () => {
+  ['ex1','ex2','ex3','ex4','ex5','ex6','ex7','ex8'].forEach(runEx);
+});
+</script>
+</body>
+</html>

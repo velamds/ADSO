@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de HTML — De cero a las etiquetas semánticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #171a2b;
+    --surface: #1f2338;
+    --surface-2: #272c47;
+    --line: rgba(255,255,255,0.09);
+    --text: #e9e9f4;
+    --text-dim: #9a9cbf;
+    --accent: #ff7a52;
+    --accent-soft: rgba(255,122,82,0.14);
+    --accent-2: #4ecdc4;
+    --tag: #ff9f7a;
+    --attr: #7ad0ff;
+    --str: #a5e39c;
+    --com: #6b7093;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(255,122,82,0.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(78,205,196,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(23,26,43,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1040px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.02em;}
+  .brand .chip{
+    background:var(--accent); color:#1a1420; padding:2px 8px; border-radius:6px;
+    font-size:.72rem; font-weight:800;
+  }
+  .toc{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{
+    color:var(--text-dim); text-decoration:none; font-size:.8rem; white-space:nowrap;
+    padding:6px 10px; border-radius:8px; transition:.15s;
+  }
+  .toc a:hover{color:var(--text); background:var(--surface-2);}
+
+  /* ---------- hero ---------- */
+  .hero{max-width:1040px; margin:0 auto; padding:72px 24px 40px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; color:var(--accent);
+    font-family:'JetBrains Mono',monospace; font-size:.82rem; font-weight:700;
+    background:var(--accent-soft); padding:6px 12px; border-radius:999px; margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(2.1rem,5vw,3.4rem); line-height:1.08; margin:0 0 18px; font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:var(--text-dim); font-size:1.08rem; max-width:640px; margin:0 0 28px;}
+  .hero-tags{display:flex; flex-wrap:wrap; gap:8px;}
+  .hero-tags .tagchip{
+    font-family:'JetBrains Mono',monospace; font-size:.78rem; color:var(--attr);
+    background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:8px;
+  }
+
+  /* ---------- sections ---------- */
+  main{max-width:1040px; margin:0 auto; padding:20px 24px 100px;}
+  section.topic{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:36px; margin-bottom:28px; scroll-margin-top:90px;
+    position:relative; overflow:hidden;
+  }
+  section.topic::before{
+    content:""; position:absolute; top:0; left:0; width:4px; height:100%;
+    background:linear-gradient(var(--accent),var(--accent-2));
+  }
+  .tag-badge{
+    display:inline-flex; align-items:center; font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:.95rem; color:var(--tag);
+    background:#141726; border:1px solid var(--line); padding:5px 12px; border-radius:8px;
+    margin-bottom:14px;
+  }
+  .tag-badge b{color:var(--attr); font-weight:700; margin:0 2px;}
+  section.topic h2{font-size:1.5rem; margin:0 0 14px; font-weight:700;}
+  section.topic p{color:var(--text-dim); margin:0 0 16px;}
+  section.topic ul{color:var(--text-dim); padding-left:20px; margin:0 0 16px;}
+  section.topic li{margin-bottom:6px;}
+  section.topic code.inline{
+    font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--attr);
+    padding:2px 6px; border-radius:5px; font-size:.88em;
+  }
+
+  /* code block */
+  .code-window{
+    background:#111322; border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    margin:18px 0;
+  }
+  .code-window .bar{
+    display:flex; gap:6px; padding:10px 14px; background:#0d0f1c; border-bottom:1px solid var(--line);
+  }
+  .code-window .dot{width:10px; height:10px; border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .code-window pre{margin:0; padding:16px; overflow-x:auto;}
+  .code-window code{font-family:'JetBrains Mono',monospace; font-size:.86rem; line-height:1.6;}
+  .tg{color:var(--tag);} .at{color:var(--attr);} .sv{color:var(--str);} .cm{color:var(--com);} .tx{color:var(--text);}
+
+  /* exercise */
+  .exercise{
+    background:var(--surface-2); border:1px dashed rgba(255,122,82,0.35); border-radius:14px;
+    padding:22px; margin-top:20px;
+  }
+  .exercise-head{
+    display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace;
+    font-weight:700; color:var(--accent); margin-bottom:10px; font-size:.95rem;
+  }
+  .exercise-head .num{
+    width:24px; height:24px; border-radius:50%; background:var(--accent); color:#1a1420;
+    display:flex; align-items:center; justify-content:center; font-size:.78rem;
+  }
+  .exercise p{color:var(--text-dim); margin:0 0 14px; font-size:.95rem;}
+  .lab{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:720px){.lab{grid-template-columns:1fr;}}
+  .lab textarea{
+    width:100%; height:220px; resize:vertical; background:#0d0f1c; color:#e9e9f4;
+    font-family:'JetBrains Mono',monospace; font-size:.82rem; border:1px solid var(--line);
+    border-radius:10px; padding:12px; line-height:1.55;
+  }
+  .lab textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .lab .frame-wrap{
+    background:#fff; border-radius:10px; border:1px solid var(--line); overflow:hidden;
+    min-height:220px;
+  }
+  .lab iframe{width:100%; height:220px; border:0; display:block;}
+  .lab-controls{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .run-btn{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.82rem;
+    background:var(--accent); color:#1a1420; border:0; padding:9px 16px; border-radius:8px;
+    cursor:pointer; transition:.15s;
+  }
+  .run-btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  details{margin-top:6px;}
+  summary{
+    cursor:pointer; color:var(--accent-2); font-size:.85rem; font-family:'JetBrains Mono',monospace;
+    font-weight:600; user-select:none;
+  }
+  details pre{
+    margin-top:10px; background:#111322; border:1px solid var(--line); border-radius:10px;
+    padding:14px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:.82rem;
+  }
+
+  footer{max-width:1040px; margin:0 auto; padding:20px 24px 70px; color:var(--text-dim); font-size:.88rem; text-align:center;}
+  footer a{color:var(--accent-2);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="chip">&lt;/&gt;</span> Guía de HTML</div>
+    <nav class="toc">
+      <a href="#s1">1. Intro</a>
+      <a href="#s2">2. Texto</a>
+      <a href="#s3">3. Enlaces</a>
+      <a href="#s4">4. Listas</a>
+      <a href="#s5">5. Tablas</a>
+      <a href="#s6">6. Formularios</a>
+      <a href="#s7">7. Semántica</a>
+      <a href="#s8">8. Buenas prácticas</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">● Guía práctica — HTML5</div>
+  <h1>Aprende <span>HTML</span> escribiéndolo, no solo leyéndolo.</h1>
+  <p>Cada sección trae la teoría justa y un laboratorio en vivo: editas el código a la izquierda y ves el resultado a la derecha, al instante. Empieza por la sección 1 y no te saltes los ejercicios.</p>
+  <div class="hero-tags">
+    <span class="tagchip">&lt;html&gt;</span>
+    <span class="tagchip">&lt;body&gt;</span>
+    <span class="tagchip">&lt;div&gt;</span>
+    <span class="tagchip">&lt;a href&gt;</span>
+    <span class="tagchip">&lt;form&gt;</span>
+    <span class="tagchip">&lt;section&gt;</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- 1 -->
+  <section class="topic" id="s1">
+    <div class="tag-badge">01 · &lt;html&gt;</div>
+    <h2>¿Qué es HTML y cómo se estructura un documento?</h2>
+    <p>HTML (HyperText Markup Language) no es un lenguaje de programación: es un lenguaje de <strong>marcado</strong>. Describe la estructura y el significado de una página usando <em>etiquetas</em> (tags), casi siempre en pares de apertura y cierre: <code class="inline">&lt;p&gt;texto&lt;/p&gt;</code>.</p>
+    <ul>
+      <li>Una etiqueta puede tener <strong>atributos</strong>, que le dan información extra: <code class="inline">&lt;a href="..."&gt;</code>.</li>
+      <li>Todo documento HTML válido empieza con <code class="inline">&lt;!DOCTYPE html&gt;</code>, seguido de <code class="inline">&lt;html&gt;</code>, <code class="inline">&lt;head&gt;</code> y <code class="inline">&lt;body&gt;</code>.</li>
+      <li>El <code class="inline">&lt;head&gt;</code> guarda metadatos (título, charset, enlaces a CSS); el <code class="inline">&lt;body&gt;</code> guarda lo que se ve.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="cm">&lt;!-- estructura mínima de una página --&gt;</span>
+<span class="tg">&lt;!DOCTYPE html&gt;</span>
+<span class="tg">&lt;html</span> <span class="at">lang</span>=<span class="sv">"es"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;head&gt;</span>
+    <span class="tg">&lt;meta</span> <span class="at">charset</span>=<span class="sv">"UTF-8"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;title&gt;</span>Mi primera página<span class="tg">&lt;/title&gt;</span>
+  <span class="tg">&lt;/head&gt;</span>
+  <span class="tg">&lt;body&gt;</span>
+    <span class="tg">&lt;h1&gt;</span>¡Hola, mundo!<span class="tg">&lt;/h1&gt;</span>
+  <span class="tg">&lt;/body&gt;</span>
+<span class="tg">&lt;/html&gt;</span></code></pre>
+    </div>
+
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">1</span> Laboratorio: tu primer documento</div>
+      <p>Completa el código para que el <code class="inline">&lt;title&gt;</code> diga "Mi guía de HTML" y agrega un <code class="inline">&lt;h1&gt;</code> con tu nombre dentro del <code class="inline">&lt;body&gt;</code>. Pulsa "Ejecutar" para ver el resultado.</p>
+      <div class="lab">
+        <textarea id="ex1-code">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+  &lt;/body&gt;
+&lt;/html&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex1-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex1')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Mi guía de HTML&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Juan Pérez&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="topic" id="s2">
+    <div class="tag-badge">02 · &lt;h1&gt;–&lt;p&gt;</div>
+    <h2>Etiquetas de texto</h2>
+    <p>El contenido textual se organiza con encabezados y párrafos:</p>
+    <ul>
+      <li><code class="inline">&lt;h1&gt;</code> a <code class="inline">&lt;h6&gt;</code>: títulos, de mayor a menor importancia. Usa un solo <code class="inline">&lt;h1&gt;</code> por página.</li>
+      <li><code class="inline">&lt;p&gt;</code>: párrafos de texto.</li>
+      <li><code class="inline">&lt;strong&gt;</code> da importancia (negrita semántica); <code class="inline">&lt;em&gt;</code> da énfasis (cursiva semántica).</li>
+      <li><code class="inline">&lt;br&gt;</code> hace un salto de línea; <code class="inline">&lt;hr&gt;</code> dibuja una línea divisoria.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;h1&gt;</span>Título principal<span class="tg">&lt;/h1&gt;</span>
+<span class="tg">&lt;h2&gt;</span>Subtítulo<span class="tg">&lt;/h2&gt;</span>
+<span class="tg">&lt;p&gt;</span>Este es un párrafo con una palabra <span class="tg">&lt;strong&gt;</span>importante<span class="tg">&lt;/strong&gt;</span> y otra con <span class="tg">&lt;em&gt;</span>énfasis<span class="tg">&lt;/em&gt;</span>.<span class="tg">&lt;/p&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">2</span> Laboratorio: jerarquía de texto</div>
+      <p>Crea un <code class="inline">&lt;h1&gt;</code> con "Mi receta favorita", un <code class="inline">&lt;h2&gt;</code> con "Ingredientes" y un párrafo donde una palabra esté en <code class="inline">&lt;strong&gt;</code>.</p>
+      <div class="lab">
+        <textarea id="ex2-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex2-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex2')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;h1&gt;Mi receta favorita&lt;/h1&gt;
+  &lt;h2&gt;Ingredientes&lt;/h2&gt;
+  &lt;p&gt;Necesitas &lt;strong&gt;2 tazas&lt;/strong&gt; de harina.&lt;/p&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="topic" id="s3">
+    <div class="tag-badge">03 · &lt;a&gt; &lt;img&gt;</div>
+    <h2>Enlaces e imágenes</h2>
+    <p>Los enlaces conectan páginas; las imágenes las ilustran. Ambos son elementos con atributos clave:</p>
+    <ul>
+      <li><code class="inline">&lt;a href="url"&gt;texto&lt;/a&gt;</code>: crea un enlace. <code class="inline">target="_blank"</code> lo abre en pestaña nueva.</li>
+      <li><code class="inline">&lt;img src="url" alt="descripción"&gt;</code>: es una etiqueta "vacía" (sin cierre). <code class="inline">alt</code> es obligatorio para accesibilidad.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;a</span> <span class="at">href</span>=<span class="sv">"https://developer.mozilla.org"</span> <span class="at">target</span>=<span class="sv">"_blank"</span><span class="tg">&gt;</span>Visita MDN<span class="tg">&lt;/a&gt;</span>
+
+<span class="tg">&lt;img</span> <span class="at">src</span>=<span class="sv">"gato.jpg"</span> <span class="at">alt</span>=<span class="sv">"Gato naranja durmiendo"</span> <span class="tg">&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">3</span> Laboratorio: enlace con imagen</div>
+      <p>Agrega un enlace a "https://www.wikipedia.org" con el texto "Ir a Wikipedia", y debajo una imagen usando esta URL de prueba: <code class="inline">https://picsum.photos/300/150</code>, con un <code class="inline">alt</code> descriptivo.</p>
+      <div class="lab">
+        <textarea id="ex3-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex3-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex3')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;a href="https://www.wikipedia.org"&gt;Ir a Wikipedia&lt;/a&gt;
+  &lt;br&gt;
+  &lt;img src="https://picsum.photos/300/150" alt="Imagen aleatoria de paisaje"&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="topic" id="s4">
+    <div class="tag-badge">04 · &lt;ul&gt; &lt;ol&gt;</div>
+    <h2>Listas</h2>
+    <p>HTML tiene tres tipos de listas:</p>
+    <ul>
+      <li><code class="inline">&lt;ul&gt;</code>: lista sin orden (viñetas), con elementos <code class="inline">&lt;li&gt;</code>.</li>
+      <li><code class="inline">&lt;ol&gt;</code>: lista ordenada (numerada), también con <code class="inline">&lt;li&gt;</code>.</li>
+      <li><code class="inline">&lt;dl&gt;</code>: lista de definiciones, con <code class="inline">&lt;dt&gt;</code> (término) y <code class="inline">&lt;dd&gt;</code> (definición).</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;ul&gt;</span>
+  <span class="tg">&lt;li&gt;</span>Manzana<span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span>Pera<span class="tg">&lt;/li&gt;</span>
+<span class="tg">&lt;/ul&gt;</span>
+
+<span class="tg">&lt;ol&gt;</span>
+  <span class="tg">&lt;li&gt;</span>Precalentar el horno<span class="tg">&lt;/li&gt;</span>
+  <span class="tg">&lt;li&gt;</span>Mezclar ingredientes<span class="tg">&lt;/li&gt;</span>
+<span class="tg">&lt;/ol&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">4</span> Laboratorio: tu lista de tareas</div>
+      <p>Crea una lista ordenada con 3 pasos para preparar un café, y debajo una lista sin orden con 3 ingredientes.</p>
+      <div class="lab">
+        <textarea id="ex4-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex4-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex4')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Hervir agua&lt;/li&gt;
+    &lt;li&gt;Añadir café molido&lt;/li&gt;
+    &lt;li&gt;Servir en la taza&lt;/li&gt;
+  &lt;/ol&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Agua&lt;/li&gt;
+    &lt;li&gt;Café molido&lt;/li&gt;
+    &lt;li&gt;Azúcar&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="topic" id="s5">
+    <div class="tag-badge">05 · &lt;table&gt;</div>
+    <h2>Tablas</h2>
+    <p>Las tablas muestran datos en filas y columnas. Se construyen combinando estas etiquetas:</p>
+    <ul>
+      <li><code class="inline">&lt;table&gt;</code>: contenedor de la tabla.</li>
+      <li><code class="inline">&lt;tr&gt;</code>: fila (table row).</li>
+      <li><code class="inline">&lt;th&gt;</code>: celda de encabezado; <code class="inline">&lt;td&gt;</code>: celda de datos.</li>
+      <li><code class="inline">&lt;thead&gt;</code>, <code class="inline">&lt;tbody&gt;</code>: agrupan encabezado y cuerpo (opcional pero recomendado).</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;table&gt;</span>
+  <span class="tg">&lt;tr&gt;</span>
+    <span class="tg">&lt;th&gt;</span>Nombre<span class="tg">&lt;/th&gt;</span>
+    <span class="tg">&lt;th&gt;</span>Edad<span class="tg">&lt;/th&gt;</span>
+  <span class="tg">&lt;/tr&gt;</span>
+  <span class="tg">&lt;tr&gt;</span>
+    <span class="tg">&lt;td&gt;</span>Ana<span class="tg">&lt;/td&gt;</span>
+    <span class="tg">&lt;td&gt;</span>28<span class="tg">&lt;/td&gt;</span>
+  <span class="tg">&lt;/tr&gt;</span>
+<span class="tg">&lt;/table&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">5</span> Laboratorio: tabla de productos</div>
+      <p>Construye una tabla con encabezados "Producto" y "Precio", y agrega dos filas de datos con productos inventados.</p>
+      <div class="lab">
+        <textarea id="ex5-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex5-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex5')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;table border="1"&gt;
+    &lt;tr&gt;&lt;th&gt;Producto&lt;/th&gt;&lt;th&gt;Precio&lt;/th&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Cuaderno&lt;/td&gt;&lt;td&gt;$5&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Lápiz&lt;/td&gt;&lt;td&gt;$1&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="topic" id="s6">
+    <div class="tag-badge">06 · &lt;form&gt;</div>
+    <h2>Formularios</h2>
+    <p>Los formularios capturan datos del usuario. Piezas clave:</p>
+    <ul>
+      <li><code class="inline">&lt;form&gt;</code>: contenedor; define a dónde y cómo enviar los datos.</li>
+      <li><code class="inline">&lt;input type="..."&gt;</code>: campo de entrada. Tipos comunes: <code class="inline">text</code>, <code class="inline">email</code>, <code class="inline">password</code>, <code class="inline">checkbox</code>, <code class="inline">radio</code>, <code class="inline">date</code>.</li>
+      <li><code class="inline">&lt;label&gt;</code>: etiqueta accesible asociada a un input mediante <code class="inline">for</code>/<code class="inline">id</code>.</li>
+      <li><code class="inline">&lt;select&gt;</code> + <code class="inline">&lt;option&gt;</code>: menú desplegable. <code class="inline">&lt;textarea&gt;</code>: texto largo. <code class="inline">&lt;button&gt;</code>: botón de acción.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;form&gt;</span>
+  <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="sv">"nombre"</span><span class="tg">&gt;</span>Nombre:<span class="tg">&lt;/label&gt;</span>
+  <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="sv">"text"</span> <span class="at">id</span>=<span class="sv">"nombre"</span><span class="tg">&gt;</span>
+
+  <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="sv">"submit"</span><span class="tg">&gt;</span>Enviar<span class="tg">&lt;/button&gt;</span>
+<span class="tg">&lt;/form&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">6</span> Laboratorio: formulario de contacto</div>
+      <p>Crea un formulario con: un campo de texto para "Nombre" (con su label), un campo <code class="inline">email</code> para "Correo", un <code class="inline">textarea</code> para "Mensaje" y un botón para enviar.</p>
+      <div class="lab">
+        <textarea id="ex6-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex6-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex6')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;form&gt;
+    &lt;label for="nombre"&gt;Nombre:&lt;/label&gt;
+    &lt;input type="text" id="nombre"&gt;&lt;br&gt;
+    &lt;label for="correo"&gt;Correo:&lt;/label&gt;
+    &lt;input type="email" id="correo"&gt;&lt;br&gt;
+    &lt;label for="msg"&gt;Mensaje:&lt;/label&gt;&lt;br&gt;
+    &lt;textarea id="msg"&gt;&lt;/textarea&gt;&lt;br&gt;
+    &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+  &lt;/form&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="topic" id="s7">
+    <div class="tag-badge">07 · &lt;section&gt;</div>
+    <h2>Elementos semánticos de HTML5</h2>
+    <p>Antes de HTML5 casi todo se hacía con <code class="inline">&lt;div&gt;</code>. Hoy existen etiquetas que describen el <em>rol</em> de cada bloque, lo que mejora accesibilidad y SEO:</p>
+    <ul>
+      <li><code class="inline">&lt;header&gt;</code>: cabecera de la página o de una sección.</li>
+      <li><code class="inline">&lt;nav&gt;</code>: bloque de navegación (menús, enlaces).</li>
+      <li><code class="inline">&lt;main&gt;</code>: contenido principal (uno por página).</li>
+      <li><code class="inline">&lt;section&gt;</code>: agrupa contenido temáticamente relacionado.</li>
+      <li><code class="inline">&lt;article&gt;</code>: contenido autocontenido (un post, una noticia).</li>
+      <li><code class="inline">&lt;aside&gt;</code>: contenido secundario (barra lateral).</li>
+      <li><code class="inline">&lt;footer&gt;</code>: pie de página.</li>
+    </ul>
+    <div class="code-window">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <pre><code><span class="tg">&lt;header&gt;</span>
+  <span class="tg">&lt;nav&gt;</span>Inicio | Blog | Contacto<span class="tg">&lt;/nav&gt;</span>
+<span class="tg">&lt;/header&gt;</span>
+<span class="tg">&lt;main&gt;</span>
+  <span class="tg">&lt;article&gt;</span>
+    <span class="tg">&lt;h1&gt;</span>Título del post<span class="tg">&lt;/h1&gt;</span>
+    <span class="tg">&lt;p&gt;</span>Contenido...<span class="tg">&lt;/p&gt;</span>
+  <span class="tg">&lt;/article&gt;</span>
+<span class="tg">&lt;/main&gt;</span>
+<span class="tg">&lt;footer&gt;</span>© 2026<span class="tg">&lt;/footer&gt;</span></code></pre>
+    </div>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">7</span> Laboratorio: página semántica</div>
+      <p>Arma el esqueleto de una mini página de blog usando <code class="inline">&lt;header&gt;</code> con un <code class="inline">&lt;nav&gt;</code>, un <code class="inline">&lt;main&gt;</code> con un <code class="inline">&lt;article&gt;</code>, y un <code class="inline">&lt;footer&gt;</code>.</p>
+      <div class="lab">
+        <textarea id="ex7-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex7-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex7')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;header&gt;
+    &lt;nav&gt;Inicio | Blog | Contacto&lt;/nav&gt;
+  &lt;/header&gt;
+  &lt;main&gt;
+    &lt;article&gt;
+      &lt;h1&gt;Cómo aprendí HTML&lt;/h1&gt;
+      &lt;p&gt;Practicando todos los días.&lt;/p&gt;
+    &lt;/article&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;© 2026 Mi Blog&lt;/footer&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="topic" id="s8">
+    <div class="tag-badge">08 · buenas prácticas</div>
+    <h2>Buenas prácticas y siguientes pasos</h2>
+    <ul>
+      <li>Usa siempre <code class="inline">alt</code> descriptivo en imágenes y <code class="inline">lang</code> en <code class="inline">&lt;html&gt;</code>.</li>
+      <li>Elige etiquetas por su <strong>significado</strong>, no por cómo se ven (eso es trabajo del CSS).</li>
+      <li>Indenta tu código de forma consistente; facilita detectar etiquetas sin cerrar.</li>
+      <li>Valida tu HTML con el <a href="https://validator.w3.org/" target="_blank" style="color:var(--accent-2)">validador del W3C</a>.</li>
+      <li>Un solo <code class="inline">&lt;h1&gt;</code> por página, y no saltes niveles de encabezado (de h2 a h4 sin h3).</li>
+    </ul>
+    <div class="exercise">
+      <div class="exercise-head"><span class="num">8</span> Reto final: tarjeta de perfil</div>
+      <p>Combina todo lo aprendido: crea una "tarjeta de perfil" con una imagen, un <code class="inline">&lt;h1&gt;</code> con tu nombre, un párrafo de bio, una lista de 3 habilidades y un enlace a tu red social favorita. Usa <code class="inline">&lt;section&gt;</code> para envolver todo.</p>
+      <div class="lab">
+        <textarea id="ex8-code">&lt;body&gt;
+
+&lt;/body&gt;</textarea>
+        <div class="frame-wrap"><iframe id="ex8-frame"></iframe></div>
+      </div>
+      <div class="lab-controls"><button class="run-btn" onclick="runEx('ex8')">▶ Ejecutar</button></div>
+      <details><summary>Ver solución sugerida</summary><pre><code>&lt;body&gt;
+  &lt;section&gt;
+    &lt;img src="https://picsum.photos/100" alt="Foto de perfil"&gt;
+    &lt;h1&gt;Ana Torres&lt;/h1&gt;
+    &lt;p&gt;Desarrolladora front-end aprendiendo HTML y CSS.&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;HTML&lt;/li&gt;
+      &lt;li&gt;CSS&lt;/li&gt;
+      &lt;li&gt;Diseño&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;a href="https://linkedin.com"&gt;Mi LinkedIn&lt;/a&gt;
+  &lt;/section&gt;
+&lt;/body&gt;</code></pre></details>
+    </div>
+  </section>
+
+</main>
+
+<footer>Guía de HTML · Sigue con la <strong>Guía de CSS</strong> para darle estilo a todo esto.</footer>
+
+<script>
+function runEx(id){
+  const code = document.getElementById(id+'-code').value;
+  document.getElementById(id+'-frame').srcdoc = code;
+}
+window.addEventListener('DOMContentLoaded', () => {
+  ['ex1','ex2','ex3','ex4','ex5','ex6','ex7','ex8'].forEach(runEx);
+});
+</script>
+</body>
+</html>
