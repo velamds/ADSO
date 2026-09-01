@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cómo usar CSS con HTML — Serie de mini-ejercicios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12142a;
+    --surface: #191c3a;
+    --surface-2: #22254a;
+    --line: rgba(255,255,255,0.09);
+    --text: #eceefb;
+    --text-dim: #9a9dc4;
+    --accent: #4d8dff;
+    --accent-2: #ff9f5a;
+    --ok: #a7e3a0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(900px 500px at 90% -10%, rgba(77,141,255,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(255,159,90,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,.mono{font-family:'JetBrains Mono',monospace;}
+
+  header.hero{max-width:900px; margin:0 auto; padding:60px 24px 20px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace;
+    font-size:.8rem; font-weight:700; padding:6px 12px; border-radius:999px; margin-bottom:20px;
+    color:var(--accent); background:rgba(77,141,255,0.12); border:1px solid var(--line);
+  }
+  header.hero h1{font-size:clamp(1.9rem,4.4vw,2.7rem); line-height:1.15; margin:0 0 14px; font-weight:800; letter-spacing:-0.01em;}
+  header.hero h1 span{color:var(--accent);}
+  header.hero p{color:var(--text-dim); font-size:1.02rem; max-width:600px;}
+
+  .path{max-width:900px; margin:20px auto 0; padding:0 24px; display:flex; gap:6px; flex-wrap:wrap;}
+  .path .step{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim);
+    background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:999px;
+  }
+
+  main{max-width:900px; margin:0 auto; padding:30px 24px 100px;}
+
+  section.mini{
+    background:var(--surface); border:1px solid var(--line); border-radius:18px;
+    padding:28px; margin-bottom:22px; position:relative; overflow:hidden;
+  }
+  section.mini::before{
+    content:""; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--accent);
+  }
+  .mini-head{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+  .mini-num{
+    width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:.85rem;
+    background:var(--surface-2); border:1px solid var(--line); flex-shrink:0;
+  }
+  section.mini h2{font-size:1.18rem; margin:0; font-weight:700;}
+  .explain{color:var(--text-dim); font-size:.94rem; margin:0 0 16px;}
+  code.inline{
+    font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--accent);
+    padding:2px 6px; border-radius:5px; font-size:.87em;
+  }
+  .task{
+    background:var(--surface-2); border-left:2px solid var(--accent-2); border-radius:8px;
+    padding:12px 16px; margin-bottom:16px; font-size:.9rem;
+  }
+  .task b{color:var(--accent-2);}
+
+  .lab{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media(max-width:680px){.lab{grid-template-columns:1fr;}}
+  .lab textarea{
+    width:100%; height:170px; resize:vertical; background:#0c0e1e; color:#eceefb;
+    font-family:'JetBrains Mono',monospace; font-size:.8rem; border:1px solid var(--line);
+    border-radius:10px; padding:12px; line-height:1.55;
+  }
+  .lab textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .lab .frame-wrap{background:#fff; border-radius:10px; border:1px solid var(--line); overflow:hidden; min-height:170px;}
+  .lab iframe{width:100%; height:170px; border:0; display:block;}
+  .lab-controls{display:flex; align-items:center; gap:10px; margin-top:10px;}
+  .run-btn{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.8rem;
+    background:var(--accent); color:#0c0e1e; border:0; padding:8px 14px; border-radius:8px;
+    cursor:pointer; transition:.15s;
+  }
+  .run-btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  details{margin-top:12px;}
+  summary{cursor:pointer; color:var(--ok); font-size:.82rem; font-family:'JetBrains Mono',monospace; font-weight:600; user-select:none;}
+  details pre{margin-top:8px; background:#0c0e1e; border:1px solid var(--line); border-radius:10px; padding:12px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:.78rem;}
+
+  footer{max-width:900px; margin:0 auto; padding:10px 24px 70px; color:var(--text-dim); font-size:.86rem; text-align:center;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow">● Serie de mini-ejercicios · nivel fácil</div>
+  <h1>Cómo usar <span>CSS</span> junto con <span>HTML</span></h1>
+  <p>Seis pasos muy pequeños, uno a la vez. Cada uno te enseña una sola idea sobre cómo conectar CSS con HTML y aplicar selectores básicos. No hay que saltarse ninguno: cada paso se apoya en el anterior.</p>
+</header>
+
+<div class="path">
+  <span class="step">1. Estilo en línea</span>
+  <span class="step">2. Estilo interno</span>
+  <span class="step">3. Estilo externo</span>
+  <span class="step">4. Selector de etiqueta</span>
+  <span class="step">5. Selector de clase</span>
+  <span class="step">6. Selector de id</span>
+</div>
+
+<main>
+
+  <!-- 1 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">1</div><h2>CSS en línea (inline)</h2></div>
+    <p class="explain">La forma más directa de aplicar CSS: el atributo <code class="inline">style="..."</code> dentro de la propia etiqueta. Solo afecta a ese elemento. Es rápido, pero poco escalable — evítalo en proyectos grandes.</p>
+    <div class="task"><b>Tarea:</b> al párrafo dale color <code class="inline">purple</code> usando <code class="inline">style="color: purple;"</code> directamente en la etiqueta <code class="inline">&lt;p&gt;</code>.</div>
+    <div class="lab">
+      <textarea id="ex1-code">&lt;body&gt;
+  &lt;p&gt;Este texto debería ser morado.&lt;/p&gt;
+&lt;/body&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex1-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex1')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;body&gt;
+  &lt;p style="color: purple;"&gt;Este texto debería ser morado.&lt;/p&gt;
+&lt;/body&gt;</code></pre></details>
+  </section>
+
+  <!-- 2 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">2</div><h2>CSS interno (con &lt;style&gt;)</h2></div>
+    <p class="explain">En vez de repetir <code class="inline">style="..."</code> en cada etiqueta, puedes escribir todas las reglas juntas dentro de un bloque <code class="inline">&lt;style&gt;</code> en el <code class="inline">&lt;head&gt;</code>. Así un solo selector puede afectar a varios elementos a la vez.</p>
+    <div class="task"><b>Tarea:</b> dentro de <code class="inline">&lt;style&gt;</code>, escribe la regla <code class="inline">p { color: teal; }</code> para que los dos párrafos cambien de color sin tocar el HTML.</div>
+    <div class="lab">
+      <textarea id="ex2-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;p&gt;Primer párrafo.&lt;/p&gt;
+  &lt;p&gt;Segundo párrafo.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex2-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex2')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;style&gt;
+p {
+  color: teal;
+}
+&lt;/style&gt;</code></pre></details>
+  </section>
+
+  <!-- 3 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">3</div><h2>CSS externo (con &lt;link&gt;)</h2></div>
+    <p class="explain">En proyectos reales, el CSS vive en su propio archivo (por ejemplo <code class="inline">estilos.css</code>) y se conecta al HTML con una etiqueta <code class="inline">&lt;link&gt;</code> dentro del <code class="inline">&lt;head&gt;</code>. Es la forma recomendada: separa contenido y estilo, y el mismo archivo CSS puede reutilizarse en varias páginas.</p>
+    <div class="task"><b>Tarea:</b> este editor no puede cargar un archivo aparte, así que en vez de escribirlo tú completa el <code class="inline">&lt;link&gt;</code> que faltaría en el <code class="inline">&lt;head&gt;</code> para vincular <code class="inline">estilos.css</code>. Como aquí no existe ese archivo, el resultado no cambiará — el objetivo es memorizar la sintaxis correcta.</div>
+    <div class="lab">
+      <textarea id="ex3-code">&lt;html&gt;
+&lt;head&gt;
+  &lt;!-- completa aquí el link al archivo estilos.css --&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;p&gt;Este párrafo se vería afectado por estilos.css&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex3-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex3')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;head&gt;
+  &lt;link rel="stylesheet" href="estilos.css"&gt;
+&lt;/head&gt;</code></pre></details>
+  </section>
+
+  <!-- 4 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">4</div><h2>Selector de etiqueta</h2></div>
+    <p class="explain">El selector más simple: el nombre de la etiqueta, sin puntos ni almohadillas. Aplica la regla a <strong>todos</strong> los elementos de ese tipo en la página.</p>
+    <div class="task"><b>Tarea:</b> usando el selector <code class="inline">li</code>, dale a todos los elementos de la lista fondo <code class="inline">#e8f0ff</code> y un poco de <code class="inline">padding: 6px</code>.</div>
+    <div class="lab">
+      <textarea id="ex4-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Manzana&lt;/li&gt;
+    &lt;li&gt;Pera&lt;/li&gt;
+    &lt;li&gt;Uva&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex4-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex4')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;style&gt;
+li {
+  background: #e8f0ff;
+  padding: 6px;
+}
+&lt;/style&gt;</code></pre></details>
+  </section>
+
+  <!-- 5 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">5</div><h2>Selector de clase</h2></div>
+    <p class="explain">Una <strong>clase</strong> se escribe en el HTML como <code class="inline">class="nombre"</code> y en el CSS se selecciona con un punto: <code class="inline">.nombre</code>. A diferencia del selector de etiqueta, solo afecta a los elementos que tengan esa clase — y una clase puede reutilizarse en varios elementos distintos.</p>
+    <div class="task"><b>Tarea:</b> usando el selector <code class="inline">.aviso</code>, dale a esos elementos texto en color <code class="inline">crimson</code> y <code class="inline">font-weight: bold</code>.</div>
+    <div class="lab">
+      <textarea id="ex5-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;p&gt;Texto normal.&lt;/p&gt;
+  &lt;p class="aviso"&gt;¡Cuidado, esto es importante!&lt;/p&gt;
+  &lt;p&gt;Otro texto normal.&lt;/p&gt;
+  &lt;p class="aviso"&gt;Última fecha para inscribirse: mañana.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex5-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex5')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;style&gt;
+.aviso {
+  color: crimson;
+  font-weight: bold;
+}
+&lt;/style&gt;</code></pre></details>
+  </section>
+
+  <!-- 6 -->
+  <section class="mini">
+    <div class="mini-head"><div class="mini-num">6</div><h2>Selector de id</h2></div>
+    <p class="explain">Un <strong>id</strong> se escribe como <code class="inline">id="nombre"</code> y se selecciona con una almohadilla: <code class="inline">#nombre</code>. A diferencia de la clase, un id debe existir <strong>una sola vez</strong> por página — se usa para un elemento único, como la cabecera principal.</p>
+    <div class="task"><b>Tarea:</b> usando el selector <code class="inline">#titulo-principal</code>, dale al encabezado con ese id un tamaño de <code class="inline">font-size: 32px</code> y color <code class="inline">#4d8dff</code>.</div>
+    <div class="lab">
+      <textarea id="ex6-code">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 id="titulo-principal"&gt;Bienvenido&lt;/h1&gt;
+  &lt;h2&gt;Un subtítulo cualquiera&lt;/h2&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+      <div class="frame-wrap"><iframe id="ex6-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runEx('ex6')">▶ Ejecutar</button></div>
+    <details><summary>Ver solución</summary><pre><code>&lt;style&gt;
+#titulo-principal {
+  font-size: 32px;
+  color: #4d8dff;
+}
+&lt;/style&gt;</code></pre></details>
+  </section>
+
+</main>
+
+<footer>Serie: Cómo usar CSS con HTML · Sigue practicando en las guías completas de HTML y CSS.</footer>
+
+<script>
+function runEx(id){
+  const code = document.getElementById(id+'-code').value;
+  document.getElementById(id+'-frame').srcdoc = code;
+}
+window.addEventListener('DOMContentLoaded', () => {
+  ['ex1','ex2','ex3','ex4','ex5','ex6'].forEach(runEx);
+});
+</script>
+</body>
+</html>
