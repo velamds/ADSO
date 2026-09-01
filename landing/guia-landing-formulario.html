@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía paso a paso — Landing Page y Formulario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #15132a;
+    --surface: #1c1a38;
+    --surface-2: #262247;
+    --line: rgba(255,255,255,0.09);
+    --text: #ece9fb;
+    --text-dim: #9d97c4;
+    --accent: #a78bfa;
+    --accent-soft: rgba(167,139,250,0.14);
+    --accent-2: #f472b6;
+    --sel: #7ec8ff;
+    --prop: #ffb37a;
+    --val: #a7e3a0;
+    --com: #6f76a3;
+    --tg: #ff9f7a;
+    --at: #7ec8ff;
+    --sv: #a7e3a0;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 85% -10%, rgba(167,139,250,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(244,114,182,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(21,19,42,0.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .topbar-inner{max-width:1080px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800;}
+  .brand .chip{background:var(--accent); color:#150f2e; padding:2px 8px; border-radius:6px; font-size:.72rem; font-weight:800;}
+  .toc{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{color:var(--text-dim); text-decoration:none; font-size:.78rem; white-space:nowrap; padding:6px 9px; border-radius:8px; transition:.15s;}
+  .toc a:hover{color:var(--text); background:var(--surface-2);}
+
+  .hero{max-width:1080px; margin:0 auto; padding:56px 24px 30px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:.82rem; font-weight:700; background:var(--accent-soft); padding:6px 12px; border-radius:999px; margin-bottom:20px;}
+  .hero h1{font-size:clamp(2rem,4.6vw,3.2rem); line-height:1.1; margin:0 0 16px; font-weight:800; letter-spacing:-0.01em;}
+  .hero h1 span{color:var(--accent);}
+  .hero p{color:var(--text-dim); font-size:1.05rem; max-width:660px; margin:0 0 20px;}
+  .part-nav{display:flex; gap:10px; flex-wrap:wrap;}
+  .part-nav a{
+    font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700; color:var(--text);
+    background:var(--surface); border:1px solid var(--line); padding:8px 14px; border-radius:10px; text-decoration:none;
+  }
+  .part-nav a:hover{border-color:var(--accent);}
+
+  main{max-width:1080px; margin:0 auto; padding:10px 24px 100px;}
+
+  .part-title{
+    display:flex; align-items:center; gap:14px; margin:56px 0 24px; scroll-margin-top:80px;
+  }
+  .part-title .pnum{
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:1rem; color:#150f2e;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); width:40px; height:40px;
+    border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .part-title h2{font-family:'Poppins',sans-serif; font-size:1.7rem; margin:0; font-weight:700;}
+  .part-title p{color:var(--text-dim); margin:4px 0 0; font-size:.92rem;}
+
+  section.step{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:32px; margin-bottom:22px; scroll-margin-top:90px; position:relative; overflow:hidden;
+  }
+  section.step::before{content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:linear-gradient(var(--accent),var(--accent-2));}
+  .step-badge{
+    display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace;
+    font-weight:700; font-size:.85rem; color:var(--accent); background:#120f26; border:1px solid var(--line);
+    padding:5px 12px; border-radius:8px; margin-bottom:12px;
+  }
+  section.step h3{font-size:1.28rem; margin:0 0 12px; font-weight:700;}
+  section.step > p.intro{color:var(--text-dim); margin:0 0 18px;}
+  code.inline{font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--sel); padding:2px 6px; border-radius:5px; font-size:.87em;}
+
+  .code-window{background:#0f0d20; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:14px 0;}
+  .code-window .bar{display:flex; align-items:center; justify-content:space-between; padding:9px 14px; background:#0b0918; border-bottom:1px solid var(--line);}
+  .code-window .dots{display:flex; gap:6px;}
+  .code-window .dot{width:9px; height:9px; border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .code-window .label{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim);}
+  .code-window pre{margin:0; padding:16px; overflow-x:auto; max-height:340px;}
+  .code-window code{font-family:'JetBrains Mono',monospace; font-size:.82rem; line-height:1.6;}
+
+  .rules{background:var(--surface-2); border-radius:12px; padding:16px 18px; margin:14px 0 0;}
+  .rules .rules-title{font-family:'JetBrains Mono',monospace; font-size:.78rem; font-weight:700; color:var(--accent-2); margin-bottom:10px; text-transform:uppercase; letter-spacing:.04em;}
+  .rule-row{display:grid; grid-template-columns:180px 1fr; gap:12px; padding:7px 0; border-top:1px solid var(--line); font-size:.87rem;}
+  .rule-row:first-of-type{border-top:none;}
+  .rule-row .prop-name{font-family:'JetBrains Mono',monospace; color:var(--prop); font-weight:600; word-break:break-word;}
+  .rule-row .prop-desc{color:var(--text-dim);}
+  @media(max-width:600px){.rule-row{grid-template-columns:1fr;}}
+
+  .preview-block{margin-top:18px;}
+  .preview-label{font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--text-dim); margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+  .preview-label::before{content:"●"; color:var(--accent-2); font-size:.6rem;}
+  .frame-wrap{background:#fff; border-radius:12px; border:1px solid var(--line); overflow:hidden;}
+  .frame-wrap iframe{width:100%; border:0; display:block;}
+
+  /* editable playground */
+  .lab{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}
+  @media(max-width:760px){.lab{grid-template-columns:1fr;}}
+  .lab textarea{
+    width:100%; height:420px; resize:vertical; background:#0f0d20; color:#ece9fb;
+    font-family:'JetBrains Mono',monospace; font-size:.78rem; border:1px solid var(--line);
+    border-radius:10px; padding:12px; line-height:1.55;
+  }
+  .lab textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .lab .frame-wrap{min-height:420px;}
+  .lab .frame-wrap iframe{height:420px;}
+  .lab-controls{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .run-btn{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.82rem;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#150f2e; border:0;
+    padding:9px 16px; border-radius:8px; cursor:pointer; transition:.15s;
+  }
+  .run-btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .playground-note{color:var(--text-dim); font-size:.9rem; margin-bottom:6px;}
+
+  .tg{color:var(--tg);} .at{color:var(--at);} .svv{color:var(--sv);} .cm{color:var(--com);} .tx{color:var(--text);}
+  .sel{color:var(--sel);} .propc{color:var(--prop);} .valc{color:var(--val);} .pu{color:var(--text-dim);}
+
+  footer{max-width:1080px; margin:0 auto; padding:20px 24px 70px; color:var(--text-dim); font-size:.88rem; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="chip">▲</span> Landing + Formulario</div>
+    <nav class="toc">
+      <a href="#p1">Parte 1: Landing</a>
+      <a href="#p2">Parte 2: Formulario</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">● Guía de proyecto — paso a paso</div>
+  <h1>Construye una <span>landing page</span> y un <span>formulario</span> desde cero</h1>
+  <p>Esta guía no explica etiquetas sueltas: construye dos piezas reales, capa por capa. En cada paso ves qué HTML se agregó, qué CSS se aplicó y — lo más importante — <strong>qué hace cada regla</strong>, para que entiendas el porqué y no solo el cómo.</p>
+  <div class="part-nav">
+    <a href="#p1">🧱 Parte 1 · Landing page (5 pasos)</a>
+    <a href="#p2">📋 Parte 2 · Formulario (5 pasos)</a>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ PARTE 1 ============ -->
+  <div class="part-title" id="p1">
+    <div class="pnum">1</div>
+    <div><h2>Landing page</h2><p>Header, hero, características, llamado a la acción y footer — construidos capa por capa.</p></div>
+  </div>
+
+  <!-- L STEP 1 -->
+  <section class="step" id="l1">
+    <div class="step-badge">Paso 1 / 5</div>
+    <h3>El esqueleto HTML, sin estilos</h3>
+    <p class="intro">Antes de escribir una sola línea de CSS, arma toda la estructura semántica de la página. Esto obliga a pensar en el contenido primero, no en cómo se ve.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">index.html</span></div>
+      <pre><code><span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;header</span> <span class="at">class</span>=<span class="svv">"nav"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"logo"</span><span class="tg">&gt;</span>Brandly<span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;nav&gt;</span>
+      <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="svv">"#"</span><span class="tg">&gt;</span>Producto<span class="tg">&lt;/a&gt;</span>
+      <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="svv">"#"</span><span class="tg">&gt;</span>Precios<span class="tg">&lt;/a&gt;</span>
+      <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="svv">"#"</span><span class="tg">&gt;</span>Contacto<span class="tg">&lt;/a&gt;</span>
+    <span class="tg">&lt;/nav&gt;</span>
+  <span class="tg">&lt;/header&gt;</span>
+
+  <span class="tg">&lt;section</span> <span class="at">class</span>=<span class="svv">"hero"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;div&gt;</span>
+      <span class="tg">&lt;h1&gt;</span>Organiza tu equipo sin fricción<span class="tg">&lt;/h1&gt;</span>
+      <span class="tg">&lt;p&gt;</span>La herramienta que centraliza tareas, chats y archivos en un solo lugar.<span class="tg">&lt;/p&gt;</span>
+      <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="svv">"#"</span> <span class="at">class</span>=<span class="svv">"btn"</span><span class="tg">&gt;</span>Empieza gratis<span class="tg">&lt;/a&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;img</span> <span class="at">src</span>=<span class="svv">"https://picsum.photos/420/300"</span> <span class="at">alt</span>=<span class="svv">"Vista previa del producto"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;/section&gt;</span>
+
+  <span class="tg">&lt;section</span> <span class="at">class</span>=<span class="svv">"features"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"card"</span><span class="tg">&gt;</span><span class="tg">&lt;h3&gt;</span>Rápido<span class="tg">&lt;/h3&gt;</span><span class="tg">&lt;p&gt;</span>Configura tu espacio en minutos.<span class="tg">&lt;/p&gt;</span><span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"card"</span><span class="tg">&gt;</span><span class="tg">&lt;h3&gt;</span>Seguro<span class="tg">&lt;/h3&gt;</span><span class="tg">&lt;p&gt;</span>Tus datos siempre encriptados.<span class="tg">&lt;/p&gt;</span><span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"card"</span><span class="tg">&gt;</span><span class="tg">&lt;h3&gt;</span>Flexible<span class="tg">&lt;/h3&gt;</span><span class="tg">&lt;p&gt;</span>Se adapta a tu flujo de trabajo.<span class="tg">&lt;/p&gt;</span><span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;/section&gt;</span>
+
+  <span class="tg">&lt;section</span> <span class="at">class</span>=<span class="svv">"cta"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;h2&gt;</span>¿Listo para empezar?<span class="tg">&lt;/h2&gt;</span>
+    <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="svv">"#"</span> <span class="at">class</span>=<span class="svv">"btn"</span><span class="tg">&gt;</span>Crear cuenta<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;/section&gt;</span>
+
+  <span class="tg">&lt;footer&gt;</span>© 2026 Brandly · Todos los derechos reservados<span class="tg">&lt;/footer&gt;</span>
+<span class="tg">&lt;/body&gt;</span></code></pre>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (sin estilos)</div>
+      <div class="frame-wrap"><iframe id="l1-frame" style="height:380px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- L STEP 2 -->
+  <section class="step" id="l2">
+    <div class="step-badge">Paso 2 / 5</div>
+    <h3>Reset y estilos globales</h3>
+    <p class="intro">Antes de estilizar cada sección, se fijan reglas base que afectan a toda la página: tipografía, colores de fondo y una regla de <em>reset</em> muy común para que el tamaño de las cajas sea predecible.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">*</span> <span class="pu">{</span>
+  <span class="propc">box-sizing</span>: <span class="valc">border-box</span>;
+  <span class="propc">margin</span>: <span class="valc">0</span>;
+  <span class="propc">padding</span>: <span class="valc">0</span>;
+<span class="pu">}</span>
+
+<span class="sel">body</span> <span class="pu">{</span>
+  <span class="propc">font-family</span>: <span class="valc">"Segoe UI", sans-serif</span>;
+  <span class="propc">color</span>: <span class="valc">#1f2333</span>;
+  <span class="propc">background</span>: <span class="valc">#fafafc</span>;
+  <span class="propc">line-height</span>: <span class="valc">1.5</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">box-sizing: border-box</span><span class="prop-desc">Hace que el <code class="inline">width</code>/<code class="inline">height</code> de cualquier caja incluya su padding y border, en vez de sumarse aparte. Evita que los elementos "se desborden" al agregarles espacio interno.</span></div>
+      <div class="rule-row"><span class="prop-name">margin: 0 / padding: 0</span><span class="prop-desc">Elimina los espacios por defecto que el navegador aplica a etiquetas como <code class="inline">&lt;body&gt;</code>, <code class="inline">&lt;h1&gt;</code> o <code class="inline">&lt;p&gt;</code>, para partir de un lienzo predecible.</span></div>
+      <div class="rule-row"><span class="prop-name">font-family</span><span class="prop-desc">Define la tipografía de toda la página (se hereda a los elementos hijos salvo que se sobreescriba).</span></div>
+      <div class="rule-row"><span class="prop-name">color / background</span><span class="prop-desc">Color de texto y de fondo por defecto para todo el body.</span></div>
+      <div class="rule-row"><span class="prop-name">line-height: 1.5</span><span class="prop-desc">Espaciado vertical entre líneas de texto — mejora la legibilidad de los párrafos.</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (con reset + tipografía base)</div>
+      <div class="frame-wrap"><iframe id="l2-frame" style="height:380px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- L STEP 3 -->
+  <section class="step" id="l3">
+    <div class="step-badge">Paso 3 / 5</div>
+    <h3>Header y hero</h3>
+    <p class="intro">El header usa Flexbox para separar el logo de los enlaces. El hero usa <code class="inline">display: grid</code> con dos columnas para poner el texto junto a la imagen.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">.nav</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">justify-content</span>: <span class="valc">space-between</span>;
+  <span class="propc">align-items</span>: <span class="valc">center</span>;
+  <span class="propc">padding</span>: <span class="valc">20px 48px</span>;
+  <span class="propc">background</span>: <span class="valc">white</span>;
+<span class="pu">}</span>
+<span class="sel">.nav a</span> <span class="pu">{</span> <span class="propc">margin-left</span>: <span class="valc">24px</span>; <span class="propc">text-decoration</span>: <span class="valc">none</span>; <span class="propc">color</span>: <span class="valc">#1f2333</span>; <span class="pu">}</span>
+<span class="sel">.logo</span> <span class="pu">{</span> <span class="propc">font-weight</span>: <span class="valc">800</span>; <span class="propc">font-size</span>: <span class="valc">1.3rem</span>; <span class="pu">}</span>
+
+<span class="sel">.hero</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">grid</span>;
+  <span class="propc">grid-template-columns</span>: <span class="valc">1fr 1fr</span>;
+  <span class="propc">align-items</span>: <span class="valc">center</span>;
+  <span class="propc">gap</span>: <span class="valc">40px</span>;
+  <span class="propc">padding</span>: <span class="valc">60px 48px</span>;
+<span class="pu">}</span>
+<span class="sel">.hero h1</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">2.4rem</span>; <span class="propc">margin-bottom</span>: <span class="valc">16px</span>; <span class="pu">}</span>
+<span class="sel">.hero p</span> <span class="pu">{</span> <span class="propc">color</span>: <span class="valc">#5b6180</span>; <span class="propc">margin-bottom</span>: <span class="valc">24px</span>; <span class="pu">}</span>
+<span class="sel">.hero img</span> <span class="pu">{</span> <span class="propc">width</span>: <span class="valc">100%</span>; <span class="propc">border-radius</span>: <span class="valc">16px</span>; <span class="pu">}</span>
+
+<span class="sel">.btn</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">inline-block</span>;
+  <span class="propc">background</span>: <span class="valc">#a78bfa</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+  <span class="propc">padding</span>: <span class="valc">12px 24px</span>;
+  <span class="propc">border-radius</span>: <span class="valc">8px</span>;
+  <span class="propc">text-decoration</span>: <span class="valc">none</span>;
+  <span class="propc">font-weight</span>: <span class="valc">600</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">.nav → display: flex</span><span class="prop-desc">Coloca logo y navegación en fila. <code class="inline">justify-content: space-between</code> empuja el logo a la izquierda y los enlaces a la derecha. <code class="inline">align-items: center</code> los alinea verticalmente.</span></div>
+      <div class="rule-row"><span class="prop-name">.nav a → text-decoration: none</span><span class="prop-desc">Quita el subrayado por defecto de los enlaces. <code class="inline">margin-left</code> separa un enlace del siguiente.</span></div>
+      <div class="rule-row"><span class="prop-name">.hero → grid-template-columns: 1fr 1fr</span><span class="prop-desc">Divide el hero en dos columnas de igual ancho: texto a la izquierda, imagen a la derecha. <code class="inline">gap</code> separa ambas columnas.</span></div>
+      <div class="rule-row"><span class="prop-name">.hero img → width: 100%</span><span class="prop-desc">Hace que la imagen llene su columna en vez de mostrarse en su tamaño original. <code class="inline">border-radius</code> le redondea las esquinas.</span></div>
+      <div class="rule-row"><span class="prop-name">.btn</span><span class="prop-desc"><code class="inline">display: inline-block</code> permite aplicar padding y mantenerlo en línea con el texto; el resto son estilos visuales del botón (color, relleno, esquinas redondeadas).</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (con header + hero)</div>
+      <div class="frame-wrap"><iframe id="l3-frame" style="height:420px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- L STEP 4 -->
+  <section class="step" id="l4">
+    <div class="step-badge">Paso 4 / 5</div>
+    <h3>Tarjetas de características y CTA</h3>
+    <p class="intro">Las tres tarjetas usan <code class="inline">display: grid</code> con columnas repetidas. La sección CTA (call to action) es un bloque de fondo sólido, centrado, para captar la atención justo antes del footer.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">.features</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">grid</span>;
+  <span class="propc">grid-template-columns</span>: <span class="valc">repeat(3, 1fr)</span>;
+  <span class="propc">gap</span>: <span class="valc">24px</span>;
+  <span class="propc">padding</span>: <span class="valc">40px 48px</span>;
+<span class="pu">}</span>
+<span class="sel">.card</span> <span class="pu">{</span>
+  <span class="propc">background</span>: <span class="valc">white</span>;
+  <span class="propc">border-radius</span>: <span class="valc">14px</span>;
+  <span class="propc">padding</span>: <span class="valc">24px</span>;
+  <span class="propc">box-shadow</span>: <span class="valc">0 4px 16px rgba(0,0,0,0.06)</span>;
+  <span class="propc">transition</span>: <span class="valc">transform 0.2s ease</span>;
+<span class="pu">}</span>
+<span class="sel">.card:hover</span> <span class="pu">{</span> <span class="propc">transform</span>: <span class="valc">translateY(-4px)</span>; <span class="pu">}</span>
+
+<span class="sel">.cta</span> <span class="pu">{</span>
+  <span class="propc">background</span>: <span class="valc">#1f2333</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+  <span class="propc">text-align</span>: <span class="valc">center</span>;
+  <span class="propc">padding</span>: <span class="valc">60px 24px</span>;
+<span class="pu">}</span>
+<span class="sel">.cta h2</span> <span class="pu">{</span> <span class="propc">margin-bottom</span>: <span class="valc">20px</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">.features → repeat(3, 1fr)</span><span class="prop-desc">Atajo para crear 3 columnas de ancho igual, sin escribir <code class="inline">1fr 1fr 1fr</code> a mano.</span></div>
+      <div class="rule-row"><span class="prop-name">.card → box-shadow</span><span class="prop-desc">Agrega una sombra suave (desplazamiento, difuminado y color con transparencia) que le da a la tarjeta sensación de "estar elevada".</span></div>
+      <div class="rule-row"><span class="prop-name">.card → transition + :hover</span><span class="prop-desc"><code class="inline">transition</code> hace que los cambios de <code class="inline">transform</code> ocurran suavemente en 0.2 segundos, en vez de saltar de golpe. Al pasar el mouse (<code class="inline">:hover</code>), la tarjeta sube 4px.</span></div>
+      <div class="rule-row"><span class="prop-name">.cta → text-align: center</span><span class="prop-desc">Centra el texto dentro del bloque; combinado con el fondo oscuro, crea contraste para destacar la llamada a la acción.</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (con tarjetas + CTA)</div>
+      <div class="frame-wrap"><iframe id="l4-frame" style="height:520px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- L STEP 5 -->
+  <section class="step" id="l5">
+    <div class="step-badge">Paso 5 / 5 · Reto final</div>
+    <h3>Footer, responsive y playground editable</h3>
+    <p class="intro">Se estiliza el footer y se agrega una <code class="inline">@media query</code> para que el hero y las tarjetas se apilen en pantallas angostas. Desde aquí puedes editar libremente todo el código de la landing.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">footer</span> <span class="pu">{</span>
+  <span class="propc">text-align</span>: <span class="valc">center</span>;
+  <span class="propc">padding</span>: <span class="valc">24px</span>;
+  <span class="propc">color</span>: <span class="valc">#8a90ad</span>;
+  <span class="propc">font-size</span>: <span class="valc">.9rem</span>;
+<span class="pu">}</span>
+
+<span class="com">/* pantallas angostas: apilar en una columna */</span>
+<span class="sel">@media (max-width: 700px)</span> <span class="pu">{</span>
+  <span class="sel">.hero</span> <span class="pu">{</span> <span class="propc">grid-template-columns</span>: <span class="valc">1fr</span>; <span class="pu">}</span>
+  <span class="sel">.features</span> <span class="pu">{</span> <span class="propc">grid-template-columns</span>: <span class="valc">1fr</span>; <span class="pu">}</span>
+  <span class="sel">.nav</span> <span class="pu">{</span> <span class="propc">flex-direction</span>: <span class="valc">column</span>; <span class="propc">gap</span>: <span class="valc">12px</span>; <span class="pu">}</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">@media (max-width: 700px)</span><span class="prop-desc">Todo lo que esté dentro de estas llaves solo se aplica cuando el ancho de la pantalla es de 700px o menos — así el diseño se adapta a celulares.</span></div>
+      <div class="rule-row"><span class="prop-name">grid-template-columns: 1fr</span><span class="prop-desc">Reduce el hero y las tarjetas a una sola columna, apilando el contenido verticalmente en vez de mostrarlo lado a lado.</span></div>
+      <div class="rule-row"><span class="prop-name">.nav → flex-direction: column</span><span class="prop-desc">Cambia el eje del flex de fila a columna, para que el logo quede arriba de los enlaces en pantallas pequeñas.</span></div>
+    </div>
+    <div class="playground-note">✏️ Edita el HTML y CSS completos de la landing page y pulsa "Ejecutar":</div>
+    <div class="lab">
+      <textarea id="landing-code"></textarea>
+      <div class="frame-wrap"><iframe id="landing-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runLab('landing')">▶ Ejecutar</button></div>
+  </section>
+
+  <!-- ============ PARTE 2 ============ -->
+  <div class="part-title" id="p2">
+    <div class="pnum">2</div>
+    <div><h2>Formulario</h2><p>Estructura, layout de campos, estados de foco y validación, botón y responsive.</p></div>
+  </div>
+
+  <!-- F STEP 1 -->
+  <section class="step" id="f1">
+    <div class="step-badge">Paso 1 / 5</div>
+    <h3>Estructura HTML del formulario</h3>
+    <p class="intro">Cada campo se envuelve en un <code class="inline">&lt;div class="field"&gt;</code> con su <code class="inline">&lt;label&gt;</code> asociado por <code class="inline">for</code>/<code class="inline">id</code>. Esto facilita estilizar cada fila de forma consistente.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">index.html</span></div>
+      <pre><code><span class="tg">&lt;form</span> <span class="at">class</span>=<span class="svv">"formulario"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;h2&gt;</span>Crea tu cuenta<span class="tg">&lt;/h2&gt;</span>
+
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"row"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"field"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="svv">"nombre"</span><span class="tg">&gt;</span>Nombre<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="svv">"text"</span> <span class="at">id</span>=<span class="svv">"nombre"</span> <span class="at">required</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+    <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"field"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="svv">"correo"</span><span class="tg">&gt;</span>Correo<span class="tg">&lt;/label&gt;</span>
+      <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="svv">"email"</span> <span class="at">id</span>=<span class="svv">"correo"</span> <span class="at">required</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;/div&gt;</span>
+  <span class="tg">&lt;/div&gt;</span>
+
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"field"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="svv">"plan"</span><span class="tg">&gt;</span>Plan<span class="tg">&lt;/label&gt;</span>
+    <span class="tg">&lt;select</span> <span class="at">id</span>=<span class="svv">"plan"</span><span class="tg">&gt;</span>
+      <span class="tg">&lt;option&gt;</span>Básico<span class="tg">&lt;/option&gt;</span>
+      <span class="tg">&lt;option&gt;</span>Pro<span class="tg">&lt;/option&gt;</span>
+    <span class="tg">&lt;/select&gt;</span>
+  <span class="tg">&lt;/div&gt;</span>
+
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="svv">"field checkbox"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;input</span> <span class="at">type</span>=<span class="svv">"checkbox"</span> <span class="at">id</span>=<span class="svv">"terminos"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;label</span> <span class="at">for</span>=<span class="svv">"terminos"</span><span class="tg">&gt;</span>Acepto los términos<span class="tg">&lt;/label&gt;</span>
+  <span class="tg">&lt;/div&gt;</span>
+
+  <span class="tg">&lt;button</span> <span class="at">type</span>=<span class="svv">"submit"</span><span class="tg">&gt;</span>Crear cuenta<span class="tg">&lt;/button&gt;</span>
+<span class="tg">&lt;/form&gt;</span></code></pre>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (sin estilos)</div>
+      <div class="frame-wrap"><iframe id="f1-frame" style="height:340px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- F STEP 2 -->
+  <section class="step" id="f2">
+    <div class="step-badge">Paso 2 / 5</div>
+    <h3>La tarjeta contenedora</h3>
+    <p class="intro">El formulario completo vive dentro de una "tarjeta" centrada: ancho máximo, fondo blanco, esquinas redondeadas y sombra. Es el mismo patrón visual que las tarjetas de la landing.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">body</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">justify-content</span>: <span class="valc">center</span>;
+  <span class="propc">background</span>: <span class="valc">#f2f0fa</span>;
+  <span class="propc">min-height</span>: <span class="valc">100vh</span>;
+  <span class="propc">padding</span>: <span class="valc">40px 16px</span>;
+<span class="pu">}</span>
+
+<span class="sel">.formulario</span> <span class="pu">{</span>
+  <span class="propc">background</span>: <span class="valc">white</span>;
+  <span class="propc">width</span>: <span class="valc">100%</span>;
+  <span class="propc">max-width</span>: <span class="valc">420px</span>;
+  <span class="propc">border-radius</span>: <span class="valc">16px</span>;
+  <span class="propc">padding</span>: <span class="valc">32px</span>;
+  <span class="propc">box-shadow</span>: <span class="valc">0 8px 30px rgba(0,0,0,0.08)</span>;
+<span class="pu">}</span>
+<span class="sel">.formulario h2</span> <span class="pu">{</span> <span class="propc">margin-bottom</span>: <span class="valc">20px</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">body → display: flex + justify-content: center</span><span class="prop-desc">Centra horizontalmente la tarjeta del formulario dentro de toda la pantalla.</span></div>
+      <div class="rule-row"><span class="prop-name">min-height: 100vh</span><span class="prop-desc"><code class="inline">vh</code> = "viewport height". <code class="inline">100vh</code> asegura que el body ocupe como mínimo toda la altura visible de la ventana, para poder centrar verticalmente si se combina con más reglas.</span></div>
+      <div class="rule-row"><span class="prop-name">.formulario → max-width: 420px</span><span class="prop-desc">Evita que la tarjeta se estire demasiado en pantallas grandes; en pantallas pequeñas, <code class="inline">width: 100%</code> hace que ocupe el espacio disponible hasta ese máximo.</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (con tarjeta contenedora)</div>
+      <div class="frame-wrap"><iframe id="f2-frame" style="height:420px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- F STEP 3 -->
+  <section class="step" id="f3">
+    <div class="step-badge">Paso 3 / 5</div>
+    <h3>Estilo de labels, inputs y estado de foco</h3>
+    <p class="intro">Cada campo se apila verticalmente (label arriba, input abajo) usando flexbox en columna. Los inputs reciben un borde consistente que cambia de color cuando el usuario hace clic dentro con <code class="inline">:focus</code>.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">.field</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">flex-direction</span>: <span class="valc">column</span>;
+  <span class="propc">margin-bottom</span>: <span class="valc">18px</span>;
+  <span class="propc">flex</span>: <span class="valc">1</span>;
+<span class="pu">}</span>
+<span class="sel">.field label</span> <span class="pu">{</span>
+  <span class="propc">font-size</span>: <span class="valc">.85rem</span>;
+  <span class="propc">font-weight</span>: <span class="valc">600</span>;
+  <span class="propc">margin-bottom</span>: <span class="valc">6px</span>;
+  <span class="propc">color</span>: <span class="valc">#3d4160</span>;
+<span class="pu">}</span>
+<span class="sel">.field input, .field select</span> <span class="pu">{</span>
+  <span class="propc">border</span>: <span class="valc">1.5px solid #dcdaf0</span>;
+  <span class="propc">border-radius</span>: <span class="valc">8px</span>;
+  <span class="propc">padding</span>: <span class="valc">10px 12px</span>;
+  <span class="propc">font-size</span>: <span class="valc">.95rem</span>;
+  <span class="propc">outline</span>: <span class="valc">none</span>;
+  <span class="propc">transition</span>: <span class="valc">border-color 0.15s ease</span>;
+<span class="pu">}</span>
+<span class="sel">.field input:focus, .field select:focus</span> <span class="pu">{</span>
+  <span class="propc">border-color</span>: <span class="valc">#a78bfa</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">.field → flex-direction: column</span><span class="prop-desc">Apila el label sobre el input en vez de ponerlos en fila (que sería el comportamiento por defecto de flex).</span></div>
+      <div class="rule-row"><span class="prop-name">outline: none + border transition</span><span class="prop-desc">Se quita el contorno azul por defecto del navegador para reemplazarlo con un cambio de color de borde propio, animado suavemente.</span></div>
+      <div class="rule-row"><span class="prop-name">:focus → border-color</span><span class="prop-desc">Se activa automáticamente mientras el input está seleccionado (el cursor parpadeando dentro). Le da al usuario una señal visual clara de en qué campo está escribiendo.</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (haz clic en un campo para ver el foco)</div>
+      <div class="frame-wrap"><iframe id="f3-frame" style="height:420px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- F STEP 4 -->
+  <section class="step" id="f4">
+    <div class="step-badge">Paso 4 / 5</div>
+    <h3>Fila de dos campos y checkbox</h3>
+    <p class="intro">Nombre y Correo van lado a lado usando flexbox con <code class="inline">gap</code>. El checkbox necesita su propio layout horizontal, distinto al de los demás campos.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">.row</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">gap</span>: <span class="valc">12px</span>;
+<span class="pu">}</span>
+
+<span class="sel">.field.checkbox</span> <span class="pu">{</span>
+  <span class="propc">flex-direction</span>: <span class="valc">row</span>;
+  <span class="propc">align-items</span>: <span class="valc">center</span>;
+  <span class="propc">gap</span>: <span class="valc">8px</span>;
+<span class="pu">}</span>
+<span class="sel">.field.checkbox input</span> <span class="pu">{</span> <span class="propc">width</span>: <span class="valc">16px</span>; <span class="propc">height</span>: <span class="valc">16px</span>; <span class="pu">}</span>
+<span class="sel">.field.checkbox label</span> <span class="pu">{</span> <span class="propc">margin</span>: <span class="valc">0</span>; <span class="propc">font-weight</span>: <span class="valc">400</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">.row → display: flex + gap</span><span class="prop-desc">Pone los dos <code class="inline">.field</code> hijos en fila. Como cada <code class="inline">.field</code> tiene <code class="inline">flex: 1</code> (paso 3), ambos ocupan el mismo ancho automáticamente.</span></div>
+      <div class="rule-row"><span class="prop-name">.field.checkbox → flex-direction: row</span><span class="prop-desc">Sobreescribe la regla general de <code class="inline">.field</code> (que apila en columna) solo para el checkbox, que necesita quedar al lado de su texto, no encima.</span></div>
+      <div class="rule-row"><span class="prop-name">.checkbox input → width/height: 16px</span><span class="prop-desc">Fija un tamaño consistente para la casilla, que de otro modo variaría según el navegador.</span></div>
+    </div>
+    <div class="preview-block">
+      <div class="preview-label">Vista previa (con fila de 2 columnas + checkbox)</div>
+      <div class="frame-wrap"><iframe id="f4-frame" style="height:440px"></iframe></div>
+    </div>
+  </section>
+
+  <!-- F STEP 5 -->
+  <section class="step" id="f5">
+    <div class="step-badge">Paso 5 / 5 · Reto final</div>
+    <h3>Botón de envío y playground editable</h3>
+    <p class="intro">El botón usa los mismos principios de estado que el input: apariencia base, <code class="inline">:hover</code> para retroalimentación al pasar el mouse, y transición suave entre ambos. Desde aquí puedes editar libremente todo el formulario.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="label">estilos.css</span></div>
+      <pre><code><span class="sel">.formulario button</span> <span class="pu">{</span>
+  <span class="propc">width</span>: <span class="valc">100%</span>;
+  <span class="propc">background</span>: <span class="valc">#a78bfa</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+  <span class="propc">border</span>: <span class="valc">none</span>;
+  <span class="propc">padding</span>: <span class="valc">12px</span>;
+  <span class="propc">border-radius</span>: <span class="valc">8px</span>;
+  <span class="propc">font-weight</span>: <span class="valc">700</span>;
+  <span class="propc">font-size</span>: <span class="valc">.95rem</span>;
+  <span class="propc">cursor</span>: <span class="valc">pointer</span>;
+  <span class="propc">transition</span>: <span class="valc">background 0.15s ease</span>;
+<span class="pu">}</span>
+<span class="sel">.formulario button:hover</span> <span class="pu">{</span> <span class="propc">background</span>: <span class="valc">#8f6ff0</span>; <span class="pu">}</span>
+
+<span class="com">/* pantallas angostas: la fila de nombre/correo se apila */</span>
+<span class="sel">@media (max-width: 480px)</span> <span class="pu">{</span>
+  <span class="sel">.row</span> <span class="pu">{</span> <span class="propc">flex-direction</span>: <span class="valc">column</span>; <span class="propc">gap</span>: <span class="valc">0</span>; <span class="pu">}</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="rules">
+      <div class="rules-title">¿Qué hace cada regla?</div>
+      <div class="rule-row"><span class="prop-name">width: 100%</span><span class="prop-desc">El botón ocupa todo el ancho de la tarjeta, un patrón común en formularios para darle prioridad visual a la acción principal.</span></div>
+      <div class="rule-row"><span class="prop-name">cursor: pointer</span><span class="prop-desc">Cambia el ícono del mouse a una manito al pasar por encima, reforzando que el elemento es interactivo (por defecto los <code class="inline">&lt;button&gt;</code> ya lo hacen, pero es buena práctica declararlo).</span></div>
+      <div class="rule-row"><span class="prop-name">:hover → background</span><span class="prop-desc">Oscurece ligeramente el color al pasar el mouse, dando retroalimentación antes incluso de hacer clic.</span></div>
+      <div class="rule-row"><span class="prop-name">@media (max-width: 480px)</span><span class="prop-desc">En pantallas muy angostas (celulares), la fila de Nombre/Correo pasa de dos columnas a una sola, apilando los campos para que no queden demasiado angostos.</span></div>
+    </div>
+    <div class="playground-note">✏️ Edita el HTML y CSS completos del formulario y pulsa "Ejecutar":</div>
+    <div class="lab">
+      <textarea id="form-code"></textarea>
+      <div class="frame-wrap"><iframe id="form-frame"></iframe></div>
+    </div>
+    <div class="lab-controls"><button class="run-btn" onclick="runLab('form')">▶ Ejecutar</button></div>
+  </section>
+
+</main>
+
+<footer>Guía de proyecto: Landing page + Formulario · Construido capa por capa, regla por regla.</footer>
+
+<script>
+const landingBase = `<html><head><style>
+* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:"Segoe UI",sans-serif; color:#1f2333; background:#fafafc; line-height:1.5; }
+</style></head><body>
+<header class="nav"><div class="logo">Brandly</div><nav><a href="#">Producto</a><a href="#">Precios</a><a href="#">Contacto</a></nav></header>
+<section class="hero"><div><h1>Organiza tu equipo sin fricción</h1><p>La herramienta que centraliza tareas, chats y archivos en un solo lugar.</p><a href="#" class="btn">Empieza gratis</a></div><img src="https://picsum.photos/420/300" alt="Vista previa del producto"></section>
+<section class="features">
+<div class="card"><h3>Rápido</h3><p>Configura tu espacio en minutos.</p></div>
+<div class="card"><h3>Seguro</h3><p>Tus datos siempre encriptados.</p></div>
+<div class="card"><h3>Flexible</h3><p>Se adapta a tu flujo de trabajo.</p></div>
+</section>
+<section class="cta"><h2>¿Listo para empezar?</h2><a href="#" class="btn">Crear cuenta</a></section>
+<footer>© 2026 Brandly · Todos los derechos reservados</footer>
+</body></html>`;
+
+const l2css = `* { box-sizing: border-box; margin:0; padding:0; }
+body { font-family:"Segoe UI",sans-serif; color:#1f2333; background:#fafafc; line-height:1.5; }`;
+
+const l3css = l2css + `
+.nav { display:flex; justify-content:space-between; align-items:center; padding:20px 48px; background:white; }
+.nav a { margin-left:24px; text-decoration:none; color:#1f2333; }
+.logo { font-weight:800; font-size:1.3rem; }
+.hero { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:40px; padding:60px 48px; }
+.hero h1 { font-size:2.4rem; margin-bottom:16px; }
+.hero p { color:#5b6180; margin-bottom:24px; }
+.hero img { width:100%; border-radius:16px; }
+.btn { display:inline-block; background:#a78bfa; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600; }`;
+
+const l4css = l3css + `
+.features { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:40px 48px; }
+.card { background:white; border-radius:14px; padding:24px; box-shadow:0 4px 16px rgba(0,0,0,0.06); transition:transform 0.2s ease; }
+.card:hover { transform:translateY(-4px); }
+.cta { background:#1f2333; color:white; text-align:center; padding:60px 24px; }
+.cta h2 { margin-bottom:20px; }`;
+
+const l5css = l4css + `
+footer { text-align:center; padding:24px; color:#8a90ad; font-size:.9rem; }
+@media (max-width:700px) {
+  .hero { grid-template-columns:1fr; }
+  .features { grid-template-columns:1fr; }
+  .nav { flex-direction:column; gap:12px; }
+}`;
+
+function withCss(css){ return landingBase.replace('</style>', css + '</style>'); }
+
+const formBase = `<html><head><style>
+* { box-sizing:border-box; margin:0; padding:0; font-family:"Segoe UI",sans-serif; }
+</style></head><body>
+<form class="formulario">
+  <h2>Crea tu cuenta</h2>
+  <div class="row">
+    <div class="field"><label for="nombre">Nombre</label><input type="text" id="nombre" required></div>
+    <div class="field"><label for="correo">Correo</label><input type="email" id="correo" required></div>
+  </div>
+  <div class="field"><label for="plan">Plan</label><select id="plan"><option>Básico</option><option>Pro</option></select></div>
+  <div class="field checkbox"><input type="checkbox" id="terminos"><label for="terminos">Acepto los términos</label></div>
+  <button type="submit">Crear cuenta</button>
+</form>
+</body></html>`;
+
+const f2css = `body { display:flex; justify-content:center; background:#f2f0fa; min-height:100vh; padding:40px 16px; }
+.formulario { background:white; width:100%; max-width:420px; border-radius:16px; padding:32px; box-shadow:0 8px 30px rgba(0,0,0,0.08); }
+.formulario h2 { margin-bottom:20px; }`;
+
+const f3css = f2css + `
+.field { display:flex; flex-direction:column; margin-bottom:18px; flex:1; }
+.field label { font-size:.85rem; font-weight:600; margin-bottom:6px; color:#3d4160; }
+.field input, .field select { border:1.5px solid #dcdaf0; border-radius:8px; padding:10px 12px; font-size:.95rem; outline:none; transition:border-color 0.15s ease; }
+.field input:focus, .field select:focus { border-color:#a78bfa; }`;
+
+const f4css = f3css + `
+.row { display:flex; gap:12px; }
+.field.checkbox { flex-direction:row; align-items:center; gap:8px; }
+.field.checkbox input { width:16px; height:16px; }
+.field.checkbox label { margin:0; font-weight:400; }`;
+
+const f5css = f4css + `
+.formulario button { width:100%; background:#a78bfa; color:white; border:none; padding:12px; border-radius:8px; font-weight:700; font-size:.95rem; cursor:pointer; transition:background 0.15s ease; }
+.formulario button:hover { background:#8f6ff0; }
+@media (max-width:480px) { .row { flex-direction:column; gap:0; } }`;
+
+function withFormCss(css){ return formBase.replace('</style>', css + '</style>'); }
+
+function runLab(id){
+  const code = document.getElementById(id+'-code').value;
+  document.getElementById(id+'-frame').srcdoc = code;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('l1-frame').srcdoc = landingBase;
+  document.getElementById('l2-frame').srcdoc = withCss(l2css);
+  document.getElementById('l3-frame').srcdoc = withCss(l3css);
+  document.getElementById('l4-frame').srcdoc = withCss(l4css);
+
+  document.getElementById('f1-frame').srcdoc = formBase;
+  document.getElementById('f2-frame').srcdoc = withFormCss(f2css);
+  document.getElementById('f3-frame').srcdoc = withFormCss(f3css);
+  document.getElementById('f4-frame').srcdoc = withFormCss(f4css);
+
+  document.getElementById('landing-code').value = withCss(l5css);
+  document.getElementById('form-code').value = withFormCss(f5css);
+  runLab('landing');
+  runLab('form');
+});
+</script>
+</body>
+</html>

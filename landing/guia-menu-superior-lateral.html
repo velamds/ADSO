@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía — Menú superior + menú lateral para un sitio profesional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12162a; --surface:#191d38; --surface-2:#222748; --line:rgba(255,255,255,0.09);
+    --text:#eceefb; --text-dim:#989ec4;
+    --accent:#6366f1; --accent-soft:rgba(99,102,241,0.15); --accent-2:#22d3ee;
+    --ok:#4ade80; --ok-soft:rgba(74,222,128,0.12);
+    --tg:#ff9f7a; --at:#7ec8ff; --svv:#a7e3a0;
+    --sel:#7ec8ff; --propc:#ffb37a; --valc:#a7e3a0; --com:#6f76a3; --pu:#8890b8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:radial-gradient(1100px 600px at 85% -10%, rgba(99,102,241,0.12), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(34,211,238,0.08), transparent 55%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.65;
+  }
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(18,22,42,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .topbar-inner{max-width:1080px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800;}
+  .brand .chip{background:var(--accent); color:#0e1024; padding:2px 8px; border-radius:6px; font-size:.7rem; font-weight:800;}
+  .toc{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{color:var(--text-dim); text-decoration:none; font-size:.76rem; white-space:nowrap; padding:6px 9px; border-radius:8px;}
+  .toc a:hover{color:var(--text); background:var(--surface-2);}
+
+  .hero{max-width:1080px; margin:0 auto; padding:56px 24px 30px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; color:var(--accent-2); font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700; background:var(--accent-soft); padding:6px 12px; border-radius:999px; margin-bottom:20px;}
+  .hero h1{font-size:clamp(1.9rem,4.4vw,2.9rem); line-height:1.14; margin:0 0 16px; font-weight:800; letter-spacing:-0.01em;}
+  .hero h1 span{color:var(--accent-2);}
+  .hero p{color:var(--text-dim); font-size:1.03rem; max-width:680px; margin:0 0 18px;}
+  .goal-box{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 22px;
+    font-size:.92rem; color:var(--text-dim); max-width:680px;
+  }
+  .goal-box b{color:var(--text);}
+
+  main{max-width:1080px; margin:0 auto; padding:10px 24px 100px;}
+
+  .part-title{display:flex; align-items:center; gap:14px; margin:52px 0 22px; scroll-margin-top:80px;}
+  .part-title .pnum{
+    font-family:'JetBrains Mono',monospace; font-weight:800; font-size:.95rem; color:#0e1024;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); width:38px; height:38px;
+    border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .part-title h2{font-family:'Poppins',sans-serif; font-size:1.55rem; margin:0; font-weight:700;}
+  .part-title p{color:var(--text-dim); margin:4px 0 0; font-size:.9rem;}
+
+  section.card{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:32px; margin-bottom:22px; scroll-margin-top:90px; position:relative; overflow:hidden;
+  }
+  section.card::before{content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:linear-gradient(var(--accent),var(--accent-2));}
+  .badge{display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.84rem; color:var(--accent-2); background:#0f1226; border:1px solid var(--line); padding:5px 12px; border-radius:8px; margin-bottom:12px;}
+  section.card h3{font-size:1.25rem; margin:0 0 12px; font-weight:700;}
+  section.card > p{color:var(--text-dim); margin:0 0 16px;}
+  code.inline{font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--sel); padding:2px 6px; border-radius:5px; font-size:.87em;}
+
+  /* concept diagrams */
+  .diagram{background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:20px; margin:14px 0;}
+  .diagram-label{font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--text-dim); margin-bottom:10px; text-transform:uppercase; letter-spacing:.04em;}
+  .flex-demo{display:flex; gap:10px; background:#0f1226; border:1px dashed rgba(99,102,241,0.5); border-radius:10px; padding:14px; position:relative;}
+  .flex-demo .box{background:var(--accent); color:white; font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700; padding:14px; border-radius:8px; display:flex; align-items:center; justify-content:center; min-width:60px;}
+  .axis-row{display:flex; align-items:center; gap:8px; margin-top:10px; font-size:.76rem; color:var(--text-dim); font-family:'JetBrains Mono',monospace;}
+  .axis-row .arrow{color:var(--accent-2);}
+  .justify-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;}
+  @media(max-width:640px){.justify-grid{grid-template-columns:1fr;}}
+  .justify-item{background:#0f1226; border:1px solid var(--line); border-radius:10px; padding:10px;}
+  .justify-item .jlabel{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--accent-2); margin-bottom:8px;}
+  .justify-item .row{display:flex; gap:6px; background:#191d38; border-radius:6px; padding:8px;}
+  .jc-start{justify-content:flex-start;} .jc-center{justify-content:center;} .jc-between{justify-content:space-between;} .jc-around{justify-content:space-around;}
+  .mini-box{background:var(--accent-2); color:#0e1024; font-family:'JetBrains Mono',monospace; font-size:.7rem; font-weight:700; padding:6px 10px; border-radius:5px;}
+
+  .grid-demo{display:grid; grid-template-columns:1fr 2fr; grid-template-rows:44px 90px; grid-template-areas:"gh gh" "gs gc"; gap:8px; background:#0f1226; border:1px dashed rgba(34,211,238,0.5); border-radius:10px; padding:14px;}
+  .gd-h{grid-area:gh; background:var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; color:white; font-family:'JetBrains Mono',monospace; font-size:.76rem; font-weight:700;}
+  .gd-s{grid-area:gs; background:var(--accent-2); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#0e1024; font-family:'JetBrains Mono',monospace; font-size:.76rem; font-weight:700;}
+  .gd-c{grid-area:gc; background:#3730a3; border-radius:6px; display:flex; align-items:center; justify-content:center; color:white; font-family:'JetBrains Mono',monospace; font-size:.76rem; font-weight:700;}
+
+  .code-window{background:#0e1122; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:14px 0;}
+  .code-window .bar{display:flex; align-items:center; justify-content:space-between; padding:9px 14px; background:#0a0c1a; border-bottom:1px solid var(--line);}
+  .code-window .dots{display:flex; gap:6px;}
+  .code-window .dot{width:9px; height:9px; border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .code-window .flabel{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim);}
+  .code-window pre{margin:0; padding:16px; overflow-x:auto; max-height:360px;}
+  .code-window code{font-family:'JetBrains Mono',monospace; font-size:.81rem; line-height:1.6;}
+  .tg{color:var(--tg);} .at{color:var(--at);} .cm{color:var(--com);}
+
+  .checkpoint{background:var(--ok-soft); border:1px solid rgba(74,222,128,0.35); border-radius:14px; padding:18px 20px; margin-top:16px;}
+  .checkpoint-title{display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--ok); font-size:.88rem; margin-bottom:10px;}
+  .checkpoint ul{margin:0; padding-left:20px; color:var(--text); font-size:.9rem;}
+  .checkpoint li{margin-bottom:5px;}
+
+  .preview-label{font-family:'JetBrains Mono',monospace; font-size:.73rem; color:var(--text-dim); margin:14px 0 8px; display:flex; align-items:center; gap:6px;}
+  .preview-label::before{content:"●"; color:var(--accent-2); font-size:.55rem;}
+  .frame-wrap{background:#fff; border-radius:12px; border:1px solid var(--line); overflow:hidden;}
+  .frame-wrap iframe{width:100%; border:0; display:block;}
+
+  .final-shot{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:32px; text-align:center;}
+  .final-shot h3{font-size:1.3rem; margin:0 0 8px;}
+  .final-shot p{color:var(--text-dim); margin:0 0 20px; max-width:600px; margin-left:auto; margin-right:auto;}
+
+  footer{max-width:1080px; margin:0 auto; padding:20px 24px 70px; color:var(--text-dim); font-size:.87rem; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="chip">▦</span> Menú superior + lateral</div>
+    <nav class="toc">
+      <a href="#c1">Flexbox</a>
+      <a href="#c2">Grid</a>
+      <a href="#p0">Paso 0</a>
+      <a href="#p1">Paso 1</a>
+      <a href="#p2">Paso 2</a>
+      <a href="#p3">Paso 3</a>
+      <a href="#p4">Paso 4</a>
+      <a href="#p5">Paso 5</a>
+      <a href="#p6">Paso 6</a>
+      <a href="#final">Resultado</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">● Guía de layout profesional</div>
+  <h1>Menú <span>superior</span> + menú <span>lateral</span> para un sitio profesional</h1>
+  <p>Este es el patrón de navegación más usado en paneles de administración, dashboards y plataformas SaaS: una barra superior fija y un menú lateral fijo, con el contenido principal a la derecha.</p>
+  <div class="goal-box">
+    🎯 <b>Antes de escribir código</b> vas a entender a fondo <b>Flexbox</b> (para alinear elementos dentro de cada menú) y <b>CSS Grid</b> (para armar el esqueleto general de la página). Luego construirás el layout en 7 pasos incrementales, cada uno con su <b>checkpoint</b> para verificar que vas por buen camino. No hay código completo al final — solo la imagen del resultado esperado.
+  </div>
+</div>
+
+<main>
+
+  <!-- ===================== CONCEPTOS ===================== -->
+  <div class="part-title" id="c1">
+    <div class="pnum">A</div>
+    <div><h2>Concepto: Flexbox al detalle</h2><p>Lo usarás para alinear los elementos <em>dentro</em> del menú superior y dentro del menú lateral.</p></div>
+  </div>
+
+  <section class="card">
+    <div class="badge">display: flex</div>
+    <h3>La idea central de Flexbox</h3>
+    <p>Flexbox organiza los <strong>hijos directos</strong> de un contenedor a lo largo de una sola dirección: una fila o una columna. Todo gira en torno a dos ejes:</p>
+    <div class="diagram">
+      <div class="diagram-label">Ejemplo: 3 cajas dentro de un contenedor con display: flex</div>
+      <div class="flex-demo">
+        <div class="box">1</div><div class="box">2</div><div class="box">3</div>
+      </div>
+      <div class="axis-row"><span class="arrow">→</span> Eje principal (main axis): la dirección en la que se acomodan las cajas — horizontal por defecto.</div>
+      <div class="axis-row"><span class="arrow">↕</span> Eje cruzado (cross axis): perpendicular al principal — vertical por defecto.</div>
+    </div>
+    <p>Todo el poder de Flexbox está en cuatro propiedades del <strong>contenedor</strong> (el padre, no las cajas):</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="sel">.contenedor</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;              <span class="cm">/* activa flexbox */</span>
+  <span class="propc">flex-direction</span>: <span class="valc">row</span>;      <span class="cm">/* row (fila) o column (columna) */</span>
+  <span class="propc">justify-content</span>: <span class="valc">center</span>;  <span class="cm">/* alineación en el eje principal */</span>
+  <span class="propc">align-items</span>: <span class="valc">center</span>;      <span class="cm">/* alineación en el eje cruzado */</span>
+  <span class="propc">gap</span>: <span class="valc">12px</span>;                <span class="cm">/* espacio entre cajas */</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <p><strong>justify-content</strong> es la propiedad que más se usa, y la que vas a necesitar para separar el logo de los enlaces en el menú superior. Compara sus valores más comunes:</p>
+    <div class="justify-grid">
+      <div class="justify-item"><div class="jlabel">justify-content: flex-start (por defecto)</div><div class="row jc-start"><div class="mini-box">A</div><div class="mini-box">B</div><div class="mini-box">C</div></div></div>
+      <div class="justify-item"><div class="jlabel">justify-content: center</div><div class="row jc-center"><div class="mini-box">A</div><div class="mini-box">B</div><div class="mini-box">C</div></div></div>
+      <div class="justify-item"><div class="jlabel">justify-content: space-between</div><div class="row jc-between"><div class="mini-box">A</div><div class="mini-box">B</div><div class="mini-box">C</div></div></div>
+      <div class="justify-item"><div class="jlabel">justify-content: space-around</div><div class="row jc-around"><div class="mini-box">A</div><div class="mini-box">B</div><div class="mini-box">C</div></div></div>
+    </div>
+    <p style="margin-top:16px;">Para el menú superior usarás <code class="inline">space-between</code> (logo a un extremo, enlaces al otro). Para el menú lateral usarás <code class="inline">flex-direction: column</code>, que gira los ejes 90° y apila los enlaces verticalmente en vez de ponerlos en fila.</p>
+  </section>
+
+  <div class="part-title" id="c2">
+    <div class="pnum">B</div>
+    <div><h2>Concepto: CSS Grid al detalle</h2><p>Lo usarás para armar el esqueleto general: dónde va el menú superior, dónde el lateral y dónde el contenido.</p></div>
+  </div>
+
+  <section class="card">
+    <div class="badge">display: grid</div>
+    <h3>La idea central de Grid</h3>
+    <p>Mientras Flexbox organiza en <strong>una</strong> dirección, Grid organiza en <strong>dos</strong> a la vez: filas y columnas simultáneamente. Es la herramienta correcta para el esqueleto de una página completa, porque tu layout tiene exactamente esa forma: una fila arriba (menú superior) y, debajo, dos columnas (menú lateral + contenido).</p>
+    <div class="diagram">
+      <div class="diagram-label">Ejemplo: grid de 2 columnas × 2 filas, con un área que ocupa toda la fila superior</div>
+      <div class="grid-demo">
+        <div class="gd-h">header</div>
+        <div class="gd-s">sidebar</div>
+        <div class="gd-c">content</div>
+      </div>
+    </div>
+    <p>La forma más clara de describir esto en CSS es con <code class="inline">grid-template-areas</code>: le pones nombre a cada región y "dibujas" el layout con texto.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="sel">.layout</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">grid</span>;
+  <span class="propc">grid-template-columns</span>: <span class="valc">240px 1fr</span>;
+  <span class="propc">grid-template-rows</span>: <span class="valc">64px 1fr</span>;
+  <span class="propc">grid-template-areas</span>:
+    <span class="valc">"header  header"</span>
+    <span class="valc">"sidebar content"</span>;
+<span class="pu">}</span>
+
+<span class="cm">/* a cada hijo se le asigna su región por nombre */</span>
+<span class="sel">.topbar</span>  <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">header</span>;  <span class="pu">}</span>
+<span class="sel">.sidebar</span> <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">sidebar</span>; <span class="pu">}</span>
+<span class="sel">.content</span> <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">content</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <p>Cómo leer esto:</p>
+    <ul style="color:var(--text-dim); padding-left:20px;">
+      <li><code class="inline">grid-template-columns: 240px 1fr</code> crea 2 columnas: la primera de 240px fijos (para el menú lateral), la segunda ocupa <em>todo el resto</em> del espacio disponible (<code class="inline">1fr</code> = una fracción libre).</li>
+      <li><code class="inline">grid-template-rows: 64px 1fr</code> crea 2 filas: la primera de 64px (para el menú superior), la segunda ocupa el resto de la altura.</li>
+      <li><code class="inline">grid-template-areas</code> repite <code class="inline">"header"</code> en ambas columnas de la primera fila, indicando que esa región ocupa todo el ancho. En la segunda fila, <code class="inline">sidebar</code> y <code class="inline">content</code> van cada uno en su columna.</li>
+      <li>Cada elemento hijo se "engancha" a su región con <code class="inline">grid-area: nombre</code>, que debe coincidir con el texto usado arriba.</li>
+    </ul>
+  </section>
+
+  <!-- ===================== CONSTRUCCIÓN ===================== -->
+  <div class="part-title" id="p0-intro">
+    <div class="pnum">1</div>
+    <div><h2>Construcción incremental</h2><p>Ahora sí: 7 pasos, cada uno con checkpoint. No avances al siguiente paso sin cumplir el checkpoint actual.</p></div>
+  </div>
+
+  <!-- PASO 0 -->
+  <section class="card" id="p0">
+    <div class="badge">Paso 0 · Estructura HTML</div>
+    <h3>El esqueleto semántico, sin CSS</h3>
+    <p>Tres regiones principales, con las etiquetas semánticas correctas: <code class="inline">&lt;header&gt;</code> para el menú superior, <code class="inline">&lt;aside&gt;</code> para el menú lateral (contenido secundario/navegación) y <code class="inline">&lt;main&gt;</code> para el contenido principal. Las tres van dentro de un <code class="inline">&lt;div class="layout"&gt;</code> que será nuestro contenedor de Grid.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">index.html</span></div>
+      <pre><code><span class="tg">&lt;body&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"layout"</span><span class="tg">&gt;</span>
+
+    <span class="tg">&lt;header</span> <span class="at">class</span>=<span class="valc">"topbar"</span><span class="tg">&gt;</span>
+      <span class="cm">&lt;!-- menú superior --&gt;</span>
+    <span class="tg">&lt;/header&gt;</span>
+
+    <span class="tg">&lt;aside</span> <span class="at">class</span>=<span class="valc">"sidebar"</span><span class="tg">&gt;</span>
+      <span class="cm">&lt;!-- menú lateral --&gt;</span>
+    <span class="tg">&lt;/aside&gt;</span>
+
+    <span class="tg">&lt;main</span> <span class="at">class</span>=<span class="valc">"content"</span><span class="tg">&gt;</span>
+      <span class="cm">&lt;!-- contenido principal --&gt;</span>
+    <span class="tg">&lt;/main&gt;</span>
+
+  <span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;/body&gt;</span></code></pre>
+    </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Tienes un <code class="inline">.layout</code> con exactamente 3 hijos directos: <code class="inline">header</code>, <code class="inline">aside</code>, <code class="inline">main</code>.</li>
+        <li>No hay CSS todavía — al abrir el archivo verás los tres bloques apilados uno debajo del otro, sin estilo. Es esperado.</li>
+        <li>Usaste etiquetas semánticas, no <code class="inline">&lt;div&gt;</code> genéricos, para las tres regiones.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 1 -->
+  <section class="card" id="p1">
+    <div class="badge">Paso 1 · Reset y base</div>
+    <h3>Reset, tipografía y altura completa</h3>
+    <p>Antes del layout, algunas reglas base. La más importante aquí: <code class="inline">html, body { height: 100%; }</code>, necesaria para que el layout de Grid pueda ocupar toda la altura de la pantalla en el siguiente paso.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="sel">*</span> <span class="pu">{</span> <span class="propc">box-sizing</span>: <span class="valc">border-box</span>; <span class="propc">margin</span>: <span class="valc">0</span>; <span class="propc">padding</span>: <span class="valc">0</span>; <span class="pu">}</span>
+
+<span class="sel">html, body</span> <span class="pu">{</span> <span class="propc">height</span>: <span class="valc">100%</span>; <span class="pu">}</span>
+
+<span class="sel">body</span> <span class="pu">{</span>
+  <span class="propc">font-family</span>: <span class="valc">"Segoe UI", sans-serif</span>;
+  <span class="propc">color</span>: <span class="valc">#1e2233</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Visualmente nada cambió todavía (sigue todo apilado), pero ya no hay márgenes por defecto raros del navegador.</li>
+        <li><code class="inline">height: 100%</code> en <code class="inline">html</code> y <code class="inline">body</code> es clave: sin esto, el Grid del paso 2 no tendría una altura de referencia para expandirse.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="card" id="p2">
+    <div class="badge">Paso 2 · Esqueleto con Grid</div>
+    <h3>Aplicando el concepto de Grid al <code class="inline">.layout</code></h3>
+    <p>Este es el paso clave: exactamente el mismo <code class="inline">grid-template-areas</code> que viste en la sección de conceptos, aplicado a tu <code class="inline">.layout</code> real. Para poder <em>verlo</em>, cada región recibe temporalmente un color de fondo distinto.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="sel">.layout</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">grid</span>;
+  <span class="propc">grid-template-columns</span>: <span class="valc">240px 1fr</span>;
+  <span class="propc">grid-template-rows</span>: <span class="valc">64px 1fr</span>;
+  <span class="propc">grid-template-areas</span>:
+    <span class="valc">"header  header"</span>
+    <span class="valc">"sidebar content"</span>;
+  <span class="propc">height</span>: <span class="valc">100%</span>;
+<span class="pu">}</span>
+
+<span class="sel">.topbar</span>  <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">header</span>;  <span class="propc">background</span>: <span class="valc">#c7d2fe</span>; <span class="pu">}</span>
+<span class="sel">.sidebar</span> <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">sidebar</span>; <span class="propc">background</span>: <span class="valc">#a5f3fc</span>; <span class="pu">}</span>
+<span class="sel">.content</span> <span class="pu">{</span> <span class="propc">grid-area</span>: <span class="valc">content</span>; <span class="propc">background</span>: <span class="valc">#f1f0fe</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe id="p2-frame" style="height:280px"></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Ves 3 bloques de color formando una "L" invertida: una franja completa arriba, y abajo dos columnas.</li>
+        <li>La franja superior (morada) ocupa <strong>todo el ancho</strong>, sin importar las columnas definidas.</li>
+        <li>La columna izquierda (celeste) mide 240px fijos; la derecha (lila) se estira con el resto del espacio.</li>
+        <li>Si algún bloque no aparece donde debería, revisa que el texto en <code class="inline">grid-template-areas</code> coincida exactamente con el <code class="inline">grid-area</code> de cada clase.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="card" id="p3">
+    <div class="badge">Paso 3 · Menú superior con Flexbox</div>
+    <h3>Logo a la izquierda, enlaces a la derecha</h3>
+    <p>Dentro de <code class="inline">.topbar</code> aplicas el concepto de Flexbox visto antes: <code class="inline">display: flex</code> con <code class="inline">justify-content: space-between</code> separa el logo (un extremo) de la navegación (el otro), y <code class="inline">align-items: center</code> los centra verticalmente dentro de la franja de 64px.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">index.html + estilos.css</span></div>
+      <pre><code><span class="cm">&lt;!-- dentro de &lt;header class="topbar"&gt; --&gt;</span>
+<span class="tg">&lt;span</span> <span class="at">class</span>=<span class="valc">"logo"</span><span class="tg">&gt;</span>Panelio<span class="tg">&lt;/span&gt;</span>
+<span class="tg">&lt;nav</span> <span class="at">class</span>=<span class="valc">"top-links"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span><span class="tg">&gt;</span>Reportes<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span><span class="tg">&gt;</span>Clientes<span class="tg">&lt;/a&gt;</span>
+<span class="tg">&lt;/nav&gt;</span>
+
+<span class="cm">/* estilos.css */</span>
+<span class="sel">.topbar</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">justify-content</span>: <span class="valc">space-between</span>;
+  <span class="propc">align-items</span>: <span class="valc">center</span>;
+  <span class="propc">padding</span>: <span class="valc">0 24px</span>;
+  <span class="propc">background</span>: <span class="valc">#1e2233</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+<span class="pu">}</span>
+<span class="sel">.logo</span> <span class="pu">{</span> <span class="propc">font-weight</span>: <span class="valc">800</span>; <span class="propc">font-size</span>: <span class="valc">1.1rem</span>; <span class="pu">}</span>
+<span class="sel">.top-links</span> <span class="pu">{</span> <span class="propc">display</span>: <span class="valc">flex</span>; <span class="propc">gap</span>: <span class="valc">22px</span>; <span class="pu">}</span>
+<span class="sel">.top-links a</span> <span class="pu">{</span> <span class="propc">color</span>: <span class="valc">#c7d2fe</span>; <span class="propc">text-decoration</span>: <span class="valc">none</span>; <span class="propc">font-size</span>: <span class="valc">.9rem</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe id="p3-frame" style="height:280px"></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>El logo "Panelio" está pegado al borde izquierdo y los enlaces al borde derecho de la franja superior.</li>
+        <li>Ambos están alineados verticalmente al centro de la franja (ninguno "flota" arriba o abajo).</li>
+        <li>Nota que <code class="inline">.top-links</code> también usa <code class="inline">display: flex</code>: es un flex <em>dentro</em> de otro flex — los enlaces internos se ponen en fila con <code class="inline">gap</code> entre ellos.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 4 -->
+  <section class="card" id="p4">
+    <div class="badge">Paso 4 · Menú lateral con Flexbox en columna</div>
+    <h3>Enlaces apilados verticalmente</h3>
+    <p>Mismo concepto de Flexbox, pero girando el eje: <code class="inline">flex-direction: column</code> hace que los enlaces se apilen uno debajo del otro en vez de ponerse en fila. El enlace activo se distingue con una clase y un color de fondo distinto.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">index.html + estilos.css</span></div>
+      <pre><code><span class="cm">&lt;!-- dentro de &lt;aside class="sidebar"&gt; --&gt;</span>
+<span class="tg">&lt;nav</span> <span class="at">class</span>=<span class="valc">"side-links"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span> <span class="at">class</span>=<span class="valc">"active"</span><span class="tg">&gt;</span>Inicio<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span><span class="tg">&gt;</span>Proyectos<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span><span class="tg">&gt;</span>Equipo<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span><span class="tg">&gt;</span>Configuración<span class="tg">&lt;/a&gt;</span>
+<span class="tg">&lt;/nav&gt;</span>
+
+<span class="cm">/* estilos.css */</span>
+<span class="sel">.sidebar</span> <span class="pu">{</span> <span class="propc">background</span>: <span class="valc">#161a2c</span>; <span class="propc">padding</span>: <span class="valc">16px</span>; <span class="pu">}</span>
+<span class="sel">.side-links</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">flex-direction</span>: <span class="valc">column</span>;
+  <span class="propc">gap</span>: <span class="valc">4px</span>;
+<span class="pu">}</span>
+<span class="sel">.side-links a</span> <span class="pu">{</span>
+  <span class="propc">color</span>: <span class="valc">#c7ccf0</span>;
+  <span class="propc">text-decoration</span>: <span class="valc">none</span>;
+  <span class="propc">padding</span>: <span class="valc">10px 12px</span>;
+  <span class="propc">border-radius</span>: <span class="valc">8px</span>;
+  <span class="propc">font-size</span>: <span class="valc">.9rem</span>;
+<span class="pu">}</span>
+<span class="sel">.side-links a.active</span> <span class="pu">{</span> <span class="propc">background</span>: <span class="valc">#6366f1</span>; <span class="propc">color</span>: <span class="valc">white</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe id="p4-frame" style="height:340px"></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Los 4 enlaces del menú lateral están uno debajo del otro, no en fila.</li>
+        <li>"Inicio" se ve resaltado con fondo morado — así el usuario sabe en qué sección está.</li>
+        <li>El <code class="inline">gap: 4px</code> entre enlaces reemplaza tener que ponerle <code class="inline">margin-bottom</code> a cada uno individualmente.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 5 -->
+  <section class="card" id="p5">
+    <div class="badge">Paso 5 · Pulir el contenido y quitar los colores de prueba</div>
+    <h3>Terminando de vestir el layout</h3>
+    <p>Se reemplazan los colores planos de prueba del paso 2 por una paleta profesional definitiva, y se le da al <code class="inline">.content</code> algo de contenido real: un título y una cuadrícula simple de tarjetas (usando el mismo <code class="inline">display: grid</code> del concepto anterior, ahora a menor escala).</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="sel">.content</span> <span class="pu">{</span> <span class="propc">background</span>: <span class="valc">#f4f5fb</span>; <span class="propc">padding</span>: <span class="valc">24px</span>; <span class="propc">overflow-y</span>: <span class="valc">auto</span>; <span class="pu">}</span>
+<span class="sel">.content h1</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">1.4rem</span>; <span class="propc">margin-bottom</span>: <span class="valc">16px</span>; <span class="pu">}</span>
+
+<span class="sel">.cards</span> <span class="pu">{</span>
+  <span class="propc">display</span>: <span class="valc">grid</span>;
+  <span class="propc">grid-template-columns</span>: <span class="valc">repeat(3, 1fr)</span>;
+  <span class="propc">gap</span>: <span class="valc">16px</span>;
+<span class="pu">}</span>
+<span class="sel">.cards .card</span> <span class="pu">{</span>
+  <span class="propc">background</span>: <span class="valc">white</span>;
+  <span class="propc">border-radius</span>: <span class="valc">12px</span>;
+  <span class="propc">padding</span>: <span class="valc">18px</span>;
+  <span class="propc">box-shadow</span>: <span class="valc">0 2px 10px rgba(0,0,0,0.06)</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe id="p5-frame" style="height:340px"></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>El área de contenido ya no es un rectángulo de color plano: tiene un título y 3 tarjetas blancas con sombra.</li>
+        <li>Las tarjetas están en una fila de 3 columnas iguales gracias a <code class="inline">repeat(3, 1fr)</code> — un segundo <code class="inline">grid</code>, distinto del <code class="inline">.layout</code> general, anidado dentro del contenido.</li>
+        <li>El conjunto ya se parece a un panel de administración real, no a un boceto de colores.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PASO 6 -->
+  <section class="card" id="p6">
+    <div class="badge">Paso 6 · Responsive</div>
+    <h3>Adaptar el layout a pantallas angostas</h3>
+    <p>En un celular no hay espacio para un menú lateral fijo de 240px. La solución más simple: con una <code class="inline">@media query</code>, se redefine <code class="inline">grid-template-areas</code> a una sola columna y se oculta el <code class="inline">.sidebar</code> (en un sitio real, se reemplazaría por un botón de menú tipo "hamburguesa" que lo muestre/oculte; aquí se simplifica para enfocarnos en el layout).</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">estilos.css</span></div>
+      <pre><code><span class="cm">/* pantallas de 700px o menos */</span>
+<span class="sel">@media (max-width: 700px)</span> <span class="pu">{</span>
+  <span class="sel">.layout</span> <span class="pu">{</span>
+    <span class="propc">grid-template-columns</span>: <span class="valc">1fr</span>;
+    <span class="propc">grid-template-areas</span>:
+      <span class="valc">"header"</span>
+      <span class="valc">"content"</span>;
+  <span class="pu">}</span>
+  <span class="sel">.sidebar</span> <span class="pu">{</span> <span class="propc">display</span>: <span class="valc">none</span>; <span class="pu">}</span>
+  <span class="sel">.cards</span> <span class="pu">{</span> <span class="propc">grid-template-columns</span>: <span class="valc">1fr</span>; <span class="pu">}</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="preview-label">Checkpoint visual (simulación de pantalla angosta)</div>
+    <div class="frame-wrap" style="max-width:340px; margin:0 auto;"><iframe id="p6-frame" style="height:320px"></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Al reducirse el ancho, la fila <code class="inline">"sidebar content"</code> desaparece de <code class="inline">grid-template-areas</code> y queda solo <code class="inline">"header"</code> y <code class="inline">"content"</code>.</li>
+        <li>El menú lateral se oculta por completo (<code class="inline">display: none</code>); el contenido pasa a ocupar todo el ancho.</li>
+        <li>Las tarjetas también pasan de 3 columnas a 1, apilándose para no verse aplastadas.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- RESULTADO FINAL -->
+  <div class="part-title" id="final">
+    <div class="pnum">✓</div>
+    <div><h2>Resultado esperado</h2><p>Así debería verse tu layout terminado, en escritorio.</p></div>
+  </div>
+
+  <section class="final-shot">
+    <h3>Panel con menú superior + menú lateral</h3>
+    <p>No hay código completo aquí a propósito — si seguiste los 7 pasos y cada checkpoint se cumplió, tu resultado debe verse así:</p>
+    <svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:720px; border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,0.35);">
+      <rect x="0" y="0" width="760" height="460" rx="14" fill="#f4f5fb"/>
+      <!-- browser chrome -->
+      <rect x="0" y="0" width="760" height="26" rx="14" fill="#e2e4f3"/>
+      <circle cx="16" cy="13" r="4" fill="#ff5f57"/><circle cx="30" cy="13" r="4" fill="#febc2e"/><circle cx="44" cy="13" r="4" fill="#28c840"/>
+      <!-- topbar -->
+      <rect x="0" y="26" width="760" height="52" fill="#1e2233"/>
+      <text x="24" y="58" font-family="JetBrains Mono, monospace" font-size="17" font-weight="700" fill="#ffffff">Panelio</text>
+      <text x="560" y="58" font-family="Inter, sans-serif" font-size="13" fill="#c7d2fe">Reportes</text>
+      <text x="650" y="58" font-family="Inter, sans-serif" font-size="13" fill="#c7d2fe">Clientes</text>
+      <circle cx="726" cy="52" r="12" fill="#6366f1"/>
+      <!-- sidebar -->
+      <rect x="0" y="78" width="180" height="382" fill="#161a2c"/>
+      <rect x="16" y="98" width="148" height="34" rx="8" fill="#6366f1"/>
+      <text x="30" y="120" font-family="Inter, sans-serif" font-size="12.5" fill="#ffffff">Inicio</text>
+      <text x="30" y="164" font-family="Inter, sans-serif" font-size="12.5" fill="#c7ccf0">Proyectos</text>
+      <text x="30" y="200" font-family="Inter, sans-serif" font-size="12.5" fill="#c7ccf0">Equipo</text>
+      <text x="30" y="236" font-family="Inter, sans-serif" font-size="12.5" fill="#c7ccf0">Configuración</text>
+      <!-- content -->
+      <rect x="180" y="78" width="580" height="382" fill="#f4f5fb"/>
+      <text x="208" y="118" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#1e2233">Bienvenido de nuevo</text>
+      <g>
+        <rect x="208" y="140" width="164" height="110" rx="12" fill="#ffffff"/>
+        <rect x="226" y="160" width="80" height="10" rx="4" fill="#c7d2fe"/>
+        <rect x="226" y="182" width="120" height="8" rx="4" fill="#e2e4f3"/>
+        <rect x="226" y="198" width="90" height="8" rx="4" fill="#e2e4f3"/>
+      </g>
+      <g>
+        <rect x="388" y="140" width="164" height="110" rx="12" fill="#ffffff"/>
+        <rect x="406" y="160" width="80" height="10" rx="4" fill="#a5f3fc"/>
+        <rect x="406" y="182" width="120" height="8" rx="4" fill="#e2e4f3"/>
+        <rect x="406" y="198" width="90" height="8" rx="4" fill="#e2e4f3"/>
+      </g>
+      <g>
+        <rect x="568" y="140" width="164" height="110" rx="12" fill="#ffffff"/>
+        <rect x="586" y="160" width="80" height="10" rx="4" fill="#fbcfe8"/>
+        <rect x="586" y="182" width="120" height="8" rx="4" fill="#e2e4f3"/>
+        <rect x="586" y="198" width="90" height="8" rx="4" fill="#e2e4f3"/>
+      </g>
+      <rect x="208" y="270" width="524" height="150" rx="12" fill="#ffffff"/>
+      <rect x="228" y="290" width="140" height="10" rx="4" fill="#e2e4f3"/>
+      <rect x="228" y="312" width="484" height="8" rx="4" fill="#eef0f8"/>
+      <rect x="228" y="330" width="440" height="8" rx="4" fill="#eef0f8"/>
+      <rect x="228" y="348" width="460" height="8" rx="4" fill="#eef0f8"/>
+    </svg>
+  </section>
+
+</main>
+
+<footer>Guía: Menú superior + menú lateral con Flexbox y Grid · Patrón usado en dashboards y paneles profesionales.</footer>
+
+<script>
+const previewShell = (inner) => `<html><head><style>
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; }
+body { font-family:"Segoe UI",sans-serif; color:#1e2233; }
+</style></head><body>${inner}</body></html>`;
+
+const p2html = `<div class="layout"><header class="topbar"></header><aside class="sidebar"></aside><main class="content"></main></div>
+<style>
+.layout{display:grid; grid-template-columns:240px 1fr; grid-template-rows:64px 1fr; grid-template-areas:"header header" "sidebar content"; height:100%;}
+.topbar{grid-area:header; background:#c7d2fe;}
+.sidebar{grid-area:sidebar; background:#a5f3fc;}
+.content{grid-area:content; background:#f1f0fe;}
+</style>`;
+
+const p3html = `<div class="layout">
+<header class="topbar"><span class="logo">Panelio</span><nav class="top-links"><a href="#">Reportes</a><a href="#">Clientes</a></nav></header>
+<aside class="sidebar" style="background:#a5f3fc;"></aside>
+<main class="content" style="background:#f1f0fe;"></main>
+</div>
+<style>
+.layout{display:grid; grid-template-columns:240px 1fr; grid-template-rows:64px 1fr; grid-template-areas:"header header" "sidebar content"; height:100%;}
+.topbar{grid-area:header; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#1e2233; color:white;}
+.logo{font-weight:800; font-size:1.1rem;}
+.top-links{display:flex; gap:22px;}
+.top-links a{color:#c7d2fe; text-decoration:none; font-size:.9rem;}
+</style>`;
+
+const p4html = `<div class="layout">
+<header class="topbar"><span class="logo">Panelio</span><nav class="top-links"><a href="#">Reportes</a><a href="#">Clientes</a></nav></header>
+<aside class="sidebar">
+  <nav class="side-links">
+    <a href="#" class="active">Inicio</a>
+    <a href="#">Proyectos</a>
+    <a href="#">Equipo</a>
+    <a href="#">Configuración</a>
+  </nav>
+</aside>
+<main class="content" style="background:#f1f0fe;"></main>
+</div>
+<style>
+.layout{display:grid; grid-template-columns:240px 1fr; grid-template-rows:64px 1fr; grid-template-areas:"header header" "sidebar content"; height:100%;}
+.topbar{grid-area:header; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#1e2233; color:white;}
+.logo{font-weight:800; font-size:1.1rem;}
+.top-links{display:flex; gap:22px;}
+.top-links a{color:#c7d2fe; text-decoration:none; font-size:.9rem;}
+.sidebar{grid-area:sidebar; background:#161a2c; padding:16px;}
+.side-links{display:flex; flex-direction:column; gap:4px;}
+.side-links a{color:#c7ccf0; text-decoration:none; padding:10px 12px; border-radius:8px; font-size:.9rem; display:block;}
+.side-links a.active{background:#6366f1; color:white;}
+</style>`;
+
+const p5html = `<div class="layout">
+<header class="topbar"><span class="logo">Panelio</span><nav class="top-links"><a href="#">Reportes</a><a href="#">Clientes</a></nav></header>
+<aside class="sidebar">
+  <nav class="side-links">
+    <a href="#" class="active">Inicio</a>
+    <a href="#">Proyectos</a>
+    <a href="#">Equipo</a>
+    <a href="#">Configuración</a>
+  </nav>
+</aside>
+<main class="content">
+  <h1>Bienvenido de nuevo</h1>
+  <div class="cards">
+    <div class="card">Tarjeta 1</div>
+    <div class="card">Tarjeta 2</div>
+    <div class="card">Tarjeta 3</div>
+  </div>
+</main>
+</div>
+<style>
+.layout{display:grid; grid-template-columns:240px 1fr; grid-template-rows:64px 1fr; grid-template-areas:"header header" "sidebar content"; height:100%;}
+.topbar{grid-area:header; display:flex; justify-content:space-between; align-items:center; padding:0 24px; background:#1e2233; color:white;}
+.logo{font-weight:800; font-size:1.1rem;}
+.top-links{display:flex; gap:22px;}
+.top-links a{color:#c7d2fe; text-decoration:none; font-size:.9rem;}
+.sidebar{grid-area:sidebar; background:#161a2c; padding:16px;}
+.side-links{display:flex; flex-direction:column; gap:4px;}
+.side-links a{color:#c7ccf0; text-decoration:none; padding:10px 12px; border-radius:8px; font-size:.9rem; display:block;}
+.side-links a.active{background:#6366f1; color:white;}
+.content{grid-area:content; background:#f4f5fb; padding:24px; overflow-y:auto;}
+.content h1{font-size:1.4rem; margin-bottom:16px;}
+.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+.cards .card{background:white; border-radius:12px; padding:18px; box-shadow:0 2px 10px rgba(0,0,0,0.06); font-size:.85rem; color:#5b6180;}
+</style>`;
+
+const p6html = p5html.replace('</style>', `
+@media (max-width:700px){
+  .layout{ grid-template-columns:1fr; grid-template-areas:"header" "content"; }
+  .sidebar{ display:none; }
+  .cards{ grid-template-columns:1fr; }
+}
+</style>`);
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('p2-frame').srcdoc = previewShell(p2html);
+  document.getElementById('p3-frame').srcdoc = previewShell(p3html);
+  document.getElementById('p4-frame').srcdoc = previewShell(p4html);
+  document.getElementById('p5-frame').srcdoc = previewShell(p5html);
+  document.getElementById('p6-frame').srcdoc = previewShell(p6html);
+});
+</script>
+</body>
+</html>
