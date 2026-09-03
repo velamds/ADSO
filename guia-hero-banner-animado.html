@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía — Hero / Banner animado con CSS puro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1220; --surface:#221930; --surface-2:#2c2140; --line:rgba(255,255,255,0.09);
+    --text:#f3ecf9; --text-dim:#a89bc0;
+    --accent:#fb7185; --accent-soft:rgba(251,113,133,0.15); --accent-2:#fbbf24;
+    --ok:#4ade80; --ok-soft:rgba(74,222,128,0.12);
+    --dare:#38bdf8; --dare-soft:rgba(56,189,248,0.12);
+    --tg:#ff9f7a; --at:#7ec8ff; --svv:#a7e3a0;
+    --sel:#7ec8ff; --propc:#ffb37a; --valc:#a7e3a0; --com:#8a86ad; --pu:#8890b8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:radial-gradient(1100px 600px at 85% -10%, rgba(251,113,133,0.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(251,191,36,0.08), transparent 55%), var(--bg);
+    color:var(--text); font-family:'Inter',sans-serif; line-height:1.65;
+  }
+  h1,h2,h3,.mono{font-family:'JetBrains Mono',monospace;}
+
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(26,18,32,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .topbar-inner{max-width:1040px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800;}
+  .brand .chip{background:var(--accent); color:#210f16; padding:2px 8px; border-radius:6px; font-size:.7rem; font-weight:800;}
+  .toc{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{color:var(--text-dim); text-decoration:none; font-size:.76rem; white-space:nowrap; padding:6px 9px; border-radius:8px;}
+  .toc a:hover{color:var(--text); background:var(--surface-2);}
+
+  .hero-top{max-width:1040px; margin:0 auto; padding:56px 24px 30px;}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; color:var(--accent-2); font-family:'JetBrains Mono',monospace; font-size:.8rem; font-weight:700; background:var(--accent-soft); padding:6px 12px; border-radius:999px; margin-bottom:20px;}
+  .hero-top h1{font-size:clamp(1.9rem,4.4vw,2.9rem); line-height:1.14; margin:0 0 16px; font-weight:800; letter-spacing:-0.01em;}
+  .hero-top h1 span{color:var(--accent);}
+  .hero-top p{color:var(--text-dim); font-size:1.03rem; max-width:680px; margin:0 0 18px;}
+  .goal-box{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 22px; font-size:.92rem; color:var(--text-dim); max-width:680px;}
+  .goal-box b{color:var(--text);}
+
+  main{max-width:1040px; margin:0 auto; padding:10px 24px 100px;}
+
+  section.card{
+    background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:32px; margin-bottom:24px; scroll-margin-top:90px; position:relative; overflow:hidden;
+  }
+  section.card::before{content:""; position:absolute; top:0; left:0; width:4px; height:100%; background:linear-gradient(var(--accent),var(--accent-2));}
+  .badge{display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.84rem; color:var(--accent-2); background:#180f1e; border:1px solid var(--line); padding:5px 12px; border-radius:8px; margin-bottom:12px;}
+  section.card h3{font-size:1.25rem; margin:0 0 12px; font-weight:700;}
+  section.card > p.intro{color:var(--text-dim); margin:0 0 16px;}
+  code.inline{font-family:'JetBrains Mono',monospace; background:var(--surface-2); color:var(--sel); padding:2px 6px; border-radius:5px; font-size:.87em;}
+
+  .code-window{background:#150e1c; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:14px 0;}
+  .code-window .bar{display:flex; align-items:center; justify-content:space-between; padding:9px 14px; background:#110b16; border-bottom:1px solid var(--line);}
+  .code-window .dots{display:flex; gap:6px;}
+  .code-window .dot{width:9px; height:9px; border-radius:50%;}
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .code-window .flabel{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--text-dim);}
+  .code-window pre{margin:0; padding:16px; overflow-x:auto; max-height:380px;}
+  .code-window code{font-family:'JetBrains Mono',monospace; font-size:.8rem; line-height:1.65;}
+  .tg{color:var(--tg);} .at{color:var(--at);} .cm{color:var(--com);}
+  .sel{color:var(--sel);} .propc{color:var(--propc);} .valc{color:var(--valc);}
+
+  /* line-by-line explanation */
+  .linebyline{background:var(--surface-2); border-radius:12px; padding:16px 18px; margin:14px 0 0;}
+  .linebyline .lbl-title{font-family:'JetBrains Mono',monospace; font-size:.76rem; font-weight:700; color:var(--accent-2); margin-bottom:10px; text-transform:uppercase; letter-spacing:.04em;}
+  .line-row{display:grid; grid-template-columns:auto 1fr; gap:12px; padding:6px 0; border-top:1px solid var(--line); font-size:.86rem; align-items:baseline;}
+  .line-row:first-of-type{border-top:none;}
+  .line-row .lcode{font-family:'JetBrains Mono',monospace; color:#ffcfa3; background:#0f0913; padding:2px 8px; border-radius:5px; white-space:nowrap;}
+  .line-row .ldesc{color:var(--text-dim);}
+
+  .checkpoint{background:var(--ok-soft); border:1px solid rgba(74,222,128,0.35); border-radius:14px; padding:18px 20px; margin-top:16px;}
+  .checkpoint-title{display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--ok); font-size:.88rem; margin-bottom:10px;}
+  .checkpoint ul{margin:0; padding-left:20px; color:var(--text); font-size:.9rem;}
+  .checkpoint li{margin-bottom:5px;}
+
+  .dare{background:var(--dare-soft); border:1px dashed rgba(56,189,248,0.45); border-radius:14px; padding:16px 20px; margin-top:14px;}
+  .dare-title{display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--dare); font-size:.86rem; margin-bottom:6px;}
+  .dare p{margin:0; color:var(--text); font-size:.9rem;}
+
+  .preview-label{font-family:'JetBrains Mono',monospace; font-size:.73rem; color:var(--text-dim); margin:16px 0 8px; display:flex; align-items:center; gap:6px;}
+  .preview-label::before{content:"●"; color:var(--accent-2); font-size:.55rem;}
+  .frame-wrap{background:#111; border-radius:12px; border:1px solid var(--line); overflow:hidden;}
+  .frame-wrap iframe{width:100%; border:0; display:block;}
+
+  .final-shot{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:32px; text-align:center;}
+  .final-shot h3{font-size:1.35rem; margin:0 0 8px;}
+  .final-shot p{color:var(--text-dim); margin:0 auto 20px; max-width:600px;}
+
+  footer{max-width:1040px; margin:0 auto; padding:20px 24px 70px; color:var(--text-dim); font-size:.87rem; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="chip">▶</span> Hero animado con CSS</div>
+    <nav class="toc">
+      <a href="#p1">Paso 1</a>
+      <a href="#p2">Paso 2</a>
+      <a href="#p3">Paso 3</a>
+      <a href="#p4">Paso 4</a>
+      <a href="#p5">Paso 5</a>
+      <a href="#p6">Paso 6</a>
+      <a href="#final">Resultado</a>
+    </nav>
+  </div>
+</div>
+
+<div class="hero-top">
+  <div class="eyebrow">● Guía paso a paso · 100% CSS, sin JavaScript</div>
+  <h1>Banner (<span>hero</span>) animado con 3-4 imágenes</h1>
+  <p>Vas a construir un banner de portada que rota automáticamente entre varias imágenes en bucle, con texto y un botón superpuestos. Todo el movimiento se logra con <code class="inline">@keyframes</code> de CSS — ni una línea de JavaScript.</p>
+  <div class="goal-box">
+    🎯 Cada paso agrega una sola pieza nueva. Al final de cada uno hay un <b>checkpoint</b> que explica línea por línea lo que acabas de escribir, más un <b>mini reto</b> para que pruebes algo por tu cuenta antes de seguir. No se te entrega el archivo final completo para copiar y pegar — se indica exactamente qué agregar en cada paso, y al final ves el resultado funcionando.
+  </div>
+</div>
+
+<main>
+
+  <!-- PASO 1 -->
+  <section class="card" id="p1">
+    <div class="badge">Paso 1 · Estructura HTML</div>
+    <h3>El contenedor del banner y sus 4 capas de imagen</h3>
+    <p class="intro">El banner es una sección con 4 <code class="inline">&lt;div&gt;</code> vacíos (uno por imagen) y un bloque de texto. Cada imagen ocupará exactamente el mismo espacio, apiladas unas sobre otras como capas — eso lo resolverás con CSS en el paso 2.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu index.html</span></div>
+      <pre><code><span class="tg">&lt;section</span> <span class="at">class</span>=<span class="valc">"hero"</span><span class="tg">&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"slide slide-1"</span><span class="tg">&gt;&lt;/div&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"slide slide-2"</span><span class="tg">&gt;&lt;/div&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"slide slide-3"</span><span class="tg">&gt;&lt;/div&gt;</span>
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"slide slide-4"</span><span class="tg">&gt;&lt;/div&gt;</span>
+
+  <span class="tg">&lt;div</span> <span class="at">class</span>=<span class="valc">"hero-content"</span><span class="tg">&gt;</span>
+    <span class="tg">&lt;h1&gt;</span>Explora el mundo a tu manera<span class="tg">&lt;/h1&gt;</span>
+    <span class="tg">&lt;p&gt;</span>Rutas, guías y experiencias diseñadas para ti.<span class="tg">&lt;/p&gt;</span>
+    <span class="tg">&lt;a</span> <span class="at">href</span>=<span class="valc">"#"</span> <span class="at">class</span>=<span class="valc">"btn"</span><span class="tg">&gt;</span>Ver destinos<span class="tg">&lt;/a&gt;</span>
+  <span class="tg">&lt;/div&gt;</span>
+<span class="tg">&lt;/section&gt;</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">&lt;section class="hero"&gt;</span><span class="ldesc">Es el contenedor de todo el banner. Usamos <code class="inline">&lt;section&gt;</code> porque semánticamente agrupa una parte independiente de la página, y le damos la clase <code class="inline">hero</code> para poder estilizarla luego.</span></div>
+      <div class="line-row"><span class="lcode">&lt;div class="slide slide-1"&gt;</span><span class="ldesc">Cada imagen del carrusel es un <code class="inline">&lt;div&gt;</code> vacío. Tiene <strong>dos</strong> clases: <code class="inline">slide</code> (estilos que comparten las 4 capas) y <code class="inline">slide-1</code> (solo para esta capa: su imagen y su momento de aparición).</span></div>
+      <div class="line-row"><span class="lcode">slide-2, slide-3, slide-4</span><span class="ldesc">Se repite el mismo patrón 3 veces más — un div por cada imagen adicional del banner.</span></div>
+      <div class="line-row"><span class="lcode">&lt;div class="hero-content"&gt;</span><span class="ldesc">El bloque de texto que se verá <em>encima</em> de las imágenes. Va después de los 4 slides en el HTML para que, cuando le des posicionamiento en el paso 4, quede naturalmente por encima en el orden de apilado.</span></div>
+      <div class="line-row"><span class="lcode">&lt;h1&gt;, &lt;p&gt;, &lt;a class="btn"&gt;</span><span class="ldesc">Título, texto de apoyo y un botón — el contenido típico de cualquier hero: mensaje claro + llamado a la acción.</span></div>
+    </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Al abrir el archivo en el navegador verás solo texto plano apilado verticalmente: título, párrafo y un enlace. Es normal — todavía no hay una sola línea de CSS.</li>
+        <li>Cuenta que tengas exactamente 4 <code class="inline">.slide</code> dentro de <code class="inline">.hero</code>, numerados del 1 al 4.</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Sin mirar el paso siguiente: ¿en qué orden crees que deberían ir en el HTML los 4 <code class="inline">.slide</code> y el <code class="inline">.hero-content</code> para que el texto termine visible por encima de las imágenes? Ya lo escribiste arriba — solo confirma que entiendes <em>por qué</em> ese orden importa antes de seguir.</p>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="card" id="p2">
+    <div class="badge">Paso 2 · Apilar las imágenes con position</div>
+    <h3>Convertir los 4 divs en capas superpuestas</h3>
+    <p class="intro">Ahora mismo los 4 <code class="inline">.slide</code> están apilados uno debajo del otro, como bloques normales. Para que ocupen <strong>el mismo lugar exacto</strong>, uno encima del otro, se usa <code class="inline">position: absolute</code> sobre un contenedor con <code class="inline">position: relative</code>.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu estilos.css</span></div>
+      <pre><code><span class="sel">.hero</span> <span class="pu">{</span>
+  <span class="propc">position</span>: <span class="valc">relative</span>;
+  <span class="propc">height</span>: <span class="valc">480px</span>;
+  <span class="propc">overflow</span>: <span class="valc">hidden</span>;
+<span class="pu">}</span>
+
+<span class="sel">.slide</span> <span class="pu">{</span>
+  <span class="propc">position</span>: <span class="valc">absolute</span>;
+  <span class="propc">inset</span>: <span class="valc">0</span>;
+  <span class="propc">opacity</span>: <span class="valc">0</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">.hero → position: relative</span><span class="ldesc">Convierte a <code class="inline">.hero</code> en el "punto de referencia" para cualquier hijo con <code class="inline">position: absolute</code>. Sin esta línea, los slides se posicionarían respecto a toda la página, no respecto al banner.</span></div>
+      <div class="line-row"><span class="lcode">.hero → height: 480px</span><span class="ldesc">Como los slides estarán en <code class="inline">absolute</code> (y eso los saca del flujo normal), el <code class="inline">.hero</code> ya no crece automáticamente según su contenido — necesita una altura fija propia.</span></div>
+      <div class="line-row"><span class="lcode">.hero → overflow: hidden</span><span class="ldesc">Recorta cualquier cosa que se salga de los límites del banner, evitando barras de scroll accidentales.</span></div>
+      <div class="line-row"><span class="lcode">.slide → position: absolute</span><span class="ldesc">Saca a cada slide del flujo normal del documento y lo posiciona respecto al <code class="inline">.hero</code> (gracias al <code class="inline">relative</code> del paso anterior).</span></div>
+      <div class="line-row"><span class="lcode">.slide → inset: 0</span><span class="ldesc">Atajo que equivale a <code class="inline">top:0; right:0; bottom:0; left:0;</code> — estira cada slide para que cubra por completo los cuatro bordes del <code class="inline">.hero</code>.</span></div>
+      <div class="line-row"><span class="lcode">.slide → opacity: 0</span><span class="ldesc">Por defecto, las 4 capas están invisibles (transparencia total). Esto es intencional: en el paso 5, la animación se encargará de mostrarlas una por una.</span></div>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe style="height:200px" srcdoc='<html><head><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:sans-serif;}.hero{position:relative;height:180px;overflow:hidden;background:#ddd;}.slide{position:absolute;inset:0;opacity:0;background:#fb7185;}.slide-1{opacity:1;}</style></head><body><div class="hero"><div class="slide slide-1"></div><div class="slide slide-2"></div></div></body></html>'></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>El banner ahora es un rectángulo de 480px de alto (probablemente gris o vacío, porque los slides no tienen ni color ni imagen todavía).</li>
+        <li>El texto (<code class="inline">.hero-content</code>) puede haberse "escondido" o mezclado — es normal, aún no le diste estilo; se resuelve en el paso 4.</li>
+        <li>Si inspeccionas el HTML en el navegador, los 4 <code class="inline">.slide</code> deberían tener el mismo tamaño y posición exacta, superpuestos.</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Agrega temporalmente <code class="inline">background: red;</code> solo a <code class="inline">.slide-1</code> y súbele la opacidad a <code class="inline">opacity: 1;</code> (solo a esa clase, no a <code class="inline">.slide</code> general). Deberías ver un rectángulo rojo del tamaño exacto del banner. Cuando lo confirmes, quítalo — era solo para comprobar que el posicionamiento funciona.</p>
+    </div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="card" id="p3">
+    <div class="badge">Paso 3 · Imágenes reales + overlay oscuro</div>
+    <h3>Dar a cada capa su imagen de fondo</h3>
+    <p class="intro">Cada <code class="inline">.slide-N</code> recibe una imagen distinta con <code class="inline">background-image</code>. También se agrega un degradado oscuro semitransparente <em>encima</em> de la imagen (con <code class="inline">::after</code>), para que el texto blanco del paso 4 se lea bien sin importar qué tan clara sea la foto.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu estilos.css</span></div>
+      <pre><code><span class="sel">.slide</span> <span class="pu">{</span>
+  <span class="propc">background-size</span>: <span class="valc">cover</span>;
+  <span class="propc">background-position</span>: <span class="valc">center</span>;
+<span class="pu">}</span>
+
+<span class="sel">.slide-1</span> <span class="pu">{</span> <span class="propc">background-image</span>: <span class="valc">url("https://picsum.photos/id/1018/1400/600")</span>; <span class="pu">}</span>
+<span class="sel">.slide-2</span> <span class="pu">{</span> <span class="propc">background-image</span>: <span class="valc">url("https://picsum.photos/id/1015/1400/600")</span>; <span class="pu">}</span>
+<span class="sel">.slide-3</span> <span class="pu">{</span> <span class="propc">background-image</span>: <span class="valc">url("https://picsum.photos/id/1043/1400/600")</span>; <span class="pu">}</span>
+<span class="sel">.slide-4</span> <span class="pu">{</span> <span class="propc">background-image</span>: <span class="valc">url("https://picsum.photos/id/1050/1400/600")</span>; <span class="pu">}</span>
+
+<span class="sel">.hero</span><span class="sel">::after</span> <span class="pu">{</span>
+  <span class="propc">content</span>: <span class="valc">""</span>;
+  <span class="propc">position</span>: <span class="valc">absolute</span>;
+  <span class="propc">inset</span>: <span class="valc">0</span>;
+  <span class="propc">background</span>: <span class="valc">linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55))</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">.slide → background-size: cover</span><span class="ldesc">Escala la imagen para que cubra todo el espacio de la capa sin deformarse, recortando el exceso si su proporción no coincide exactamente con la del banner.</span></div>
+      <div class="line-row"><span class="lcode">.slide → background-position: center</span><span class="ldesc">Cuando se recorta la imagen, esto asegura que el recorte se haga desde el centro (no desde una esquina), manteniendo lo más importante de la foto visible.</span></div>
+      <div class="line-row"><span class="lcode">.slide-1 → background-image: url(...)</span><span class="ldesc">Asigna la imagen específica de esa capa. Cada <code class="inline">slide-N</code> apunta a una URL distinta — así cada capa termina mostrando una foto diferente.</span></div>
+      <div class="line-row"><span class="lcode">.hero::after</span><span class="ldesc"><code class="inline">::after</code> crea un elemento "fantasma" extra, generado por CSS, justo después del contenido real del <code class="inline">.hero</code> — sin tener que agregar un div más en el HTML.</span></div>
+      <div class="line-row"><span class="lcode">content: ""</span><span class="ldesc">Obligatorio para que un <code class="inline">::after</code> exista visualmente. Puede ir vacío: aquí no necesitamos texto, solo la capa de color.</span></div>
+      <div class="line-row"><span class="lcode">position: absolute; inset: 0;</span><span class="ldesc">Igual que con los slides: estira este pseudo-elemento para cubrir todo el banner, encima de las imágenes (por estar declarado después en el HTML/CSS).</span></div>
+      <div class="line-row"><span class="lcode">background: linear-gradient(...)</span><span class="ldesc">Crea un degradado negro semitransparente: más claro arriba (<code class="inline">.25</code> de opacidad) y más oscuro abajo (<code class="inline">.55</code>), donde normalmente va el texto.</span></div>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe style="height:220px" srcdoc='<html><head><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:sans-serif;}.hero{position:relative;height:200px;overflow:hidden;}.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55));}.slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;}.slide-1{opacity:1;background-image:url("https://picsum.photos/id/1018/1400/600");}</style></head><body><div class="hero"><div class="slide slide-1"></div></div></body></html>'></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Deberías ver <strong>una</strong> imagen visible (la del slide que tenga <code class="inline">opacity: 1</code> del reto anterior — si ya lo quitaste, quizás no veas ninguna todavía, y está bien).</li>
+        <li>Sobre la imagen se nota un oscurecimiento gradual de arriba hacia abajo.</li>
+        <li>Cambia temporalmente <code class="inline">opacity: 1</code> en <code class="inline">.slide-2</code>, <code class="inline">.slide-3</code> o <code class="inline">.slide-4</code> para confirmar que cada una carga su propia imagen distinta.</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Reemplaza al menos una de las 4 URLs por una imagen propia (puede ser un enlace directo a cualquier imagen tuya en internet) o cambia el número de <code class="inline">id/XXXX/</code> de picsum.photos por otro que te guste. Después ajusta los dos valores de opacidad del <code class="inline">linear-gradient</code> (por ejemplo a <code class="inline">.4</code> y <code class="inline">.7</code>) y observa cómo cambia el contraste.</p>
+    </div>
+  </section>
+
+  <!-- PASO 4 -->
+  <section class="card" id="p4">
+    <div class="badge">Paso 4 · El texto sobre las imágenes</div>
+    <h3>Centrar y estilizar el contenido del hero</h3>
+    <p class="intro">El bloque <code class="inline">.hero-content</code> también se saca del flujo normal con <code class="inline">position: absolute</code> y se centra con Flexbox. Necesita <code class="inline">z-index</code> para asegurarnos de que quede por encima de las imágenes y del degradado.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu estilos.css</span></div>
+      <pre><code><span class="sel">.hero-content</span> <span class="pu">{</span>
+  <span class="propc">position</span>: <span class="valc">absolute</span>;
+  <span class="propc">inset</span>: <span class="valc">0</span>;
+  <span class="propc">z-index</span>: <span class="valc">2</span>;
+  <span class="propc">display</span>: <span class="valc">flex</span>;
+  <span class="propc">flex-direction</span>: <span class="valc">column</span>;
+  <span class="propc">align-items</span>: <span class="valc">center</span>;
+  <span class="propc">justify-content</span>: <span class="valc">center</span>;
+  <span class="propc">text-align</span>: <span class="valc">center</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+  <span class="propc">padding</span>: <span class="valc">0 24px</span>;
+<span class="pu">}</span>
+<span class="sel">.hero-content h1</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">2.4rem</span>; <span class="propc">margin-bottom</span>: <span class="valc">12px</span>; <span class="pu">}</span>
+<span class="sel">.hero-content p</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">1.05rem</span>; <span class="propc">margin-bottom</span>: <span class="valc">22px</span>; <span class="propc">max-width</span>: <span class="valc">480px</span>; <span class="pu">}</span>
+<span class="sel">.btn</span> <span class="pu">{</span>
+  <span class="propc">background</span>: <span class="valc">#fb7185</span>;
+  <span class="propc">color</span>: <span class="valc">white</span>;
+  <span class="propc">padding</span>: <span class="valc">12px 26px</span>;
+  <span class="propc">border-radius</span>: <span class="valc">999px</span>;
+  <span class="propc">text-decoration</span>: <span class="valc">none</span>;
+  <span class="propc">font-weight</span>: <span class="valc">700</span>;
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">.hero-content → position: absolute; inset: 0;</span><span class="ldesc">Mismo truco que con los slides: se estira para ocupar todo el banner y así poder centrar su contenido dentro de ese espacio completo.</span></div>
+      <div class="line-row"><span class="lcode">z-index: 2</span><span class="ldesc">Define el "orden de apilado". Los slides y el <code class="inline">::after</code> no tienen z-index explícito (equivale a 0), así que este valor de 2 asegura que el texto quede visualmente por encima de todo.</span></div>
+      <div class="line-row"><span class="lcode">display: flex; flex-direction: column;</span><span class="ldesc">Convierte a <code class="inline">.hero-content</code> en un contenedor flex en columna, para apilar título → párrafo → botón verticalmente.</span></div>
+      <div class="line-row"><span class="lcode">align-items: center; justify-content: center;</span><span class="ldesc">Centra el contenido tanto horizontal (<code class="inline">align-items</code>, eje cruzado en modo columna) como verticalmente (<code class="inline">justify-content</code>, eje principal en modo columna) dentro del banner.</span></div>
+      <div class="line-row"><span class="lcode">color: white</span><span class="ldesc">El texto necesita ser claro para leerse sobre fotos y el degradado oscuro del paso 3.</span></div>
+      <div class="line-row"><span class="lcode">.hero-content p → max-width: 480px</span><span class="ldesc">Evita que el párrafo se estire de borde a borde en pantallas anchas — los textos cortos se leen mejor con un ancho limitado.</span></div>
+      <div class="line-row"><span class="lcode">.btn → border-radius: 999px</span><span class="ldesc">Un valor tan alto redondea completamente los extremos del botón, dándole forma de "píldora".</span></div>
+    </div>
+    <div class="preview-label">Checkpoint visual</div>
+    <div class="frame-wrap"><iframe style="height:260px" srcdoc='<html><head><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:sans-serif;}.hero{position:relative;height:240px;overflow:hidden;}.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55));}.slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;}.slide-1{opacity:1;background-image:url("https://picsum.photos/id/1018/1400/600");}.hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;padding:0 24px;}.hero-content h1{font-size:1.6rem;margin-bottom:10px;}.hero-content p{font-size:.9rem;margin-bottom:16px;max-width:340px;}.btn{background:#fb7185;color:white;padding:9px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:.85rem;}</style></head><body><div class="hero"><div class="slide slide-1"></div><div class="hero-content"><h1>Explora el mundo a tu manera</h1><p>Rutas, guias y experiencias disenadas para ti.</p><a href="#" class="btn">Ver destinos</a></div></div></body></html>'></iframe></div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Ahora ves el título, el párrafo y el botón centrados sobre la imagen, legibles gracias al degradado oscuro.</li>
+        <li>El botón tiene forma de píldora y color de acento, distinto al resto del texto.</li>
+        <li>Si el texto no aparece, revisa que <code class="inline">z-index: 2</code> esté puesto — sin eso, las capas de imagen podrían tapar el contenido.</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Agrega una regla <code class="inline">.btn:hover { }</code> con un <code class="inline">background</code> distinto (por ejemplo un tono más oscuro de rosa) y una <code class="inline">transition: background 0.2s ease;</code> en <code class="inline">.btn</code>, para que el cambio de color al pasar el mouse sea suave en vez de instantáneo.</p>
+    </div>
+  </section>
+
+  <!-- PASO 5 -->
+  <section class="card" id="p5">
+    <div class="badge">Paso 5 · La animación con @keyframes</div>
+    <h3>Hacer que las imágenes roten solas</h3>
+    <p class="intro">Este es el paso central. Se define una animación llamada <code class="inline">fundido</code> que hace que un elemento aparezca y desaparezca (fade in / fade out). Luego se aplica a las 4 capas con la <strong>misma</strong> animación pero un <code class="inline">animation-delay</code> distinto en cada una, para que no aparezcan todas al mismo tiempo.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu estilos.css</span></div>
+      <pre><code><span class="cm">@keyframes</span> <span class="valc">fundido</span> <span class="pu">{</span>
+  <span class="propc">0%</span>   <span class="pu">{</span> <span class="propc">opacity</span>: <span class="valc">0</span>; <span class="pu">}</span>
+  <span class="propc">5%</span>   <span class="pu">{</span> <span class="propc">opacity</span>: <span class="valc">1</span>; <span class="pu">}</span>
+  <span class="propc">20%</span>  <span class="pu">{</span> <span class="propc">opacity</span>: <span class="valc">1</span>; <span class="pu">}</span>
+  <span class="propc">25%</span>  <span class="pu">{</span> <span class="propc">opacity</span>: <span class="valc">0</span>; <span class="pu">}</span>
+  <span class="propc">100%</span> <span class="pu">{</span> <span class="propc">opacity</span>: <span class="valc">0</span>; <span class="pu">}</span>
+<span class="pu">}</span>
+
+<span class="sel">.slide</span> <span class="pu">{</span>
+  <span class="propc">animation</span>: <span class="valc">fundido 16s infinite</span>;
+<span class="pu">}</span>
+<span class="sel">.slide-1</span> <span class="pu">{</span> <span class="propc">animation-delay</span>: <span class="valc">0s</span>;  <span class="pu">}</span>
+<span class="sel">.slide-2</span> <span class="pu">{</span> <span class="propc">animation-delay</span>: <span class="valc">4s</span>;  <span class="pu">}</span>
+<span class="sel">.slide-3</span> <span class="pu">{</span> <span class="propc">animation-delay</span>: <span class="valc">8s</span>;  <span class="pu">}</span>
+<span class="sel">.slide-4</span> <span class="pu">{</span> <span class="propc">animation-delay</span>: <span class="valc">12s</span>; <span class="pu">}</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">@keyframes fundido { }</span><span class="ldesc">Define una animación con nombre propio (<code class="inline">fundido</code>) que podrás reutilizar. Dentro se describe cómo cambia la <code class="inline">opacity</code> a lo largo del tiempo, en porcentajes de 0% (inicio) a 100% (fin del ciclo).</span></div>
+      <div class="line-row"><span class="lcode">0% { opacity: 0; }</span><span class="ldesc">Al empezar el ciclo, la capa está totalmente invisible.</span></div>
+      <div class="line-row"><span class="lcode">5% { opacity: 1; }</span><span class="ldesc">Muy rápido (en el primer 5% del tiempo total) pasa a estar completamente visible — esto crea el efecto de aparición suave (fade in), no un salto brusco.</span></div>
+      <div class="line-row"><span class="lcode">20% { opacity: 1; }</span><span class="ldesc">Se mantiene visible sin cambios desde el 5% hasta el 20% del ciclo — es el tiempo que la imagen se queda "quieta" en pantalla.</span></div>
+      <div class="line-row"><span class="lcode">25% { opacity: 0; }</span><span class="ldesc">Entre el 20% y el 25% se desvanece de nuevo (fade out).</span></div>
+      <div class="line-row"><span class="lcode">100% { opacity: 0; }</span><span class="ldesc">Se mantiene invisible el resto del ciclo (75% restante), mientras les toca el turno a las otras 3 capas.</span></div>
+      <div class="line-row"><span class="lcode">.slide → animation: fundido 16s infinite;</span><span class="ldesc">Aplica la animación <code class="inline">fundido</code> a las 4 capas por igual: dura <code class="inline">16s</code> por ciclo completo y <code class="inline">infinite</code> hace que se repita para siempre.</span></div>
+      <div class="line-row"><span class="lcode">.slide-1 → animation-delay: 0s;</span><span class="ldesc">Retrasa el inicio de <em>su propio</em> ciclo de animación. Con 0s, el slide 1 empieza a animarse de inmediato: visible durante el primer 25% de 16s, es decir, los primeros 4 segundos.</span></div>
+      <div class="line-row"><span class="lcode">.slide-2/3/4 → 4s, 8s, 12s</span><span class="ldesc">Cada capa arranca su ciclo 4 segundos después que la anterior. Como cada una solo es visible durante "su" primer 25% del ciclo, el resultado es que se turnan cada 4 segundos sin superponerse — 4 imágenes × 4s = 16s, el mismo total que la duración de la animación.</span></div>
+    </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Sin necesidad de tocar ningún botón, el banner ahora cambia de imagen solo, cada 4 segundos, con un desvanecimiento suave (no un salto brusco).</li>
+        <li>Después de la cuarta imagen, vuelve a la primera y el ciclo se repite indefinidamente.</li>
+        <li>Si ves un "parpadeo" en vez de un fundido suave, revisa que hayas dejado los 5 puntos porcentuales de <code class="inline">@keyframes</code> exactamente como están arriba (0%, 5%, 20%, 25%, 100%).</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Sin ver el resultado todavía: si quisieras que cada imagen se mostrara durante <strong>5 segundos</strong> en vez de 4 (para un total de 20s con 4 imágenes), ¿qué valores cambiarías? Piensa la respuesta, luego pruébala: ajusta <code class="inline">16s</code> a <code class="inline">20s</code> en <code class="inline">animation</code>, y los delays a <code class="inline">0s, 5s, 10s, 15s</code>.</p>
+    </div>
+  </section>
+
+  <!-- PASO 6 -->
+  <section class="card" id="p6">
+    <div class="badge">Paso 6 · Responsive</div>
+    <h3>Que se vea bien también en pantallas pequeñas</h3>
+    <p class="intro">En celulares, un banner de 480px de alto con un título de 2.4rem se ve desproporcionado. Con una <code class="inline">@media query</code> se reduce la altura y el tamaño de fuente solo por debajo de cierto ancho de pantalla.</p>
+    <div class="code-window">
+      <div class="bar"><div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div><span class="flabel">Agrega esto en tu estilos.css</span></div>
+      <pre><code><span class="cm">/* pantallas de 600px o menos */</span>
+<span class="sel">@media (max-width: 600px)</span> <span class="pu">{</span>
+  <span class="sel">.hero</span> <span class="pu">{</span> <span class="propc">height</span>: <span class="valc">340px</span>; <span class="pu">}</span>
+  <span class="sel">.hero-content h1</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">1.5rem</span>; <span class="pu">}</span>
+  <span class="sel">.hero-content p</span> <span class="pu">{</span> <span class="propc">font-size</span>: <span class="valc">.9rem</span>; <span class="pu">}</span>
+<span class="pu">}</span></code></pre>
+    </div>
+    <div class="linebyline">
+      <div class="lbl-title">Línea por línea</div>
+      <div class="line-row"><span class="lcode">@media (max-width: 600px) { }</span><span class="ldesc">Todo lo declarado dentro de estas llaves solo se aplica cuando el ancho de la ventana es de 600px o menos — típico de un celular en vertical.</span></div>
+      <div class="line-row"><span class="lcode">.hero → height: 340px</span><span class="ldesc">Reduce la altura del banner de 480px a 340px, evitando que ocupe demasiada pantalla en un dispositivo pequeño.</span></div>
+      <div class="line-row"><span class="lcode">.hero-content h1/p → font-size más chico</span><span class="ldesc">Reduce el tamaño de letra del título y el párrafo para que quepan cómodamente en un banner más bajo y angosto.</span></div>
+    </div>
+    <div class="checkpoint">
+      <div class="checkpoint-title">✅ Checkpoint</div>
+      <ul>
+        <li>Al achicar la ventana del navegador por debajo de 600px de ancho, el banner debería verse más bajo y el texto más pequeño, pero seguir siendo legible y bien centrado.</li>
+        <li>La animación de las imágenes debe seguir funcionando igual — el <code class="inline">@media</code> no toca nada relacionado con <code class="inline">@keyframes</code> ni <code class="inline">animation</code>.</li>
+      </ul>
+    </div>
+    <div class="dare">
+      <div class="dare-title">🎯 Mini reto</div>
+      <p>Agrega una segunda <code class="inline">@media (max-width: 380px)</code> para celulares muy angostos, que reduzca aún más el <code class="inline">padding</code> horizontal de <code class="inline">.hero-content</code> (por ejemplo a <code class="inline">0 12px</code>) para que el texto no quede pegado a los bordes.</p>
+    </div>
+  </section>
+
+  <!-- RESULTADO FINAL -->
+  <div class="hero-top" id="final" style="padding-top:40px;">
+    <div class="eyebrow">✓ Resultado</div>
+    <h1>Así se ve tu banner terminado</h1>
+    <p>No hay un bloque de código para copiar y pegar aquí a propósito: si seguiste los 6 pasos y cada checkpoint se cumplió, tu banner ya rota solo, con las 4 imágenes en bucle. Este es el resultado en vivo, funcionando exactamente con las reglas que escribiste paso a paso:</p>
+  </div>
+  <section class="final-shot">
+    <div class="frame-wrap">
+      <iframe style="height:420px" srcdoc='<html><head><style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:"Segoe UI",sans-serif;}
+        .hero{position:relative;height:400px;overflow:hidden;}
+        .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55));}
+        .slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:fundido 16s infinite;}
+        .slide-1{background-image:url("https://picsum.photos/id/1018/1400/600");animation-delay:0s;}
+        .slide-2{background-image:url("https://picsum.photos/id/1015/1400/600");animation-delay:4s;}
+        .slide-3{background-image:url("https://picsum.photos/id/1043/1400/600");animation-delay:8s;}
+        .slide-4{background-image:url("https://picsum.photos/id/1050/1400/600");animation-delay:12s;}
+        @keyframes fundido{0%{opacity:0;}5%{opacity:1;}20%{opacity:1;}25%{opacity:0;}100%{opacity:0;}}
+        .hero-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;padding:0 24px;}
+        .hero-content h1{font-size:2.1rem;margin-bottom:12px;}
+        .hero-content p{font-size:1rem;margin-bottom:20px;max-width:440px;}
+        .btn{background:#fb7185;color:white;padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:700;transition:background 0.2s ease;}
+        .btn:hover{background:#e11d48;}
+      </style></head><body>
+        <div class="hero">
+          <div class="slide slide-1"></div>
+          <div class="slide slide-2"></div>
+          <div class="slide slide-3"></div>
+          <div class="slide slide-4"></div>
+          <div class="hero-content">
+            <h1>Explora el mundo a tu manera</h1>
+            <p>Rutas, guias y experiencias disenadas para ti.</p>
+            <a href="#" class="btn">Ver destinos</a>
+          </div>
+        </div>
+      </body></html>'></iframe>
+    </div>
+    <p style="margin-top:18px;">Observa el banner unos segundos: cada 4 de los 16 segundos totales del ciclo, cambia de imagen con un fundido suave, y vuelve a empezar.</p>
+  </section>
+
+</main>
+
+<footer>Guía: Hero / Banner animado con CSS puro · position + @keyframes + animation-delay, sin una sola línea de JavaScript.</footer>
+
+</body>
+</html>
