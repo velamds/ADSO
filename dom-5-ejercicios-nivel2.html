@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manipulación del DOM · Nivel 2 · 5 ejercicios</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #2451c4;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --accent-4: #8a3ec4;
+    --danger: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-header: #282a3e;
+    --code-fg: #cdd6f4;
+    --code-line: #464a63;
+    --kw: #c792ea;
+    --str: #8bd5a0;
+    --fn: #82aaff;
+    --tag: #f07178;
+    --attr: #ffcb6b;
+    --num: #f78c6c;
+    --cm: #6b7089;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #12305e, #2451c4 55%, #4d7ef5);
+    color: white;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 660px; color: #dbe6ff; }
+  .badges { margin-top: 18px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+  }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.96);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+  }
+  nav.toc ul {
+    list-style: none; margin: 0; padding: 10px 16px;
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    max-width: 1000px; margin-inline: auto;
+  }
+  nav.toc a {
+    text-decoration: none; color: var(--ink); font-size: 0.82rem;
+    padding: 6px 12px; border-radius: 8px; border: 1px solid transparent;
+  }
+  nav.toc a:hover { background: #eaf0ff; border-color: var(--border); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px; margin-bottom: 34px;
+    box-shadow: 0 2px 10px rgba(20,40,100,0.05);
+  }
+  .intro-card h2 { margin-top: 0; }
+  .lock-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #fff7e8; border: 1px solid #f2dcae; border-radius: 10px;
+    padding: 12px 14px; margin-top: 14px; font-size: 0.92rem; color: #6b4e13;
+  }
+  .info-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #eef4ff; border: 1px solid #c7d9fb; border-radius: 10px;
+    padding: 12px 14px; margin: 16px 0; font-size: 0.9rem; color: #1c3d85;
+  }
+
+  section.exercise {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 26px 26px 30px; margin-bottom: 40px;
+    box-shadow: 0 2px 14px rgba(20,40,100,0.06);
+    scroll-margin-top: 70px;
+  }
+  .ex-tag {
+    display: inline-block; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  section.exercise h2 { margin: 0 0 6px; font-size: 1.4rem; }
+  section.exercise > p.lead { color: var(--muted); margin-top: 0; }
+
+  h3.subhead {
+    margin: 28px 0 10px; font-size: 1.02rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  /* ---------- Demo en vivo ---------- */
+  .demo {
+    background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px;
+    padding: 18px; margin: 10px 0 20px;
+  }
+  .demo input[type="text"] {
+    padding: 8px 10px; border: 1px solid #c9cce0; border-radius: 8px;
+    font-size: 0.95rem; margin-right: 6px;
+  }
+  .demo button {
+    background: var(--accent); color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+  }
+  .demo button:hover { filter: brightness(1.08); }
+  .demo button:disabled { background: #b9bfd6; cursor: not-allowed; }
+  .demo ul { padding-left: 0; list-style: none; margin: 12px 0 0; }
+
+  /* Ejercicio 1: tareas */
+  .tarea {
+    cursor: pointer; padding: 9px 12px; border-bottom: 1px solid #e5e8f5;
+    border-radius: 6px; user-select: none;
+  }
+  .tarea:hover { background: #eef1fb; }
+  .tarea.completada { text-decoration: line-through; color: #98a0b8; }
+
+  /* Ejercicio 2: productos */
+  #lista-demo2 li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border-bottom: 1px solid #e5e8f5;
+  }
+  .btn-borrar {
+    background: #fbe9ec; color: var(--danger); border: 1px solid #f3c4cd;
+    padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;
+  }
+
+  /* Ejercicio 3: paleta */
+  .paleta { display: flex; gap: 10px; margin-bottom: 14px; }
+  .color-btn {
+    width: 40px; height: 40px; border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 0 0 1px #d7dbee; cursor: pointer; padding: 0;
+  }
+  .vista-previa {
+    width: 100%; height: 70px; border-radius: 10px; background: #e7e9f5;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; transition: background-color .25s;
+  }
+  .control-bloqueo { margin-top: 12px; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
+
+  /* Ejercicio 4: FAQ */
+  .faq-item { border: 1px solid #e5e8f5; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .faq-pregunta {
+    width: 100%; text-align: left; background: #f3f5fc; border: none;
+    padding: 12px 14px; font-weight: 600; cursor: pointer; font-size: 0.92rem;
+  }
+  .faq-pregunta:hover { background: #e9ecf9; }
+  .faq-respuesta {
+    display: none; padding: 0 14px; font-size: 0.9rem; color: var(--muted);
+  }
+  .faq-respuesta.mostrar { display: block; padding: 12px 14px; }
+
+  /* Ejercicio 5: buscador */
+  #lista-demo5 li { padding: 7px 12px; border-bottom: 1px solid #e5e8f5; }
+
+  /* ---------- Bloques de código (candado anti-copia) ---------- */
+  .code-window {
+    border-radius: 12px; overflow: hidden; margin: 10px 0 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .code-header {
+    background: var(--code-header); color: #9aa0c3;
+    padding: 8px 14px; display: flex; align-items: center; gap: 10px;
+    font-family: Consolas, "Courier New", monospace; font-size: 0.75rem;
+  }
+  .code-header .dots span {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px;
+  }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-header .lang { text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
+  .code-header .lock { color: #ffcb6b; }
+
+  .code-body {
+    background: var(--code-bg); padding: 12px 0; overflow-x: auto;
+    font-family: Consolas, "Courier New", monospace; font-size: 0.83rem;
+    -webkit-user-select: none; -moz-user-select: none; user-select: none;
+  }
+  .code-line { display: flex; padding: 1px 16px; white-space: pre; }
+  .code-line .ln {
+    color: var(--code-line); width: 28px; flex-shrink: 0;
+    -webkit-user-select: none; user-select: none;
+  }
+  .code-line .txt { color: var(--code-fg); }
+  .kw { color: var(--kw); }
+  .str { color: var(--str); }
+  .fn  { color: var(--fn); }
+  .tag { color: var(--tag); }
+  .attr{ color: var(--attr); }
+  .num { color: var(--num); }
+  .cm  { color: var(--cm); font-style: italic; }
+
+  .copy-toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #24263a; color: #f1f2fa; padding: 10px 18px; border-radius: 10px;
+    font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 999;
+  }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Explicación línea por línea ---------- */
+  .explain {
+    background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px;
+    padding: 6px 16px; margin: 4px 0 18px;
+  }
+  .explain-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e0e2ef; }
+  .explain-row:last-child { border-bottom: none; }
+  .explain-num {
+    flex-shrink: 0; width: 32px; height: 26px; border-radius: 7px;
+    background: var(--accent); color: white; font-size: 0.68rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .explain-row p { margin: 0; font-size: 0.92rem; }
+  .explain-row code {
+    background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px;
+    font-family: Consolas, monospace; font-size: 0.85rem;
+  }
+
+  /* ---------- Checkpoints ---------- */
+  .checkpoint {
+    background: #eefaf3; border: 1px solid #b9e6cc; border-left: 5px solid var(--accent-2);
+    border-radius: 10px; padding: 18px 20px; margin-top: 22px;
+  }
+  .checkpoint .cp-title {
+    font-weight: 700; color: #146c43; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; font-size: 0.98rem;
+  }
+  .checkpoint p.cp-q { margin: 6px 0 10px; font-weight: 600; }
+  .cp-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .cp-options label {
+    background: white; border: 1px solid #d3e9dd; border-radius: 8px;
+    padding: 8px 12px; cursor: pointer; font-size: 0.9rem;
+  }
+  .cp-options label:hover { border-color: var(--accent-2); }
+  .cp-check-btn {
+    background: var(--accent-2); color: white; border: none; padding: 8px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+  }
+  .cp-feedback { margin-top: 10px; font-size: 0.9rem; font-weight: 600; min-height: 20px; }
+  .cp-feedback.ok { color: #146c43; }
+  .cp-feedback.bad { color: var(--danger); }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>🚀 Manipulación del DOM · Nivel 2</h1>
+  <p>Segunda tanda de 5 ejercicios, un poco más avanzados: seleccionar varios elementos a la vez, delegación de eventos, atributos personalizados, recorrido del árbol del DOM y un buscador en vivo. Sigue siendo HTML + CSS + JavaScript puro.</p>
+  <div class="badges">
+    <span class="badge">querySelectorAll</span>
+    <span class="badge">Delegación de eventos</span>
+    <span class="badge">dataset</span>
+    <span class="badge">Recorrido del DOM</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#ej1">1. Seleccionar varios elementos</a></li>
+    <li><a href="#ej2">2. Delegación de eventos</a></li>
+    <li><a href="#ej3">3. Atributos y dataset</a></li>
+    <li><a href="#ej4">4. Recorrer el DOM</a></li>
+    <li><a href="#ej5">5. Buscador en vivo</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="intro-card">
+    <h2>Antes de empezar</h2>
+    <p>Esta guía asume que ya conoces <code>getElementById</code>, <code>addEventListener</code>, <code>createElement</code>, <code>appendChild</code> y <code>textContent</code> (si no, esos son los cinco ejercicios del nivel 1). Aquí subimos un poco el nivel: vamos a trabajar con <strong>varios elementos a la vez</strong>, a delegar eventos en un contenedor padre, a leer y escribir <strong>atributos</strong>, y a <strong>recorrer</strong> el árbol del DOM entre padres, hijos y hermanos.</p>
+    <div class="lock-note">
+      🔒 <span>El código sigue bloqueado para copiar y pegar. Transcríbelo a mano: en este nivel los detalles de sintaxis importan más (paréntesis, puntos, comillas), y escribirlos tú mismo ayuda a que se fijen.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 1 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej1">
+    <span class="ex-tag" style="background:#2451c4">Ejercicio 1</span>
+    <h2>Seleccionar varios elementos con querySelectorAll</h2>
+    <p class="lead">Hasta ahora seleccionabas un elemento a la vez con <code>getElementById</code>. Ahora usarás <code>querySelectorAll</code> para seleccionar <strong>todos</strong> los elementos que compartan una clase, y <code>forEach</code> para recorrerlos.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <ul>
+        <li class="tarea">Lavar los platos</li>
+        <li class="tarea">Estudiar JavaScript</li>
+        <li class="tarea">Sacar la basura</li>
+      </ul>
+      <button id="btn-marcar-demo1">Marcar todas como completadas</button>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">ul</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span> <span class="attr">class</span>=<span class="str">"tarea"</span>&gt;Lavar los platos&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span> <span class="attr">class</span>=<span class="str">"tarea"</span>&gt;Estudiar JavaScript&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span> <span class="attr">class</span>=<span class="str">"tarea"</span>&gt;Sacar la basura&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&lt;/<span class="tag">ul</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnMarcarTodas"</span>&gt;Marcar todas como completadas&lt;/<span class="tag">button</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">02-04</div><p>Tres elementos <code>&lt;li&gt;</code> que comparten la misma clase <code>tarea</code>. A diferencia de un <code>id</code>, una <code>class</code> sí se puede repetir en varios elementos: por eso es la forma correcta de "agrupar" elementos similares.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p>Un botón para marcar todas las tareas de una vez.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> CSS para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">estilos.css</span><span class="lang">CSS</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">.<span class="attr">tarea</span> {</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;cursor: pointer;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;padding: <span class="num">8px</span>;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">}</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">.<span class="attr">completada</span> {</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;text-decoration: line-through;</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;color: <span class="str">#98a0b8</span>;</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">}</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-04</div><p><code>cursor: pointer</code> hace que el mouse se vea como una manito al pasar sobre la tarea, indicando que se puede hacer clic.</p></div>
+      <div class="explain-row"><div class="explain-num">06-09</div><p><code>.completada</code> es, otra vez, una clase que no está en el HTML al inicio: JavaScript la agregará o quitará con <code>classList</code>.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> tareas = document.<span class="fn">querySelectorAll</span>(<span class="str">".tarea"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> btnMarcarTodas = document.<span class="fn">getElementById</span>(<span class="str">"btnMarcarTodas"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">tareas.<span class="fn">forEach</span>(<span class="kw">function</span> (tarea) {</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;tarea.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;tarea.classList.<span class="fn">toggle</span>(<span class="str">"completada"</span>);</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">});</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">btnMarcarTodas.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">&nbsp;&nbsp;tareas.<span class="fn">forEach</span>(<span class="kw">function</span> (tarea) {</span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;tarea.classList.<span class="fn">add</span>(<span class="str">"completada"</span>);</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p><code>document.querySelectorAll(".tarea")</code> busca <strong>todos</strong> los elementos que tengan <code>class="tarea"</code> (el punto antes de "tarea" indica que es una clase, igual que en CSS) y devuelve una lista de ellos llamada <code>NodeList</code>, guardada en <code>tareas</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>El botón, seleccionado como siempre por su <code>id</code> único.</p></div>
+      <div class="explain-row"><div class="explain-num">04</div><p><code>tareas.forEach(...)</code> recorre la lista y ejecuta la función una vez por cada tarea, pasándola como parámetro (aquí llamado <code>tarea</code>).</p></div>
+      <div class="explain-row"><div class="explain-num">05-07</div><p>Dentro del recorrido, a <strong>cada</strong> tarea se le agrega su propio <code>addEventListener</code>: al hacer clic en ella, alterna (agrega o quita) la clase <code>completada</code> solo sobre sí misma.</p></div>
+      <div class="explain-row"><div class="explain-num">10-14</div><p>El botón "Marcar todas" vuelve a recorrer la misma lista <code>tareas</code> con <code>forEach</code>, pero esta vez usando <code>classList.add</code> (no <code>toggle</code>) para asegurarnos de que todas queden marcadas, sin importar su estado anterior.</p></div>
+    </div>
+
+    <div class="info-note">
+      💡 <span><strong>Dato importante:</strong> <code>tareas</code> es una <em>foto fija</em> de los elementos que existían en el momento en que se ejecutó <code>querySelectorAll</code>. Si más adelante agregas una nueva tarea al HTML con JavaScript, esa tarea nueva <strong>no</strong> tendrá el clic activado automáticamente, porque nunca fue parte de esa lista. Ese problema es justo lo que resuelve la <strong>delegación de eventos</strong> del siguiente ejercicio.</span>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 1</div>
+      <p class="cp-q">¿Cuál es la diferencia principal entre <code>getElementById</code> y <code>querySelectorAll</code>?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp1" value="a"> getElementById es más moderno que querySelectorAll.</label>
+        <label><input type="radio" name="cp1" value="b"> getElementById devuelve un único elemento por su id; querySelectorAll devuelve una lista de todos los elementos que coinciden con un selector CSS.</label>
+        <label><input type="radio" name="cp1" value="c"> No hay ninguna diferencia, son intercambiables siempre.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp1','b','fb1')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb1"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 2 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej2">
+    <span class="ex-tag" style="background:#17a673">Ejercicio 2</span>
+    <h2>Delegación de eventos</h2>
+    <p class="lead">Vamos a construir una lista de productos donde cada uno tiene su botón de eliminar, pero en vez de agregar un <code>addEventListener</code> a cada botón, escucharemos los clics en el contenedor padre (<code>&lt;ul&gt;</code>). Así, incluso los productos agregados después seguirán funcionando.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <input type="text" id="input-demo2" placeholder="Nuevo producto">
+      <button id="btn-agregar-demo2">Agregar</button>
+      <ul id="lista-demo2"></ul>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inputProducto"</span> <span class="attr">placeholder</span>=<span class="str">"Nuevo producto"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnAgregarProducto"</span>&gt;Agregar&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&lt;<span class="tag">ul</span> <span class="attr">id</span>=<span class="str">"listaProductos"</span>&gt;&lt;/<span class="tag">ul</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-03</div><p>Un input, un botón y una lista vacía: la misma base de siempre. Lo distinto está en cómo vamos a escuchar los clics de los botones que se crearán adentro de la lista.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> inputProducto = document.<span class="fn">getElementById</span>(<span class="str">"inputProducto"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> btnAgregar = document.<span class="fn">getElementById</span>(<span class="str">"btnAgregarProducto"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> listaProductos = document.<span class="fn">getElementById</span>(<span class="str">"listaProductos"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">btnAgregar.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> texto = inputProducto.value.<span class="fn">trim</span>();</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;<span class="kw">if</span> (texto === <span class="str">""</span>) <span class="kw">return</span>;</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;listaProductos.<span class="fn">insertAdjacentHTML</span>(<span class="str">"beforeend"</span>, <span class="cm">`&lt;li&gt;${texto} &lt;button class="btn-borrar"&gt;Eliminar&lt;/button&gt;&lt;/li&gt;`</span>);</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">&nbsp;&nbsp;inputProducto.value = <span class="str">""</span>;</span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">});</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">listaProductos.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> (evento) {</span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt">&nbsp;&nbsp;<span class="kw">if</span> (evento.target.classList.<span class="fn">contains</span>(<span class="str">"btn-borrar"</span>)) {</span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;evento.target.<span class="fn">closest</span>(<span class="str">"li"</span>).<span class="fn">remove</span>();</span></div>
+        <div class="code-line"><span class="ln">17</span><span class="txt">&nbsp;&nbsp;}</span></div>
+        <div class="code-line"><span class="ln">18</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-03</div><p>Seleccionamos el input, el botón de agregar y la lista, como siempre.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p>Leemos el texto escrito y le quitamos espacios sobrantes con <code>.trim()</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">07</div><p>Si quedó vacío, salimos de la función sin hacer nada más.</p></div>
+      <div class="explain-row"><div class="explain-num">09</div><p><code>insertAdjacentHTML("beforeend", ...)</code> es otra forma de agregar contenido, distinta de <code>createElement</code> + <code>appendChild</code>: le pasamos directamente un texto con HTML (usando comillas invertidas, o <em>template literal</em>) y lo inserta "justo antes de que termine" el elemento (<code>beforeend</code> significa eso). Aquí insertamos un <code>&lt;li&gt;</code> completo, con el texto del producto y su propio botón "Eliminar" ya incluido.</p></div>
+      <div class="explain-row"><div class="explain-num">11</div><p>Limpiamos el campo de texto.</p></div>
+      <div class="explain-row"><div class="explain-num">14</div><p>Aquí está la delegación: ponemos <strong>un único</strong> <code>addEventListener</code> en <code>listaProductos</code> (el <code>&lt;ul&gt;</code>, que siempre existe), en vez de uno por cada botón "Eliminar" (que se crean después y podrían no existir todavía cuando el script se ejecuta por primera vez).</p></div>
+      <div class="explain-row"><div class="explain-num">15</div><p><code>evento.target</code> es el elemento exacto donde ocurrió el clic. Como el <code>&lt;ul&gt;</code> puede recibir clics en cualquier parte de cualquier <code>&lt;li&gt;</code>, comprobamos si justo ese elemento tiene la clase <code>btn-borrar</code>, es decir, si el clic fue realmente sobre un botón de eliminar.</p></div>
+      <div class="explain-row"><div class="explain-num">16</div><p><code>evento.target.closest("li")</code> sube desde el botón hasta encontrar el <code>&lt;li&gt;</code> que lo contiene, y <code>.remove()</code> lo elimina completo de la página.</p></div>
+    </div>
+
+    <div class="info-note">
+      💡 <span>Compara con el Ejercicio 1: allí cada tarea ya existía en el HTML desde el principio, así que podíamos recorrerlas con <code>forEach</code> y ponerles su propio listener. Aquí los productos <strong>no existen todavía</strong> cuando carga la página, así que delegar el evento al contenedor padre es la única forma de que funcionen sin importar cuántos se agreguen después.</span>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 2</div>
+      <p class="cp-q">¿Por qué la delegación de eventos funciona incluso para productos agregados después de cargar la página?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp2" value="a"> Porque el navegador revisa el HTML cada segundo buscando botones nuevos.</label>
+        <label><input type="radio" name="cp2" value="b"> Porque el listener está en el &lt;ul&gt;, que siempre existe, y los clics dentro de él "burbujean" hasta ese contenedor sin importar cuándo se crearon sus hijos.</label>
+        <label><input type="radio" name="cp2" value="c"> Porque insertAdjacentHTML agrega el evento automáticamente.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp2','b','fb2')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb2"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 3 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej3">
+    <span class="ex-tag" style="background:#8a3ec4">Ejercicio 3</span>
+    <h2>Atributos personalizados con dataset</h2>
+    <p class="lead">Vas a construir un selector de color: cada botón guarda su color en un atributo personalizado <code>data-color</code>, que JavaScript puede leer con <code>dataset</code>. También aprenderás a activar y quitar el atributo <code>disabled</code> con código.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <div class="paleta">
+        <button class="color-btn" data-color="#2451c4" id="cb1"></button>
+        <button class="color-btn" data-color="#17a673" id="cb2"></button>
+        <button class="color-btn" data-color="#d9782d" id="cb3"></button>
+        <button class="color-btn" data-color="#d1435b" id="cb4"></button>
+      </div>
+      <div class="vista-previa" id="vista-previa-demo3">Vista previa</div>
+      <div class="control-bloqueo">
+        <input type="checkbox" id="check-bloquear-demo3">
+        <label for="check-bloquear-demo3">Bloquear paleta</label>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"paleta"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">class</span>=<span class="str">"color-btn"</span> <span class="attr">data-color</span>=<span class="str">"#2451c4"</span>&gt;&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">class</span>=<span class="str">"color-btn"</span> <span class="attr">data-color</span>=<span class="str">"#17a673"</span>&gt;&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">class</span>=<span class="str">"color-btn"</span> <span class="attr">data-color</span>=<span class="str">"#d9782d"</span>&gt;&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&lt;<span class="tag">div</span> <span class="attr">id</span>=<span class="str">"vistaPrevia"</span> <span class="attr">class</span>=<span class="str">"vista-previa"</span>&gt;Vista previa&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"checkbox"</span> <span class="attr">id</span>=<span class="str">"checkBloquear"</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">02-04</div><p>Cada botón tiene <code>data-color="..."</code>. Cualquier atributo que empiece con <code>data-</code> es un atributo personalizado: no significa nada para el navegador, pero nosotros lo usamos para guardar información extra pegada al elemento.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p>Un recuadro que cambiará de color de fondo según el botón elegido.</p></div>
+      <div class="explain-row"><div class="explain-num">07</div><p>Una casilla para bloquear/desbloquear la paleta completa.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> botonesColor = document.<span class="fn">querySelectorAll</span>(<span class="str">".color-btn"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> vistaPrevia = document.<span class="fn">getElementById</span>(<span class="str">"vistaPrevia"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> checkBloquear = document.<span class="fn">getElementById</span>(<span class="str">"checkBloquear"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">botonesColor.<span class="fn">forEach</span>(<span class="kw">function</span> (boton) {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;boton.style.backgroundColor = boton.dataset.color;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;boton.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;vistaPrevia.style.backgroundColor = boton.dataset.color;</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">});</span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">checkBloquear.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">&nbsp;&nbsp;botonesColor.<span class="fn">forEach</span>(<span class="kw">function</span> (boton) {</span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (checkBloquear.checked) {</span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;boton.<span class="fn">setAttribute</span>(<span class="str">"disabled"</span>, <span class="str">"true"</span>);</span></div>
+        <div class="code-line"><span class="ln">17</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;} <span class="kw">else</span> {</span></div>
+        <div class="code-line"><span class="ln">18</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;boton.<span class="fn">removeAttribute</span>(<span class="str">"disabled"</span>);</span></div>
+        <div class="code-line"><span class="ln">19</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;}</span></div>
+        <div class="code-line"><span class="ln">20</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">21</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Seleccionamos todos los botones de color con <code>querySelectorAll</code>, igual que en el Ejercicio 1.</p></div>
+      <div class="explain-row"><div class="explain-num">02-03</div><p>Seleccionamos la vista previa y la casilla de bloqueo por su <code>id</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p><code>boton.dataset.color</code> lee el valor del atributo <code>data-color</code> de ese botón. <code>dataset</code> es una forma abreviada: convierte automáticamente <code>data-color</code> en la propiedad <code>.color</code>. Usamos ese valor para pintar el propio botón al cargar la página, así el usuario ve el color antes de hacer clic.</p></div>
+      <div class="explain-row"><div class="explain-num">08-10</div><p>Al hacer clic en un botón, tomamos su color guardado y lo aplicamos como fondo de la vista previa.</p></div>
+      <div class="explain-row"><div class="explain-num">13</div><p>Escuchamos el evento <code>"change"</code> de la casilla: se dispara cada vez que se marca o desmarca.</p></div>
+      <div class="explain-row"><div class="explain-num">15-19</div><p><code>checkBloquear.checked</code> nos dice si la casilla está marcada (true) o no (false). Si está marcada, usamos <code>setAttribute("disabled", "true")</code> para deshabilitar cada botón; si no, usamos <code>removeAttribute("disabled")</code> para volver a habilitarlo. A diferencia de <code>dataset</code> (para atributos <code>data-*</code> personalizados), <code>setAttribute</code>/<code>removeAttribute</code> funcionan con cualquier atributo del HTML, incluidos los que el navegador sí interpreta, como <code>disabled</code>.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 3</div>
+      <p class="cp-q">¿Cómo se lee desde JavaScript el valor del atributo <code>data-color</code> de un botón?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp3" value="a"> boton.color</label>
+        <label><input type="radio" name="cp3" value="b"> boton.dataset.color</label>
+        <label><input type="radio" name="cp3" value="c"> boton.attributes.color</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp3','b','fb3')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb3"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 4 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej4">
+    <span class="ex-tag" style="background:#d9782d">Ejercicio 4</span>
+    <h2>Recorrer el DOM: padres, hijos y hermanos</h2>
+    <p class="lead">Construirás un acordeón de preguntas frecuentes. Al hacer clic en una pregunta, se muestra su respuesta usando <code>nextElementSibling</code> (el "hermano" siguiente en el HTML), y se cierran las demás respuestas abiertas.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo" id="faq-demo4">
+      <div class="faq-item">
+        <button class="faq-pregunta">¿Qué es el DOM?</button>
+        <div class="faq-respuesta">Es la representación en memoria de la página que JavaScript puede leer y modificar.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-pregunta">¿Qué es un evento?</button>
+        <div class="faq-respuesta">Una acción que ocurre en la página, como un clic, y que JavaScript puede "escuchar".</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-pregunta">¿Qué es la delegación de eventos?</button>
+        <div class="faq-respuesta">Escuchar eventos en un elemento padre en vez de en cada hijo individual.</div>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"faq-item"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">class</span>=<span class="str">"faq-pregunta"</span>&gt;¿Qué es el DOM?&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"faq-respuesta"</span>&gt;Es la representación en memoria de la página...&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"faq-item"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">class</span>=<span class="str">"faq-pregunta"</span>&gt;¿Qué es un evento?&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"faq-respuesta"</span>&gt;Una acción que ocurre en la página...&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&lt;/<span class="tag">div</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-04</div><p>Cada pregunta es un <code>.faq-item</code> que contiene exactamente dos elementos: el botón de la pregunta y, justo después, el <code>&lt;div&gt;</code> con la respuesta. Ese orden es clave para el paso siguiente.</p></div>
+      <div class="explain-row"><div class="explain-num">06-09</div><p>El siguiente ítem del FAQ sigue la misma estructura: pregunta y respuesta como "hermanos" dentro del mismo contenedor.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> CSS para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">estilos.css</span><span class="lang">CSS</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">.<span class="attr">faq-respuesta</span> {</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;display: none;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">}</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">.<span class="attr">faq-respuesta</span>.<span class="attr">mostrar</span> {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;display: block;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">}</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-03</div><p>Por defecto, todas las respuestas están ocultas con <code>display: none</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">05-07</div><p><code>.faq-respuesta.mostrar</code> (sin espacio entre ambas clases) selecciona un elemento que tenga <strong>ambas</strong> clases a la vez. Cuando JavaScript agregue la clase <code>mostrar</code> a una respuesta, esta regla la vuelve visible.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> preguntas = document.<span class="fn">querySelectorAll</span>(<span class="str">".faq-pregunta"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">preguntas.<span class="fn">forEach</span>(<span class="kw">function</span> (pregunta) {</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&nbsp;&nbsp;pregunta.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> respuestaActual = pregunta.nextElementSibling;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> yaAbierta = respuestaActual.classList.<span class="fn">contains</span>(<span class="str">"mostrar"</span>);</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;preguntas.<span class="fn">forEach</span>(<span class="kw">function</span> (otraPregunta) {</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otraPregunta.nextElementSibling.classList.<span class="fn">remove</span>(<span class="str">"mostrar"</span>);</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (!yaAbierta) {</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;respuestaActual.classList.<span class="fn">add</span>(<span class="str">"mostrar"</span>);</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;}</span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Seleccionamos todos los botones de pregunta.</p></div>
+      <div class="explain-row"><div class="explain-num">03-04</div><p>Recorremos cada pregunta y le agregamos su propio listener de clic (aquí sí podemos hacerlo así porque las preguntas ya existen desde el inicio, como en el Ejercicio 1).</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p><code>pregunta.nextElementSibling</code> es el elemento que está justo después de <code>pregunta</code> dentro del mismo padre, ignorando espacios en blanco. Como en el HTML la respuesta siempre va inmediatamente después de su pregunta, esto nos da exactamente el <code>&lt;div&gt;</code> de la respuesta correspondiente.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p>Antes de cambiar nada, guardamos si esa respuesta ya estaba abierta (<code>yaAbierta</code>), para decidir después si debemos volver a abrirla o dejarla cerrada.</p></div>
+      <div class="explain-row"><div class="explain-num">08-10</div><p>Recorremos <strong>todas</strong> las preguntas y a la respuesta de cada una (usando de nuevo <code>nextElementSibling</code>) le quitamos la clase <code>mostrar</code>. Esto cierra todas las respuestas, incluida la que se acaba de clicar.</p></div>
+      <div class="explain-row"><div class="explain-num">12-14</div><p>Si la respuesta que se clicó <strong>no</strong> estaba abierta antes (<code>!yaAbierta</code>), la volvemos a abrir agregándole la clase <code>mostrar</code>. Si sí estaba abierta, no hacemos nada más y se queda cerrada: así el mismo clic sirve para abrir y para cerrar.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 4</div>
+      <p class="cp-q">¿Por qué el código guarda el valor de <code>yaAbierta</code> ANTES de cerrar todas las respuestas?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp4" value="a"> Por prevención, pero no cambia nada si se guarda después.</label>
+        <label><input type="radio" name="cp4" value="b"> Porque si se guarda después de cerrar todas, yaAbierta siempre daría false, y la pregunta clicada nunca podría quedar cerrada al volver a hacer clic.</label>
+        <label><input type="radio" name="cp4" value="c"> Porque JavaScript exige declarar las variables antes que cualquier bucle.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp4','b','fb4')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb4"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 5 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej5">
+    <span class="ex-tag" style="background:#146c43">Ejercicio 5</span>
+    <h2>Buscador en vivo (filtro de lista)</h2>
+    <p class="lead">El ejercicio más completo de este nivel: una lista se filtra en tiempo real mientras el usuario escribe, combinando el evento <code>input</code>, <code>querySelectorAll</code>, texto en minúsculas y mostrar/ocultar elementos con <code>style.display</code>.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <input type="text" id="buscador-demo5" placeholder="Buscar fruta...">
+      <ul id="lista-demo5">
+        <li>Manzana</li>
+        <li>Banano</li>
+        <li>Fresa</li>
+        <li>Uva</li>
+        <li>Mango</li>
+      </ul>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"buscador"</span> <span class="attr">placeholder</span>=<span class="str">"Buscar fruta..."</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">ul</span> <span class="attr">id</span>=<span class="str">"listaBuscable"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span>&gt;Manzana&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span>&gt;Banano&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span>&gt;Fresa&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span>&gt;Uva&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">li</span>&gt;Mango&lt;/<span class="tag">li</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&lt;/<span class="tag">ul</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>El campo donde el usuario escribirá su búsqueda.</p></div>
+      <div class="explain-row"><div class="explain-num">02-08</div><p>Una lista fija de frutas, ya presente en el HTML desde el inicio (no se crean con JavaScript en este ejercicio).</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> buscador = document.<span class="fn">getElementById</span>(<span class="str">"buscador"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> items = document.<span class="fn">querySelectorAll</span>(<span class="str">"#listaBuscable li"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">buscador.<span class="fn">addEventListener</span>(<span class="str">"input"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> texto = buscador.value.<span class="fn">toLowerCase</span>();</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;items.<span class="fn">forEach</span>(<span class="kw">function</span> (item) {</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> contenido = item.textContent.<span class="fn">toLowerCase</span>();</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> coincide = contenido.<span class="fn">includes</span>(texto);</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;item.style.display = coincide ? <span class="str">"list-item"</span> : <span class="str">"none"</span>;</span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Seleccionamos el campo de búsqueda.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p><code>"#listaBuscable li"</code> es un selector CSS compuesto: significa "todos los <code>&lt;li&gt;</code> que estén dentro del elemento con id <code>listaBuscable</code>". Guardamos esa lista completa de frutas en <code>items</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">04</div><p>Usamos el evento <code>"input"</code>, no <code>"change"</code>: <code>input</code> se dispara con <strong>cada</strong> tecla que el usuario presiona, mientras que <code>change</code> solo se dispara cuando el campo pierde el foco. Para un filtro en vivo necesitamos reaccionar en cada tecla.</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p>Convertimos lo que escribió el usuario a minúsculas con <code>toLowerCase()</code>, para que la búsqueda no distinga entre mayúsculas y minúsculas (que "uva" también encuentre "Uva").</p></div>
+      <div class="explain-row"><div class="explain-num">07</div><p>Recorremos cada fruta de la lista para decidir, una por una, si debe mostrarse u ocultarse.</p></div>
+      <div class="explain-row"><div class="explain-num">08</div><p>Tomamos el texto de esa fruta y también lo pasamos a minúsculas, para comparar en igualdad de condiciones.</p></div>
+      <div class="explain-row"><div class="explain-num">09</div><p><code>contenido.includes(texto)</code> devuelve <code>true</code> si <code>contenido</code> contiene en algún punto el texto buscado (por ejemplo, "mango".includes("man") es true).</p></div>
+      <div class="explain-row"><div class="explain-num">11</div><p>Esta línea usa un <strong>operador ternario</strong>: es una forma corta de escribir un if/else en una sola línea. Se lee así: "si <code>coincide</code> es verdadero, usa <code>'list-item'</code>; si no, usa <code>'none'</code>". El resultado se asigna directamente a <code>item.style.display</code>, mostrando u ocultando la fruta según si coincide con la búsqueda.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 5</div>
+      <p class="cp-q">¿Por qué este ejercicio usa el evento "input" en vez de "change" para el buscador?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp5" value="a"> Porque "change" no existe para campos de texto.</label>
+        <label><input type="radio" name="cp5" value="b"> Porque "input" se dispara con cada tecla presionada, lo cual es necesario para un filtro que reacciona mientras el usuario escribe.</label>
+        <label><input type="radio" name="cp5" value="c"> No hay ninguna razón, ambos eventos son exactamente iguales.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp5','b','fb5')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb5"></p>
+    </div>
+  </section>
+
+  <hr class="divider">
+  <p style="text-align:center; color:var(--muted);">✅ Con estos 5 ejercicios ya sabes seleccionar grupos de elementos, delegar eventos, trabajar con atributos personalizados, recorrer el árbol del DOM y construir un filtro en vivo. El siguiente paso natural sería combinar todo esto con datos que vienen de un servidor (fetch/APIs).</p>
+
+</main>
+
+<footer>Guía práctica de manipulación del DOM · Nivel 2 · HTML + CSS + JavaScript puro</footer>
+
+<div class="copy-toast" id="copyToast">✋ Este código es para transcribir a mano, no para copiar.</div>
+
+<script>
+  /* =========================================================
+     CANDADO ANTI COPIAR/PEGAR EN LOS BLOQUES DE CÓDIGO
+     ========================================================= */
+  const toast = document.getElementById("copyToast");
+  let toastTimer = null;
+  function mostrarToast() {
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  document.querySelectorAll(".code-lock").forEach(function (bloque) {
+    bloque.addEventListener("copy", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("cut", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("contextmenu", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("dragstart", function (e) { e.preventDefault(); });
+    bloque.addEventListener("selectstart", function (e) { e.preventDefault(); });
+  });
+
+  /* =========================================================
+     CHECKPOINTS
+     ========================================================= */
+  function revisarCheckpoint(nombreGrupo, valorCorrecto, idFeedback) {
+    const seleccionado = document.querySelector('input[name="' + nombreGrupo + '"]:checked');
+    const feedback = document.getElementById(idFeedback);
+
+    if (!seleccionado) {
+      feedback.textContent = "Selecciona una opción antes de comprobar.";
+      feedback.className = "cp-feedback bad";
+      return;
+    }
+
+    if (seleccionado.value === valorCorrecto) {
+      feedback.textContent = "✅ ¡Correcto! Vas por buen camino.";
+      feedback.className = "cp-feedback ok";
+    } else {
+      feedback.textContent = "❌ No es esa. Vuelve a leer la explicación línea por línea e inténtalo de nuevo.";
+      feedback.className = "cp-feedback bad";
+    }
+  }
+
+  /* =========================================================
+     EJERCICIO 1: demo en vivo
+     ========================================================= */
+  const tareasDemo1 = document.querySelectorAll("#ej1 .tarea");
+  const btnMarcarDemo1 = document.getElementById("btn-marcar-demo1");
+
+  tareasDemo1.forEach(function (tarea) {
+    tarea.addEventListener("click", function () {
+      tarea.classList.toggle("completada");
+    });
+  });
+
+  btnMarcarDemo1.addEventListener("click", function () {
+    tareasDemo1.forEach(function (tarea) {
+      tarea.classList.add("completada");
+    });
+  });
+
+  /* =========================================================
+     EJERCICIO 2: demo en vivo
+     ========================================================= */
+  const inputDemo2 = document.getElementById("input-demo2");
+  const btnAgregarDemo2 = document.getElementById("btn-agregar-demo2");
+  const listaDemo2 = document.getElementById("lista-demo2");
+
+  btnAgregarDemo2.addEventListener("click", function () {
+    const texto = inputDemo2.value.trim();
+    if (texto === "") return;
+
+    listaDemo2.insertAdjacentHTML("beforeend", `<li>${texto} <button class="btn-borrar">Eliminar</button></li>`);
+
+    inputDemo2.value = "";
+  });
+
+  listaDemo2.addEventListener("click", function (evento) {
+    if (evento.target.classList.contains("btn-borrar")) {
+      evento.target.closest("li").remove();
+    }
+  });
+
+  /* =========================================================
+     EJERCICIO 3: demo en vivo
+     ========================================================= */
+  const botonesColorDemo3 = document.querySelectorAll("#ej3 .color-btn");
+  const vistaPreviaDemo3 = document.getElementById("vista-previa-demo3");
+  const checkBloquearDemo3 = document.getElementById("check-bloquear-demo3");
+
+  botonesColorDemo3.forEach(function (boton) {
+    boton.style.backgroundColor = boton.dataset.color;
+
+    boton.addEventListener("click", function () {
+      vistaPreviaDemo3.style.backgroundColor = boton.dataset.color;
+    });
+  });
+
+  checkBloquearDemo3.addEventListener("change", function () {
+    botonesColorDemo3.forEach(function (boton) {
+      if (checkBloquearDemo3.checked) {
+        boton.setAttribute("disabled", "true");
+      } else {
+        boton.removeAttribute("disabled");
+      }
+    });
+  });
+
+  /* =========================================================
+     EJERCICIO 4: demo en vivo
+     ========================================================= */
+  const preguntasDemo4 = document.querySelectorAll("#faq-demo4 .faq-pregunta");
+
+  preguntasDemo4.forEach(function (pregunta) {
+    pregunta.addEventListener("click", function () {
+      const respuestaActual = pregunta.nextElementSibling;
+      const yaAbierta = respuestaActual.classList.contains("mostrar");
+
+      preguntasDemo4.forEach(function (otraPregunta) {
+        otraPregunta.nextElementSibling.classList.remove("mostrar");
+      });
+
+      if (!yaAbierta) {
+        respuestaActual.classList.add("mostrar");
+      }
+    });
+  });
+
+  /* =========================================================
+     EJERCICIO 5: demo en vivo
+     ========================================================= */
+  const buscadorDemo5 = document.getElementById("buscador-demo5");
+  const itemsDemo5 = document.querySelectorAll("#lista-demo5 li");
+
+  buscadorDemo5.addEventListener("input", function () {
+    const texto = buscadorDemo5.value.toLowerCase();
+
+    itemsDemo5.forEach(function (item) {
+      const contenido = item.textContent.toLowerCase();
+      const coincide = contenido.includes(texto);
+
+      item.style.display = coincide ? "list-item" : "none";
+    });
+  });
+</script>
+</body>
+</html>
