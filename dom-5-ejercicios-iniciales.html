@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manipulación del DOM · 5 ejercicios paso a paso</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #4a3fcf;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --danger: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-header: #282a3e;
+    --code-fg: #cdd6f4;
+    --code-line: #464a63;
+    --kw: #c792ea;
+    --str: #8bd5a0;
+    --fn: #82aaff;
+    --tag: #f07178;
+    --attr: #ffcb6b;
+    --num: #f78c6c;
+    --cm: #6b7089;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+  }
+
+  a { color: var(--accent); }
+
+  /* ---------- Layout general ---------- */
+  header.hero {
+    background: linear-gradient(135deg, #372f8f, #4a3fcf 55%, #6c5ce7);
+    color: white;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 640px; color: #e4e1ff; }
+  .badges { margin-top: 18px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+  }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.96);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(4px);
+  }
+  nav.toc ul {
+    list-style: none; margin: 0; padding: 10px 16px;
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    max-width: 1000px; margin-inline: auto;
+  }
+  nav.toc a {
+    text-decoration: none; color: var(--ink); font-size: 0.82rem;
+    padding: 6px 12px; border-radius: 8px; border: 1px solid transparent;
+  }
+  nav.toc a:hover { background: #eef0ff; border-color: var(--border); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px; margin-bottom: 34px;
+    box-shadow: 0 2px 10px rgba(30,20,80,0.04);
+  }
+  .intro-card h2 { margin-top: 0; }
+  .lock-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #fff7e8; border: 1px solid #f2dcae; border-radius: 10px;
+    padding: 12px 14px; margin-top: 14px; font-size: 0.92rem; color: #6b4e13;
+  }
+
+  section.exercise {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 26px 26px 30px; margin-bottom: 40px;
+    box-shadow: 0 2px 14px rgba(30,20,80,0.05);
+    scroll-margin-top: 70px;
+  }
+  .ex-tag {
+    display: inline-block; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  section.exercise h2 { margin: 0 0 6px; font-size: 1.4rem; }
+  section.exercise > p.lead { color: var(--muted); margin-top: 0; }
+
+  h3.subhead {
+    margin: 28px 0 10px; font-size: 1.02rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  /* ---------- Demo en vivo ---------- */
+  .demo {
+    background: #fafbff; border: 1px dashed #c7cbe8; border-radius: 12px;
+    padding: 18px; margin: 10px 0 20px;
+  }
+  .demo input[type="text"] {
+    padding: 8px 10px; border: 1px solid #c9cce0; border-radius: 8px;
+    font-size: 0.95rem; margin-right: 6px;
+  }
+  .demo button {
+    background: var(--accent); color: white; border: none;
+    padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+  }
+  .demo button.secondary { background: #565a77; }
+  .demo button:hover { filter: brightness(1.08); }
+  .demo ul { padding-left: 20px; }
+  .demo li { margin: 6px 0; display: flex; align-items: center; gap: 8px; }
+  .demo li button {
+    background: #f1f2fa; color: #444; border: 1px solid #d8dae8;
+    padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+  }
+  .caja-demo {
+    display: inline-block; padding: 16px 22px; background: #eceefb;
+    border-radius: 10px; transition: background-color .25s;
+    font-weight: 600;
+  }
+  .caja-demo.resaltado { border: 3px solid var(--accent-3); font-weight: 700; }
+  #mensaje-demo5 { font-weight: 600; min-height: 22px; }
+
+  /* ---------- Bloques de código (candado anti-copia) ---------- */
+  .code-window {
+    border-radius: 12px; overflow: hidden; margin: 10px 0 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .code-header {
+    background: var(--code-header); color: #9aa0c3;
+    padding: 8px 14px; display: flex; align-items: center; gap: 10px;
+    font-family: Consolas, "Courier New", monospace; font-size: 0.75rem;
+  }
+  .code-header .dots span {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px;
+  }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-header .lang { text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
+  .code-header .lock { color: #ffcb6b; }
+
+  .code-body {
+    background: var(--code-bg); padding: 12px 0; overflow-x: auto;
+    font-family: Consolas, "Courier New", monospace; font-size: 0.83rem;
+    /* candado anti copiar/pegar */
+    -webkit-user-select: none; -moz-user-select: none; user-select: none;
+  }
+  .code-line { display: flex; padding: 1px 16px; white-space: pre; }
+  .code-line .ln {
+    color: var(--code-line); width: 28px; flex-shrink: 0;
+    -webkit-user-select: none; user-select: none;
+  }
+  .code-line .txt { color: var(--code-fg); }
+  .kw { color: var(--kw); }
+  .str { color: var(--str); }
+  .fn  { color: var(--fn); }
+  .tag { color: var(--tag); }
+  .attr{ color: var(--attr); }
+  .num { color: var(--num); }
+  .cm  { color: var(--cm); font-style: italic; }
+
+  .copy-toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #24263a; color: #f1f2fa; padding: 10px 18px; border-radius: 10px;
+    font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 999;
+  }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Explicación línea por línea ---------- */
+  .explain {
+    background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px;
+    padding: 6px 16px; margin: 4px 0 18px;
+  }
+  .explain-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e0e2ef; }
+  .explain-row:last-child { border-bottom: none; }
+  .explain-num {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 7px;
+    background: var(--accent); color: white; font-size: 0.72rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .explain-row p { margin: 0; font-size: 0.92rem; }
+  .explain-row code {
+    background: #eceefb; color: #3b3580; padding: 1px 5px; border-radius: 5px;
+    font-family: Consolas, monospace; font-size: 0.85rem;
+  }
+
+  /* ---------- Checkpoints ---------- */
+  .checkpoint {
+    background: #eefaf3; border: 1px solid #b9e6cc; border-left: 5px solid var(--accent-2);
+    border-radius: 10px; padding: 18px 20px; margin-top: 22px;
+  }
+  .checkpoint .cp-title {
+    font-weight: 700; color: #146c43; display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; font-size: 0.98rem;
+  }
+  .checkpoint p.cp-q { margin: 6px 0 10px; font-weight: 600; }
+  .cp-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .cp-options label {
+    background: white; border: 1px solid #d3e9dd; border-radius: 8px;
+    padding: 8px 12px; cursor: pointer; font-size: 0.9rem;
+  }
+  .cp-options label:hover { border-color: var(--accent-2); }
+  .cp-check-btn {
+    background: var(--accent-2); color: white; border: none; padding: 8px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+  }
+  .cp-feedback { margin-top: 10px; font-size: 0.9rem; font-weight: 600; min-height: 20px; }
+  .cp-feedback.ok { color: #146c43; }
+  .cp-feedback.bad { color: var(--danger); }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>🧩 Manipulación del DOM con JavaScript</h1>
+  <p>5 ejercicios explicados línea por línea, con HTML y CSS puro (sin frameworks). Pensados para dar tus primeros pasos con el DOM.</p>
+  <div class="badges">
+    <span class="badge">HTML</span>
+    <span class="badge">CSS</span>
+    <span class="badge">JavaScript</span>
+    <span class="badge">Sin librerías</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#ej1">1. Seleccionar y cambiar texto</a></li>
+    <li><a href="#ej2">2. Cambiar estilos</a></li>
+    <li><a href="#ej3">3. Crear elementos</a></li>
+    <li><a href="#ej4">4. Eliminar elementos</a></li>
+    <li><a href="#ej5">5. Formulario con validación</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="intro-card">
+    <h2>¿Qué es el DOM?</h2>
+    <p>Cuando el navegador carga una página HTML, construye en memoria una representación de esa página en forma de árbol de objetos: el <strong>DOM</strong> (Document Object Model). JavaScript puede leer y modificar ese árbol: cambiar texto, estilos, crear elementos nuevos o eliminarlos. Eso es "manipular el DOM".</p>
+    <p>En esta guía vas a practicar con 5 ejercicios, cada uno con una <strong>demo en vivo</strong> que puedes probar, el <strong>código completo</strong> para transcribir, la <strong>explicación de cada línea</strong> y un <strong>checkpoint</strong> para comprobar que entendiste.</p>
+    <div class="lock-note">
+      🔒 <span>El código de los ejercicios está bloqueado para copiar y pegar a propósito. La idea es que lo <strong>transcribas a mano</strong> en tu propio editor: escribir cada línea te obliga a leerla con atención y ayuda mucho más a memorizar la sintaxis que un copiar-pegar.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 1 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej1">
+    <span class="ex-tag" style="background:#4a3fcf">Ejercicio 1</span>
+    <h2>Seleccionar un elemento y cambiar su texto</h2>
+    <p class="lead">Aprenderás a "atrapar" un elemento del HTML desde JavaScript usando su <code>id</code>, y a cambiar el texto que muestra.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <h4 id="titulo-demo1" style="margin:0 0 12px;">Hola, soy un título</h4>
+      <button id="btn-demo1">Cambiar texto</button>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header">
+        <span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        <span class="fname">index.html</span>
+        <span class="lang">HTML</span>
+        <span class="lock">🔒</span>
+      </div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">h2</span> <span class="attr">id</span>=<span class="str">"titulo"</span>&gt;Hola, soy un título&lt;/<span class="tag">h2</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnCambiar"</span>&gt;Cambiar texto&lt;/<span class="tag">button</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Un encabezado <code>&lt;h2&gt;</code> con <code>id="titulo"</code>. Ese <code>id</code> es el "nombre único" que usaremos desde JavaScript para encontrarlo.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Un botón con <code>id="btnCambiar"</code>. Al hacer clic en él, va a ejecutarse nuestra función de JavaScript.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header">
+        <span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        <span class="fname">script.js</span>
+        <span class="lang">JavaScript</span>
+        <span class="lock">🔒</span>
+      </div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> titulo = document.<span class="fn">getElementById</span>(<span class="str">"titulo"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> boton = document.<span class="fn">getElementById</span>(<span class="str">"btnCambiar"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">boton.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;titulo.textContent = <span class="str">"¡El texto ha cambiado!"</span>;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p><code>document</code> representa toda la página. <code>document.getElementById("titulo")</code> busca el elemento cuyo <code>id</code> es <code>"titulo"</code> y lo guarda en la constante <code>titulo</code>. A partir de aquí, la palabra <code>titulo</code> en el código ES ese elemento del HTML.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Lo mismo, pero para el botón: buscamos el elemento con <code>id="btnCambiar"</code> y lo guardamos en <code>boton</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">04</div><p><code>addEventListener</code> significa "escuchar un evento". Aquí le decimos al botón: "cuando ocurra un <code>click</code>, ejecuta la función que viene a continuación". Esa función (sin nombre, por eso se llama función anónima) es el segundo argumento.</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p><code>textContent</code> es una propiedad de cualquier elemento que representa su texto visible. Al asignarle un nuevo valor con <code>=</code>, reemplazamos el texto que tenía el <code>&lt;h2&gt;</code> por el nuevo.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p>Cerramos primero la función (<code>}</code>) y luego los paréntesis de <code>addEventListener(...)</code> con <code>)</code>, y terminamos la instrucción con <code>;</code>.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 1</div>
+      <p class="cp-q">Si en el HTML cambias <code>id="btnCambiar"</code> por <code>id="botonCambiar"</code> pero olvidas actualizar el JavaScript, ¿qué va a pasar?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp1" value="a"> El botón cambiará de color automáticamente.</label>
+        <label><input type="radio" name="cp1" value="b"> getElementById("btnCambiar") devolverá null y el clic no hará nada.</label>
+        <label><input type="radio" name="cp1" value="c"> El navegador corrige el error automáticamente.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp1','b','fb1')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb1"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 2 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej2">
+    <span class="ex-tag" style="background:#17a673">Ejercicio 2</span>
+    <h2>Cambiar estilos con JavaScript</h2>
+    <p class="lead">Verás dos formas de cambiar la apariencia de un elemento: modificando su estilo directamente (<code>style</code>) o activando/desactivando una clase CSS (<code>classList</code>).</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <p><span class="caja-demo" id="caja-demo2">Soy una caja</span></p>
+      <button id="btn-color-demo2">Cambiar color</button>
+      <button id="btn-resaltar-demo2" class="secondary">Activar/Desactivar resaltado</button>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">div</span> <span class="attr">id</span>=<span class="str">"caja"</span> <span class="attr">class</span>=<span class="str">"caja"</span>&gt;Soy una caja&lt;/<span class="tag">div</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnColor"</span>&gt;Cambiar color&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnResaltar"</span>&gt;Activar/Desactivar resaltado&lt;/<span class="tag">button</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>El <code>&lt;div&gt;</code> tiene dos atributos: <code>id="caja"</code> (para seleccionarlo desde JS) y <code>class="caja"</code> (para darle estilo desde CSS). Son cosas distintas: el <code>id</code> es único en la página, la <code>class</code> se puede repetir en varios elementos.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Botón que cambiará el color de fondo de la caja.</p></div>
+      <div class="explain-row"><div class="explain-num">03</div><p>Botón que activará o desactivará una clase CSS de resaltado.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> CSS para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">estilos.css</span><span class="lang">CSS</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">.<span class="attr">caja</span> {</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;padding: <span class="num">20px</span>;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;background-color: <span class="str">#eceefb</span>;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&nbsp;&nbsp;border-radius: <span class="num">8px</span>;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&nbsp;&nbsp;transition: background-color <span class="num">0.3s</span>;</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">}</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">.<span class="attr">resaltado</span> {</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;border: <span class="num">3px</span> solid orange;</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;font-weight: bold;</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">}</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p><code>.caja</code> con un punto selecciona cualquier elemento que tenga <code>class="caja"</code>, y define su apariencia inicial.</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p><code>transition</code> hace que el cambio de color se vea suave (0.3 segundos) en lugar de instantáneo.</p></div>
+      <div class="explain-row"><div class="explain-num">08</div><p><code>.resaltado</code> es una clase que <strong>no</strong> está puesta en el HTML desde el principio. JavaScript la va a agregar o quitar dinámicamente.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> caja = document.<span class="fn">getElementById</span>(<span class="str">"caja"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> btnColor = document.<span class="fn">getElementById</span>(<span class="str">"btnColor"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> btnResaltar = document.<span class="fn">getElementById</span>(<span class="str">"btnResaltar"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">btnColor.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;caja.style.backgroundColor = <span class="str">"lightblue"</span>;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">});</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">btnResaltar.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;caja.classList.<span class="fn">toggle</span>(<span class="str">"resaltado"</span>);</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Guardamos la caja en una variable, igual que en el ejercicio 1.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Guardamos el botón de color.</p></div>
+      <div class="explain-row"><div class="explain-num">03</div><p>Guardamos el botón de resaltado.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p><code>caja.style.backgroundColor</code> cambia directamente el estilo <em>en línea</em> del elemento (como si escribieras <code>style="background-color: lightblue"</code> en el HTML). Nota que en JS la propiedad se escribe en "camelCase" (<code>backgroundColor</code>), mientras que en CSS se escribe con guion (<code>background-color</code>).</p></div>
+      <div class="explain-row"><div class="explain-num">10</div><p><code>classList.toggle("resaltado")</code> es un interruptor: si la caja no tiene la clase <code>resaltado</code>, la agrega; si ya la tiene, la quita. Por eso cada clic activa o desactiva el efecto.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 2</div>
+      <p class="cp-q">¿Cuál es la principal ventaja de usar <code>classList.toggle()</code> en vez de cambiar <code>style</code> directamente?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp2" value="a"> classList.toggle() es más rápido de escribir, nada más.</label>
+        <label><input type="radio" name="cp2" value="b"> Permite reutilizar estilos definidos en el CSS y mantener el diseño separado del JS.</label>
+        <label><input type="radio" name="cp2" value="c"> style ya no funciona en navegadores modernos.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp2','b','fb2')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb2"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 3 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej3">
+    <span class="ex-tag" style="background:#d9782d">Ejercicio 3</span>
+    <h2>Crear elementos dinámicamente</h2>
+    <p class="lead">Vas a construir una mini lista de frutas: el usuario escribe un nombre y JavaScript crea un nuevo elemento <code>&lt;li&gt;</code> y lo agrega a la lista.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <input type="text" id="input-demo3" placeholder="Escribe una fruta">
+      <button id="btn-demo3">Agregar</button>
+      <ul id="lista-demo3"></ul>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inputFruta"</span> <span class="attr">placeholder</span>=<span class="str">"Escribe una fruta"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnAgregar"</span>&gt;Agregar&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&lt;<span class="tag">ul</span> <span class="attr">id</span>=<span class="str">"listaFrutas"</span>&gt;&lt;/<span class="tag">ul</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Un campo de texto. <code>placeholder</code> es el texto gris de ejemplo que se ve cuando está vacío; no es su valor real.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>El botón que dispara la acción de agregar.</p></div>
+      <div class="explain-row"><div class="explain-num">03</div><p>Una lista <code>&lt;ul&gt;</code> completamente vacía. Cada fruta que agreguemos se convertirá en un <code>&lt;li&gt;</code> dentro de ella.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">"inputFruta"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> boton = document.<span class="fn">getElementById</span>(<span class="str">"btnAgregar"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> lista = document.<span class="fn">getElementById</span>(<span class="str">"listaFrutas"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">boton.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> texto = input.value;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;<span class="kw">if</span> (texto === <span class="str">""</span>) {</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span>;</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;}</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> item = document.<span class="fn">createElement</span>(<span class="str">"li"</span>);</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">&nbsp;&nbsp;item.textContent = texto;</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">&nbsp;&nbsp;lista.<span class="fn">appendChild</span>(item);</span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">&nbsp;&nbsp;input.value = <span class="str">""</span>;</span></div>
+        <div class="code-line"><span class="ln">17</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p>Guardamos el campo de texto en <code>input</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Guardamos el botón en <code>boton</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">03</div><p>Guardamos la lista <code>&lt;ul&gt;</code> en <code>lista</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p><code>input.value</code> lee lo que el usuario escribió en el campo de texto en este momento, y lo guarda en <code>texto</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">08-10</div><p>Comprobamos si <code>texto</code> está vacío. Si es así, <code>return</code> termina la función inmediatamente, sin crear ningún elemento. Esto evita agregar frutas "en blanco" a la lista.</p></div>
+      <div class="explain-row"><div class="explain-num">12</div><p><code>document.createElement("li")</code> crea un nuevo elemento <code>&lt;li&gt;</code> en memoria. Todavía no se ve en la página: solo existe como un objeto de JavaScript.</p></div>
+      <div class="explain-row"><div class="explain-num">13</div><p>Le damos contenido al <code>&lt;li&gt;</code> asignando el texto que escribió el usuario.</p></div>
+      <div class="explain-row"><div class="explain-num">14</div><p><code>lista.appendChild(item)</code> inserta ese <code>&lt;li&gt;</code> como el último hijo de la lista. <strong>Este es el paso que realmente lo hace aparecer en la página</strong>; sin él, el elemento creado en la línea 12 nunca se vería.</p></div>
+      <div class="explain-row"><div class="explain-num">16</div><p>Vaciamos el campo de texto asignándole una cadena vacía, para que quede listo para escribir la siguiente fruta.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 3</div>
+      <p class="cp-q">Si borras la línea <code>lista.appendChild(item);</code> pero dejas todo lo demás igual, ¿qué pasará al hacer clic en "Agregar"?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp3" value="a"> Aparecerá un error y la página dejará de funcionar.</label>
+        <label><input type="radio" name="cp3" value="b"> El elemento se crea en memoria pero nunca se muestra en la página.</label>
+        <label><input type="radio" name="cp3" value="c"> La fruta se agrega igual, solo que sin estilos.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp3','b','fb3')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb3"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 4 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej4">
+    <span class="ex-tag" style="background:#d1435b">Ejercicio 4</span>
+    <h2>Eliminar elementos del DOM</h2>
+    <p class="lead">Vamos a mejorar la lista del ejercicio anterior agregando un botón "❌" a cada fruta, para poder eliminarla.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <input type="text" id="input-demo4" placeholder="Escribe una fruta">
+      <button id="btn-demo4">Agregar</button>
+      <ul id="lista-demo4"></ul>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inputFruta"</span> <span class="attr">placeholder</span>=<span class="str">"Escribe una fruta"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"btnAgregar"</span>&gt;Agregar&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&lt;<span class="tag">ul</span> <span class="attr">id</span>=<span class="str">"listaFrutas"</span>&gt;&lt;/<span class="tag">ul</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-03</div><p>Exactamente el mismo HTML del ejercicio 3. Lo único que cambia es el JavaScript: ahora cada <code>&lt;li&gt;</code> creado incluirá también su propio botón de borrar.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">"inputFruta"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> boton = document.<span class="fn">getElementById</span>(<span class="str">"btnAgregar"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> lista = document.<span class="fn">getElementById</span>(<span class="str">"listaFrutas"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">boton.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> texto = input.value;</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt">&nbsp;&nbsp;<span class="kw">if</span> (texto === <span class="str">""</span>) <span class="kw">return</span>;</span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> item = document.<span class="fn">createElement</span>(<span class="str">"li"</span>);</span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;item.textContent = texto;</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> btnBorrar = document.<span class="fn">createElement</span>(<span class="str">"button"</span>);</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">&nbsp;&nbsp;btnBorrar.textContent = <span class="str">"❌"</span>;</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt">&nbsp;&nbsp;btnBorrar.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, <span class="kw">function</span> () {</span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;item.<span class="fn">remove</span>();</span></div>
+        <div class="code-line"><span class="ln">17</span><span class="txt">&nbsp;&nbsp;});</span></div>
+        <div class="code-line"><span class="ln">18</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">19</span><span class="txt">&nbsp;&nbsp;item.<span class="fn">appendChild</span>(btnBorrar);</span></div>
+        <div class="code-line"><span class="ln">20</span><span class="txt">&nbsp;&nbsp;lista.<span class="fn">appendChild</span>(item);</span></div>
+        <div class="code-line"><span class="ln">21</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">22</span><span class="txt">&nbsp;&nbsp;input.value = <span class="str">""</span>;</span></div>
+        <div class="code-line"><span class="ln">23</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-10</div><p>Igual que en el ejercicio 3: seleccionamos los elementos, leemos el texto, validamos que no esté vacío y creamos el <code>&lt;li&gt;</code> con su texto.</p></div>
+      <div class="explain-row"><div class="explain-num">12</div><p>Creamos un nuevo elemento <code>&lt;button&gt;</code> en memoria: será el botón de borrar de esta fruta en particular.</p></div>
+      <div class="explain-row"><div class="explain-num">13</div><p>Le ponemos como texto el emoji "❌", para que se vea como un botón de eliminar.</p></div>
+      <div class="explain-row"><div class="explain-num">15-17</div><p>Le agregamos su propio <code>addEventListener</code> a este botón, en el mismo momento en que lo creamos. Cuando se haga clic en él, se ejecutará <code>item.remove()</code>. Como <code>item</code> es la variable del <code>&lt;li&gt;</code> que estamos construyendo en <strong>esta misma vuelta</strong> del clic, cada botón de borrar "recuerda" a cuál fruta pertenece (esto se llama <em>closure</em>, o cierre).</p></div>
+      <div class="explain-row"><div class="explain-num">16</div><p><code>item.remove()</code> es un método moderno que elimina el elemento directamente del DOM, sin necesidad de preguntarle a su elemento padre.</p></div>
+      <div class="explain-row"><div class="explain-num">19</div><p>Metemos el botón de borrar <strong>dentro</strong> del <code>&lt;li&gt;</code>, como su hijo.</p></div>
+      <div class="explain-row"><div class="explain-num">20</div><p>Ahora sí, insertamos el <code>&lt;li&gt;</code> completo (con su texto y su botón de borrar ya dentro) en la lista.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 4</div>
+      <p class="cp-q">¿Por qué el botón "❌" de cada fruta borra <em>esa</em> fruta específica y no otra?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp4" value="a"> Porque JavaScript adivina cuál fruta quiere borrar el usuario.</label>
+        <label><input type="radio" name="cp4" value="b"> Porque su función de clic fue creada dentro del mismo bloque donde existe la variable item de esa fruta en particular.</label>
+        <label><input type="radio" name="cp4" value="c"> Porque todos los botones "❌" están conectados entre sí.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp4','b','fb4')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb4"></p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EJERCICIO 5 -->
+  <!-- ============================================================ -->
+  <section class="exercise" id="ej5">
+    <span class="ex-tag" style="background:#146c43">Ejercicio 5</span>
+    <h2>Formulario con validación básica</h2>
+    <p class="lead">Ejercicio final: un formulario que valida que el usuario haya escrito su nombre antes de mostrar un mensaje de bienvenida, evitando que la página se recargue.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Demo en vivo</h3>
+    <div class="demo">
+      <form id="form-demo5">
+        <input type="text" id="input-nombre-demo5" placeholder="Tu nombre">
+        <button type="submit">Enviar</button>
+      </form>
+      <p id="mensaje-demo5"></p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> HTML para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">index.html</span><span class="lang">HTML</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt">&lt;<span class="tag">form</span> <span class="attr">id</span>=<span class="str">"formNombre"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inputNombre"</span> <span class="attr">placeholder</span>=<span class="str">"Tu nombre"</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt">&nbsp;&nbsp;&lt;<span class="tag">button</span> <span class="attr">type</span>=<span class="str">"submit"</span>&gt;Enviar&lt;/<span class="tag">button</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt">&lt;/<span class="tag">form</span>&gt;</span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">&lt;<span class="tag">p</span> <span class="attr">id</span>=<span class="str">"mensaje"</span>&gt;&lt;/<span class="tag">p</span>&gt;</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01</div><p><code>&lt;form&gt;</code> agrupa el campo y el botón; cuando el botón dentro de él tiene <code>type="submit"</code>, hacer clic dispara automáticamente el evento <code>submit</code> del formulario.</p></div>
+      <div class="explain-row"><div class="explain-num">02</div><p>Campo donde el usuario escribe su nombre.</p></div>
+      <div class="explain-row"><div class="explain-num">03</div><p><code>type="submit"</code> convierte este botón en el "botón de envío" del formulario.</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p>Un párrafo vacío donde vamos a mostrar el mensaje de bienvenida o de error.</p></div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> JavaScript para transcribir</h3>
+    <div class="code-window code-lock">
+      <div class="code-header"><span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span><span class="fname">script.js</span><span class="lang">JavaScript</span><span class="lock">🔒</span></div>
+      <div class="code-body">
+        <div class="code-line"><span class="ln">01</span><span class="txt"><span class="kw">const</span> formulario = document.<span class="fn">getElementById</span>(<span class="str">"formNombre"</span>);</span></div>
+        <div class="code-line"><span class="ln">02</span><span class="txt"><span class="kw">const</span> inputNombre = document.<span class="fn">getElementById</span>(<span class="str">"inputNombre"</span>);</span></div>
+        <div class="code-line"><span class="ln">03</span><span class="txt"><span class="kw">const</span> mensaje = document.<span class="fn">getElementById</span>(<span class="str">"mensaje"</span>);</span></div>
+        <div class="code-line"><span class="ln">04</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">05</span><span class="txt">formulario.<span class="fn">addEventListener</span>(<span class="str">"submit"</span>, <span class="kw">function</span> (evento) {</span></div>
+        <div class="code-line"><span class="ln">06</span><span class="txt">&nbsp;&nbsp;evento.<span class="fn">preventDefault</span>();</span></div>
+        <div class="code-line"><span class="ln">07</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">08</span><span class="txt">&nbsp;&nbsp;<span class="kw">const</span> nombre = inputNombre.value.<span class="fn">trim</span>();</span></div>
+        <div class="code-line"><span class="ln">09</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">10</span><span class="txt">&nbsp;&nbsp;<span class="kw">if</span> (nombre === <span class="str">""</span>) {</span></div>
+        <div class="code-line"><span class="ln">11</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;mensaje.textContent = <span class="str">"Por favor escribe tu nombre."</span>;</span></div>
+        <div class="code-line"><span class="ln">12</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;mensaje.style.color = <span class="str">"red"</span>;</span></div>
+        <div class="code-line"><span class="ln">13</span><span class="txt">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span>;</span></div>
+        <div class="code-line"><span class="ln">14</span><span class="txt">&nbsp;&nbsp;}</span></div>
+        <div class="code-line"><span class="ln">15</span><span class="txt"></span></div>
+        <div class="code-line"><span class="ln">16</span><span class="txt">&nbsp;&nbsp;mensaje.textContent = <span class="str">"¡Hola, "</span> + nombre + <span class="str">"! Bienvenido."</span>;</span></div>
+        <div class="code-line"><span class="ln">17</span><span class="txt">&nbsp;&nbsp;mensaje.style.color = <span class="str">"green"</span>;</span></div>
+        <div class="code-line"><span class="ln">18</span><span class="txt">&nbsp;&nbsp;inputNombre.value = <span class="str">""</span>;</span></div>
+        <div class="code-line"><span class="ln">19</span><span class="txt">});</span></div>
+      </div>
+    </div>
+    <div class="explain">
+      <div class="explain-row"><div class="explain-num">01-03</div><p>Seleccionamos el formulario, el campo de nombre y el párrafo de mensaje, como en los ejercicios anteriores.</p></div>
+      <div class="explain-row"><div class="explain-num">05</div><p>Escuchamos el evento <code>"submit"</code> del formulario. Esta vez la función sí recibe un parámetro, al que llamamos <code>evento</code>: es un objeto que el navegador crea automáticamente con información sobre lo que ocurrió.</p></div>
+      <div class="explain-row"><div class="explain-num">06</div><p><code>evento.preventDefault()</code> cancela el comportamiento por defecto de un formulario, que es recargar la página al enviarse. Sin esta línea, la página se recargaría y perderíamos el control con JavaScript.</p></div>
+      <div class="explain-row"><div class="explain-num">08</div><p>Leemos el valor del campo con <code>.value</code> y le aplicamos <code>.trim()</code>, un método que quita espacios en blanco al inicio y al final (así " Ana " se convierte en "Ana").</p></div>
+      <div class="explain-row"><div class="explain-num">10-14</div><p>Si después de quitar espacios el nombre quedó vacío, mostramos un mensaje de error en rojo y salimos de la función con <code>return</code>, sin llegar a mostrar el mensaje de bienvenida.</p></div>
+      <div class="explain-row"><div class="explain-num">16</div><p>Si el nombre sí es válido, construimos el mensaje de bienvenida uniendo texto y variable con el operador <code>+</code>.</p></div>
+      <div class="explain-row"><div class="explain-num">17</div><p>Pintamos el mensaje de verde para indicar éxito.</p></div>
+      <div class="explain-row"><div class="explain-num">18</div><p>Limpiamos el campo de texto para dejarlo listo por si se quiere volver a usar.</p></div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="cp-title">🧩 Checkpoint 5</div>
+      <p class="cp-q">¿Qué pasaría si quitas la línea <code>evento.preventDefault();</code>?</p>
+      <div class="cp-options">
+        <label><input type="radio" name="cp5" value="a"> Nada, el formulario funcionaría exactamente igual.</label>
+        <label><input type="radio" name="cp5" value="b"> El validador de nombre dejaría de funcionar.</label>
+        <label><input type="radio" name="cp5" value="c"> Al enviar el formulario, la página se recargaría y el mensaje nunca se vería.</label>
+      </div>
+      <button class="cp-check-btn" onclick="revisarCheckpoint('cp5','c','fb5')">Comprobar respuesta</button>
+      <p class="cp-feedback" id="fb5"></p>
+    </div>
+  </section>
+
+  <hr class="divider">
+  <p style="text-align:center; color:var(--muted);">✅ Completa los 5 checkpoints y habrás recorrido lo esencial para empezar a manipular el DOM: seleccionar, leer, cambiar estilos, crear, eliminar y validar formularios.</p>
+
+</main>
+
+<footer>Guía práctica de manipulación del DOM · HTML + CSS + JavaScript puro</footer>
+
+<div class="copy-toast" id="copyToast">✋ Este código es para transcribir a mano, no para copiar.</div>
+
+<script>
+  /* =========================================================
+     CANDADO ANTI COPIAR/PEGAR EN LOS BLOQUES DE CÓDIGO
+     ========================================================= */
+  const toast = document.getElementById("copyToast");
+  let toastTimer = null;
+  function mostrarToast() {
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+
+  document.querySelectorAll(".code-lock").forEach(function (bloque) {
+    bloque.addEventListener("copy", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("cut", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("contextmenu", function (e) { e.preventDefault(); mostrarToast(); });
+    bloque.addEventListener("dragstart", function (e) { e.preventDefault(); });
+    bloque.addEventListener("selectstart", function (e) { e.preventDefault(); });
+  });
+
+  /* =========================================================
+     CHECKPOINTS: comprobar respuesta seleccionada
+     ========================================================= */
+  function revisarCheckpoint(nombreGrupo, valorCorrecto, idFeedback) {
+    const seleccionado = document.querySelector('input[name="' + nombreGrupo + '"]:checked');
+    const feedback = document.getElementById(idFeedback);
+
+    if (!seleccionado) {
+      feedback.textContent = "Selecciona una opción antes de comprobar.";
+      feedback.className = "cp-feedback bad";
+      return;
+    }
+
+    if (seleccionado.value === valorCorrecto) {
+      feedback.textContent = "✅ ¡Correcto! Vas por buen camino.";
+      feedback.className = "cp-feedback ok";
+    } else {
+      feedback.textContent = "❌ No es esa. Vuelve a leer la explicación línea por línea e inténtalo de nuevo.";
+      feedback.className = "cp-feedback bad";
+    }
+  }
+
+  /* =========================================================
+     EJERCICIO 1: demo en vivo
+     ========================================================= */
+  const tituloDemo1 = document.getElementById("titulo-demo1");
+  const botonDemo1 = document.getElementById("btn-demo1");
+
+  botonDemo1.addEventListener("click", function () {
+    tituloDemo1.textContent = "¡El texto ha cambiado!";
+  });
+
+  /* =========================================================
+     EJERCICIO 2: demo en vivo
+     ========================================================= */
+  const cajaDemo2 = document.getElementById("caja-demo2");
+  const btnColorDemo2 = document.getElementById("btn-color-demo2");
+  const btnResaltarDemo2 = document.getElementById("btn-resaltar-demo2");
+
+  btnColorDemo2.addEventListener("click", function () {
+    cajaDemo2.style.backgroundColor = "lightblue";
+  });
+
+  btnResaltarDemo2.addEventListener("click", function () {
+    cajaDemo2.classList.toggle("resaltado");
+  });
+
+  /* =========================================================
+     EJERCICIO 3: demo en vivo
+     ========================================================= */
+  const inputDemo3 = document.getElementById("input-demo3");
+  const btnDemo3 = document.getElementById("btn-demo3");
+  const listaDemo3 = document.getElementById("lista-demo3");
+
+  btnDemo3.addEventListener("click", function () {
+    const texto = inputDemo3.value;
+    if (texto === "") return;
+
+    const item = document.createElement("li");
+    item.textContent = texto;
+    listaDemo3.appendChild(item);
+
+    inputDemo3.value = "";
+  });
+
+  /* =========================================================
+     EJERCICIO 4: demo en vivo
+     ========================================================= */
+  const inputDemo4 = document.getElementById("input-demo4");
+  const btnDemo4 = document.getElementById("btn-demo4");
+  const listaDemo4 = document.getElementById("lista-demo4");
+
+  btnDemo4.addEventListener("click", function () {
+    const texto = inputDemo4.value;
+    if (texto === "") return;
+
+    const item = document.createElement("li");
+    item.textContent = texto;
+
+    const btnBorrar = document.createElement("button");
+    btnBorrar.textContent = "❌";
+
+    btnBorrar.addEventListener("click", function () {
+      item.remove();
+    });
+
+    item.appendChild(btnBorrar);
+    listaDemo4.appendChild(item);
+
+    inputDemo4.value = "";
+  });
+
+  /* =========================================================
+     EJERCICIO 5: demo en vivo
+     ========================================================= */
+  const formDemo5 = document.getElementById("form-demo5");
+  const inputNombreDemo5 = document.getElementById("input-nombre-demo5");
+  const mensajeDemo5 = document.getElementById("mensaje-demo5");
+
+  formDemo5.addEventListener("submit", function (evento) {
+    evento.preventDefault();
+
+    const nombre = inputNombreDemo5.value.trim();
+
+    if (nombre === "") {
+      mensajeDemo5.textContent = "Por favor escribe tu nombre.";
+      mensajeDemo5.style.color = "red";
+      return;
+    }
+
+    mensajeDemo5.textContent = "¡Hola, " + nombre + "! Bienvenido.";
+    mensajeDemo5.style.color = "green";
+    inputNombreDemo5.value = "";
+  });
+</script>
+</body>
+</html>
