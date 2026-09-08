@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Retos de manipulación del DOM · Resuélvelos tú mismo</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #7b2ff7;
+    --facil: #17a673;
+    --media: #d9782d;
+    --dificil: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-fg: #cdd6f4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-user-select: none; -moz-user-select: none; user-select: none;
+  }
+  textarea, input { user-select: text; -webkit-user-select: text; }
+
+  header.hero {
+    background: linear-gradient(135deg, #33115e, #7b2ff7 55%, #a466f0);
+    color: white; padding: 46px 24px 38px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 680px; color: #eadfff; }
+  .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; }
+
+  #devtools-warning {
+    display: none; position: sticky; top: 0; z-index: 100;
+    background: #fff3cd; color: #664d03; text-align: center;
+    padding: 8px 14px; font-size: 0.85rem; border-bottom: 1px solid #f3d98b;
+  }
+
+  nav.toc { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(4px); }
+  nav.toc ul { list-style: none; margin: 0; padding: 10px 14px; display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; max-width: 1050px; margin-inline: auto; }
+  nav.toc a { text-decoration: none; color: var(--ink); font-size: 0.76rem; padding: 5px 10px; border-radius: 8px; }
+  nav.toc a:hover { background: #f1e8ff; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 34px; box-shadow: 0 2px 10px rgba(60,20,120,0.05); }
+  .intro-card h2 { margin-top: 0; }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 12px; margin-top: 14px; }
+  .rule { background: #faf7ff; border: 1px solid #e6d9fb; border-radius: 10px; padding: 12px 14px; font-size: 0.87rem; }
+  .rule b { display: block; margin-bottom: 4px; color: #5b21b6; }
+  .lock-note { display: flex; gap: 10px; align-items: flex-start; background: #fff7e8; border: 1px solid #f2dcae; border-radius: 10px; padding: 12px 14px; margin-top: 16px; font-size: 0.9rem; color: #6b4e13; }
+  .entrega-unica { display: flex; gap: 10px; align-items: flex-start; background: #eefaf3; border: 1px solid #b9e6cc; border-radius: 10px; padding: 14px 16px; margin-top: 16px; font-size: 0.9rem; color: #146c43; }
+  .entrega-unica code { background: #d9f0e3; padding: 1px 6px; border-radius: 5px; }
+
+  section.exercise { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 24px 28px; margin-bottom: 36px; box-shadow: 0 2px 14px rgba(60,20,120,0.06); scroll-margin-top: 70px; }
+  section.exercise.resuelto { border-left: 5px solid var(--facil); }
+  .ex-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .ex-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .marcar-resuelto { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  section.exercise h2 { margin: 0 0 4px; font-size: 1.3rem; }
+  .basado-en { font-size: 0.76rem; color: #8a8fa3; margin: 0 0 10px; }
+  section.exercise > p.lead { color: var(--ink); margin-top: 0; }
+
+  h3.subhead { margin: 22px 0 10px; font-size: 0.98rem; display: flex; align-items: center; gap: 8px; }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  .req-list { background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px 12px 30px; margin: 0; font-size: 0.9rem; }
+  .req-list li { margin-bottom: 4px; }
+  .req-list code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.85rem; }
+
+  .demo { background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px; padding: 16px; }
+  .demo input[type="text"] { padding: 7px 9px; border: 1px solid #c9cce0; border-radius: 7px; font-size: 0.9rem; }
+  .demo button { background: var(--accent); color: white; border: none; padding: 7px 14px; border-radius: 7px; font-size: 0.86rem; cursor: pointer; }
+  .demo button:hover { filter: brightness(1.08); }
+  .demo ul { padding-left: 0; list-style: none; margin: 10px 0 0; }
+  .demo li { padding: 6px 10px; border-bottom: 1px solid #e5e8f5; display: flex; align-items: center; justify-content: space-between; }
+
+  .hints { display: flex; flex-direction: column; gap: 6px; }
+  .hint-btn { align-self: flex-start; background: #fff3e0; color: #93590a; border: 1px solid #f3d9a8; padding: 7px 14px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+  .hint-btn:hover { background: #ffe8c2; }
+  .hint-text { background: #fffaf0; border: 1px solid #f3d9a8; border-radius: 8px; padding: 10px 14px; font-size: 0.88rem; margin: 0; color: #5c4108; }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<div id="devtools-warning">⚠️ Parece que tienes las herramientas de desarrollador abiertas. Ciérralas para mantener el reto justo contigo mismo/a.</div>
+
+<header class="hero">
+  <h1>🏆 10 retos de manipulación del DOM</h1>
+  <p>Aquí no hay código para transcribir: tienes que escribir tu propia solución en tu propio editor. Puedes pedir pistas y comparar con el resultado esperado. El entregable final es un único repositorio de GitHub con los 10 ejercicios resueltos. Todo basado en las ideas de las guías 1 y 2.</p>
+  <div class="badges">
+    <span class="badge">Sin soluciones</span>
+    <span class="badge">Con pistas</span>
+    <span class="badge">1 repositorio para los 10</span>
+    <span class="badge">Copiar/Inspeccionar bloqueado</span>
+  </div>
+</header>
+
+<nav class="toc"><ul id="nav-ejercicios"></ul></nav>
+
+<main>
+  <div class="intro-card">
+    <h2>Cómo funciona esta guía</h2>
+    <div class="rules">
+      <div class="rule"><b>1. Lee el enunciado</b>Cada reto explica qué debe hacer tu página y qué requisitos debe cumplir.</div>
+      <div class="rule"><b>2. Mira el resultado esperado</b>Es una demo funcional que puedes probar. Te muestra el comportamiento, no el código.</div>
+      <div class="rule"><b>3. Pide pistas si te atoras</b>Cada ejercicio tiene hasta 3 pistas progresivas. Ninguna te da la solución completa.</div>
+      <div class="rule"><b>4. Resuelve en tu propio editor</b>Escribe tu HTML, CSS y JavaScript en tu computador, con VS Code o el editor que uses normalmente.</div>
+    </div>
+    <div class="entrega-unica">
+      📦 <span><strong>Entregable:</strong> no se entrega ejercicio por ejercicio. Debes crear <strong>un único repositorio de GitHub</strong> que contenga los 10 ejercicios resueltos (por ejemplo, una carpeta por ejercicio: <code>ejercicio-1/</code>, <code>ejercicio-2/</code>, etc.). Lo que se entrega es el enlace a ese repositorio.</span>
+    </div>
+    <div class="lock-note">
+      🔒 <span>Copiar/pegar y las herramientas de inspección están bloqueadas en esta página a propósito (clic derecho, atajos de DevTools, selección de texto). El objetivo es que pienses y escribas tu propia solución en tu editor, no que la copies de algún lado.</span>
+    </div>
+  </div>
+
+  <div id="contenedor-ejercicios"></div>
+
+  <hr class="divider">
+  <p style="text-align:center; color:var(--muted);">🎯 Si resolviste los 10 retos sin ver ninguna pista, ¡dominas los fundamentos del DOM! Si usaste pistas, no pasa nada: vuelve a intentar el ejercicio desde cero en un par de días, sin mirarlas.</p>
+</main>
+
+<footer>10 retos prácticos de manipulación del DOM · Basados en las guías 1 y 2 · HTML + CSS + JavaScript puro</footer>
+
+<script>
+/* =========================================================
+   DATOS DE LOS 10 EJERCICIOS
+   ========================================================= */
+var ejercicios = [
+  {
+    titulo: "Contador de clics",
+    color: "#17a673", dificultad: "Fácil",
+    basadoEn: "Guía 1 · Ejercicio 1 (seleccionar y cambiar texto)",
+    enunciado: "Crea un botón que, cada vez que se le haga clic, aumente un contador y muestre el nuevo total en pantalla.",
+    requisitos: [
+      "Debe existir un botón y un elemento de texto que muestre el número de clics.",
+      "El contador debe iniciar en 0 y aumentar de 1 en 1 con cada clic.",
+      "El texto debe actualizarse inmediatamente después de cada clic, sin recargar la página."
+    ],
+    hints: [
+      "Declara una variable <code>contador = 0</code> fuera de la función del evento, para que conserve su valor entre clics.",
+      "Escucha el evento <code>\"click\"</code> del botón con <code>addEventListener</code>.",
+      "Dentro del evento, incrementa <code>contador</code> y actualiza el <code>textContent</code> del elemento de texto con el nuevo valor."
+    ],
+    startHtml: '<button id="btnContador">Haz clic</button>\n<p id="contador">Clics: 0</p>',
+    startCss: "/* Escribe aquí tu CSS si lo necesitas */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var btn = document.createElement("button");
+      btn.textContent = "Haz clic";
+      var p = document.createElement("p");
+      p.textContent = "Clics: 0";
+      var contador = 0;
+      btn.addEventListener("click", function () {
+        contador++;
+        p.textContent = "Clics: " + contador;
+      });
+      root.appendChild(btn);
+      root.appendChild(p);
+    }
+  },
+  {
+    titulo: "Mostrar u ocultar un párrafo",
+    color: "#17a673", dificultad: "Fácil",
+    basadoEn: "Guía 1 · Ejercicio 2 (classList)",
+    enunciado: "Un botón debe alternar la visibilidad de un párrafo: si está visible, lo oculta; si está oculto, lo vuelve a mostrar.",
+    requisitos: [
+      "Debe existir un párrafo con texto y un botón.",
+      "Usa una clase CSS (por ejemplo <code>.oculto</code>) con <code>display: none</code> en vez de manipular el estilo directamente.",
+      "Un solo clic debe servir tanto para ocultar como para volver a mostrar."
+    ],
+    hints: [
+      "Selecciona el párrafo y el botón con <code>getElementById</code>.",
+      "En tu CSS crea una clase, por ejemplo <code>.oculto { display: none; }</code>.",
+      "Usa <code>classList.toggle(\"oculto\")</code> sobre el párrafo dentro del evento click del botón."
+    ],
+    startHtml: '<p id="parrafo">Este es un párrafo que puedes mostrar u ocultar.</p>\n<button id="btnToggle">Mostrar/Ocultar</button>',
+    startCss: "/* Define aquí una clase para ocultar elementos */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var p = document.createElement("p");
+      p.textContent = "Este es un párrafo que puedes mostrar u ocultar.";
+      var btn = document.createElement("button");
+      btn.textContent = "Mostrar/Ocultar";
+      btn.addEventListener("click", function () {
+        p.classList.toggle("demo-oculto");
+      });
+      root.appendChild(p);
+      root.appendChild(btn);
+    }
+  },
+  {
+    titulo: "Tarjeta que reacciona al mouse",
+    color: "#17a673", dificultad: "Fácil",
+    basadoEn: "Guía 1 · Ejercicio 2 (estilos) + nuevos eventos de mouse",
+    enunciado: "Cuando el mouse pase por encima de una tarjeta, su color de fondo debe cambiar; cuando el mouse salga, debe volver al color original.",
+    requisitos: [
+      "Debe existir un elemento (por ejemplo un <code>&lt;div&gt;</code>) que actúe como tarjeta.",
+      "El color de fondo debe cambiar mientras el mouse esté encima.",
+      "Al sacar el mouse, el color original debe restaurarse."
+    ],
+    hints: [
+      "Hay dos eventos que necesitas: uno para cuando el mouse entra y otro para cuando sale del elemento.",
+      "Investiga los eventos <code>\"mouseover\"</code> y <code>\"mouseout\"</code> (también existen <code>\"mouseenter\"</code>/<code>\"mouseleave\"</code>).",
+      "Cambia <code>elemento.style.backgroundColor</code> dentro de cada uno de los dos listeners, usando un color distinto en cada caso."
+    ],
+    startHtml: '<div id="tarjeta">Pasa el mouse aquí</div>',
+    startCss: "#tarjeta {\n  padding: 20px;\n  border-radius: 8px;\n  background-color: #eee;\n  width: 220px;\n  text-align: center;\n}",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var caja = document.createElement("div");
+      caja.textContent = "Pasa el mouse aquí";
+      caja.className = "demo-caja-hover";
+      caja.addEventListener("mouseover", function () { caja.style.backgroundColor = "#c7e3ff"; });
+      caja.addEventListener("mouseout", function () { caja.style.backgroundColor = "#eceefb"; });
+      root.appendChild(caja);
+    }
+  },
+  {
+    titulo: "Lista de tareas con eliminar",
+    color: "#d9782d", dificultad: "Media",
+    basadoEn: "Guía 1 · Ejercicios 3 y 4 (crear y eliminar elementos)",
+    enunciado: "El usuario debe poder escribir una tarea, agregarla a una lista, y eliminar cualquier tarea individualmente.",
+    requisitos: [
+      "Un campo de texto y un botón \"Agregar\".",
+      "No se debe poder agregar una tarea con el campo vacío.",
+      "Cada tarea agregada debe tener su propio botón para eliminarla.",
+      "El campo de texto debe quedar vacío después de agregar."
+    ],
+    hints: [
+      "Lee el valor del input con <code>.value</code> y usa <code>.trim()</code> para validar que no esté vacío antes de continuar.",
+      "Usa <code>document.createElement(\"li\")</code> y dale su texto con <code>textContent</code>.",
+      "Para poder eliminar cada tarea, crea también un botón dentro del <code>&lt;li&gt;</code> y dale su propio <code>addEventListener</code> que use <code>.remove()</code>."
+    ],
+    startHtml: '<input type="text" id="inputTarea" placeholder="Nueva tarea">\n<button id="btnAgregarTarea">Agregar</button>\n<ul id="listaTareas"></ul>',
+    startCss: "/* Escribe aquí tu CSS si lo necesitas */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var input = document.createElement("input"); input.type = "text"; input.placeholder = "Nueva tarea";
+      var btn = document.createElement("button"); btn.textContent = "Agregar";
+      var ul = document.createElement("ul");
+      btn.addEventListener("click", function () {
+        var texto = input.value.trim();
+        if (texto === "") return;
+        var li = document.createElement("li");
+        var span = document.createElement("span"); span.textContent = texto;
+        var del = document.createElement("button"); del.textContent = "❌";
+        del.addEventListener("click", function () { li.remove(); });
+        li.appendChild(span); li.appendChild(del);
+        ul.appendChild(li);
+        input.value = "";
+      });
+      root.appendChild(input); root.appendChild(btn); root.appendChild(ul);
+    }
+  },
+  {
+    titulo: "Formulario de registro con validaciones",
+    color: "#d9782d", dificultad: "Media",
+    basadoEn: "Guía 1 · Ejercicio 5 (formulario y preventDefault)",
+    enunciado: "Un formulario con nombre y correo debe validar que ambos campos estén completos y que el correo contenga una arroba (@) antes de mostrar un mensaje de éxito.",
+    requisitos: [
+      "El formulario no debe recargar la página al enviarse.",
+      "Si el nombre o el correo están vacíos, muestra un mensaje de error.",
+      "Si el correo no contiene \"@\", muestra un mensaje de error distinto o el mismo, a tu criterio.",
+      "Si todo es válido, muestra un mensaje de éxito con el nombre incluido."
+    ],
+    hints: [
+      "Escucha el evento <code>\"submit\"</code> del formulario y no olvides <code>evento.preventDefault()</code>.",
+      "Puedes usar <code>.trim()</code> para quitar espacios y comprobar si un campo quedó vacío.",
+      "Para el correo, el método <code>.includes(\"@\")</code> te dice si el texto contiene una arroba."
+    ],
+    startHtml: '<form id="formRegistro">\n  <input type="text" id="nombreRegistro" placeholder="Nombre">\n  <input type="text" id="correoRegistro" placeholder="Correo">\n  <button type="submit">Registrarse</button>\n</form>\n<p id="mensajeRegistro"></p>',
+    startCss: "/* Escribe aquí tu CSS si lo necesitas */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var form = document.createElement("form");
+      var inpNombre = document.createElement("input"); inpNombre.type = "text"; inpNombre.placeholder = "Nombre";
+      var inpCorreo = document.createElement("input"); inpCorreo.type = "text"; inpCorreo.placeholder = "Correo"; inpCorreo.style.marginLeft = "6px";
+      var btn = document.createElement("button"); btn.type = "submit"; btn.textContent = "Registrarse"; btn.style.marginLeft = "6px";
+      form.appendChild(inpNombre); form.appendChild(inpCorreo); form.appendChild(btn);
+      var msg = document.createElement("p");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var nombre = inpNombre.value.trim();
+        var correo = inpCorreo.value.trim();
+        if (nombre === "" || correo === "" || correo.indexOf("@") === -1) {
+          msg.textContent = "Revisa los datos: nombre y correo válido son obligatorios.";
+          msg.style.color = "crimson";
+          return;
+        }
+        msg.textContent = "¡Registro exitoso, " + nombre + "!";
+        msg.style.color = "green";
+      });
+      root.appendChild(form); root.appendChild(msg);
+    }
+  },
+  {
+    titulo: "Marcar varias tareas y reiniciar",
+    color: "#d9782d", dificultad: "Media",
+    basadoEn: "Guía 2 · Ejercicio 1 (querySelectorAll + forEach)",
+    enunciado: "Una lista de tareas ya existe en el HTML. Al hacer clic en cualquiera, debe tacharse (marcarse como completada). Un botón \"Reiniciar\" debe quitar todas las marcas de una sola vez.",
+    requisitos: [
+      "Debe haber al menos 3 tareas ya escritas en el HTML.",
+      "El clic en una tarea solo debe afectar a esa tarea, no a las demás.",
+      "El botón Reiniciar debe quitar la marca de TODAS las tareas, sin importar cuáles estén marcadas."
+    ],
+    hints: [
+      "Selecciona todas las tareas con <code>querySelectorAll</code> y recórrelas con <code>forEach</code> para ponerles su propio listener.",
+      "El clic en cada tarea solo debe afectarla a ella misma: usa <code>classList.toggle</code> sobre el elemento del propio callback (no sobre toda la lista).",
+      "El botón Reiniciar debe volver a recorrer la misma lista con <code>forEach</code> y usar <code>classList.remove</code> en cada una."
+    ],
+    startHtml: '<ul id="listaMarcar">\n  <li class="marcable">Tarea A</li>\n  <li class="marcable">Tarea B</li>\n  <li class="marcable">Tarea C</li>\n</ul>\n<button id="btnReiniciarMarcas">Reiniciar</button>',
+    startCss: ".marcada {\n  text-decoration: line-through;\n  color: #999;\n}",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var ul = document.createElement("ul");
+      var lis = [];
+      ["Tarea A", "Tarea B", "Tarea C"].forEach(function (t) {
+        var li = document.createElement("li");
+        li.textContent = t; li.className = "demo-marcable";
+        li.addEventListener("click", function () { li.classList.toggle("demo-marcada"); });
+        ul.appendChild(li);
+        lis.push(li);
+      });
+      var btn = document.createElement("button"); btn.textContent = "Reiniciar";
+      btn.addEventListener("click", function () {
+        lis.forEach(function (li) { li.classList.remove("demo-marcada"); });
+      });
+      root.appendChild(ul); root.appendChild(btn);
+    }
+  },
+  {
+    titulo: "Comentarios con delegación de eventos",
+    color: "#d1435b", dificultad: "Difícil",
+    basadoEn: "Guía 2 · Ejercicio 2 (delegación de eventos)",
+    enunciado: "El usuario agrega comentarios a una lista, y cada comentario tiene su propio botón de eliminar. La eliminación debe manejarse con UN SOLO listener delegado en el contenedor, no con un listener por botón.",
+    requisitos: [
+      "Un input y un botón para agregar comentarios.",
+      "Cada comentario nuevo debe incluir su propio botón de eliminar.",
+      "El listener de clic para eliminar debe estar en el contenedor (<code>&lt;ul&gt;</code>), no en cada botón individual.",
+      "Debe funcionar incluso para comentarios agregados después de cargar la página (por eso se pide delegación, no listeners individuales)."
+    ],
+    hints: [
+      "Crea cada comentario con <code>createElement</code> o <code>insertAdjacentHTML</code>, incluyendo un botón de eliminar dentro.",
+      "En vez de agregar un listener a cada botón de eliminar, agrega un único <code>addEventListener</code> de tipo <code>\"click\"</code> al <code>&lt;ul&gt;</code> que contiene todos los comentarios.",
+      "Dentro de ese único listener, usa <code>evento.target</code> para saber en qué se hizo clic (por ejemplo comprobando su clase), y <code>.closest(\"li\")</code> para encontrar y eliminar el comentario completo."
+    ],
+    startHtml: '<input type="text" id="inputComentario" placeholder="Escribe un comentario">\n<button id="btnComentar">Comentar</button>\n<ul id="listaComentarios"></ul>',
+    startCss: "/* Escribe aquí tu CSS si lo necesitas */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var input = document.createElement("input"); input.type = "text"; input.placeholder = "Escribe un comentario";
+      var btn = document.createElement("button"); btn.textContent = "Comentar";
+      var ul = document.createElement("ul");
+      btn.addEventListener("click", function () {
+        var texto = input.value.trim();
+        if (texto === "") return;
+        var li = document.createElement("li");
+        var span = document.createElement("span"); span.textContent = texto;
+        var del = document.createElement("button"); del.textContent = "Eliminar"; del.className = "demo-del-comment";
+        li.appendChild(span); li.appendChild(del);
+        ul.appendChild(li);
+        input.value = "";
+      });
+      ul.addEventListener("click", function (e) {
+        if (e.target.classList.contains("demo-del-comment")) {
+          e.target.closest("li").remove();
+        }
+      });
+      root.appendChild(input); root.appendChild(btn); root.appendChild(ul);
+    }
+  },
+  {
+    titulo: "Selector de tema con data-attributes",
+    color: "#d1435b", dificultad: "Difícil",
+    basadoEn: "Guía 2 · Ejercicio 3 (dataset y atributos)",
+    enunciado: "Dos botones, cada uno con un atributo <code>data-tema</code> ('claro' u 'oscuro'), deben cambiar la apariencia de una caja de vista previa según el tema elegido.",
+    requisitos: [
+      "Los botones deben tener el atributo <code>data-tema</code> en el HTML.",
+      "La caja de vista previa debe cambiar de colores según el botón presionado.",
+      "Debes leer el tema con <code>dataset</code>, no escribiendo el valor a mano dos veces en el JS."
+    ],
+    hints: [
+      "Cada botón de tema ya tiene un atributo <code>data-tema</code> en el HTML; puedes leerlo con <code>boton.dataset.tema</code>.",
+      "Define en tu CSS dos clases, por ejemplo <code>.tema-claro</code> y <code>.tema-oscuro</code>, con colores de fondo y texto distintos.",
+      "En el evento click de cada botón, quita ambas clases de la caja de vista previa y agrega solo la que corresponda según el valor leído."
+    ],
+    startHtml: '<button id="btnClaro" data-tema="claro">Tema claro</button>\n<button id="btnOscuro" data-tema="oscuro">Tema oscuro</button>\n<div id="cajaTema">Vista previa del tema</div>',
+    startCss: "#cajaTema {\n  margin-top: 10px;\n  padding: 20px;\n  border-radius: 8px;\n}\n\n/* Define aquí .tema-claro y .tema-oscuro */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var btnClaro = document.createElement("button"); btnClaro.textContent = "Tema claro"; btnClaro.dataset.tema = "claro";
+      var btnOscuro = document.createElement("button"); btnOscuro.textContent = "Tema oscuro"; btnOscuro.dataset.tema = "oscuro"; btnOscuro.style.marginLeft = "6px";
+      var caja = document.createElement("div"); caja.textContent = "Vista previa del tema"; caja.className = "demo-tema-caja demo-tema-claro";
+      function aplicar(tema) {
+        caja.classList.remove("demo-tema-claro", "demo-tema-oscuro");
+        caja.classList.add("demo-tema-" + tema);
+      }
+      btnClaro.addEventListener("click", function () { aplicar(btnClaro.dataset.tema); });
+      btnOscuro.addEventListener("click", function () { aplicar(btnOscuro.dataset.tema); });
+      var wrap = document.createElement("div"); wrap.style.marginTop = "10px"; wrap.appendChild(caja);
+      root.appendChild(btnClaro); root.appendChild(btnOscuro); root.appendChild(wrap);
+    }
+  },
+  {
+    titulo: "Acordeón de preguntas frecuentes",
+    color: "#d1435b", dificultad: "Difícil",
+    basadoEn: "Guía 2 · Ejercicio 4 (recorrer el DOM: nextElementSibling)",
+    enunciado: "Construye un acordeón con al menos 3 preguntas. Al hacer clic en una, se muestra su respuesta y se cierran las demás, de modo que solo una respuesta puede estar abierta a la vez.",
+    requisitos: [
+      "Al menos 3 pares de pregunta/respuesta.",
+      "Cada respuesta debe estar oculta por defecto.",
+      "Al hacer clic en una pregunta abierta, esta debe cerrarse (no quedar siempre abierta).",
+      "Abrir una pregunta debe cerrar automáticamente cualquier otra que estuviera abierta."
+    ],
+    hints: [
+      "Selecciona todas las preguntas con <code>querySelectorAll</code> y recórrelas con <code>forEach</code>.",
+      "La respuesta de cada pregunta puede obtenerse con <code>nextElementSibling</code>, si la ubicas justo después del botón en el HTML.",
+      "Antes de cerrar todas las respuestas, guarda si la que se clicó ya estaba abierta (con <code>classList.contains</code>), para decidir si debes volver a abrirla o dejarla cerrada."
+    ],
+    startHtml: '<div class="faq-item">\n  <button class="faq-pregunta">¿Qué es el DOM?</button>\n  <div class="faq-respuesta">Es la representación en memoria de la página.</div>\n</div>\n<div class="faq-item">\n  <button class="faq-pregunta">¿Qué es un evento?</button>\n  <div class="faq-respuesta">Una acción que JS puede escuchar, como un clic.</div>\n</div>\n<div class="faq-item">\n  <button class="faq-pregunta">¿Qué es la delegación?</button>\n  <div class="faq-respuesta">Escuchar eventos en un padre en vez de en cada hijo.</div>\n</div>',
+    startCss: ".faq-respuesta {\n  display: none;\n}\n\n/* Agrega aquí la clase que muestra la respuesta */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var preguntas = [
+        ["¿Qué es el DOM?", "Es la representación en memoria de la página."],
+        ["¿Qué es un evento?", "Una acción que JS puede escuchar, como un clic."],
+        ["¿Qué es la delegación?", "Escuchar eventos en un padre en vez de en cada hijo."]
+      ];
+      var botones = [];
+      preguntas.forEach(function (par) {
+        var item = document.createElement("div"); item.className = "demo-faq-item";
+        var btn = document.createElement("button"); btn.textContent = par[0]; btn.className = "demo-faq-pregunta";
+        var resp = document.createElement("div"); resp.textContent = par[1]; resp.className = "demo-faq-respuesta";
+        item.appendChild(btn); item.appendChild(resp);
+        root.appendChild(item);
+        botones.push(btn);
+      });
+      botones.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var respuesta = btn.nextElementSibling;
+          var yaAbierta = respuesta.classList.contains("demo-mostrar");
+          botones.forEach(function (b) { b.nextElementSibling.classList.remove("demo-mostrar"); });
+          if (!yaAbierta) respuesta.classList.add("demo-mostrar");
+        });
+      });
+    }
+  },
+  {
+    titulo: "Reto final: agenda de contactos con buscador",
+    color: "#7b2ff7", dificultad: "Capstone",
+    basadoEn: "Combina TODO: guía 1 (crear/eliminar/validar) + guía 2 (delegación + buscador en vivo)",
+    enunciado: "Construye una mini agenda: se agregan contactos con nombre y teléfono, cada uno se puede eliminar (con delegación de eventos), y un buscador filtra la lista en tiempo real mientras se escribe.",
+    requisitos: [
+      "Inputs para nombre y teléfono, más un botón para agregar.",
+      "No agregar contactos si falta el nombre o el teléfono.",
+      "Cada contacto debe poder eliminarse, usando delegación de eventos en el contenedor de la lista.",
+      "Un input de búsqueda debe filtrar la lista con cada tecla presionada (evento <code>\"input\"</code>), sin distinguir mayúsculas de minúsculas.",
+      "Si el contacto no coincide con la búsqueda, debe ocultarse (no eliminarse)."
+    ],
+    hints: [
+      "Divide el problema en partes: primero logra agregar y eliminar contactos (como en ejercicios anteriores) antes de sumar el buscador.",
+      "Para eliminar, delega el evento de clic en el contenedor de la lista, no en cada botón individual, igual que en el ejercicio de comentarios.",
+      "Para el buscador, escucha el evento <code>\"input\"</code>, recorre todos los contactos con <code>forEach</code> y compara el texto en minúsculas con <code>.includes()</code>, cambiando <code>style.display</code> según coincida o no."
+    ],
+    startHtml: '<input type="text" id="inputNombreContacto" placeholder="Nombre">\n<input type="text" id="inputTelContacto" placeholder="Teléfono">\n<button id="btnAgregarContacto">Agregar</button>\n<input type="text" id="buscadorContactos" placeholder="Buscar contacto...">\n<ul id="listaContactos"></ul>',
+    startCss: "/* Escribe aquí tu CSS si lo necesitas */",
+    startJs: "// Escribe aquí tu JavaScript\n",
+    demo: function (root) {
+      var inpNombre = document.createElement("input"); inpNombre.type = "text"; inpNombre.placeholder = "Nombre";
+      var inpTel = document.createElement("input"); inpTel.type = "text"; inpTel.placeholder = "Teléfono"; inpTel.style.marginLeft = "6px";
+      var btnAdd = document.createElement("button"); btnAdd.textContent = "Agregar"; btnAdd.style.marginLeft = "6px";
+      var buscador = document.createElement("input"); buscador.type = "text"; buscador.placeholder = "Buscar contacto..."; buscador.style.display = "block"; buscador.style.marginTop = "10px";
+      var ul = document.createElement("ul"); ul.style.marginTop = "10px";
+
+      btnAdd.addEventListener("click", function () {
+        var nombre = inpNombre.value.trim();
+        var tel = inpTel.value.trim();
+        if (nombre === "" || tel === "") return;
+        var li = document.createElement("li");
+        var span = document.createElement("span"); span.textContent = nombre + " - " + tel;
+        var del = document.createElement("button"); del.textContent = "Eliminar"; del.className = "demo-del-contacto";
+        li.appendChild(span); li.appendChild(del);
+        ul.appendChild(li);
+        inpNombre.value = ""; inpTel.value = "";
+      });
+
+      ul.addEventListener("click", function (e) {
+        if (e.target.classList.contains("demo-del-contacto")) {
+          e.target.closest("li").remove();
+        }
+      });
+
+      buscador.addEventListener("input", function () {
+        var texto = buscador.value.toLowerCase();
+        ul.querySelectorAll("li").forEach(function (li) {
+          var coincide = li.textContent.toLowerCase().includes(texto);
+          li.style.display = coincide ? "flex" : "none";
+        });
+      });
+
+      root.appendChild(inpNombre); root.appendChild(inpTel); root.appendChild(btnAdd);
+      root.appendChild(buscador); root.appendChild(ul);
+    }
+  }
+];
+
+/* =========================================================
+   ESTILOS EXTRA PARA LAS DEMOS "RESULTADO ESPERADO"
+   ========================================================= */
+var estiloDemos = document.createElement("style");
+estiloDemos.textContent =
+  ".demo-oculto { display: none; }" +
+  ".demo-caja-hover { padding: 20px; border-radius: 8px; background: #eceefb; text-align: center; width: 220px; transition: background-color .2s; }" +
+  ".demo-marcable { cursor: pointer; }" +
+  ".demo-marcada { text-decoration: line-through; color: #999; }" +
+  ".demo-tema-caja { padding: 20px; border-radius: 8px; margin-top: 10px; transition: all .2s; }" +
+  ".demo-tema-claro { background: #f5f5f5; color: #222; }" +
+  ".demo-tema-oscuro { background: #20232a; color: #eee; }" +
+  ".demo-faq-item { border: 1px solid #e5e8f5; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }" +
+  ".demo-faq-pregunta { width: 100%; text-align: left; background: #f3f5fc; border: none; padding: 10px; cursor: pointer; font-size: 0.88rem; }" +
+  ".demo-faq-respuesta { display: none; padding: 0 10px; font-size: 0.86rem; color: #666; }" +
+  ".demo-faq-respuesta.demo-mostrar { display: block; padding: 10px; }";
+document.head.appendChild(estiloDemos);
+
+/* =========================================================
+   RENDERIZAR EJERCICIOS
+   ========================================================= */
+
+function renderEjercicios() {
+  var contenedor = document.getElementById("contenedor-ejercicios");
+  var nav = document.getElementById("nav-ejercicios");
+
+  ejercicios.forEach(function (ej, index) {
+    var n = index + 1;
+
+    nav.insertAdjacentHTML("beforeend", '<li><a href="#ej' + n + '">' + n + ". " + ej.titulo + "</a></li>");
+
+    var reqHtml = ej.requisitos.map(function (r) { return "<li>" + r + "</li>"; }).join("");
+
+    var hintsHtml = ej.hints.map(function (h, i) {
+      var hi = i + 1;
+      return '<button class="hint-btn" onclick="toggleHint(' + n + "," + hi + ')">💡 Pista ' + hi + "</button>" +
+             '<p class="hint-text" id="hint-' + n + "-" + hi + '" style="display:none;">' + h + "</p>";
+    }).join("");
+
+    var cardHtml =
+      '<section class="exercise" id="ej' + n + '">' +
+        '<div class="ex-top">' +
+          '<div>' +
+            '<span class="ex-tag" style="background:' + ej.color + '">Ejercicio ' + n + " · " + ej.dificultad + "</span>" +
+            "<h2>" + ej.titulo + "</h2>" +
+            '<p class="basado-en">🔗 Basado en: ' + ej.basadoEn + "</p>" +
+          "</div>" +
+          '<label class="marcar-resuelto"><input type="checkbox" onchange="marcarResuelto(' + n + ',this)"> Resuelto</label>' +
+        "</div>" +
+        '<p class="lead">' + ej.enunciado + "</p>" +
+
+        '<h3 class="subhead"><span class="dot"></span> Requisitos</h3>' +
+        '<ul class="req-list">' + reqHtml + "</ul>" +
+
+        '<h3 class="subhead"><span class="dot"></span> Resultado esperado (pruébalo)</h3>' +
+        '<div class="demo" id="demo-' + n + '"></div>' +
+
+        '<h3 class="subhead"><span class="dot"></span> Pistas</h3>' +
+        '<div class="hints">' + hintsHtml + "</div>" +
+      "</section>";
+
+    contenedor.insertAdjacentHTML("beforeend", cardHtml);
+
+    ej.demo(document.getElementById("demo-" + n));
+  });
+}
+
+/* =========================================================
+   INTERACCIÓN: pistas y marcar resuelto
+   ========================================================= */
+function toggleHint(n, i) {
+  var el = document.getElementById("hint-" + n + "-" + i);
+  el.style.display = (el.style.display === "none" || el.style.display === "") ? "block" : "none";
+}
+
+function marcarResuelto(n, checkbox) {
+  var seccion = document.getElementById("ej" + n);
+  if (checkbox.checked) {
+    seccion.classList.add("resuelto");
+  } else {
+    seccion.classList.remove("resuelto");
+  }
+}
+
+renderEjercicios();
+
+/* =========================================================
+   BLOQUEO DE COPIAR / PEGAR Y HERRAMIENTAS DE INSPECCIÓN
+   (excepto dentro de las cajas de código, que deben ser editables)
+   ========================================================= */
+document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+document.addEventListener("copy", function (e) {
+  if (e.target.tagName !== "TEXTAREA" && e.target.tagName !== "INPUT") e.preventDefault();
+});
+document.addEventListener("cut", function (e) {
+  if (e.target.tagName !== "TEXTAREA" && e.target.tagName !== "INPUT") e.preventDefault();
+});
+document.addEventListener("selectstart", function (e) {
+  if (e.target.tagName !== "TEXTAREA" && e.target.tagName !== "INPUT") e.preventDefault();
+});
+
+document.addEventListener("keydown", function (e) {
+  var combos =
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i")) ||
+    (e.ctrlKey && e.shiftKey && (e.key === "J" || e.key === "j")) ||
+    (e.ctrlKey && e.shiftKey && (e.key === "C" || e.key === "c")) ||
+    (e.ctrlKey && (e.key === "U" || e.key === "u"));
+  if (combos) e.preventDefault();
+});
+
+var avisoDevtools = document.getElementById("devtools-warning");
+setInterval(function () {
+  var abierto = (window.outerWidth - window.innerWidth > 170) || (window.outerHeight - window.innerHeight > 170);
+  avisoDevtools.style.display = abierto ? "block" : "none";
+}, 1200);
+</script>
+</body>
+</html>
