@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía: 3 juegos con HTML, CSS y JavaScript</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #2451c4;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --accent-4: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-header: #282a3e;
+    --code-fg: #cdd6f4;
+    --code-line: #464a63;
+    --kw: #c792ea;
+    --str: #8bd5a0;
+    --fn: #82aaff;
+    --tag: #f07178;
+    --attr: #ffcb6b;
+    --num: #f78c6c;
+    --cm: #6b7089;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #12305e, #2451c4 55%, #4d7ef5);
+    color: white; padding: 46px 24px 38px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 700px; color: #dbe6ff; }
+  .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; }
+
+  nav.toc { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(4px); }
+  nav.toc ul { list-style: none; margin: 0; padding: 10px 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1000px; margin-inline: auto; }
+  nav.toc a { text-decoration: none; color: var(--ink); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; }
+  nav.toc a:hover { background: #eaf0ff; }
+
+  main { max-width: 940px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card, .resumen-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 34px; box-shadow: 0 2px 10px rgba(20,40,100,0.05); }
+  .intro-card h2 { margin-top: 0; }
+  .icon-note { display: flex; gap: 10px; align-items: flex-start; border-radius: 10px; padding: 12px 14px; margin-top: 14px; font-size: 0.9rem; }
+  .icon-note svg { flex-shrink: 0; margin-top: 2px; }
+  .icon-note.lock { background: #fff7e8; border: 1px solid #f2dcae; color: #6b4e13; }
+  .icon-note.info { background: #eef4ff; border: 1px solid #c7d9fb; color: #1c3d85; }
+  .icon-note.image { background: #eefaf3; border: 1px solid #b9e6cc; color: #146c43; }
+
+  section.game { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 32px; margin-bottom: 44px; box-shadow: 0 2px 14px rgba(20,40,100,0.06); scroll-margin-top: 70px; }
+  .game-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  section.game h2 { margin: 0 0 6px; font-size: 1.5rem; }
+  section.game > p.lead { color: var(--muted); margin-top: 0; }
+
+  h3.subhead { margin: 30px 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  .conceptos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 6px 0 8px; }
+  .concepto-card { background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .concepto-card h4 { margin: 0 0 4px; font-size: 0.92rem; color: var(--accent); }
+  .concepto-card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  .concepto-card code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.82rem; }
+
+  /* ---------- Bloques de código (candado anti-copia) ---------- */
+  .code-window { border-radius: 12px; overflow: hidden; margin: 12px 0 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+  .code-header { background: var(--code-header); color: #9aa0c3; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; }
+  .code-header .dots span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-header .lang { text-transform: uppercase; font-weight: 700; letter-spacing: .04em; margin-right: 6px; }
+  .code-header .lock { color: #ffcb6b; display: flex; align-items: center; }
+
+  .code-body { background: var(--code-bg); padding: 12px 0; overflow-x: auto; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+  .code-line { display: flex; padding: 1px 16px; white-space: pre; }
+  .code-line .ln { color: var(--code-line); width: 30px; flex-shrink: 0; -webkit-user-select: none; user-select: none; }
+  .code-line .txt { color: var(--code-fg); }
+  .kw { color: var(--kw); }
+  .str { color: var(--str); }
+  .fn  { color: var(--fn); }
+  .tag { color: var(--tag); }
+  .attr{ color: var(--attr); }
+  .num { color: var(--num); }
+  .cm  { color: var(--cm); font-style: italic; }
+  .prop{ color: #94e2d5; }
+
+  .copy-toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: #24263a; color: #f1f2fa; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s; box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 999; display: flex; align-items: center; gap: 8px; }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Checkpoints visuales (SVG) ---------- */
+  .checkpoint { background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px; padding: 18px; margin: 10px 0 22px; text-align: center; }
+  .checkpoint-label { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; font-weight: 700; }
+  .checkpoint svg.mockup { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; }
+  .checkpoint-caption { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  p.explain { font-size: 0.95rem; }
+  p.explain code, li code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Guía práctica: construye 3 juegos con HTML, CSS y JavaScript</h1>
+  <p>Adivina el número, Piedra papel o tijera, y Busca la pareja. Cada juego empieza explicando los conceptos que vas a necesitar, y luego construye el código completo paso a paso.</p>
+  <div class="badges">
+    <span class="badge">HTML + CSS + JS puro</span>
+    <span class="badge">Sin librerías</span>
+    <span class="badge">Código completo</span>
+    <span class="badge">Checkpoints en imagen</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#intro">Antes de empezar</a></li>
+    <li><a href="#juego1">Juego 1 · Adivina el número</a></li>
+    <li><a href="#juego2">Juego 2 · Piedra, papel o tijera</a></li>
+    <li><a href="#juego3">Juego 3 · Busca la pareja</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="intro-card" id="intro">
+    <h2>Cómo está organizada esta guía</h2>
+    <p class="explain">Cada uno de los 3 juegos sigue la misma estructura: primero se explican, en un lenguaje sencillo, los conceptos de JavaScript que ese juego necesita; después se construye el <code>HTML</code>, luego el <code>CSS</code> y por último el <code>JavaScript</code>, mostrando el código completo de cada archivo (nada se deja fuera ni se resume con puntos suspensivos). Entre paso y paso encontrarás un <strong>checkpoint visual</strong>: una imagen que muestra cómo debe verse tu juego en ese punto, para que compares tu resultado.</p>
+    <div class="icon-note lock">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      <span>El código de esta guía está bloqueado para copiar y pegar a propósito. Transcríbelo a mano en tu propio editor: escribir cada línea te obliga a leerla con atención.</span>
+    </div>
+    <div class="icon-note info">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="10.5" x2="12" y2="16"></line><circle cx="12" cy="7.2" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+      <span>No hay ningún entorno para ejecutar código dentro de esta guía. Debes crear los archivos <code>index.html</code>, <code>style.css</code> y <code>script.js</code> en tu computador y abrirlos en tu navegador para probarlos.</span>
+    </div>
+    <div class="icon-note image">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+      <span>Los "checkpoints" son imágenes (dibujadas en SVG) que muestran el aspecto y el contenido esperado de tu juego en un momento dado, no el código ni una demostración interactiva.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 1: ADIVINA EL NÚMERO -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego1">
+    <span class="game-tag" style="background:#2451c4">Juego 1</span>
+    <h2>Adivina el número</h2>
+    <p class="lead">La computadora elige en secreto un número entre 1 y 100. El jugador escribe números hasta acertar, y el juego le dice si su intento fue muy alto o muy bajo.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>Math.random()</h4>
+        <p>Devuelve un número decimal aleatorio entre 0 (incluido) y 1 (no incluido). Es la base para generar cualquier valor al azar en JavaScript.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Math.floor()</h4>
+        <p>Redondea un número decimal hacia abajo, quitando la parte decimal. Combinado con <code>Math.random()</code>, sirve para obtener números enteros aleatorios dentro de un rango.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Number() e isNaN()</h4>
+        <p><code>Number(texto)</code> convierte un texto en un número. <code>isNaN(valor)</code> comprueba si ese resultado no es un número válido, útil para validar lo que escribe el usuario.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Comparación de números</h4>
+        <p>Los operadores <code>===</code>, <code>&gt;</code> y <code>&lt;</code> permiten comparar el número del usuario contra el número secreto para decidir qué mensaje mostrar.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>addEventListener("click")</h4>
+        <p>Ejecuta una función cada vez que el usuario hace clic en un botón, como el botón de "Adivinar" o el de "Reiniciar".</p>
+      </div>
+      <div class="concepto-card">
+        <h4>textContent</h4>
+        <p>Permite leer o cambiar el texto visible de un elemento, que usaremos para mostrar los mensajes de "muy alto", "muy bajo" o "correcto".</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">Necesitamos un campo para que el usuario escriba su número, un botón para confirmar el intento, un lugar para mostrar mensajes, un contador de intentos y un botón para volver a jugar.</p>
+    <div id="cod-j1-html"></div>
+    <p class="explain">El <code>&lt;input type="number"&gt;</code> restringe (de forma suave, el usuario aún puede escribir otra cosa) el campo a valores numéricos, y los atributos <code>min</code> y <code>max</code> documentan el rango esperado. Cada elemento tiene su propio <code>id</code> porque así los vamos a encontrar por separado desde JavaScript.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 420 210" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="418" height="208" rx="12" fill="#ffffff"></rect>
+        <text x="26" y="38" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Adivina el número</text>
+        <text x="26" y="60" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Elegí un número entre 1 y 100. ¡Adivínalo!</text>
+        <rect x="26" y="80" width="140" height="34" rx="7" fill="#ffffff" stroke="#c9cce0"></rect>
+        <text x="38" y="101" font-size="12" fill="#9aa0b8" font-family="Segoe UI, Arial">Tu número</text>
+        <rect x="176" y="80" width="100" height="34" rx="7" fill="#2451c4"></rect>
+        <text x="194" y="101" font-size="12" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Adivinar</text>
+        <text x="26" y="150" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Intentos: 0</text>
+        <rect x="26" y="168" width="150" height="28" rx="7" fill="#eceefb"></rect>
+        <text x="42" y="187" font-size="12" fill="#444a5e" font-family="Segoe UI, Arial">Reiniciar juego</text>
+      </svg>
+      <p class="checkpoint-caption">Así debe verse la página apenas cargas el HTML (todavía sin estilos ni lógica): el título, el campo, el botón, el contador en cero y el botón de reinicio.</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS no cambia el comportamiento del juego, solo su apariencia: le da una tarjeta con bordes redondeados, espacio interno, y estilos a los campos y botones.</p>
+    <div id="cod-j1-css"></div>
+    <p class="explain">La clase <code>.juego</code> es el contenedor principal. <code>button:disabled</code> define cómo se ve el botón "Adivinar" cuando lo desactivemos al ganar la partida, para que quede visualmente claro que ya no se puede seguir jugando.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Aquí vive el comportamiento real del juego: generar el número secreto, leer el intento del usuario, compararlo, y actualizar los mensajes en pantalla.</p>
+    <div id="cod-j1-js"></div>
+    <p class="explain">Las primeras dos líneas crean el estado del juego: <code>numeroSecreto</code> (usando <code>Math.floor(Math.random() * 100) + 1</code>, que genera un entero entre 1 y 100) y <code>intentos</code>, que empieza en 0. Ambas están declaradas con <code>let</code> porque sus valores cambiarán mientras se juega.</p>
+    <p class="explain">Las siguientes cinco líneas guardan en variables cada elemento del HTML que vamos a necesitar, usando <code>document.getElementById</code>.</p>
+    <p class="explain">Dentro del <code>addEventListener("click")</code> del botón "Adivinar": primero convertimos el texto del input a número con <code>Number(input.value)</code>. La condición <code>if (input.value === "" || isNaN(numeroUsuario))</code> comprueba dos casos de error: que el campo esté vacío, o que lo escrito no sea un número (por ejemplo, letras); en ambos casos mostramos un mensaje y salimos de la función con <code>return</code>, sin sumar un intento.</p>
+    <p class="explain">Si el número es válido, aumentamos <code>intentos</code> en 1 y actualizamos el contador en pantalla. Luego, la cadena de <code>if</code> / <code>else if</code> / <code>else</code> compara <code>numeroUsuario</code> contra <code>numeroSecreto</code>: si son iguales, mostramos el mensaje de victoria y desactivamos el botón con <code>btnAdivinar.disabled = true</code>; si el intento es mayor, avisamos que baje; si es menor, avisamos que suba. Al final, <code>input.value = ""</code> limpia el campo para el siguiente intento.</p>
+    <p class="explain">El botón "Reiniciar juego" vuelve a generar un número secreto, pone los intentos en 0, limpia el mensaje, reactiva el botón "Adivinar" (<code>disabled = false</code>) y limpia el campo de texto, dejando el juego exactamente como al principio.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 420 210" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="418" height="208" rx="12" fill="#ffffff"></rect>
+        <text x="26" y="38" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Adivina el número</text>
+        <text x="26" y="60" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Elegí un número entre 1 y 100. ¡Adivínalo!</text>
+        <rect x="26" y="80" width="140" height="34" rx="7" fill="#ffffff" stroke="#c9cce0"></rect>
+        <text x="38" y="101" font-size="12" fill="#9aa0b8" font-family="Segoe UI, Arial">Tu número</text>
+        <rect x="176" y="80" width="100" height="34" rx="7" fill="#2451c4"></rect>
+        <text x="194" y="101" font-size="12" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Adivinar</text>
+        <text x="26" y="140" font-size="13" fill="#b45309" font-weight="600" font-family="Segoe UI, Arial">Muy alto. Intenta con un número menor.</text>
+        <text x="26" y="163" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Intentos: 1</text>
+        <rect x="26" y="178" width="150" height="28" rx="7" fill="#eceefb"></rect>
+        <text x="42" y="197" font-size="12" fill="#444a5e" font-family="Segoe UI, Arial">Reiniciar juego</text>
+      </svg>
+      <p class="checkpoint-caption">Después de un primer intento incorrecto: aparece el mensaje de pista y el contador de intentos sube a 1.</p>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 420 210" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="418" height="208" rx="12" fill="#ffffff"></rect>
+        <text x="26" y="38" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Adivina el número</text>
+        <text x="26" y="60" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Elegí un número entre 1 y 100. ¡Adivínalo!</text>
+        <rect x="26" y="80" width="140" height="34" rx="7" fill="#ffffff" stroke="#c9cce0"></rect>
+        <text x="38" y="101" font-size="12" fill="#9aa0b8" font-family="Segoe UI, Arial">Tu número</text>
+        <rect x="176" y="80" width="100" height="34" rx="7" fill="#b9bfd6"></rect>
+        <text x="194" y="101" font-size="12" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Adivinar</text>
+        <text x="26" y="135" font-size="13" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">Correcto. El número era 42.</text>
+        <text x="26" y="152" font-size="13" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">Lo lograste en 5 intentos.</text>
+        <text x="26" y="174" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Intentos: 5</text>
+        <rect x="26" y="188" width="150" height="0" fill="none"></rect>
+      </svg>
+      <p class="checkpoint-caption">Al acertar: el mensaje de victoria incluye el número secreto y la cantidad de intentos, y el botón "Adivinar" se ve deshabilitado (gris).</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 2: PIEDRA, PAPEL O TIJERA -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego2">
+    <span class="game-tag" style="background:#17a673">Juego 2</span>
+    <h2>Piedra, papel o tijera</h2>
+    <p class="lead">El jugador elige una opción haciendo clic en un botón; la computadora elige al azar entre las mismas tres opciones, y el juego determina quién ganó según las reglas clásicas.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>Arrays</h4>
+        <p>Una lista ordenada de valores, como <code>["piedra", "papel", "tijera"]</code>. Nos sirve para guardar las tres opciones posibles y para que la computadora elija una al azar entre ellas.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Índice aleatorio de un array</h4>
+        <p>Combinando <code>Math.floor(Math.random() * array.length)</code> obtenemos una posición válida al azar dentro del array, y con <code>array[posición]</code> accedemos a ese valor.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>querySelectorAll + forEach</h4>
+        <p>Selecciona todos los botones de opción a la vez y permite agregarle su propio evento de clic a cada uno, recorriendo la lista.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>dataset</h4>
+        <p>Cada botón guarda su opción en un atributo <code>data-opcion</code>. Desde JavaScript, <code>boton.dataset.opcion</code> nos dice qué eligió el jugador.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Operadores lógicos && y ||</h4>
+        <p><code>&amp;&amp;</code> (y) exige que dos condiciones sean ciertas a la vez; <code>||</code> (o) alcanza con que una de varias lo sea. Los usamos para expresar las reglas de quién le gana a quién.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>SVG embebido en HTML</h4>
+        <p>En vez de usar imágenes o emoticones, dibujamos figuras simples directamente en el HTML con etiquetas <code>&lt;svg&gt;</code>, <code>&lt;circle&gt;</code>, <code>&lt;rect&gt;</code> y <code>&lt;line&gt;</code>.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">Necesitamos tres botones (uno por opción, cada uno con su propio ícono dibujado en SVG y su atributo <code>data-opcion</code>), un lugar para el resultado, un marcador de puntaje y un botón para reiniciar el marcador.</p>
+    <div id="cod-j2-html"></div>
+    <p class="explain">Cada botón contiene un <code>&lt;svg&gt;</code> distinto: un círculo gris para "Piedra", un rectángulo azul para "Papel", y dos líneas cruzadas con dos círculos pequeños (simulando las argollas de una tijera) para "Tijera". El atributo <code>data-opcion</code> es el que JavaScript va a leer para saber qué botón se presionó.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 2
+      </div>
+      <svg class="mockup" viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="418" height="218" rx="12" fill="#ffffff"></rect>
+        <text x="26" y="36" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Piedra, papel o tijera</text>
+        <text x="26" y="58" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Elige una opción para jugar contra la computadora.</text>
+
+        <rect x="26" y="76" width="96" height="70" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        <circle cx="74" cy="104" r="14" fill="#8a8fa3"></circle>
+        <text x="52" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Piedra</text>
+
+        <rect x="132" y="76" width="96" height="70" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        <rect x="169" y="90" width="22" height="30" rx="2" fill="#2451c4"></rect>
+        <text x="158" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Papel</text>
+
+        <rect x="238" y="76" width="96" height="70" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        <line x1="270" y1="92" x2="302" y2="120" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="302" y1="92" x2="270" y2="120" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <text x="262" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Tijera</text>
+
+        <text x="26" y="176" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Ganadas: 0 | Perdidas: 0 | Empates: 0</text>
+        <rect x="26" y="188" width="150" height="26" rx="7" fill="#eceefb"></rect>
+        <text x="42" y="205" font-size="11" fill="#444a5e" font-family="Segoe UI, Arial">Reiniciar marcador</text>
+      </svg>
+      <p class="checkpoint-caption">Estado inicial: tres botones con su ícono y su etiqueta, marcador en cero para las tres categorías.</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">Solo necesitamos organizar los tres botones en fila y darles una apariencia de tarjeta seleccionable.</p>
+    <div id="cod-j2-css"></div>
+    <p class="explain"><code>display: flex</code> en <code>.opciones</code> coloca los tres botones uno al lado del otro. Dentro de cada botón, <code>flex-direction: column</code> apila el ícono SVG encima del texto.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Aquí se decide qué elige la computadora y quién gana la partida.</p>
+    <div id="cod-j2-js"></div>
+    <p class="explain">El array <code>opciones</code> guarda las tres jugadas posibles. Las variables <code>ganadas</code>, <code>perdidas</code> y <code>empatadas</code> forman el marcador, inicializado en 0.</p>
+    <p class="explain"><code>document.querySelectorAll(".btnOpcion")</code> selecciona los tres botones a la vez. El <code>forEach</code> les agrega, a cada uno, su propio <code>addEventListener("click")</code>.</p>
+    <p class="explain">Dentro del clic: <code>boton.dataset.opcion</code> obtiene la elección del jugador (el botón sobre el que se hizo clic). Para la computadora, generamos un índice aleatorio válido del array con <code>Math.floor(Math.random() * opciones.length)</code> y lo usamos para leer <code>opciones[indiceAleatorio]</code>.</p>
+    <p class="explain">La cadena de <code>if</code> / <code>else if</code> / <code>else</code> compara ambas elecciones: si son iguales, es empate. Si no, comprobamos las tres combinaciones en las que gana el jugador (piedra vence a tijera, papel vence a piedra, tijera vence a papel) usando <code>&amp;&amp;</code> para combinar ambas condiciones de cada combinación, y <code>||</code> para aceptar cualquiera de las tres. Si ninguna de esas combinaciones se cumple, por descarte, gana la computadora.</p>
+    <p class="explain">Al final del clic actualizamos tanto el texto de <code>resultado</code> como el de <code>marcador</code>, reconstruyendo la cadena de texto completa cada vez a partir de las variables actuales.</p>
+    <p class="explain">El botón "Reiniciar marcador" simplemente vuelve las tres variables de puntaje a 0 y limpia los textos, sin tocar nada más del juego.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 2
+      </div>
+      <svg class="mockup" viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="418" height="218" rx="12" fill="#ffffff"></rect>
+        <text x="26" y="36" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Piedra, papel o tijera</text>
+        <text x="26" y="58" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Elige una opción para jugar contra la computadora.</text>
+
+        <rect x="26" y="76" width="96" height="70" rx="10" fill="#eaf3ff" stroke="#2451c4" stroke-width="2"></rect>
+        <circle cx="74" cy="104" r="14" fill="#8a8fa3"></circle>
+        <text x="52" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Piedra</text>
+
+        <rect x="132" y="76" width="96" height="70" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        <rect x="169" y="90" width="22" height="30" rx="2" fill="#2451c4"></rect>
+        <text x="158" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Papel</text>
+
+        <rect x="238" y="76" width="96" height="70" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        <line x1="270" y1="92" x2="302" y2="120" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="302" y1="92" x2="270" y2="120" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <text x="262" y="136" font-size="11" fill="#1f2430" font-family="Segoe UI, Arial">Tijera</text>
+
+        <text x="26" y="166" font-size="13" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">Ganaste. Piedra le gana a Tijera.</text>
+        <text x="26" y="188" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Ganadas: 1 | Perdidas: 0 | Empates: 0</text>
+        <rect x="26" y="198" width="150" height="0" fill="none"></rect>
+      </svg>
+      <p class="checkpoint-caption">Después de elegir "Piedra" y ganarle a la tijera de la computadora: mensaje de resultado y marcador actualizados.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 3: BUSCA LA PAREJA -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego3">
+    <span class="game-tag" style="background:#7b2ff7">Juego 3</span>
+    <h2>Busca la pareja</h2>
+    <p class="lead">Un tablero de cartas boca abajo esconde figuras repetidas en parejas. El jugador voltea dos cartas por turno: si coinciden, quedan reveladas; si no, vuelven a voltearse boca abajo.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>Arrays y concat()</h4>
+        <p><code>array.concat(array)</code> une dos arrays en uno solo. Lo usamos para duplicar la lista de símbolos y así crear las parejas de cartas.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Mezclar un array (Fisher-Yates)</h4>
+        <p>Un algoritmo clásico que recorre el array de atrás hacia adelante, intercambiando cada elemento con uno elegido al azar, para desordenar el mazo de forma justa.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>createElement anidado</h4>
+        <p>Cada carta se construye con varios elementos creados por separado (la carta, su interior, su cara frontal y su cara trasera) que luego se unen con <code>appendChild</code>.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Flip con CSS (rotateY)</h4>
+        <p>El efecto de "voltear" la carta se logra con <code>transform: rotateY(180deg)</code> y <code>backface-visibility: hidden</code>, sin necesitar ninguna librería.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Delegación de eventos</h4>
+        <p>Un único <code>addEventListener</code> en el tablero completo maneja los clics de todas las cartas, incluso aunque se hayan creado dinámicamente con JavaScript.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>setTimeout()</h4>
+        <p>Ejecuta una función después de cierto tiempo (en milisegundos). Lo usamos para esperar un momento antes de volver a ocultar dos cartas que no coincidieron.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Una variable "bloqueado"</h4>
+        <p>Una bandera booleana que evita que el jugador voltee una tercera carta mientras el juego todavía está mostrando el resultado de las dos anteriores.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">A diferencia de los juegos anteriores, las cartas no se escriben a mano en el HTML: solo preparamos un contenedor vacío (el tablero), y JavaScript construye las 8 cartas dentro de él.</p>
+    <div id="cod-j3-html"></div>
+    <p class="explain">El <code>&lt;span id="movimientosJuego3"&gt;</code> dentro del párrafo nos permite actualizar solamente el número de movimientos sin reescribir el resto de la frase. El <code>&lt;div id="tableroJuego3"&gt;</code> empieza vacío; su contenido lo genera por completo el JavaScript del Paso 3.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="258" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Busca la pareja</text>
+        <text x="24" y="54" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Encuentra las parejas de símbolos iguales. Intentos: 0</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="59" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="104" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="139" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="184" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="219" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="264" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="299" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+
+          <rect x="24" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="59" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="104" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="139" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="184" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="219" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="264" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="299" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Tablero recién generado: las 8 cartas están boca abajo, todas con el mismo dorso (un círculo blanco sobre fondo morado).</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS define el tamaño del tablero en cuadrícula y, sobre todo, el efecto de volteo de las cartas en 3D.</p>
+    <div id="cod-j3-css"></div>
+    <p class="explain"><code>perspective</code> en <code>.carta</code> le da profundidad a la animación 3D. <code>.carta-interior</code> es el elemento que realmente rota; sus dos caras (<code>.carta-frente</code> y <code>.carta-reverso</code>) están superpuestas con <code>position: absolute</code>, y <code>backface-visibility: hidden</code> hace que cada cara solo se vea cuando está mirando hacia el usuario. La clase <code>.volteada</code> es la que activa la rotación, y <code>.emparejada</code> cambia el color de fondo de la cara trasera cuando la pareja ya fue encontrada.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Esta es la parte más larga de la guía: genera el mazo, construye las cartas, controla los volteos y detecta parejas y victoria.</p>
+    <div id="cod-j3-js"></div>
+    <p class="explain"><code>simbolos</code> guarda los 4 nombres de figura que vamos a usar. La función <code>mezclar</code> implementa el algoritmo de Fisher-Yates: recorre el array desde el final hacia el principio con un <code>for</code>, y en cada vuelta intercambia la posición actual (<code>i</code>) con una posición aleatoria entre 0 e <code>i</code> (calculada con <code>Math.floor(Math.random() * (i + 1))</code>), usando una variable <code>temporal</code> para no perder ningún valor durante el intercambio.</p>
+    <p class="explain"><code>let mazo = mezclar(simbolos.concat(simbolos))</code> duplica los 4 símbolos (obteniendo 8 elementos) y los mezcla; es <code>let</code> porque se va a volver a generar cada vez que se reinicia el juego.</p>
+    <p class="explain">Después de seleccionar los elementos del HTML, declaramos el estado del juego: <code>cartasVolteadas</code> (un array vacío que va a contener, como máximo, las dos cartas boca arriba en un momento dado), <code>bloqueado</code> (empieza en <code>false</code>), <code>movimientos</code> y <code>paresEncontrados</code>, ambos en 0.</p>
+    <p class="explain"><code>crearSvgSimbolo(simbolo)</code> es una función que, según el texto recibido, devuelve el código SVG correspondiente: un círculo azul, un cuadrado verde, un triángulo naranja (usando <code>&lt;polygon&gt;</code> con tres puntos) o una estrella roja (un <code>&lt;polygon&gt;</code> con diez puntos). Usa varios <code>if</code> seguidos, cada uno con su propio <code>return</code>, en vez de <code>if</code>/<code>else if</code>, porque cada <code>return</code> ya corta la ejecución de la función.</p>
+    <p class="explain"><code>crearTablero()</code> primero vacía el contenedor con <code>tablero.innerHTML = ""</code> y luego recorre <code>mazo</code> con <code>forEach</code>. Por cada símbolo crea cuatro elementos anidados: <code>carta</code> (el contenedor exterior, con la clase <code>"carta"</code> y el símbolo guardado en <code>carta.dataset.simbolo</code> para poder compararlo después), <code>interior</code> (el que rota), <code>frente</code> (la cara que se ve boca abajo, con un ícono genérico) y <code>reverso</code> (la cara que muestra el símbolo real, generado con <code>crearSvgSimbolo</code>). Al final los va uniendo con <code>appendChild</code>: primero mete <code>frente</code> y <code>reverso</code> dentro de <code>interior</code>, luego <code>interior</code> dentro de <code>carta</code>, y por último <code>carta</code> dentro del <code>tablero</code>.</p>
+    <p class="explain">El <code>addEventListener("click")</code> está puesto directamente en <code>tablero</code> (delegación de eventos), no en cada carta. <code>evento.target.closest(".carta")</code> encuentra la carta más cercana al punto exacto donde se hizo clic. Las cuatro comprobaciones con <code>return</code> descartan los clics inválidos, en orden: que no se haya hecho clic sobre ninguna carta, que el juego esté bloqueado esperando a que se oculten dos cartas, que esa carta ya esté volteada, o que ya esté emparejada.</p>
+    <p class="explain">Si el clic es válido, se agrega la clase <code>"volteada"</code> a la carta y se guarda en el array <code>cartasVolteadas</code> con <code>push</code>. Cuando ese array llega a tener 2 cartas, se suma un movimiento y se llama a <code>compararCartas()</code>.</p>
+    <p class="explain">Dentro de <code>compararCartas()</code>: si el <code>dataset.simbolo</code> de ambas cartas coincide, se les agrega la clase <code>"emparejada"</code> a las dos, se vacía <code>cartasVolteadas</code> y se suma un par encontrado; si <code>paresEncontrados</code> llega a ser igual a la cantidad de símbolos distintos, se muestra el mensaje de victoria. Si no coinciden, se activa <code>bloqueado = true</code> y, con <code>setTimeout</code>, después de 900 milisegundos se les quita la clase <code>"volteada"</code> a ambas cartas, se vacía el array y se libera el bloqueo, dejando el tablero listo para el siguiente turno.</p>
+    <p class="explain">El botón de reinicio genera un mazo mezclado nuevo, pone en cero <code>movimientos</code> y <code>paresEncontrados</code>, vacía <code>cartasVolteadas</code>, quita el bloqueo, limpia los textos y vuelve a llamar a <code>crearTablero()</code> para reconstruir las cartas desde cero.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="258" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Busca la pareja</text>
+        <text x="24" y="54" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Encuentra las parejas de símbolos iguales. Intentos: 1</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="70" width="70" height="70" rx="8" fill="#ffffff" stroke="#d8dae8" stroke-width="2"></rect>
+          <circle cx="59" cy="105" r="14" fill="#2451c4"></circle>
+
+          <rect x="104" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="139" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+
+          <rect x="184" y="70" width="70" height="70" rx="8" fill="#ffffff" stroke="#d8dae8" stroke-width="2"></rect>
+          <rect x="207" y="90" width="26" height="26" fill="#17a673"></rect>
+
+          <rect x="264" y="70" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="299" cy="105" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+
+          <rect x="24" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="59" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="104" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="139" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="184" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="219" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+          <rect x="264" y="150" width="70" height="70" rx="8" fill="#4a3fcf"></rect>
+          <circle cx="299" cy="185" r="12" fill="none" stroke="#ffffff" stroke-width="2"></circle>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Segundo turno: se voltearon un círculo y un cuadrado, no coinciden. El contador ya marca 1 movimiento; un instante después, ambas cartas volverán a quedar boca abajo.</p>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="278" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Busca la pareja</text>
+        <text x="24" y="54" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Encuentra las parejas de símbolos iguales. Intentos: 9</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="70" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <circle cx="59" cy="105" r="14" fill="#2451c4"></circle>
+          <rect x="104" y="70" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <rect x="127" y="90" width="26" height="26" fill="#17a673"></rect>
+          <rect x="184" y="70" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <polygon points="219,84 233,126 205,126" fill="#d9782d"></polygon>
+          <rect x="264" y="70" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <polygon points="299,82 304,96 319,96 307,104 311,118 299,110 287,118 291,104 279,96 294,96" fill="#d1435b"></polygon>
+
+          <rect x="24" y="150" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <circle cx="59" cy="185" r="14" fill="#2451c4"></circle>
+          <rect x="104" y="150" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <rect x="127" y="170" width="26" height="26" fill="#17a673"></rect>
+          <rect x="184" y="150" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <polygon points="219,164 233,206 205,206" fill="#d9782d"></polygon>
+          <rect x="264" y="150" width="70" height="70" rx="8" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <polygon points="299,162 304,176 319,176 307,184 311,198 299,190 287,198 291,184 279,176 294,176" fill="#d1435b"></polygon>
+        </g>
+
+        <text x="24" y="248" font-size="13" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">Ganaste. Encontraste todas las parejas</text>
+        <text x="24" y="266" font-size="13" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">en 9 movimientos.</text>
+      </svg>
+      <p class="checkpoint-caption">Partida terminada: las 8 cartas quedan boca arriba con fondo verde (clase "emparejada") y aparece el mensaje final con el total de movimientos.</p>
+    </div>
+  </section>
+
+  <div class="resumen-card">
+    <h2>Para seguir practicando</h2>
+    <p class="explain">Una vez que tengas los 3 juegos funcionando, prueba modificarlos por tu cuenta: cambia el rango de números del Juego 1, agrega una cuarta opción al Juego 2 (por ejemplo "lagarto" y "Spock"), o aumenta el Juego 3 a 6 parejas en vez de 4. Cambiar código que ya entiendes es una de las mejores formas de terminar de dominarlo.</p>
+  </div>
+
+</main>
+
+<footer>Guía práctica: 3 juegos con HTML, CSS y JavaScript puro · Código completo, sin sandboxes</footer>
+
+<div class="copy-toast" id="copyToast">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+  <span>Este código es para transcribir a mano, no para copiar.</span>
+</div>
+
+<script>
+/* =========================================================
+   RESALTADO DE SINTAXIS (sin librerías externas)
+   ========================================================= */
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+var JS_PATTERN = /(\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:const|let|var|function|return|if|else|new|this|class|true|false|null|undefined|for|while|typeof|of|in)\b)|(\b[a-zA-Z_$][\w$]*(?=\())|(\.[a-zA-Z_$][\w$]*)|(\b\d+\b)/g;
+
+function highlightJSLine(line) {
+  JS_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = JS_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "str" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "kw" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "fn" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "prop" });
+    else if (m[6]) tokens.push({ text: m[6], cls: "num" });
+    last = JS_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+var HTML_PATTERN = /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][\w-]*)|([a-zA-Z-]+(?==))|("[^"]*")|(\/?>)/g;
+
+function highlightHTMLLine(line) {
+  HTML_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = HTML_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "tag" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "attr" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "str" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "tag" });
+    last = HTML_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+function highlightCSSLine(line) {
+  var trimmed = line.trim();
+  if (trimmed === "" || trimmed === "}") {
+    return [{ text: line, cls: "" }];
+  }
+  var idxLlave = line.indexOf("{");
+  if (idxLlave !== -1) {
+    return [
+      { text: line.slice(0, idxLlave), cls: "tag" },
+      { text: line.slice(idxLlave), cls: "" }
+    ];
+  }
+  var idxDosPuntos = line.indexOf(":");
+  if (idxDosPuntos !== -1) {
+    return [
+      { text: line.slice(0, idxDosPuntos), cls: "attr" },
+      { text: line.slice(idxDosPuntos), cls: "str" }
+    ];
+  }
+  return [{ text: line, cls: "" }];
+}
+
+function tokensToHtml(tokens) {
+  return tokens.map(function (t) {
+    var escaped = escapeHtml(t.text);
+    return t.cls ? '<span class="' + t.cls + '">' + escaped + "</span>" : escaped;
+  }).join("");
+}
+
+function renderCodeBlock(containerId, code, lang, filename) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+
+  var highlightFn = highlightJSLine;
+  if (lang === "html") highlightFn = highlightHTMLLine;
+  if (lang === "css") highlightFn = highlightCSSLine;
+
+  var lines = code.split("\n");
+  var bodyHtml = lines.map(function (line, i) {
+    var num = String(i + 1).padStart(2, "0");
+    var tokens = highlightFn(line);
+    return '<div class="code-line"><span class="ln">' + num + '</span><span class="txt">' + tokensToHtml(tokens) + "</span></div>";
+  }).join("");
+
+  var lockIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+
+  el.innerHTML =
+    '<div class="code-header">' +
+      '<span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>' +
+      '<span class="fname">' + filename + "</span>" +
+      '<span class="lang">' + lang.toUpperCase() + "</span>" +
+      '<span class="lock">' + lockIcon + "</span>" +
+    "</div>" +
+    '<div class="code-body">' + bodyHtml + "</div>";
+
+  el.classList.add("code-window", "code-lock");
+}
+
+/* =========================================================
+   CÓDIGO DE LOS 3 JUEGOS (fuente para los bloques de código)
+   ========================================================= */
+
+var CODIGO_J1_HTML =
+`<div class="juego">
+  <h3>Adivina el número</h3>
+  <p>Elegí un número entre 1 y 100. ¡Adivínalo!</p>
+  <input type="number" id="intentoUsuario" min="1" max="100" placeholder="Tu número">
+  <button id="btnAdivinar">Adivinar</button>
+  <p id="mensajeJuego1"></p>
+  <p id="intentosJuego1">Intentos: 0</p>
+  <button id="btnReiniciarJuego1">Reiniciar juego</button>
+</div>`;
+
+var CODIGO_J1_CSS =
+`.juego {
+  background: #ffffff;
+  border: 1px solid #e3e5ee;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+}
+
+.juego h3 {
+  margin-top: 0;
+}
+
+.juego input {
+  padding: 8px 10px;
+  border: 1px solid #c9cce0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-right: 8px;
+}
+
+.juego button {
+  background: #2451c4;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.juego button:disabled {
+  background: #b9bfd6;
+  cursor: not-allowed;
+}`;
+
+var CODIGO_J1_JS =
+`let numeroSecreto = Math.floor(Math.random() * 100) + 1;
+let intentos = 0;
+
+const input = document.getElementById("intentoUsuario");
+const btnAdivinar = document.getElementById("btnAdivinar");
+const mensaje = document.getElementById("mensajeJuego1");
+const contadorIntentos = document.getElementById("intentosJuego1");
+const btnReiniciar = document.getElementById("btnReiniciarJuego1");
+
+btnAdivinar.addEventListener("click", function () {
+  const numeroUsuario = Number(input.value);
+
+  if (input.value === "" || isNaN(numeroUsuario)) {
+    mensaje.textContent = "Escribe un número válido.";
+    return;
+  }
+
+  intentos = intentos + 1;
+  contadorIntentos.textContent = "Intentos: " + intentos;
+
+  if (numeroUsuario === numeroSecreto) {
+    mensaje.textContent = "Correcto. El número era " + numeroSecreto + ". Lo lograste en " + intentos + " intentos.";
+    btnAdivinar.disabled = true;
+  } else if (numeroUsuario > numeroSecreto) {
+    mensaje.textContent = "Muy alto. Intenta con un número menor.";
+  } else {
+    mensaje.textContent = "Muy bajo. Intenta con un número mayor.";
+  }
+
+  input.value = "";
+});
+
+btnReiniciar.addEventListener("click", function () {
+  numeroSecreto = Math.floor(Math.random() * 100) + 1;
+  intentos = 0;
+  contadorIntentos.textContent = "Intentos: 0";
+  mensaje.textContent = "";
+  btnAdivinar.disabled = false;
+  input.value = "";
+});`;
+
+var CODIGO_J2_HTML =
+`<div class="juego">
+  <h3>Piedra, papel o tijera</h3>
+  <p>Elige una opción para jugar contra la computadora.</p>
+  <div class="opciones">
+    <button class="btnOpcion" data-opcion="piedra">
+      <svg viewBox="0 0 40 40" width="28" height="28"><circle cx="20" cy="20" r="14" fill="#8a8fa3"></circle></svg>
+      Piedra
+    </button>
+    <button class="btnOpcion" data-opcion="papel">
+      <svg viewBox="0 0 40 40" width="28" height="28"><rect x="9" y="5" width="22" height="30" rx="2" fill="#2451c4"></rect></svg>
+      Papel
+    </button>
+    <button class="btnOpcion" data-opcion="tijera">
+      <svg viewBox="0 0 40 40" width="28" height="28">
+        <line x1="8" y1="8" x2="32" y2="32" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <line x1="32" y1="8" x2="8" y2="32" stroke="#d1435b" stroke-width="4" stroke-linecap="round"></line>
+        <circle cx="8" cy="8" r="3" fill="#d1435b"></circle>
+        <circle cx="8" cy="32" r="3" fill="#d1435b"></circle>
+      </svg>
+      Tijera
+    </button>
+  </div>
+  <p id="resultadoJuego2"></p>
+  <p id="marcadorJuego2">Ganadas: 0 | Perdidas: 0 | Empates: 0</p>
+  <button id="btnReiniciarJuego2">Reiniciar marcador</button>
+</div>`;
+
+var CODIGO_J2_CSS =
+`.opciones {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.btnOpcion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #f7f8fd;
+  border: 1px solid #e3e5ee;
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #1f2430;
+}
+
+.btnOpcion:hover {
+  border-color: #2451c4;
+}`;
+
+var CODIGO_J2_JS =
+`const opciones = ["piedra", "papel", "tijera"];
+let ganadas = 0;
+let perdidas = 0;
+let empatadas = 0;
+
+const botonesOpcion = document.querySelectorAll(".btnOpcion");
+const resultado = document.getElementById("resultadoJuego2");
+const marcador = document.getElementById("marcadorJuego2");
+const btnReiniciarJuego2 = document.getElementById("btnReiniciarJuego2");
+
+botonesOpcion.forEach(function (boton) {
+  boton.addEventListener("click", function () {
+    const eleccionUsuario = boton.dataset.opcion;
+    const indiceAleatorio = Math.floor(Math.random() * opciones.length);
+    const eleccionComputadora = opciones[indiceAleatorio];
+
+    let mensaje = "";
+
+    if (eleccionUsuario === eleccionComputadora) {
+      mensaje = "Empate. Ambos eligieron " + eleccionUsuario + ".";
+      empatadas = empatadas + 1;
+    } else if (
+      (eleccionUsuario === "piedra" && eleccionComputadora === "tijera") ||
+      (eleccionUsuario === "papel" && eleccionComputadora === "piedra") ||
+      (eleccionUsuario === "tijera" && eleccionComputadora === "papel")
+    ) {
+      mensaje = "Ganaste. " + eleccionUsuario + " le gana a " + eleccionComputadora + ".";
+      ganadas = ganadas + 1;
+    } else {
+      mensaje = "Perdiste. " + eleccionComputadora + " le gana a " + eleccionUsuario + ".";
+      perdidas = perdidas + 1;
+    }
+
+    resultado.textContent = mensaje;
+    marcador.textContent = "Ganadas: " + ganadas + " | Perdidas: " + perdidas + " | Empates: " + empatadas;
+  });
+});
+
+btnReiniciarJuego2.addEventListener("click", function () {
+  ganadas = 0;
+  perdidas = 0;
+  empatadas = 0;
+  resultado.textContent = "";
+  marcador.textContent = "Ganadas: 0 | Perdidas: 0 | Empates: 0";
+});`;
+
+var CODIGO_J3_HTML =
+`<div class="juego">
+  <h3>Busca la pareja</h3>
+  <p>Encuentra las parejas de símbolos iguales. Intentos: <span id="movimientosJuego3">0</span></p>
+  <div class="tablero" id="tableroJuego3"></div>
+  <p id="mensajeJuego3"></p>
+  <button id="btnReiniciarJuego3">Reiniciar juego</button>
+</div>`;
+
+var CODIGO_J3_CSS =
+`.tablero {
+  display: grid;
+  grid-template-columns: repeat(4, 70px);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.carta {
+  width: 70px;
+  height: 70px;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.carta-interior {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.carta.volteada .carta-interior {
+  transform: rotateY(180deg);
+}
+
+.carta-cara {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carta-frente {
+  background: #4a3fcf;
+}
+
+.carta-reverso {
+  background: #ffffff;
+  border: 2px solid #d8dae8;
+  transform: rotateY(180deg);
+}
+
+.carta.emparejada .carta-reverso {
+  background: #d9f0e3;
+  border-color: #17a673;
+}`;
+
+var CODIGO_J3_JS =
+`const simbolos = ["circulo", "cuadrado", "triangulo", "estrella"];
+
+function mezclar(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temporal = array[i];
+    array[i] = array[j];
+    array[j] = temporal;
+  }
+  return array;
+}
+
+let mazo = mezclar(simbolos.concat(simbolos));
+
+const tablero = document.getElementById("tableroJuego3");
+const contadorMovimientos = document.getElementById("movimientosJuego3");
+const mensajeJuego3 = document.getElementById("mensajeJuego3");
+const btnReiniciarJuego3 = document.getElementById("btnReiniciarJuego3");
+
+let cartasVolteadas = [];
+let bloqueado = false;
+let movimientos = 0;
+let paresEncontrados = 0;
+
+function crearSvgSimbolo(simbolo) {
+  if (simbolo === "circulo") {
+    return "<svg viewBox='0 0 40 40' width='34' height='34'><circle cx='20' cy='20' r='14' fill='#2451c4'></circle></svg>";
+  }
+  if (simbolo === "cuadrado") {
+    return "<svg viewBox='0 0 40 40' width='34' height='34'><rect x='7' y='7' width='26' height='26' fill='#17a673'></rect></svg>";
+  }
+  if (simbolo === "triangulo") {
+    return "<svg viewBox='0 0 40 40' width='34' height='34'><polygon points='20,6 34,34 6,34' fill='#d9782d'></polygon></svg>";
+  }
+  return "<svg viewBox='0 0 40 40' width='34' height='34'><polygon points='20,4 24,16 37,16 26,24 30,36 20,28 10,36 14,24 3,16 16,16' fill='#d1435b'></polygon></svg>";
+}
+
+function crearTablero() {
+  tablero.innerHTML = "";
+
+  mazo.forEach(function (simbolo, indice) {
+    const carta = document.createElement("div");
+    carta.className = "carta";
+    carta.dataset.simbolo = simbolo;
+    carta.dataset.indice = indice;
+
+    const interior = document.createElement("div");
+    interior.className = "carta-interior";
+
+    const frente = document.createElement("div");
+    frente.className = "carta-cara carta-frente";
+    frente.innerHTML = "<svg viewBox='0 0 40 40' width='28' height='28'><circle cx='20' cy='20' r='16' fill='none' stroke='#ffffff' stroke-width='3'></circle></svg>";
+
+    const reverso = document.createElement("div");
+    reverso.className = "carta-cara carta-reverso";
+    reverso.innerHTML = crearSvgSimbolo(simbolo);
+
+    interior.appendChild(frente);
+    interior.appendChild(reverso);
+    carta.appendChild(interior);
+    tablero.appendChild(carta);
+  });
+}
+
+crearTablero();
+
+tablero.addEventListener("click", function (evento) {
+  const carta = evento.target.closest(".carta");
+
+  if (!carta) {
+    return;
+  }
+  if (bloqueado) {
+    return;
+  }
+  if (carta.classList.contains("volteada")) {
+    return;
+  }
+  if (carta.classList.contains("emparejada")) {
+    return;
+  }
+
+  carta.classList.add("volteada");
+  cartasVolteadas.push(carta);
+
+  if (cartasVolteadas.length === 2) {
+    movimientos = movimientos + 1;
+    contadorMovimientos.textContent = movimientos;
+    compararCartas();
+  }
+});
+
+function compararCartas() {
+  const primera = cartasVolteadas[0];
+  const segunda = cartasVolteadas[1];
+
+  if (primera.dataset.simbolo === segunda.dataset.simbolo) {
+    primera.classList.add("emparejada");
+    segunda.classList.add("emparejada");
+    cartasVolteadas = [];
+    paresEncontrados = paresEncontrados + 1;
+
+    if (paresEncontrados === simbolos.length) {
+      mensajeJuego3.textContent = "Ganaste. Encontraste todas las parejas en " + movimientos + " movimientos.";
+    }
+  } else {
+    bloqueado = true;
+    setTimeout(function () {
+      primera.classList.remove("volteada");
+      segunda.classList.remove("volteada");
+      cartasVolteadas = [];
+      bloqueado = false;
+    }, 900);
+  }
+}
+
+btnReiniciarJuego3.addEventListener("click", function () {
+  mazo = mezclar(simbolos.concat(simbolos));
+  movimientos = 0;
+  paresEncontrados = 0;
+  cartasVolteadas = [];
+  bloqueado = false;
+  contadorMovimientos.textContent = "0";
+  mensajeJuego3.textContent = "";
+  crearTablero();
+});`;
+
+/* =========================================================
+   RENDERIZAR TODOS LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+renderCodeBlock("cod-j1-html", CODIGO_J1_HTML, "html", "index.html");
+renderCodeBlock("cod-j1-css", CODIGO_J1_CSS, "css", "style.css");
+renderCodeBlock("cod-j1-js", CODIGO_J1_JS, "javascript", "script.js");
+
+renderCodeBlock("cod-j2-html", CODIGO_J2_HTML, "html", "index.html");
+renderCodeBlock("cod-j2-css", CODIGO_J2_CSS, "css", "style.css");
+renderCodeBlock("cod-j2-js", CODIGO_J2_JS, "javascript", "script.js");
+
+renderCodeBlock("cod-j3-html", CODIGO_J3_HTML, "html", "index.html");
+renderCodeBlock("cod-j3-css", CODIGO_J3_CSS, "css", "style.css");
+renderCodeBlock("cod-j3-js", CODIGO_J3_JS, "javascript", "script.js");
+
+/* =========================================================
+   CANDADO ANTI COPIAR/PEGAR EN LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+var toast = document.getElementById("copyToast");
+var toastTimer = null;
+function mostrarToast() {
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2200);
+}
+
+document.querySelectorAll(".code-lock").forEach(function (bloque) {
+  bloque.addEventListener("copy", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("cut", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("contextmenu", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  bloque.addEventListener("selectstart", function (e) { e.preventDefault(); });
+});
+</script>
+</body>
+</html>
