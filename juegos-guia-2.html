@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía: 3 juegos con HTML, CSS y JavaScript · Parte 2</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #2451c4;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --accent-4: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-header: #282a3e;
+    --code-fg: #cdd6f4;
+    --code-line: #464a63;
+    --kw: #c792ea;
+    --str: #8bd5a0;
+    --fn: #82aaff;
+    --tag: #f07178;
+    --attr: #ffcb6b;
+    --num: #f78c6c;
+    --cm: #6b7089;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #12305e, #2451c4 55%, #4d7ef5);
+    color: white; padding: 46px 24px 38px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 700px; color: #dbe6ff; }
+  .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; }
+
+  nav.toc { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(4px); }
+  nav.toc ul { list-style: none; margin: 0; padding: 10px 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1000px; margin-inline: auto; }
+  nav.toc a { text-decoration: none; color: var(--ink); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; }
+  nav.toc a:hover { background: #eaf0ff; }
+
+  main { max-width: 940px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card, .resumen-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 34px; box-shadow: 0 2px 10px rgba(20,40,100,0.05); }
+  .intro-card h2 { margin-top: 0; }
+  .icon-note { display: flex; gap: 10px; align-items: flex-start; border-radius: 10px; padding: 12px 14px; margin-top: 14px; font-size: 0.9rem; }
+  .icon-note svg { flex-shrink: 0; margin-top: 2px; }
+  .icon-note.lock { background: #fff7e8; border: 1px solid #f2dcae; color: #6b4e13; }
+  .icon-note.info { background: #eef4ff; border: 1px solid #c7d9fb; color: #1c3d85; }
+  .icon-note.image { background: #eefaf3; border: 1px solid #b9e6cc; color: #146c43; }
+
+  section.game { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 32px; margin-bottom: 44px; box-shadow: 0 2px 14px rgba(20,40,100,0.06); scroll-margin-top: 70px; }
+  .game-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+  section.game h2 { margin: 0 0 6px; font-size: 1.5rem; }
+  section.game > p.lead { color: var(--muted); margin-top: 0; }
+
+  h3.subhead { margin: 30px 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  .conceptos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 6px 0 8px; }
+  .concepto-card { background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .concepto-card h4 { margin: 0 0 4px; font-size: 0.92rem; color: var(--accent); }
+  .concepto-card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  .concepto-card code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.82rem; }
+
+  /* ---------- Bloques de código (candado anti-copia) ---------- */
+  .code-window { border-radius: 12px; overflow: hidden; margin: 12px 0 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+  .code-header { background: var(--code-header); color: #9aa0c3; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; }
+  .code-header .dots span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-header .lang { text-transform: uppercase; font-weight: 700; letter-spacing: .04em; margin-right: 6px; }
+  .code-header .lock { color: #ffcb6b; display: flex; align-items: center; }
+
+  .code-body { background: var(--code-bg); padding: 12px 0; overflow-x: auto; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+  .code-line { display: flex; padding: 1px 16px; white-space: pre; }
+  .code-line .ln { color: var(--code-line); width: 30px; flex-shrink: 0; -webkit-user-select: none; user-select: none; }
+  .code-line .txt { color: var(--code-fg); }
+  .kw { color: var(--kw); }
+  .str { color: var(--str); }
+  .fn  { color: var(--fn); }
+  .tag { color: var(--tag); }
+  .attr{ color: var(--attr); }
+  .num { color: var(--num); }
+  .cm  { color: var(--cm); font-style: italic; }
+  .prop{ color: #94e2d5; }
+
+  .copy-toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: #24263a; color: #f1f2fa; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s; box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 999; display: flex; align-items: center; gap: 8px; }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Checkpoints visuales (SVG) ---------- */
+  .checkpoint { background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px; padding: 18px; margin: 10px 0 22px; text-align: center; }
+  .checkpoint-label { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; font-weight: 700; }
+  .checkpoint svg.mockup { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; }
+  .checkpoint-caption { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  p.explain { font-size: 0.95rem; }
+  p.explain code, li code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Guía práctica: 3 juegos con HTML, CSS y JavaScript · Parte 2</h1>
+  <p>Triki (Tic Tac Toe), Simon dice, y Ahorcado. Cada juego empieza explicando los conceptos que vas a necesitar, y luego construye el código completo paso a paso.</p>
+  <div class="badges">
+    <span class="badge">HTML + CSS + JS puro</span>
+    <span class="badge">Sin librerías</span>
+    <span class="badge">Código completo</span>
+    <span class="badge">Checkpoints en imagen</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#intro">Antes de empezar</a></li>
+    <li><a href="#juego1">Juego 1 · Triki (Tic Tac Toe)</a></li>
+    <li><a href="#juego2">Juego 2 · Simon dice</a></li>
+    <li><a href="#juego3">Juego 3 · Ahorcado</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="intro-card" id="intro">
+    <h2>Cómo está organizada esta guía</h2>
+    <p class="explain">Cada uno de los 3 juegos sigue la misma estructura: primero se explican, en un lenguaje sencillo, los conceptos de JavaScript que ese juego necesita; después se construye el <code>HTML</code>, luego el <code>CSS</code> y por último el <code>JavaScript</code>, mostrando el código completo de cada archivo (nada se deja fuera ni se resume con puntos suspensivos). Entre paso y paso encontrarás un <strong>checkpoint visual</strong>: una imagen que muestra cómo debe verse tu juego en ese punto, para que compares tu resultado.</p>
+    <div class="icon-note lock">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      <span>El código de esta guía está bloqueado para copiar y pegar a propósito. Transcríbelo a mano en tu propio editor: escribir cada línea te obliga a leerla con atención.</span>
+    </div>
+    <div class="icon-note info">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="10.5" x2="12" y2="16"></line><circle cx="12" cy="7.2" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+      <span>No hay ningún entorno para ejecutar código dentro de esta guía. Debes crear los archivos <code>index.html</code>, <code>style.css</code> y <code>script.js</code> en tu computador y abrirlos en tu navegador para probarlos.</span>
+    </div>
+    <div class="icon-note image">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+      <span>Los "checkpoints" son imágenes (dibujadas en SVG) que muestran el aspecto y el contenido esperado de tu juego en un momento dado, no el código ni una demostración interactiva.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 1: TRES EN RAYA -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego1">
+    <span class="game-tag" style="background:#2451c4">Juego 1</span>
+    <h2>Triki (Tic Tac Toe)</h2>
+    <p class="lead">Dos jugadores usan el mismo dispositivo y se turnan para marcar casillas con "X" y "O". Gana quien complete primero una línea de tres, ya sea horizontal, vertical o diagonal.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>Un array como tablero</h4>
+        <p>En vez de una cuadrícula 3x3, guardamos las 9 casillas en un solo array de 9 posiciones (índices 0 a 8), lo que facilita revisar y comparar valores.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Array de combinaciones ganadoras</h4>
+        <p>Una lista fija con las 8 formas posibles de ganar (3 filas, 3 columnas y 2 diagonales), cada una guardada como un array de 3 índices.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Bucle for</h4>
+        <p>Recorre el array de combinaciones ganadoras una por una, comprobando si las tres casillas de esa combinación tienen el mismo valor y no están vacías.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.every()</h4>
+        <p>Devuelve <code>true</code> solo si todos los elementos del array cumplen una condición. Lo usamos para saber si el tablero ya está lleno (empate).</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Operador ternario</h4>
+        <p><code>condición ? valorSiVerdadero : valorSiFalso</code> es una forma corta de escribir un if/else en una sola línea; lo usamos para alternar el turno entre "X" y "O".</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Delegación de eventos</h4>
+        <p>Un único <code>addEventListener</code> en el tablero completo detecta el clic sobre cualquiera de las 9 casillas, incluso creadas dinámicamente con JavaScript.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">Igual que el tablero del juego de memoria de la guía anterior, las 9 casillas no se escriben a mano: solo preparamos un contenedor vacío, y JavaScript construye las casillas dentro de él a partir del array del tablero.</p>
+    <div id="cod-j1-html"></div>
+    <p class="explain">El <code>&lt;span id="turnoActual"&gt;</code> muestra de quién es el turno sin tener que reescribir toda la frase. El <code>&lt;div id="tableroTresEnRaya"&gt;</code> empieza vacío: su contenido lo genera por completo el JavaScript del Paso 3.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Triki</text>
+        <text x="24" y="56" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Turno actual: X</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="168" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="24" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="168" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="24" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="168" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Tablero recién generado: 9 casillas vacías y el turno inicial marcado como "X".</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS organiza las 9 casillas en una cuadrícula de 3 columnas y les da tamaño y tipografía uniformes.</p>
+    <div id="cod-j1-css"></div>
+    <p class="explain"><code>grid-template-columns: repeat(3, 90px)</code> crea exactamente 3 columnas de 90 píxeles cada una; al haber 9 celdas, se acomodan solas en 3 filas. <code>.celda.ganadora</code> es la clase que resaltará en verde las tres casillas de la combinación ganadora.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Aquí se dibuja el tablero, se controlan los turnos y se comprueba si alguien ganó o si hubo empate.</p>
+    <div id="cod-j1-js"></div>
+    <p class="explain"><code>combinacionesGanadoras</code> es un array de 8 arrays, cada uno con los 3 índices (del 0 al 8) que forman una línea ganadora. <code>tablero</code> es el array de 9 posiciones que representa el estado real del juego; empieza con 9 cadenas vacías. <code>turno</code> guarda de quién es el turno actual, y <code>juegoTerminado</code> es la bandera que bloquea más clics una vez que alguien ganó o hubo empate.</p>
+    <p class="explain"><code>crearTablero()</code> vacía el contenedor y recorre el array <code>tablero</code> con <code>forEach</code>, creando una <code>&lt;div class="celda"&gt;</code> por cada posición. Cada celda guarda su posición en <code>celda.dataset.indice</code> y muestra el valor actual de esa posición ("X", "O" o vacío) como su texto.</p>
+    <p class="explain"><code>verificarGanador()</code> recorre <code>combinacionesGanadoras</code> con un <code>for</code> clásico. En cada vuelta, extrae los tres índices de la combinación (<code>a</code>, <code>b</code>, <code>c</code>) y comprueba dos cosas a la vez: que la casilla <code>a</code> no esté vacía, y que las tres casillas (<code>a</code>, <code>b</code> y <code>c</code>) tengan exactamente el mismo valor. Si encuentra una combinación así, devuelve ese valor ("X" u "O") de inmediato con <code>return</code>; si termina de recorrer todo el array sin encontrar ninguna, devuelve <code>null</code>.</p>
+    <p class="explain"><code>verificarEmpate()</code> usa <code>tablero.every(...)</code> para comprobar que ninguna posición del array siga vacía; si todas las casillas tienen algo, es empate.</p>
+    <p class="explain">El <code>addEventListener("click")</code> está en el contenedor del tablero completo (delegación de eventos), no en cada celda. Tras encontrar la celda clicada con <code>closest(".celda")</code>, se descartan los clics inválidos: que no haya celda, que el juego ya haya terminado, o que esa celda ya tenga un valor. Si el clic es válido, se guarda el turno actual en esa posición del array (<code>tablero[indice] = turno</code>) y se vuelve a dibujar el tablero completo con <code>crearTablero()</code>.</p>
+    <p class="explain">Después de dibujar, se llama a <code>verificarGanador()</code>: si devuelve un valor, se muestra el mensaje de victoria y se activa <code>juegoTerminado</code>. Si no hay ganador, se revisa <code>verificarEmpate()</code>; si tampoco hay empate, se cambia el turno con el operador ternario <code>turno = turno === "X" ? "O" : "X"</code>, que en una sola línea dice "si el turno actual es X, ahora es O; si no, ahora es X".</p>
+    <p class="explain">El botón de reinicio vuelve a llenar <code>tablero</code> con 9 cadenas vacías, restablece el turno a "X", quita la bandera <code>juegoTerminado</code>, limpia el mensaje y vuelve a dibujar el tablero desde cero.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Triki</text>
+        <text x="24" y="56" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Turno actual: O</text>
+
+        <g font-family="Segoe UI, Arial" font-size="28" text-anchor="middle">
+          <rect x="24" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <text x="57" y="115" fill="#2451c4" font-weight="700">X</text>
+          <rect x="96" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <text x="129" y="115" fill="#d1435b" font-weight="700">O</text>
+          <rect x="168" y="72" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+
+          <rect x="24" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <text x="129" y="187" fill="#2451c4" font-weight="700">X</text>
+          <rect x="168" y="144" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+
+          <rect x="24" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="168" y="216" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Partida a medias: dos X y una O ya colocadas, es el turno de O.</p>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="318" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Triki</text>
+
+        <g font-family="Segoe UI, Arial" font-size="28" text-anchor="middle">
+          <rect x="24" y="50" width="66" height="66" rx="6" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <text x="57" y="93" fill="#2451c4" font-weight="700">X</text>
+          <rect x="96" y="50" width="66" height="66" rx="6" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <text x="129" y="93" fill="#2451c4" font-weight="700">X</text>
+          <rect x="168" y="50" width="66" height="66" rx="6" fill="#d9f0e3" stroke="#17a673" stroke-width="2"></rect>
+          <text x="201" y="93" fill="#2451c4" font-weight="700">X</text>
+
+          <rect x="24" y="122" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <text x="57" y="165" fill="#d1435b" font-weight="700">O</text>
+          <rect x="96" y="122" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <text x="129" y="165" fill="#d1435b" font-weight="700">O</text>
+          <rect x="168" y="122" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+
+          <rect x="24" y="194" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="96" y="194" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="168" y="194" width="66" height="66" rx="6" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        </g>
+
+        <text x="24" y="288" font-size="14" fill="#146c43" font-weight="600" font-family="Segoe UI, Arial">Ganó X.</text>
+        <rect x="24" y="298" width="150" height="0" fill="none"></rect>
+      </svg>
+      <p class="checkpoint-caption">Fin de la partida: la fila superior de X quedó resaltada en verde y aparece el mensaje "Ganó X."</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 2: SIMON DICE -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego2">
+    <span class="game-tag" style="background:#17a673">Juego 2</span>
+    <h2>Simon dice</h2>
+    <p class="lead">La computadora enciende una secuencia de colores, cada vez un poco más larga. El jugador debe repetir esa secuencia haciendo clic en los mismos botones y en el mismo orden.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>Un array como secuencia</h4>
+        <p>La secuencia de colores a repetir se guarda como un array de números; cada número representa la posición de un color en la lista de botones.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.push()</h4>
+        <p>Agrega un nuevo elemento al final de un array. Cada ronda, se agrega un color aleatorio más a la secuencia con este método.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>setInterval() y clearInterval()</h4>
+        <p><code>setInterval</code> repite una función cada cierto tiempo, útil para ir mostrando un color de la secuencia tras otro; <code>clearInterval</code> lo detiene cuando ya se mostraron todos.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>setTimeout() para pausas</h4>
+        <p>Se usa para apagar un botón después de un momento de estar encendido, y para dar una pequeña pausa antes de iniciar la siguiente ronda.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Comparar dos arrays paso a paso</h4>
+        <p>En vez de comparar arrays completos, se compara elemento por elemento a medida que el jugador hace clic, para detectar el error apenas ocurre.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Una variable "bloqueado"</h4>
+        <p>Evita que el jugador haga clic mientras la computadora todavía está mostrando la secuencia, o mientras se prepara la siguiente ronda.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">Necesitamos 4 botones de color (cada uno con su propio <code>id</code> y un <code>data-color</code> con su posición numérica), un contador de ronda, un mensaje y un botón para iniciar el juego.</p>
+    <div id="cod-j2-html"></div>
+    <p class="explain">El atributo <code>data-color</code> de cada botón coincide con su posición dentro de <code>document.querySelectorAll(".colorSimon")</code> (0, 1, 2 y 3), lo que permite relacionar directamente un color con una posición numérica dentro de la secuencia.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Simon dice</text>
+        <text x="24" y="56" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Memoriza y repite la secuencia. Ronda: 0</text>
+
+        <rect x="24" y="74" width="110" height="90" rx="10" fill="#17a673" opacity="0.55"></rect>
+        <rect x="142" y="74" width="110" height="90" rx="10" fill="#d1435b" opacity="0.55"></rect>
+        <rect x="24" y="172" width="110" height="90" rx="10" fill="#d9c02d" opacity="0.55"></rect>
+        <rect x="142" y="172" width="110" height="90" rx="10" fill="#2451c4" opacity="0.55"></rect>
+
+        <rect x="24" y="276" width="120" height="0" fill="none"></rect>
+        <text x="24" y="284" font-size="12" fill="#444a5e" font-family="Segoe UI, Arial"></text>
+        <rect x="24" y="276" width="140" height="26" rx="7" fill="#2451c4"></rect>
+        <text x="44" y="293" font-size="11" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Iniciar juego</text>
+      </svg>
+      <p class="checkpoint-caption">Estado inicial: los 4 colores en reposo (semi-transparentes), ronda en 0, listo para presionar "Iniciar juego".</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS acomoda los 4 botones en una cuadrícula de 2x2, les da color propio a cada uno, y define cómo se ven "encendidos".</p>
+    <div id="cod-j2-css"></div>
+    <p class="explain">Cada botón tiene <code>opacity: 0.55</code> por defecto (apagado); la clase <code>.activo</code>, que JavaScript agrega y quita brevemente, sube la opacidad a 1 para simular que el botón se "enciende".</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">La parte más particular de este juego es la reproducción de la secuencia con una pausa entre cada color, y la comparación en tiempo real de lo que hace el jugador.</p>
+    <div id="cod-j2-js"></div>
+    <p class="explain"><code>secuencia</code> es el array con el orden correcto de colores (números del 0 al 3) que el jugador debe repetir; <code>secuenciaUsuario</code> guarda lo que el jugador ha ido presionando en la ronda actual; <code>bloqueado</code> empieza en <code>true</code> porque al inicio el jugador todavía no debe poder hacer clic.</p>
+    <p class="explain"><code>generarPaso()</code> elige un número aleatorio entre 0 y la cantidad de botones (usando <code>Math.floor(Math.random() * botonesColor.length)</code>) y lo agrega al final de <code>secuencia</code> con <code>push</code>.</p>
+    <p class="explain"><code>encenderBoton(indiceColor)</code> le agrega la clase <code>"activo"</code> al botón correspondiente y, con <code>setTimeout</code>, se la quita 400 milisegundos después, logrando el efecto de parpadeo.</p>
+    <p class="explain"><code>reproducirSecuencia()</code> bloquea el juego, reinicia <code>secuenciaUsuario</code> a un array vacío y actualiza el número de ronda. Usa <code>setInterval</code> para ir encendiendo, cada 700 milisegundos, el color que corresponde según la variable <code>indice</code> (que empieza en 0 y aumenta en cada vuelta). Cuando <code>indice</code> llega al tamaño de <code>secuencia</code>, se detiene el intervalo con <code>clearInterval</code> y, tras una breve pausa con <code>setTimeout</code>, se desbloquea el juego para que el jugador pueda responder.</p>
+    <p class="explain">En el clic de cada botón de color: si <code>bloqueado</code> es verdadero, no pasa nada. Si no, se enciende el botón presionado (para dar retroalimentación visual) y se agrega su color a <code>secuenciaUsuario</code>. Con <code>pasoActual</code> (la última posición agregada) se compara <code>secuenciaUsuario[pasoActual]</code> contra <code>secuencia[pasoActual]</code>: si no coinciden, el jugador se equivocó, se muestra un mensaje con la ronda alcanzada y se vuelve a bloquear el juego. Si coinciden y además <code>secuenciaUsuario</code> ya tiene la misma longitud que <code>secuencia</code>, el jugador completó la ronda correctamente: se muestra un mensaje de éxito y, tras una pausa, se llama de nuevo a <code>generarPaso()</code> y <code>reproducirSecuencia()</code> para la siguiente ronda, ahora un color más larga.</p>
+    <p class="explain">El botón "Iniciar juego" reinicia ambos arrays, limpia el mensaje, genera el primer color de la secuencia y la reproduce, comenzando la partida desde cero.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Simon dice</text>
+        <text x="24" y="56" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Memoriza y repite la secuencia. Ronda: 3</text>
+
+        <rect x="24" y="74" width="110" height="90" rx="10" fill="#17a673" opacity="1"></rect>
+        <rect x="142" y="74" width="110" height="90" rx="10" fill="#d1435b" opacity="0.55"></rect>
+        <rect x="24" y="172" width="110" height="90" rx="10" fill="#d9c02d" opacity="0.55"></rect>
+        <rect x="142" y="172" width="110" height="90" rx="10" fill="#2451c4" opacity="0.55"></rect>
+      </svg>
+      <p class="checkpoint-caption">La computadora está mostrando la secuencia: el color verde se encendió (opacidad completa) mientras los demás siguen atenuados.</p>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="298" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="34" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Simon dice</text>
+        <text x="24" y="56" font-size="12" fill="#5b6270" font-family="Segoe UI, Arial">Memoriza y repite la secuencia. Ronda: 4</text>
+
+        <rect x="24" y="74" width="110" height="90" rx="10" fill="#17a673" opacity="0.55"></rect>
+        <rect x="142" y="74" width="110" height="90" rx="10" fill="#d1435b" opacity="0.55"></rect>
+        <rect x="24" y="172" width="110" height="90" rx="10" fill="#d9c02d" opacity="0.55"></rect>
+        <rect x="142" y="172" width="110" height="90" rx="10" fill="#2451c4" opacity="0.55"></rect>
+
+        <text x="24" y="288" font-size="13" fill="#b3261e" font-weight="600" font-family="Segoe UI, Arial">Te equivocaste. Llegaste a la ronda 4.</text>
+      </svg>
+      <p class="checkpoint-caption">El jugador falló la secuencia: mensaje de error indicando en qué ronda quedó, colores de nuevo en reposo.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- JUEGO 3: AHORCADO -->
+  <!-- ============================================================ -->
+  <section class="game" id="juego3">
+    <span class="game-tag" style="background:#7b2ff7">Juego 3</span>
+    <h2>Ahorcado</h2>
+    <p class="lead">La computadora elige en secreto una palabra. El jugador va proponiendo letras usando un teclado en pantalla; cada acierto revela esa letra en la palabra, y cada error dibuja una parte más de la figura.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>string.split("")</h4>
+        <p>Convierte un texto en un array de sus caracteres individuales, por ejemplo <code>"sol".split("")</code> produce <code>["s", "o", "l"]</code>. Lo usamos para recorrer letra por letra.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.map()</h4>
+        <p>Recorre un array y devuelve un array nuevo transformando cada elemento; lo usamos para convertir cada letra en sí misma (si ya fue adivinada) o en un guion bajo (si no).</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.indexOf()</h4>
+        <p>Devuelve la posición de un valor dentro de un array, o <code>-1</code> si no está. Nos sirve para comprobar si una letra ya fue adivinada o si pertenece a la palabra secreta.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.join(" ")</h4>
+        <p>Une todos los elementos de un array en un solo texto, separados por lo que le indiques. Lo usamos para mostrar la palabra oculta con espacios entre cada letra.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Generar botones con un bucle</h4>
+        <p>En vez de escribir 26 botones a mano en el HTML, se recorre el abecedario con <code>forEach</code> y se crea un botón por cada letra con <code>createElement</code>.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Dibujo progresivo con SVG</h4>
+        <p>Se guarda cada parte del dibujo del ahorcado en un array de fragmentos SVG, y se van agregando uno a uno según la cantidad de errores cometidos.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">Necesitamos un espacio para el dibujo, un párrafo para la palabra oculta, un contenedor vacío para el teclado (que JavaScript va a llenar con 26 botones), un mensaje y un botón de reinicio.</p>
+    <div id="cod-j3-html"></div>
+    <p class="explain">Tanto <code>&lt;div id="dibujoAhorcado"&gt;</code> como <code>&lt;div id="tecladoAhorcado"&gt;</code> empiezan vacíos: el primero se llena con el SVG del dibujo según los errores cometidos, y el segundo con los 26 botones de letras, ambos generados desde JavaScript.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="30" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Ahorcado</text>
+
+        <g transform="translate(24,36)">
+          <line x1="0" y1="160" x2="100" y2="160" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="160" x2="30" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="10" x2="130" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="130" y1="10" x2="130" y2="44" stroke="#1f2430" stroke-width="3"></line>
+        </g>
+
+        <text x="24" y="216" font-size="20" letter-spacing="4" font-family="Consolas, monospace" fill="#1f2430">_ _ _ _ _ _ _ _ _</text>
+
+        <g font-family="Consolas, monospace" font-size="11">
+          <rect x="24" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="31" y="251" fill="#1f2430">a</text>
+          <rect x="50" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="57" y="251" fill="#1f2430">b</text>
+          <rect x="76" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="83" y="251" fill="#1f2430">c</text>
+          <rect x="102" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="109" y="251" fill="#1f2430">d</text>
+          <rect x="128" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="135" y="251" fill="#1f2430">e</text>
+          <rect x="154" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="161" y="251" fill="#1f2430">f</text>
+          <rect x="180" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="187" y="251" fill="#1f2430">g</text>
+          <text x="212" y="251" fill="#9aa0b8">...</text>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Estado inicial: gallows solo con la base (sin figura), la palabra secreta oculta con guiones bajos, y el teclado completo habilitado.</p>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS da formato al teclado (una cuadrícula flexible de botones pequeños) y a la palabra oculta (con espaciado entre letras para que se lea con claridad).</p>
+    <div id="cod-j3-css"></div>
+    <p class="explain"><code>.teclaAhorcado:disabled</code> define cómo se ve un botón después de haber sido presionado (semi-transparente y sin cursor de clic), para que sea evidente qué letras ya se usaron.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Esta es la lógica más larga de la guía: elegir palabra, generar el teclado, comprobar cada letra, dibujar el ahorcado progresivamente y detectar victoria o derrota.</p>
+    <div id="cod-j3-js"></div>
+    <p class="explain"><code>palabras</code> es el array de palabras posibles; <code>palabraSecreta</code> se elige con un índice aleatorio, igual que en el Juego 1 de la guía anterior. <code>letrasAdivinadas</code> es un array vacío que se va llenando con cada acierto, <code>errores</code> empieza en 0, y <code>maxErrores</code> guarda el límite (6) antes de perder.</p>
+    <p class="explain"><code>crearDibujoAhorcado(errores)</code> tiene un array <code>partes</code> con 6 fragmentos SVG (cabeza, cuerpo, brazo izquierdo, brazo derecho, pierna izquierda y pierna derecha) y una <code>base</code> fija con el poste y la soga. Con un <code>for</code> que va de 0 hasta <code>errores</code>, se van concatenando al texto <code>contenido</code> solamente las primeras <code>errores</code> partes del array; así, con 0 errores solo se ve la base, y con 6 se ve la figura completa.</p>
+    <p class="explain"><code>mostrarPalabra()</code> convierte <code>palabraSecreta</code> en un array de letras con <code>split("")</code>, y con <code>map</code> transforma cada letra: si está en <code>letrasAdivinadas</code> (comprobado con <code>indexOf</code> distinto de -1), se muestra la letra real; si no, se muestra un guion bajo. El array resultante se convierte en texto con <code>join(" ")</code>, dejando un espacio entre cada carácter para que se lea como una palabra con espacios entre letras.</p>
+    <p class="explain"><code>verificarVictoria()</code> usa <code>every</code> sobre las letras de la palabra secreta para comprobar que todas, sin excepción, ya estén en <code>letrasAdivinadas</code>.</p>
+    <p class="explain"><code>crearTeclado()</code> vacía el contenedor y recorre el abecedario (obtenido con <code>"abcdefghijklmnopqrstuvwxyz".split("")</code>) con <code>forEach</code>, creando un botón por cada letra con <code>createElement</code>, guardando la letra tanto en el texto del botón como en <code>dataset.letra</code>.</p>
+    <p class="explain">El <code>addEventListener("click")</code> del teclado usa delegación de eventos: encuentra el botón exacto con <code>closest(".teclaAhorcado")</code>, y descarta el clic si no hay botón, si ya está deshabilitado, o si el juego ya terminó. Si el clic es válido, se deshabilita ese botón de inmediato (<code>boton.disabled = true</code>) para que no se pueda volver a usar la misma letra. Con <code>palabraSecreta.indexOf(letra)</code> se comprueba si la letra está en la palabra: si sí, se agrega a <code>letrasAdivinadas</code> y se vuelve a mostrar la palabra, revisando además si eso implica la victoria; si no, se suma un error, se vuelve a dibujar el ahorcado con la nueva cantidad de errores, y se comprueba si se llegó al máximo permitido para declarar la derrota.</p>
+    <p class="explain">El botón de reinicio elige una nueva palabra secreta al azar, vacía <code>letrasAdivinadas</code>, pone <code>errores</code> en 0, quita la bandera de juego terminado, limpia el mensaje, vuelve a dibujar el ahorcado sin partes, actualiza la palabra oculta y reconstruye el teclado completo (con todos los botones habilitados de nuevo).</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="298" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="30" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Ahorcado</text>
+
+        <g transform="translate(24,36)">
+          <line x1="0" y1="160" x2="100" y2="160" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="160" x2="30" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="10" x2="130" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="130" y1="10" x2="130" y2="44" stroke="#1f2430" stroke-width="3"></line>
+          <circle cx="130" cy="60" r="16" fill="none" stroke="#1f2430" stroke-width="3"></circle>
+          <line x1="130" y1="76" x2="130" y2="130" stroke="#1f2430" stroke-width="3"></line>
+        </g>
+
+        <text x="24" y="216" font-size="20" letter-spacing="4" font-family="Consolas, monospace" fill="#1f2430">_ A _ A _ _ R _ _ _</text>
+
+        <g font-family="Consolas, monospace" font-size="11">
+          <rect x="24" y="236" width="22" height="22" rx="5" fill="#e5e7eb" stroke="#c9cce0" opacity="0.4"></rect>
+          <text x="31" y="251" fill="#9aa0b8">a</text>
+          <rect x="50" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="57" y="251" fill="#1f2430">b</text>
+          <rect x="76" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="83" y="251" fill="#1f2430">c</text>
+          <rect x="102" y="236" width="22" height="22" rx="5" fill="#e5e7eb" stroke="#c9cce0" opacity="0.4"></rect>
+          <text x="109" y="251" fill="#9aa0b8">d</text>
+          <rect x="128" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="135" y="251" fill="#1f2430">e</text>
+          <rect x="154" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="161" y="251" fill="#1f2430">f</text>
+          <rect x="180" y="236" width="22" height="22" rx="5" fill="#f7f8fd" stroke="#c9cce0"></rect>
+          <text x="187" y="251" fill="#1f2430">g</text>
+          <text x="212" y="251" fill="#9aa0b8">...</text>
+        </g>
+      </svg>
+      <p class="checkpoint-caption">Partida en curso: se adivinaron "a" y "r" (letras reveladas en la palabra), se falló con "d" (botón deshabilitado y en gris), y el dibujo ya muestra cabeza y cuerpo (2 errores).</p>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 360 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="358" height="318" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="30" font-size="18" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Ahorcado</text>
+
+        <g transform="translate(24,36)">
+          <line x1="0" y1="160" x2="100" y2="160" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="160" x2="30" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="30" y1="10" x2="130" y2="10" stroke="#1f2430" stroke-width="4"></line>
+          <line x1="130" y1="10" x2="130" y2="44" stroke="#1f2430" stroke-width="3"></line>
+          <circle cx="130" cy="60" r="16" fill="none" stroke="#1f2430" stroke-width="3"></circle>
+          <line x1="130" y1="76" x2="130" y2="130" stroke="#1f2430" stroke-width="3"></line>
+          <line x1="130" y1="90" x2="105" y2="110" stroke="#1f2430" stroke-width="3"></line>
+          <line x1="130" y1="90" x2="155" y2="110" stroke="#1f2430" stroke-width="3"></line>
+          <line x1="130" y1="130" x2="108" y2="165" stroke="#1f2430" stroke-width="3"></line>
+          <line x1="130" y1="130" x2="152" y2="165" stroke="#1f2430" stroke-width="3"></line>
+        </g>
+
+        <text x="24" y="216" font-size="20" letter-spacing="4" font-family="Consolas, monospace" fill="#1f2430">_ N T E R N E T</text>
+
+        <text x="24" y="248" font-size="14" fill="#b3261e" font-weight="600" font-family="Segoe UI, Arial">Perdiste. La palabra era internet.</text>
+      </svg>
+      <p class="checkpoint-caption">Fin de la partida por errores: la figura del ahorcado está completa (6 errores) y se revela la palabra correcta en el mensaje.</p>
+    </div>
+  </section>
+
+  <div class="resumen-card">
+    <h2>Para seguir practicando</h2>
+    <p class="explain">Con estos 3 juegos y los 3 de la guía anterior ya cubriste selección de elementos, eventos, arrays, temporizadores, delegación de eventos y manipulación de texto. Como siguiente paso, intenta agregar un marcador de partidas ganadas al Triki, un modo más difícil en Simon dice (colores más rápidos), o una lista más larga de palabras en el Ahorcado.</p>
+  </div>
+
+</main>
+
+<footer>Guía práctica: 3 juegos con HTML, CSS y JavaScript puro · Código completo, sin sandboxes</footer>
+
+<div class="copy-toast" id="copyToast">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+  <span>Este código es para transcribir a mano, no para copiar.</span>
+</div>
+<script>
+/* =========================================================
+   RESALTADO DE SINTAXIS (sin librerías externas)
+   ========================================================= */
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+var JS_PATTERN = /(\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:const|let|var|function|return|if|else|new|this|class|true|false|null|undefined|for|while|typeof|of|in)\b)|(\b[a-zA-Z_$][\w$]*(?=\())|(\.[a-zA-Z_$][\w$]*)|(\b\d+\b)/g;
+
+function highlightJSLine(line) {
+  JS_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = JS_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "str" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "kw" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "fn" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "prop" });
+    else if (m[6]) tokens.push({ text: m[6], cls: "num" });
+    last = JS_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+var HTML_PATTERN = /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][\w-]*)|([a-zA-Z-]+(?==))|("[^"]*")|(\/?>)/g;
+
+function highlightHTMLLine(line) {
+  HTML_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = HTML_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "tag" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "attr" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "str" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "tag" });
+    last = HTML_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+function highlightCSSLine(line) {
+  var trimmed = line.trim();
+  if (trimmed === "" || trimmed === "}") {
+    return [{ text: line, cls: "" }];
+  }
+  var idxLlave = line.indexOf("{");
+  if (idxLlave !== -1) {
+    return [
+      { text: line.slice(0, idxLlave), cls: "tag" },
+      { text: line.slice(idxLlave), cls: "" }
+    ];
+  }
+  var idxDosPuntos = line.indexOf(":");
+  if (idxDosPuntos !== -1) {
+    return [
+      { text: line.slice(0, idxDosPuntos), cls: "attr" },
+      { text: line.slice(idxDosPuntos), cls: "str" }
+    ];
+  }
+  return [{ text: line, cls: "" }];
+}
+
+function tokensToHtml(tokens) {
+  return tokens.map(function (t) {
+    var escaped = escapeHtml(t.text);
+    return t.cls ? '<span class="' + t.cls + '">' + escaped + "</span>" : escaped;
+  }).join("");
+}
+
+function renderCodeBlock(containerId, code, lang, filename) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+
+  var highlightFn = highlightJSLine;
+  if (lang === "html") highlightFn = highlightHTMLLine;
+  if (lang === "css") highlightFn = highlightCSSLine;
+
+  var lines = code.split("\n");
+  var bodyHtml = lines.map(function (line, i) {
+    var num = String(i + 1).padStart(2, "0");
+    var tokens = highlightFn(line);
+    return '<div class="code-line"><span class="ln">' + num + '</span><span class="txt">' + tokensToHtml(tokens) + "</span></div>";
+  }).join("");
+
+  var lockIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+
+  el.innerHTML =
+    '<div class="code-header">' +
+      '<span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>' +
+      '<span class="fname">' + filename + "</span>" +
+      '<span class="lang">' + lang.toUpperCase() + "</span>" +
+      '<span class="lock">' + lockIcon + "</span>" +
+    "</div>" +
+    '<div class="code-body">' + bodyHtml + "</div>";
+
+  el.classList.add("code-window", "code-lock");
+}
+
+/* =========================================================
+   CÓDIGO DE LOS 3 JUEGOS (fuente para los bloques de código)
+   ========================================================= */
+
+var CODIGO_J1_HTML =
+`<div class="juego">
+  <h3>Triki (Tic Tac Toe)</h3>
+  <p>Turno actual: <span id="turnoActual">X</span></p>
+  <div class="tablero3" id="tableroTresEnRaya"></div>
+  <p id="mensajeTresEnRaya"></p>
+  <button id="btnReiniciarTresEnRaya">Reiniciar juego</button>
+</div>`;
+
+var CODIGO_J1_CSS =
+`.tablero3 {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.celda {
+  width: 90px;
+  height: 90px;
+  background: #f7f8fd;
+  border: 1px solid #e3e5ee;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2451c4;
+  cursor: pointer;
+}
+
+.celda.ganadora {
+  background: #d9f0e3;
+  border-color: #17a673;
+}`;
+
+var CODIGO_J1_JS =
+`const combinacionesGanadoras = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
+
+let tablero = ["", "", "", "", "", "", "", "", ""];
+let turno = "X";
+let juegoTerminado = false;
+
+const contenedorTablero = document.getElementById("tableroTresEnRaya");
+const turnoActual = document.getElementById("turnoActual");
+const mensaje = document.getElementById("mensajeTresEnRaya");
+const btnReiniciar = document.getElementById("btnReiniciarTresEnRaya");
+
+function crearTablero() {
+  contenedorTablero.innerHTML = "";
+
+  tablero.forEach(function (valor, indice) {
+    const celda = document.createElement("div");
+    celda.className = "celda";
+    celda.dataset.indice = indice;
+    celda.textContent = valor;
+    contenedorTablero.appendChild(celda);
+  });
+}
+
+crearTablero();
+
+function verificarGanador() {
+  for (let i = 0; i < combinacionesGanadoras.length; i++) {
+    const combinacion = combinacionesGanadoras[i];
+    const a = combinacion[0];
+    const b = combinacion[1];
+    const c = combinacion[2];
+
+    if (tablero[a] !== "" && tablero[a] === tablero[b] && tablero[a] === tablero[c]) {
+      return tablero[a];
+    }
+  }
+  return null;
+}
+
+function verificarEmpate() {
+  return tablero.every(function (valor) {
+    return valor !== "";
+  });
+}
+
+contenedorTablero.addEventListener("click", function (evento) {
+  const celda = evento.target.closest(".celda");
+
+  if (!celda) {
+    return;
+  }
+  if (juegoTerminado) {
+    return;
+  }
+
+  const indice = Number(celda.dataset.indice);
+
+  if (tablero[indice] !== "") {
+    return;
+  }
+
+  tablero[indice] = turno;
+  crearTablero();
+
+  const ganador = verificarGanador();
+
+  if (ganador) {
+    mensaje.textContent = "Ganó " + ganador + ".";
+    juegoTerminado = true;
+    return;
+  }
+
+  if (verificarEmpate()) {
+    mensaje.textContent = "Empate.";
+    juegoTerminado = true;
+    return;
+  }
+
+  turno = turno === "X" ? "O" : "X";
+  turnoActual.textContent = turno;
+});
+
+btnReiniciar.addEventListener("click", function () {
+  tablero = ["", "", "", "", "", "", "", "", ""];
+  turno = "X";
+  juegoTerminado = false;
+  mensaje.textContent = "";
+  turnoActual.textContent = turno;
+  crearTablero();
+});`;
+
+var CODIGO_J2_HTML =
+`<div class="juego">
+  <h3>Simon dice</h3>
+  <p>Memoriza y repite la secuencia de colores. Ronda: <span id="rondaSimon">0</span></p>
+  <div class="tableroSimon">
+    <button class="colorSimon" data-color="0" id="colorVerde"></button>
+    <button class="colorSimon" data-color="1" id="colorRojo"></button>
+    <button class="colorSimon" data-color="2" id="colorAmarillo"></button>
+    <button class="colorSimon" data-color="3" id="colorAzul"></button>
+  </div>
+  <p id="mensajeSimon"></p>
+  <button id="btnIniciarSimon">Iniciar juego</button>
+</div>`;
+
+var CODIGO_J2_CSS =
+`.tableroSimon {
+  display: grid;
+  grid-template-columns: 90px 90px;
+  grid-template-rows: 90px 90px;
+  gap: 8px;
+  margin: 16px 0;
+  width: 188px;
+}
+
+.colorSimon {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+#colorVerde {
+  background: #17a673;
+}
+
+#colorRojo {
+  background: #d1435b;
+}
+
+#colorAmarillo {
+  background: #d9c02d;
+}
+
+#colorAzul {
+  background: #2451c4;
+}
+
+.colorSimon.activo {
+  opacity: 1;
+}`;
+
+var CODIGO_J2_JS =
+`const botonesColor = document.querySelectorAll(".colorSimon");
+const rondaTexto = document.getElementById("rondaSimon");
+const mensaje = document.getElementById("mensajeSimon");
+const btnIniciar = document.getElementById("btnIniciarSimon");
+
+let secuencia = [];
+let secuenciaUsuario = [];
+let bloqueado = true;
+
+function generarPaso() {
+  const nuevoColor = Math.floor(Math.random() * botonesColor.length);
+  secuencia.push(nuevoColor);
+}
+
+function encenderBoton(indiceColor) {
+  const boton = botonesColor[indiceColor];
+  boton.classList.add("activo");
+  setTimeout(function () {
+    boton.classList.remove("activo");
+  }, 400);
+}
+
+function reproducirSecuencia() {
+  bloqueado = true;
+  secuenciaUsuario = [];
+  rondaTexto.textContent = secuencia.length;
+
+  let indice = 0;
+
+  const intervalo = setInterval(function () {
+    encenderBoton(secuencia[indice]);
+    indice = indice + 1;
+
+    if (indice === secuencia.length) {
+      clearInterval(intervalo);
+      setTimeout(function () {
+        bloqueado = false;
+      }, 500);
+    }
+  }, 700);
+}
+
+botonesColor.forEach(function (boton) {
+  boton.addEventListener("click", function () {
+    if (bloqueado) {
+      return;
+    }
+
+    const indiceColor = Number(boton.dataset.color);
+    encenderBoton(indiceColor);
+    secuenciaUsuario.push(indiceColor);
+
+    const pasoActual = secuenciaUsuario.length - 1;
+
+    if (secuenciaUsuario[pasoActual] !== secuencia[pasoActual]) {
+      mensaje.textContent = "Te equivocaste. Llegaste a la ronda " + secuencia.length + ".";
+      bloqueado = true;
+      return;
+    }
+
+    if (secuenciaUsuario.length === secuencia.length) {
+      mensaje.textContent = "Bien hecho. Preparando la siguiente ronda.";
+      setTimeout(function () {
+        generarPaso();
+        reproducirSecuencia();
+      }, 900);
+    }
+  });
+});
+
+btnIniciar.addEventListener("click", function () {
+  secuencia = [];
+  secuenciaUsuario = [];
+  mensaje.textContent = "";
+  generarPaso();
+  reproducirSecuencia();
+});`;
+
+var CODIGO_J3_HTML =
+`<div class="juego">
+  <h3>Ahorcado</h3>
+  <div class="dibujoAhorcado" id="dibujoAhorcado"></div>
+  <p class="palabraOculta" id="palabraOculta"></p>
+  <div class="teclado" id="tecladoAhorcado"></div>
+  <p id="mensajeAhorcado"></p>
+  <button id="btnReiniciarAhorcado">Reiniciar juego</button>
+</div>`;
+
+var CODIGO_J3_CSS =
+`.dibujoAhorcado {
+  margin: 10px 0;
+}
+
+.palabraOculta {
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  font-family: Consolas, monospace;
+}
+
+.teclado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 360px;
+  margin: 12px 0;
+}
+
+.teclaAhorcado {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #c9cce0;
+  border-radius: 6px;
+  background: #f7f8fd;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.teclaAhorcado:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}`;
+
+var CODIGO_J3_JS =
+`const palabras = ["javascript", "programacion", "computadora", "internet", "teclado"];
+
+let palabraSecreta = palabras[Math.floor(Math.random() * palabras.length)];
+let letrasAdivinadas = [];
+let errores = 0;
+const maxErrores = 6;
+let juegoTerminado = false;
+
+const dibujo = document.getElementById("dibujoAhorcado");
+const palabraOcultaEl = document.getElementById("palabraOculta");
+const teclado = document.getElementById("tecladoAhorcado");
+const mensaje = document.getElementById("mensajeAhorcado");
+const btnReiniciar = document.getElementById("btnReiniciarAhorcado");
+
+function crearDibujoAhorcado(errores) {
+  const partes = [
+    "<circle cx='150' cy='70' r='16' fill='none' stroke='#1f2430' stroke-width='3'></circle>",
+    "<line x1='150' y1='86' x2='150' y2='140' stroke='#1f2430' stroke-width='3'></line>",
+    "<line x1='150' y1='100' x2='125' y2='120' stroke='#1f2430' stroke-width='3'></line>",
+    "<line x1='150' y1='100' x2='175' y2='120' stroke='#1f2430' stroke-width='3'></line>",
+    "<line x1='150' y1='140' x2='128' y2='175' stroke='#1f2430' stroke-width='3'></line>",
+    "<line x1='150' y1='140' x2='172' y2='175' stroke='#1f2430' stroke-width='3'></line>"
+  ];
+
+  const base =
+    "<line x1='20' y1='190' x2='120' y2='190' stroke='#1f2430' stroke-width='4'></line>" +
+    "<line x1='50' y1='190' x2='50' y2='20' stroke='#1f2430' stroke-width='4'></line>" +
+    "<line x1='50' y1='20' x2='150' y2='20' stroke='#1f2430' stroke-width='4'></line>" +
+    "<line x1='150' y1='20' x2='150' y2='54' stroke='#1f2430' stroke-width='3'></line>";
+
+  let contenido = base;
+
+  for (let i = 0; i < errores; i++) {
+    contenido = contenido + partes[i];
+  }
+
+  return "<svg viewBox='0 0 220 210' width='180' height='170'>" + contenido + "</svg>";
+}
+
+function mostrarPalabra() {
+  const letras = palabraSecreta.split("");
+
+  const visible = letras.map(function (letra) {
+    if (letrasAdivinadas.indexOf(letra) !== -1) {
+      return letra;
+    }
+    return "_";
+  });
+
+  palabraOcultaEl.textContent = visible.join(" ");
+}
+
+function verificarVictoria() {
+  return palabraSecreta.split("").every(function (letra) {
+    return letrasAdivinadas.indexOf(letra) !== -1;
+  });
+}
+
+function crearTeclado() {
+  teclado.innerHTML = "";
+  const alfabeto = "abcdefghijklmnopqrstuvwxyz".split("");
+
+  alfabeto.forEach(function (letra) {
+    const boton = document.createElement("button");
+    boton.textContent = letra;
+    boton.className = "teclaAhorcado";
+    boton.dataset.letra = letra;
+    teclado.appendChild(boton);
+  });
+}
+
+crearTeclado();
+mostrarPalabra();
+dibujo.innerHTML = crearDibujoAhorcado(errores);
+
+teclado.addEventListener("click", function (evento) {
+  const boton = evento.target.closest(".teclaAhorcado");
+
+  if (!boton) {
+    return;
+  }
+  if (boton.disabled) {
+    return;
+  }
+  if (juegoTerminado) {
+    return;
+  }
+
+  const letra = boton.dataset.letra;
+  boton.disabled = true;
+
+  if (palabraSecreta.indexOf(letra) !== -1) {
+    letrasAdivinadas.push(letra);
+    mostrarPalabra();
+
+    if (verificarVictoria()) {
+      mensaje.textContent = "Ganaste. La palabra era " + palabraSecreta + ".";
+      juegoTerminado = true;
+    }
+  } else {
+    errores = errores + 1;
+    dibujo.innerHTML = crearDibujoAhorcado(errores);
+
+    if (errores === maxErrores) {
+      mensaje.textContent = "Perdiste. La palabra era " + palabraSecreta + ".";
+      juegoTerminado = true;
+    }
+  }
+});
+
+btnReiniciar.addEventListener("click", function () {
+  palabraSecreta = palabras[Math.floor(Math.random() * palabras.length)];
+  letrasAdivinadas = [];
+  errores = 0;
+  juegoTerminado = false;
+  mensaje.textContent = "";
+  dibujo.innerHTML = crearDibujoAhorcado(errores);
+  mostrarPalabra();
+  crearTeclado();
+});`;
+
+/* =========================================================
+   RENDERIZAR TODOS LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+renderCodeBlock("cod-j1-html", CODIGO_J1_HTML, "html", "index.html");
+renderCodeBlock("cod-j1-css", CODIGO_J1_CSS, "css", "style.css");
+renderCodeBlock("cod-j1-js", CODIGO_J1_JS, "javascript", "script.js");
+
+renderCodeBlock("cod-j2-html", CODIGO_J2_HTML, "html", "index.html");
+renderCodeBlock("cod-j2-css", CODIGO_J2_CSS, "css", "style.css");
+renderCodeBlock("cod-j2-js", CODIGO_J2_JS, "javascript", "script.js");
+
+renderCodeBlock("cod-j3-html", CODIGO_J3_HTML, "html", "index.html");
+renderCodeBlock("cod-j3-css", CODIGO_J3_CSS, "css", "style.css");
+renderCodeBlock("cod-j3-js", CODIGO_J3_JS, "javascript", "script.js");
+
+/* =========================================================
+   CANDADO ANTI COPIAR/PEGAR EN LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+var toast = document.getElementById("copyToast");
+var toastTimer = null;
+function mostrarToast() {
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2200);
+}
+
+document.querySelectorAll(".code-lock").forEach(function (bloque) {
+  bloque.addEventListener("copy", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("cut", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("contextmenu", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  bloque.addEventListener("selectstart", function (e) { e.preventDefault(); });
+});
+</script>
+</body>
+</html>
