@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actividad: Prototipo de frontend para tu proyecto formativo</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #2451c4;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --accent-4: #d1435b;
+    --accent-5: #7b2ff7;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #12305e, #2451c4 55%, #4d7ef5);
+    color: white; padding: 46px 24px 38px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 720px; color: #dbe6ff; }
+  .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; display: flex; align-items: center; gap: 6px; }
+
+  nav.toc { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(4px); }
+  nav.toc ul { list-style: none; margin: 0; padding: 10px 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1050px; margin-inline: auto; }
+  nav.toc a { text-decoration: none; color: var(--ink); font-size: 0.78rem; padding: 6px 12px; border-radius: 8px; }
+  nav.toc a:hover { background: #eaf0ff; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 30px; margin-bottom: 34px; box-shadow: 0 2px 14px rgba(20,40,100,0.06); scroll-margin-top: 70px; }
+  .card h2 { margin: 0 0 6px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+  .card h2 svg { flex-shrink: 0; color: var(--accent); }
+  .card > p.lead { color: var(--muted); margin-top: 4px; }
+
+  .section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+
+  h3.subhead { margin: 26px 0 12px; font-size: 1.02rem; display: flex; align-items: center; gap: 8px; }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  /* ---------- Grids de tarjetas ---------- */
+  .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 6px 0 8px; }
+  .mini-card { background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .mini-card h4 { margin: 0 0 6px; font-size: 0.94rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .mini-card h4 svg { flex-shrink: 0; }
+  .mini-card p { margin: 0; font-size: 0.86rem; color: var(--muted); }
+
+  /* ---------- Checklist con checkboxes nativos ---------- */
+  .checklist { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; }
+  .checklist input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--accent); }
+
+  /* ---------- Pasos de metodología ---------- */
+  .pasos { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+  .paso { display: flex; gap: 14px; background: #f7f8fd; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .paso-num { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: white; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+  .paso h4 { margin: 0 0 4px; font-size: 0.95rem; }
+  .paso p { margin: 0; font-size: 0.87rem; color: var(--muted); }
+
+  /* ---------- Wireframes de ejemplo (SVG) ---------- */
+  .wireframe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: 10px 0 8px; }
+  .wireframe-card { background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px; padding: 14px; text-align: center; }
+  .wireframe-card svg.mockup { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; }
+  .wireframe-title { font-weight: 700; font-size: 0.92rem; margin: 10px 0 4px; }
+  .wireframe-desc { font-size: 0.83rem; color: var(--muted); margin: 0; }
+
+  /* ---------- Bloque de datos de prueba (solo ilustrativo) ---------- */
+  .code-window { border-radius: 12px; overflow: hidden; margin: 12px 0 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .code-header { background: #282a3e; color: #9aa0c3; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; }
+  .code-header .dots span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-body { background: #1e1e2e; color: #cdd6f4; padding: 14px 18px; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; overflow-x: auto; white-space: pre; }
+  .code-body .kw { color: #c792ea; }
+  .code-body .str { color: #8bd5a0; }
+  .code-body .num { color: #f78c6c; }
+  .code-body .prop { color: #94e2d5; }
+
+  /* ---------- Rúbrica (tabla) ---------- */
+  table.rubrica { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.88rem; }
+  table.rubrica th { background: #eef1fb; text-align: left; padding: 10px 12px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+  table.rubrica td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; }
+  table.rubrica tr:last-child td { font-weight: 700; background: #f7f8fd; }
+  table.rubrica .puntos { text-align: center; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .bonus-row td { background: #eefaf3 !important; }
+  .bonus-row .puntos { color: var(--accent-2); }
+
+  .icon-note { display: flex; gap: 10px; align-items: flex-start; border-radius: 10px; padding: 12px 14px; margin-top: 14px; font-size: 0.9rem; }
+  .icon-note svg { flex-shrink: 0; margin-top: 2px; }
+  .icon-note.info { background: #eef4ff; border: 1px solid #c7d9fb; color: #1c3d85; }
+  .icon-note.warn { background: #fff7e8; border: 1px solid #f2dcae; color: #6b4e13; }
+  .icon-note.tip { background: #eefaf3; border: 1px solid #b9e6cc; color: #146c43; }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Actividad: prototipo de frontend para tu proyecto formativo</h1>
+  <p>Diseña y construye, por tu cuenta, todas las interfaces que necesita el frontend de tu proyecto formativo. El prototipo debe funcionar completamente con datos de prueba que tú mismo definas y cargues, sin depender de un backend real.</p>
+  <div class="badges">
+    <span class="badge">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      HTML + CSS + JS
+    </span>
+    <span class="badge">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"></path></svg>
+      Datos de prueba propios
+    </span>
+    <span class="badge">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13.5"></path><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H20"></path></svg>
+      Trabajo individual
+    </span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#objetivo">Objetivo</a></li>
+    <li><a href="#requisitos">Requisitos</a></li>
+    <li><a href="#metodologia">Metodología</a></li>
+    <li><a href="#interfaces">Tipos de interfaz</a></li>
+    <li><a href="#datos">Datos de prueba</a></li>
+    <li><a href="#rubrica">Rúbrica</a></li>
+    <li><a href="#entregables">Entregables</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- ============================================================ -->
+  <!-- OBJETIVO -->
+  <!-- ============================================================ -->
+  <div class="card" id="objetivo">
+    <span class="section-tag" style="background:#2451c4">Objetivo</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+      ¿Qué vas a hacer en esta actividad?
+    </h2>
+    <p class="lead">Vas a diseñar y construir el prototipo del frontend de tu propio proyecto formativo: todas las pantallas que un usuario necesitaría para usarlo, funcionando de principio a fin con información de ejemplo que tú mismo inventes, sin necesidad de un servidor ni de una base de datos real.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Objetivos de aprendizaje</h3>
+    <div class="grid-cards">
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m0 6v4a2 2 0 0 0 2 2h4m6 0h4a2 2 0 0 0 2-2v-4m0-6V5a2 2 0 0 0-2-2h-4"></path></svg> Traducir un proyecto real a pantallas</h4>
+        <p>Convertir la idea general de tu proyecto formativo en una lista concreta de interfaces que un usuario necesitaría usar.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg> Diseñar antes de programar</h4>
+        <p>Practicar la elaboración de bocetos o wireframes de baja fidelidad antes de escribir una sola línea de código.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"></path></svg> Simular datos reales</h4>
+        <p>Definir arrays y objetos de JavaScript que representen de forma creíble la información con la que trabajará tu proyecto.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 11-14h-7l1-6z"></path></svg> Aplicar manipulación del DOM</h4>
+        <p>Usar todo lo practicado en las guías anteriores (selección, eventos, creación de elementos, delegación, localStorage) en un proyecto propio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- REQUISITOS -->
+  <!-- ============================================================ -->
+  <div class="card" id="requisitos">
+    <span class="section-tag" style="background:#17a673">Requisitos</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      Requisitos del prototipo
+    </h2>
+    <p class="lead">Estas condiciones aplican sin importar cuál sea tu proyecto formativo. Márcalas a medida que las vayas cumpliendo.</p>
+
+    <ul class="checklist">
+      <li><input type="checkbox"> <span>El prototipo cubre <strong>todas las pantallas necesarias</strong> para que un usuario complete al menos un flujo completo de tu proyecto de principio a fin (por ejemplo: iniciar sesión, ver un listado, crear un registro, ver su detalle y editarlo o eliminarlo).</span></li>
+      <li><input type="checkbox"> <span>Todos los datos que se muestran (listados, detalles, formularios prellenados, etc.) provienen de <strong>datos de prueba que tú definiste</strong> como arrays u objetos de JavaScript, no de texto escrito directamente en el HTML.</span></li>
+      <li><input type="checkbox"> <span>Las acciones principales (agregar, editar, eliminar, marcar, filtrar, buscar, según lo que aplique a tu proyecto) <strong>funcionan de verdad</strong> sobre esos datos de prueba, actualizando lo que se ve en pantalla.</span></li>
+      <li><input type="checkbox"> <span>La navegación entre pantallas funciona (mostrando y ocultando secciones, o usando varias páginas HTML enlazadas), de forma que se sienta como una sola aplicación.</span></li>
+      <li><input type="checkbox"> <span>El diseño visual (colores, tipografía, espaciados) es consistente entre todas las pantallas del prototipo.</span></li>
+      <li><input type="checkbox"> <span>El código HTML, CSS y JavaScript está organizado en archivos separados y es legible (nombres de variables y funciones claros, indentación consistente).</span></li>
+      <li><input type="checkbox"> <span><em>Opcional (bono):</em> los datos de prueba se guardan con <code>localStorage</code>, de modo que los cambios sobreviven a recargar la página.</span></li>
+    </ul>
+
+    <div class="icon-note warn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+      <span>No necesitas conectar tu prototipo a un servidor, una API ni una base de datos real. Todo el "backend" de esta actividad son los datos de prueba que tú mismo escribas en JavaScript.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- METODOLOGÍA -->
+  <!-- ============================================================ -->
+  <div class="card" id="metodologia">
+    <span class="section-tag" style="background:#d9782d">Metodología</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+      Cómo abordar la actividad, paso a paso
+    </h2>
+    <p class="lead">No es obligatorio seguir este orden exacto, pero se recomienda para no quedarte atascado diseñando o programando todo al mismo tiempo.</p>
+
+    <div class="pasos">
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div>
+          <h4>Define tu proyecto y sus módulos principales</h4>
+          <p>Escribe en una frase de qué trata tu proyecto formativo, y luego divídelo en 3 a 6 módulos o funcionalidades grandes (por ejemplo: gestión de inventario, gestión de clientes, reportes, autenticación).</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div>
+          <h4>Lista las pantallas que necesita cada módulo</h4>
+          <p>Por cada módulo, identifica qué pantallas hacen falta: normalmente un listado, un formulario de creación o edición, y a veces una vista de detalle o un panel con indicadores.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div>
+          <h4>Dibuja wireframes de baja fidelidad</h4>
+          <p>En papel, en una pizarra digital o en una herramienta de diseño, dibuja un boceto simple de cada pantalla: cajas y líneas que indiquen dónde va cada elemento, sin preocuparte todavía por colores ni tipografías definitivas.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">4</div>
+        <div>
+          <h4>Define tus datos de prueba</h4>
+          <p>Antes de programar la interfaz, escribe en JavaScript los arrays de objetos que van a simular la información real de tu proyecto (ver la sección "Datos de prueba" más abajo para ideas).</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">5</div>
+        <div>
+          <h4>Construye el HTML base de cada pantalla</h4>
+          <p>Crea la estructura de cada pantalla con HTML, dejando vacíos los contenedores que luego JavaScript va a llenar con información dinámica (listas, tarjetas, filas de tabla).</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">6</div>
+        <div>
+          <h4>Aplica un estilo visual consistente</h4>
+          <p>Define una paleta de colores y una tipografía, y reutilízalas en todas las pantallas para que el prototipo se sienta como una sola aplicación, no como páginas sueltas.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">7</div>
+        <div>
+          <h4>Programa la lógica de cada pantalla</h4>
+          <p>Usa las técnicas ya practicadas: una función que "pinta" los datos en pantalla, delegación de eventos para los botones de acción, y funciones que agregan, editan o eliminan elementos de tus arrays de datos de prueba.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">8</div>
+        <div>
+          <h4>Prueba con distintos escenarios</h4>
+          <p>Verifica que tu prototipo se comporte bien con una lista vacía, con un solo elemento, con muchos elementos, y con datos "raros" (nombres muy largos, precios en cero, campos vacíos).</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">9</div>
+        <div>
+          <h4>(Opcional) agrega persistencia con localStorage</h4>
+          <p>Si te sobra tiempo, guarda tus datos de prueba en <code>localStorage</code> para que los cambios no se pierdan al recargar la página, tal como se hizo en la guía del carrito de compras.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TIPOS DE INTERFAZ -->
+  <!-- ============================================================ -->
+  <div class="card" id="interfaces">
+    <span class="section-tag" style="background:#d1435b">Tipos de interfaz</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+      Patrones frecuentes de interfaz
+    </h2>
+    <p class="lead">Casi cualquier proyecto formativo se puede construir combinando algunos patrones de interfaz muy comunes. Estos wireframes son solo ejemplos genéricos para inspirarte: <strong>debes diseñar los tuyos</strong>, con los campos y datos específicos de tu proyecto.</p>
+
+    <div class="wireframe-grid">
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <rect x="14" y="14" width="150" height="16" rx="4" fill="#e5e7f0"></rect>
+          <rect x="176" y="14" width="90" height="16" rx="4" fill="#2451c4"></rect>
+          <rect x="14" y="42" width="252" height="14" rx="3" fill="#eef1fb"></rect>
+          <rect x="14" y="66" width="252" height="1" fill="#e3e5ee"></rect>
+          <rect x="14" y="78" width="80" height="8" rx="2" fill="#c9cce0"></rect>
+          <rect x="120" y="78" width="60" height="8" rx="2" fill="#c9cce0"></rect>
+          <rect x="200" y="78" width="40" height="8" rx="2" fill="#c9cce0"></rect>
+          <rect x="14" y="98" width="252" height="1" fill="#eef1fb"></rect>
+          <rect x="14" y="110" width="80" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="120" y="110" width="60" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="200" y="110" width="40" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="14" y="130" width="252" height="1" fill="#eef1fb"></rect>
+          <rect x="14" y="142" width="80" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="120" y="142" width="60" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="200" y="142" width="40" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="14" y="166" width="60" height="18" rx="4" fill="#f0f1f8"></rect>
+        </svg>
+        <p class="wireframe-title">Listado con filtros</p>
+        <p class="wireframe-desc">Un buscador o filtro arriba, y una tabla o lista de registros abajo. Sirve para inventarios, catálogos, historiales, listas de usuarios, etc.</p>
+      </div>
+
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <rect x="14" y="14" width="140" height="16" rx="4" fill="#e5e7f0"></rect>
+          <rect x="14" y="46" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="14" y="58" width="252" height="22" rx="5" fill="#f7f8fd" stroke="#d8dae8"></rect>
+          <rect x="14" y="90" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="14" y="102" width="252" height="22" rx="5" fill="#f7f8fd" stroke="#d8dae8"></rect>
+          <rect x="14" y="134" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="14" y="146" width="252" height="22" rx="5" fill="#f7f8fd" stroke="#d8dae8"></rect>
+          <rect x="14" y="178" width="90" height="16" rx="4" fill="#17a673"></rect>
+        </svg>
+        <p class="wireframe-title">Formulario de creación o edición</p>
+        <p class="wireframe-desc">Campos etiquetados y un botón de guardar. Sirve para registrar productos, agendar citas, dar de alta usuarios, crear pedidos, etc.</p>
+      </div>
+
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <circle cx="46" cy="46" r="22" fill="#eef1fb"></circle>
+          <rect x="80" y="30" width="140" height="14" rx="3" fill="#e5e7f0"></rect>
+          <rect x="80" y="50" width="100" height="10" rx="2" fill="#c9cce0"></rect>
+          <rect x="14" y="86" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="90" y="86" width="150" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="14" y="108" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="90" y="108" width="150" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="14" y="130" width="60" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="90" y="130" width="100" height="8" rx="2" fill="#dfe1ee"></rect>
+          <rect x="14" y="168" width="80" height="18" rx="4" fill="#2451c4"></rect>
+          <rect x="104" y="168" width="80" height="18" rx="4" fill="#fbe9ec"></rect>
+        </svg>
+        <p class="wireframe-title">Vista de detalle</p>
+        <p class="wireframe-desc">Muestra toda la información de un solo registro, con botones para editarlo o eliminarlo. Sirve para ver el perfil de un cliente, el detalle de un pedido, la ficha de un producto, etc.</p>
+      </div>
+
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <rect x="14" y="14" width="120" height="14" rx="3" fill="#e5e7f0"></rect>
+          <rect x="14" y="40" width="80" height="50" rx="8" fill="#eaf3ff"></rect>
+          <rect x="100" y="40" width="80" height="50" rx="8" fill="#eafaf1"></rect>
+          <rect x="186" y="40" width="80" height="50" rx="8" fill="#fdf1e6"></rect>
+          <rect x="24" y="52" width="30" height="14" rx="3" fill="#2451c4"></rect>
+          <rect x="110" y="52" width="30" height="14" rx="3" fill="#17a673"></rect>
+          <rect x="196" y="52" width="30" height="14" rx="3" fill="#d9782d"></rect>
+          <rect x="14" y="104" width="252" height="80" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="28" y="150" width="16" height="20" fill="#c9cce0"></rect>
+          <rect x="52" y="130" width="16" height="40" fill="#c9cce0"></rect>
+          <rect x="76" y="140" width="16" height="30" fill="#c9cce0"></rect>
+          <rect x="100" y="120" width="16" height="50" fill="#2451c4"></rect>
+          <rect x="124" y="135" width="16" height="35" fill="#c9cce0"></rect>
+        </svg>
+        <p class="wireframe-title">Panel con indicadores</p>
+        <p class="wireframe-desc">Tarjetas con números clave arriba y un gráfico simple abajo. Sirve para mostrar totales, resúmenes o estadísticas generales del proyecto.</p>
+      </div>
+
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <rect x="70" y="30" width="140" height="140" rx="10" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="90" y="50" width="100" height="14" rx="3" fill="#e5e7f0"></rect>
+          <rect x="90" y="82" width="100" height="18" rx="4" fill="#ffffff" stroke="#d8dae8"></rect>
+          <rect x="90" y="108" width="100" height="18" rx="4" fill="#ffffff" stroke="#d8dae8"></rect>
+          <rect x="90" y="136" width="100" height="18" rx="4" fill="#2451c4"></rect>
+        </svg>
+        <p class="wireframe-title">Inicio de sesión o registro</p>
+        <p class="wireframe-desc">Una tarjeta centrada con campos de acceso y un botón principal. Útil si tu proyecto necesita simular distintos tipos de usuario.</p>
+      </div>
+
+      <div class="wireframe-card">
+        <svg class="mockup" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="278" height="198" rx="10" fill="#ffffff"></rect>
+          <rect x="0" y="0" width="70" height="200" fill="#eef1fb"></rect>
+          <rect x="14" y="20" width="42" height="10" rx="3" fill="#2451c4"></rect>
+          <rect x="14" y="46" width="42" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="14" y="64" width="42" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="14" y="82" width="42" height="8" rx="2" fill="#9aa0b8"></rect>
+          <rect x="86" y="20" width="180" height="14" rx="3" fill="#e5e7f0"></rect>
+          <rect x="86" y="46" width="80" height="60" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="176" y="46" width="90" height="60" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="86" y="116" width="180" height="60" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+        </svg>
+        <p class="wireframe-title">Estructura general con menú lateral</p>
+        <p class="wireframe-desc">Un menú fijo a la izquierda para moverse entre los módulos, y el contenido de cada pantalla a la derecha. Útil como "esqueleto" que envuelve a todas las demás pantallas.</p>
+      </div>
+    </div>
+
+    <div class="icon-note info">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="10.5" x2="12" y2="16"></line><circle cx="12" cy="7.2" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+      <span>No todos los proyectos necesitan los 6 patrones. Elige y combina solo los que tengan sentido para el tuyo, y agrega pantallas propias si tu proyecto necesita algo distinto (por ejemplo, un calendario, un mapa o un carrito de compras).</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DATOS DE PRUEBA -->
+  <!-- ============================================================ -->
+  <div class="card" id="datos">
+    <span class="section-tag" style="background:#7b2ff7">Datos de prueba</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg>
+      Cómo definir tus propios datos de prueba
+    </h2>
+    <p class="lead">Antes de construir cualquier pantalla, define en JavaScript los arrays de objetos que van a simular la información real de tu proyecto. Aquí tienes tres ejemplos de proyectos distintos para inspirarte; el tuyo tendrá campos diferentes según lo que necesite.</p>
+
+    <div class="code-window">
+      <div class="code-header">
+        <span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        <span class="fname">Ejemplo 1 · Sistema de inventario</span>
+      </div>
+      <div class="code-body"><span class="kw">const</span> productos = [
+  { id: <span class="num">1</span>, nombre: <span class="str">"Cemento gris x50kg"</span>, categoria: <span class="str">"Materiales"</span>, stock: <span class="num">120</span>, precio: <span class="num">32000</span> },
+  { id: <span class="num">2</span>, nombre: <span class="str">"Martillo de uña"</span>, categoria: <span class="str">"Herramientas"</span>, stock: <span class="num">8</span>, precio: <span class="num">25000</span> },
+  { id: <span class="num">3</span>, nombre: <span class="str">"Guantes de seguridad"</span>, categoria: <span class="str">"Dotación"</span>, stock: <span class="num">45</span>, precio: <span class="num">9000</span> }
+];</div>
+    </div>
+
+    <div class="code-window">
+      <div class="code-header">
+        <span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        <span class="fname">Ejemplo 2 · Agenda de citas</span>
+      </div>
+      <div class="code-body"><span class="kw">const</span> citas = [
+  { id: <span class="num">1</span>, cliente: <span class="str">"Laura Gómez"</span>, servicio: <span class="str">"Corte de cabello"</span>, fecha: <span class="str">"2026-09-22"</span>, hora: <span class="str">"10:00"</span>, estado: <span class="str">"confirmada"</span> },
+  { id: <span class="num">2</span>, cliente: <span class="str">"Andrés Ruiz"</span>, servicio: <span class="str">"Manicure"</span>, fecha: <span class="str">"2026-09-22"</span>, hora: <span class="str">"11:30"</span>, estado: <span class="str">"pendiente"</span> }
+];</div>
+    </div>
+
+    <div class="code-window">
+      <div class="code-header">
+        <span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+        <span class="fname">Ejemplo 3 · Biblioteca</span>
+      </div>
+      <div class="code-body"><span class="kw">const</span> libros = [
+  { id: <span class="num">1</span>, titulo: <span class="str">"Cien años de soledad"</span>, autor: <span class="str">"Gabriel García Márquez"</span>, disponible: <span class="kw">true</span> },
+  { id: <span class="num">2</span>, titulo: <span class="str">"El principito"</span>, autor: <span class="str">"Antoine de Saint-Exupéry"</span>, disponible: <span class="kw">false</span> }
+];</div>
+    </div>
+
+    <h3 class="subhead"><span class="dot"></span> Recomendaciones para tus datos de prueba</h3>
+    <div class="grid-cards">
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg> Usa entre 5 y 10 registros</h4>
+        <p>Suficientes para que un listado se vea real y puedas probar filtros o búsquedas, pero no tantos que sea difícil de leer mientras programas.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg> Incluye variedad</h4>
+        <p>Agrega registros con distintos estados (activo/inactivo, pagado/pendiente), valores altos y bajos, y textos cortos y largos, para probar que tu interfaz aguanta casos distintos.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg> Dale a cada registro un id único</h4>
+        <p>Igual que en las guías anteriores, un campo <code>id</code> te permite encontrar, editar o eliminar un registro concreto con <code>find</code> o <code>filter</code>.</p>
+      </div>
+      <div class="mini-card">
+        <h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg> Prueba el caso "vacío"</h4>
+        <p>Antes de entregar, prueba qué se ve en pantalla si el array de datos está completamente vacío: tu interfaz debería mostrar un mensaje claro, no quedar en blanco.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- RÚBRICA -->
+  <!-- ============================================================ -->
+  <div class="card" id="rubrica">
+    <span class="section-tag" style="background:#146c43">Rúbrica</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+      Criterios de evaluación
+    </h2>
+    <p class="lead">La actividad se evalúa sobre 100 puntos, más un bono opcional.</p>
+
+    <table class="rubrica">
+      <thead>
+        <tr><th>Criterio</th><th>Qué se evalúa</th><th>Puntos</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Análisis del proyecto</td>
+          <td>Se identificaron correctamente los módulos y funcionalidades principales del proyecto formativo.</td>
+          <td class="puntos">15</td>
+        </tr>
+        <tr>
+          <td>Wireframes previos</td>
+          <td>Existen bocetos o wireframes de baja fidelidad de las pantallas, elaborados antes de programar.</td>
+          <td class="puntos">10</td>
+        </tr>
+        <tr>
+          <td>Cobertura de interfaces</td>
+          <td>El prototipo incluye todas las pantallas necesarias para completar al menos un flujo real del proyecto de principio a fin.</td>
+          <td class="puntos">20</td>
+        </tr>
+        <tr>
+          <td>Datos de prueba</td>
+          <td>Los datos de prueba son variados, realistas y suficientes para demostrar el funcionamiento de cada pantalla.</td>
+          <td class="puntos">10</td>
+        </tr>
+        <tr>
+          <td>Funcionalidad</td>
+          <td>Las acciones de agregar, editar, eliminar, filtrar o buscar (según aplique) funcionan correctamente sobre los datos de prueba.</td>
+          <td class="puntos">25</td>
+        </tr>
+        <tr>
+          <td>Organización del código</td>
+          <td>El código está separado en archivos HTML, CSS y JS, con nombres claros e indentación consistente.</td>
+          <td class="puntos">10</td>
+        </tr>
+        <tr>
+          <td>Coherencia visual</td>
+          <td>Todas las pantallas comparten una misma paleta de colores, tipografía y estilo de componentes.</td>
+          <td class="puntos">10</td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td class="puntos">100</td>
+        </tr>
+        <tr class="bonus-row">
+          <td>Bono: persistencia con localStorage</td>
+          <td>Los datos de prueba se conservan al recargar la página, gracias a <code>localStorage</code>.</td>
+          <td class="puntos">+5</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ENTREGABLES -->
+  <!-- ============================================================ -->
+  <div class="card" id="entregables">
+    <span class="section-tag" style="background:#2451c4">Entregables</span>
+    <h2>
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Qué debes entregar
+    </h2>
+
+    <ul class="checklist">
+      <li><input type="checkbox"> <span><strong>Bocetos o wireframes</strong> de cada pantalla (fotos de tus dibujos en papel, o capturas de la herramienta de diseño que hayas usado).</span></li>
+      <li><input type="checkbox"> <span><strong>Código fuente completo</strong> del prototipo (archivos HTML, CSS y JS), organizado en carpetas si tiene varias páginas.</span></li>
+      <li><input type="checkbox"> <span>Un <strong>documento corto</strong> (media página es suficiente) explicando: de qué trata tu proyecto, qué módulos cubriste en el prototipo, y qué datos de prueba usaste.</span></li>
+      <li><input type="checkbox"> <span>El prototipo <strong>funcionando</strong>, listo para abrir y probar sin instalar nada adicional.</span></li>
+    </ul>
+
+    <div class="icon-note tip">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"></path></svg>
+      <span>Consejo final: empieza por la pantalla más simple de tu proyecto (normalmente un listado), consíguela funcionando por completo con tus datos de prueba, y solo después avanza a la siguiente. Es mejor tener 3 pantallas completamente funcionales que 8 pantallas a medias.</span>
+    </div>
+  </div>
+
+</main>
+
+<footer>Actividad formativa: prototipo de frontend con datos de prueba · HTML + CSS + JavaScript</footer>
+
+</body>
+</html>
