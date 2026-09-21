@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía: carrito de compras con HTML, CSS, JavaScript y localStorage</title>
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5b6270;
+    --border: #e3e5ee;
+    --accent: #2451c4;
+    --accent-2: #17a673;
+    --accent-3: #d9782d;
+    --accent-4: #d1435b;
+    --code-bg: #1e1e2e;
+    --code-header: #282a3e;
+    --code-fg: #cdd6f4;
+    --code-line: #464a63;
+    --kw: #c792ea;
+    --str: #8bd5a0;
+    --fn: #82aaff;
+    --tag: #f07178;
+    --attr: #ffcb6b;
+    --num: #f78c6c;
+    --cm: #6b7089;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  header.hero {
+    background: linear-gradient(135deg, #12305e, #2451c4 55%, #4d7ef5);
+    color: white; padding: 46px 24px 38px; text-align: center;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 2rem; }
+  header.hero p { margin: 0 auto; max-width: 700px; color: #dbe6ff; }
+  .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.35); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; }
+
+  nav.toc { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--border); backdrop-filter: blur(4px); }
+  nav.toc ul { list-style: none; margin: 0; padding: 10px 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1000px; margin-inline: auto; }
+  nav.toc a { text-decoration: none; color: var(--ink); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; }
+  nav.toc a:hover { background: #eaf0ff; }
+
+  main { max-width: 980px; margin: 0 auto; padding: 30px 20px 80px; }
+
+  .intro-card, .resumen-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 34px; box-shadow: 0 2px 10px rgba(20,40,100,0.05); }
+  .intro-card h2 { margin-top: 0; }
+  .icon-note { display: flex; gap: 10px; align-items: flex-start; border-radius: 10px; padding: 12px 14px; margin-top: 14px; font-size: 0.9rem; }
+  .icon-note svg { flex-shrink: 0; margin-top: 2px; }
+  .icon-note.lock { background: #fff7e8; border: 1px solid #f2dcae; color: #6b4e13; }
+  .icon-note.info { background: #eef4ff; border: 1px solid #c7d9fb; color: #1c3d85; }
+  .icon-note.image { background: #eefaf3; border: 1px solid #b9e6cc; color: #146c43; }
+
+  section.proyecto { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 26px 32px; margin-bottom: 44px; box-shadow: 0 2px 14px rgba(20,40,100,0.06); scroll-margin-top: 70px; }
+  .proyecto-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: white; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; background: #2451c4; }
+  section.proyecto h2 { margin: 0 0 6px; font-size: 1.5rem; }
+  section.proyecto > p.lead { color: var(--muted); margin-top: 0; }
+
+  h3.subhead { margin: 30px 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+  h3.subhead .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+  .conceptos { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 6px 0 8px; }
+  .concepto-card { background: #f7f8fd; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .concepto-card h4 { margin: 0 0 4px; font-size: 0.92rem; color: var(--accent); }
+  .concepto-card p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  .concepto-card code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.82rem; }
+
+  /* ---------- Bloques de código (candado anti-copia) ---------- */
+  .code-window { border-radius: 12px; overflow: hidden; margin: 12px 0 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+  .code-header { background: var(--code-header); color: #9aa0c3; padding: 8px 14px; display: flex; align-items: center; gap: 10px; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; }
+  .code-header .dots span { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+  .code-header .dots .r { background: #f07178; }
+  .code-header .dots .y { background: #ffcb6b; }
+  .code-header .dots .g { background: #8bd5a0; }
+  .code-header .fname { flex: 1; text-align: center; color: #c7cbe8; }
+  .code-header .lang { text-transform: uppercase; font-weight: 700; letter-spacing: .04em; margin-right: 6px; }
+  .code-header .lock { color: #ffcb6b; display: flex; align-items: center; }
+
+  .code-body { background: var(--code-bg); padding: 12px 0; overflow-x: auto; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; -webkit-user-select: none; -moz-user-select: none; user-select: none; }
+  .code-line { display: flex; padding: 1px 16px; white-space: pre; }
+  .code-line .ln { color: var(--code-line); width: 30px; flex-shrink: 0; -webkit-user-select: none; user-select: none; }
+  .code-line .txt { color: var(--code-fg); }
+  .kw { color: var(--kw); }
+  .str { color: var(--str); }
+  .fn  { color: var(--fn); }
+  .tag { color: var(--tag); }
+  .attr{ color: var(--attr); }
+  .num { color: var(--num); }
+  .cm  { color: var(--cm); font-style: italic; }
+  .prop{ color: #94e2d5; }
+
+  .copy-toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px); background: #24263a; color: #f1f2fa; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s; box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 999; display: flex; align-items: center; gap: 8px; }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Checkpoints visuales (SVG) ---------- */
+  .checkpoint { background: #fafbff; border: 1px dashed #c3cdef; border-radius: 12px; padding: 18px; margin: 10px 0 22px; text-align: center; }
+  .checkpoint-label { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 12px; font-weight: 700; }
+  .checkpoint svg.mockup { max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--border); background: #ffffff; }
+  .checkpoint-caption { margin: 10px 0 0; font-size: 0.85rem; color: var(--muted); }
+
+  footer { text-align: center; color: var(--muted); padding: 30px; font-size: 0.85rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  p.explain { font-size: 0.95rem; }
+  p.explain code, li code { background: #eaf0ff; color: #163a8c; padding: 1px 5px; border-radius: 5px; font-family: Consolas, monospace; font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Guía práctica: carrito de compras con localStorage</h1>
+  <p>Construye, paso a paso, un catálogo de productos y un carrito de compras que recuerda su contenido aunque el usuario recargue la página, y que se vacía automáticamente al finalizar la compra.</p>
+  <div class="badges">
+    <span class="badge">HTML + CSS + JS puro</span>
+    <span class="badge">localStorage</span>
+    <span class="badge">Código completo</span>
+    <span class="badge">Checkpoints en imagen</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#intro">Antes de empezar</a></li>
+    <li><a href="#conceptos">Conceptos</a></li>
+    <li><a href="#html">HTML</a></li>
+    <li><a href="#css">CSS</a></li>
+    <li><a href="#js">JavaScript</a></li>
+    <li><a href="#checkout">Checkout</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="intro-card" id="intro">
+    <h2>Cómo está organizada esta guía</h2>
+    <p class="explain">Primero se explican, en un lenguaje sencillo, los conceptos de JavaScript y de <code>localStorage</code> que vas a necesitar. Después se construye el <code>HTML</code>, luego el <code>CSS</code> y por último el <code>JavaScript</code>, dividido en segmentos pequeños: cada fragmento de código va seguido inmediatamente de su explicación, y nada se deja fuera ni se resume con puntos suspensivos. Entre paso y paso encontrarás un <strong>checkpoint visual</strong>: una imagen que muestra cómo debe verse la tienda en ese punto.</p>
+    <div class="icon-note lock">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      <span>El código de esta guía está bloqueado para copiar y pegar a propósito. Transcríbelo a mano en tu propio editor: escribir cada línea te obliga a leerla con atención.</span>
+    </div>
+    <div class="icon-note info">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="10.5" x2="12" y2="16"></line><circle cx="12" cy="7.2" r="0.6" fill="currentColor" stroke="none"></circle></svg>
+      <span>No hay ningún entorno para ejecutar código dentro de esta guía. Debes crear los archivos <code>index.html</code>, <code>style.css</code> y <code>script.js</code> en tu computador y abrirlos en tu navegador para probarlos.</span>
+    </div>
+    <div class="icon-note image">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+      <span>Los "checkpoints" son imágenes (dibujadas en SVG) que muestran el aspecto y el contenido esperado de la tienda en un momento dado, no el código ni una demostración interactiva.</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PROYECTO: CARRITO DE COMPRAS -->
+  <!-- ============================================================ -->
+  <section class="proyecto" id="conceptos">
+    <span class="proyecto-tag">Proyecto</span>
+    <h2>Carrito de compras para una tienda online</h2>
+    <p class="lead">Vamos a construir una página con un catálogo de productos y un carrito lateral. Al agregar productos, cambiar cantidades o eliminarlos, el carrito se guarda automáticamente en el navegador con <code>localStorage</code>, así que sigue ahí aunque se recargue la página. Al finalizar la compra, se muestra una confirmación y el carrito se vacía por completo.</p>
+
+    <h3 class="subhead"><span class="dot"></span> Conceptos que necesitas</h3>
+    <div class="conceptos">
+      <div class="concepto-card">
+        <h4>localStorage.setItem() / getItem()</h4>
+        <p>Es un espacio de almacenamiento que el navegador reserva para cada sitio web. <code>setItem(clave, valor)</code> guarda algo bajo un nombre; <code>getItem(clave)</code> lo recupera después, incluso si se cierra y se vuelve a abrir la página.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>JSON.stringify() / JSON.parse()</h4>
+        <p><code>localStorage</code> solo puede guardar texto, nunca objetos ni arrays directamente. <code>JSON.stringify(valor)</code> convierte un array u objeto en texto; <code>JSON.parse(texto)</code> hace el proceso inverso.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.find()</h4>
+        <p>Recorre un array y devuelve el primer elemento que cumpla una condición, o <code>undefined</code> si ninguno la cumple. Lo usamos para buscar un producto por su id.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.filter()</h4>
+        <p>Devuelve un array nuevo con solo los elementos que cumplen una condición. Lo usamos para quitar un producto del carrito sin tener que buscar y borrar manualmente su posición.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>array.reduce()</h4>
+        <p>Recorre un array acumulando un solo valor final. Lo usamos para sumar el precio de todos los productos del carrito y obtener el total a pagar.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Delegación de eventos</h4>
+        <p>Tanto el catálogo como el carrito escuchan los clics en su contenedor completo, no en cada botón individual, porque las tarjetas y las filas se crean y se destruyen constantemente.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>number.toLocaleString()</h4>
+        <p>Formatea un número según una configuración regional; con <code>"es-CO"</code>, un precio como 250000 se muestra como 250.000, con puntos separando los miles.</p>
+      </div>
+      <div class="concepto-card">
+        <h4>Renderizar y guardar juntos</h4>
+        <p>Cada vez que el carrito cambia, se vuelve a dibujar por completo <strong>y</strong> se guarda en <code>localStorage</code> en el mismo paso, para que la pantalla y el almacenamiento nunca queden desincronizados.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead" id="html"><span class="dot"></span> Paso 1: estructura HTML</h3>
+    <p class="explain">La página tiene dos columnas: el catálogo de productos a la izquierda y el carrito a la derecha. Ninguna tarjeta de producto ni fila del carrito se escribe a mano: todo el contenido dinámico lo genera JavaScript dentro de estos contenedores vacíos.</p>
+    <div id="cod-html"></div>
+    <p class="explain">El <code>&lt;div id="listaProductos"&gt;</code> empieza vacío y se llena con una tarjeta por producto. El <code>&lt;div id="itemsCarrito"&gt;</code> también empieza vacío, y se llena con una fila por cada producto agregado al carrito. El <code>&lt;span id="totalCarrito"&gt;</code> permite actualizar solo el número del total sin reescribir toda la frase. El <code>&lt;p id="mensajeCheckout"&gt;</code> está preparado para mostrar el resultado de la compra al final.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 1 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="638" height="318" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Catálogo</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="46" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <circle cx="89" cy="76" r="14" fill="#2451c4"></circle>
+          <text x="45" y="112" font-size="10" fill="#1f2430">Audífonos</text>
+          <text x="45" y="126" font-size="10" fill="#2451c4" font-weight="700">$120.000</text>
+          <rect x="34" y="134" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="46" y="148" font-size="8" fill="#ffffff">Agregar al carrito</text>
+
+          <rect x="166" y="46" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="217" y="62" width="28" height="28" fill="#17a673"></rect>
+          <text x="187" y="112" font-size="10" fill="#1f2430">Teclado mecánico</text>
+          <text x="187" y="126" font-size="10" fill="#2451c4" font-weight="700">$250.000</text>
+          <rect x="176" y="134" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="188" y="148" font-size="8" fill="#ffffff">Agregar al carrito</text>
+
+          <rect x="24" y="176" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <polygon points="89,192 103,220 75,220" fill="#d9782d"></polygon>
+          <text x="45" y="242" font-size="10" fill="#1f2430">Mouse</text>
+          <text x="45" y="256" font-size="10" fill="#2451c4" font-weight="700">$85.000</text>
+          <rect x="34" y="264" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="46" y="278" font-size="8" fill="#ffffff">Agregar al carrito</text>
+
+          <rect x="166" y="176" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <polygon points="231,190 235,202 250,202 238,210 242,224 231,216 220,224 224,210 212,202 227,202" fill="#d1435b"></polygon>
+          <text x="187" y="242" font-size="10" fill="#1f2430">Monitor</text>
+          <text x="187" y="256" font-size="10" fill="#2451c4" font-weight="700">$650.000</text>
+          <rect x="176" y="264" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="188" y="278" font-size="8" fill="#ffffff">Agregar al carrito</text>
+        </g>
+
+        <line x1="330" y1="24" x2="330" y2="296" stroke="#e3e5ee"></line>
+
+        <text x="350" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Carrito de compras</text>
+        <text x="350" y="60" font-size="11" fill="#5b6270" font-style="italic" font-family="Segoe UI, Arial">Tu carrito está vacío.</text>
+        <text x="350" y="210" font-size="13" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Total: $0</text>
+        <rect x="350" y="224" width="270" height="26" rx="7" fill="#eceefb"></rect>
+        <text x="440" y="241" font-size="10" fill="#444a5e" font-family="Segoe UI, Arial">Vaciar carrito</text>
+        <rect x="350" y="256" width="270" height="26" rx="7" fill="#17a673"></rect>
+        <text x="430" y="273" font-size="10" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Finalizar compra</text>
+      </svg>
+      <p class="checkpoint-caption">Así se ve la tienda apenas cargas la página: 4 productos en el catálogo y el carrito completamente vacío.</p>
+    </div>
+
+    <h3 class="subhead" id="css"><span class="dot"></span> Paso 2: estilos CSS</h3>
+    <p class="explain">El CSS organiza la página en dos columnas, le da apariencia de tarjeta a cada producto, y define cómo se ven las filas del carrito y los mensajes de éxito o error del checkout.</p>
+    <div id="cod-css"></div>
+    <p class="explain"><code>display: grid</code> en <code>.tienda</code> con <code>grid-template-columns: 1fr 340px</code> crea dos columnas: el catálogo ocupa todo el espacio disponible, y el carrito tiene un ancho fijo de 340 píxeles. Dentro del catálogo, <code>.listaProductos</code> también es una cuadrícula, pero con columnas flexibles que se ajustan automáticamente al espacio disponible. Las clases <code>.mensajeCheckout.exito</code> y <code>.mensajeCheckout.error</code> son las que le dan color verde o rojo al mensaje final, según el resultado.</p>
+
+    <h3 class="subhead" id="js"><span class="dot"></span> Paso 3: lógica en JavaScript</h3>
+    <p class="explain">Esta es la parte más larga de la guía. La vamos a construir en 12 segmentos pequeños, cada uno explicado justo después de escribirlo, hasta llegar al checkout final.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 1: los productos y el estado del carrito</h4>
+    <div id="cod-js-1"></div>
+    <p class="explain"><code>productos</code> es un array fijo con los 4 artículos de la tienda; cada uno tiene un <code>id</code> único, un <code>nombre</code>, un <code>precio</code> y una <code>categoria</code> (que vamos a usar para dibujar un ícono distinto por producto). <code>carrito</code> es el estado real del carrito: un array que empieza vacío y que va a contener objetos como <code>{ id: 1, cantidad: 2 }</code>, uno por cada producto distinto agregado. Está declarado con <code>let</code> porque más adelante lo vamos a reemplazar por completo varias veces (al vaciar el carrito o al cargar uno guardado).</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 2: seleccionar los elementos del DOM</h4>
+    <div id="cod-js-2"></div>
+    <p class="explain">Guardamos en variables cada elemento del HTML que vamos a necesitar: los dos contenedores principales, el texto del total, los dos botones de acción y el párrafo del mensaje final.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 3: crear los íconos de cada producto</h4>
+    <div id="cod-js-3"></div>
+    <p class="explain">En vez de usar imágenes o emoticones, cada producto se representa con una figura simple dibujada en SVG, según el texto guardado en su propiedad <code>categoria</code>. Esta función recibe esa categoría y devuelve el código SVG correspondiente: un círculo azul, un cuadrado verde, un triángulo naranja o una estrella roja.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 4: pintar el catálogo de productos</h4>
+    <div id="cod-js-4"></div>
+    <p class="explain"><code>renderProductos()</code> vacía el contenedor del catálogo y recorre el array <code>productos</code> con <code>forEach</code>. Por cada producto crea una tarjeta completa: un <code>&lt;div&gt;</code> para el ícono (usando la función del segmento anterior), un <code>&lt;p&gt;</code> para el nombre, otro <code>&lt;p&gt;</code> para el precio ya formateado con <code>toLocaleString("es-CO")</code>, y un <code>&lt;button&gt;</code> que guarda el <code>id</code> del producto en <code>dataset.id</code>. El catálogo, a diferencia del carrito, no cambia mientras el usuario compra, así que esta función solo se llama una vez al cargar la página.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 5: guardar y cargar el carrito con localStorage</h4>
+    <div id="cod-js-5"></div>
+    <p class="explain"><code>guardarCarrito()</code> convierte el array <code>carrito</code> en texto con <code>JSON.stringify</code> y lo guarda en <code>localStorage</code> bajo la clave <code>"carritoTienda"</code>. <code>cargarCarrito()</code> hace lo contrario: intenta leer esa clave con <code>getItem</code>, y si existe algo guardado (es decir, si no es <code>null</code>), lo convierte de vuelta a un array real con <code>JSON.parse</code> y lo asigna a <code>carrito</code>. Estas dos funciones son el corazón de la persistencia: sin ellas, el carrito se perdería cada vez que se recargue la página.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 6: calcular el total a pagar</h4>
+    <div id="cod-js-6"></div>
+    <p class="explain"><code>calcularTotal()</code> usa <code>carrito.reduce(...)</code> para recorrer todos los productos del carrito y acumular un solo número. El segundo argumento de <code>reduce</code>, el <code>0</code>, es el valor inicial del acumulador. En cada vuelta, se busca el producto real correspondiente con <code>find</code> (porque el carrito solo guarda el <code>id</code> y la <code>cantidad</code>, no el precio), y se suma <code>producto.precio * itemCarrito.cantidad</code> al acumulado. Si por alguna razón el producto ya no existiera, se devuelve el acumulado sin cambios, evitando un error.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 7: pintar el carrito</h4>
+    <div id="cod-js-7"></div>
+    <p class="explain"><code>renderCarrito()</code> vacía el contenedor del carrito y, si está vacío, muestra el mensaje "Tu carrito está vacío." Si tiene productos, recorre <code>carrito</code> con <code>forEach</code>: por cada item busca el producto real con <code>find</code>, calcula su <code>subtotal</code> (precio por cantidad), y construye la fila completa de una sola vez con <code>innerHTML</code> y una cadena de texto, incluyendo los botones de sumar, restar y eliminar con el <code>id</code> del producto guardado en <code>data-id</code>. Al final de la función, siempre se actualiza el texto del total llamando a <code>calcularTotal()</code>, y se llama a <code>guardarCarrito()</code>: así, cada vez que se pinta el carrito, también queda guardado en <code>localStorage</code>, sin que tengamos que acordarnos de hacerlo por separado en cada lugar donde el carrito cambia.</p>
+
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 2 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="638" height="318" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Catálogo</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="46" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <circle cx="89" cy="76" r="14" fill="#2451c4"></circle>
+          <text x="45" y="112" font-size="10" fill="#1f2430">Audífonos</text>
+          <text x="45" y="126" font-size="10" fill="#2451c4" font-weight="700">$120.000</text>
+          <rect x="34" y="134" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="46" y="148" font-size="8" fill="#ffffff">Agregar al carrito</text>
+
+          <rect x="166" y="46" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <rect x="217" y="62" width="28" height="28" fill="#17a673"></rect>
+          <text x="187" y="112" font-size="10" fill="#1f2430">Teclado mecánico</text>
+          <text x="187" y="126" font-size="10" fill="#2451c4" font-weight="700">$250.000</text>
+          <rect x="176" y="134" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="188" y="148" font-size="8" fill="#ffffff">Agregar al carrito</text>
+        </g>
+
+        <line x1="330" y1="24" x2="330" y2="296" stroke="#e3e5ee"></line>
+
+        <text x="350" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Carrito de compras</text>
+
+        <g font-family="Segoe UI, Arial" font-size="10">
+          <text x="350" y="60" fill="#1f2430">Audífonos inalámbricos</text>
+          <rect x="350" y="68" width="18" height="16" rx="4" fill="#ffffff" stroke="#c9cce0"></rect>
+          <text x="356" y="80" fill="#1f2430">-</text>
+          <text x="376" y="80" fill="#1f2430">1</text>
+          <rect x="392" y="68" width="18" height="16" rx="4" fill="#ffffff" stroke="#c9cce0"></rect>
+          <text x="398" y="80" fill="#1f2430">+</text>
+          <text x="500" y="80" fill="#2451c4" font-weight="700">$120.000</text>
+          <text x="580" y="80" fill="#d1435b">Eliminar</text>
+
+          <line x1="350" y1="92" x2="620" y2="92" stroke="#e5e8f5"></line>
+
+          <text x="350" y="112" fill="#1f2430">Teclado mecánico</text>
+          <rect x="350" y="120" width="18" height="16" rx="4" fill="#ffffff" stroke="#c9cce0"></rect>
+          <text x="356" y="132" fill="#1f2430">-</text>
+          <text x="376" y="132" fill="#1f2430">1</text>
+          <rect x="392" y="120" width="18" height="16" rx="4" fill="#ffffff" stroke="#c9cce0"></rect>
+          <text x="398" y="132" fill="#1f2430">+</text>
+          <text x="500" y="132" fill="#2451c4" font-weight="700">$250.000</text>
+          <text x="580" y="132" fill="#d1435b">Eliminar</text>
+        </g>
+
+        <text x="350" y="210" font-size="13" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Total: $370.000</text>
+        <rect x="350" y="224" width="270" height="26" rx="7" fill="#eceefb"></rect>
+        <text x="440" y="241" font-size="10" fill="#444a5e" font-family="Segoe UI, Arial">Vaciar carrito</text>
+        <rect x="350" y="256" width="270" height="26" rx="7" fill="#17a673"></rect>
+        <text x="430" y="273" font-size="10" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Finalizar compra</text>
+      </svg>
+      <p class="checkpoint-caption">Con dos productos agregados: cada fila muestra sus controles de cantidad, su subtotal y su botón de eliminar, y el total ya suma $370.000. Si en este punto recargas la página, gracias a localStorage el carrito aparece exactamente igual.</p>
+    </div>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 8: agregar productos al carrito</h4>
+    <div id="cod-js-8"></div>
+    <p class="explain"><code>agregarAlCarrito(idProducto)</code> primero busca, con <code>find</code>, si ese producto ya está en el carrito. Si ya existe, simplemente le suma 1 a su <code>cantidad</code>; si no existe todavía, agrega un objeto nuevo al array con <code>push</code>, empezando en cantidad 1. Al final, llama a <code>renderCarrito()</code> para que el cambio se refleje en pantalla (y de paso se guarde en <code>localStorage</code>, como vimos en el segmento anterior).</p>
+    <p class="explain">El <code>addEventListener("click")</code> está puesto en el contenedor completo del catálogo (delegación de eventos), no en cada botón: así funciona sin importar cuántos productos tenga el catálogo. Con <code>evento.target.closest(".btnAgregar")</code> se identifica si el clic fue realmente sobre un botón de "Agregar al carrito"; si fue así, se lee el <code>id</code> guardado en <code>dataset.id</code> (convertido a número, porque los atributos siempre llegan como texto) y se llama a <code>agregarAlCarrito</code> con ese valor.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 9: cambiar cantidades y eliminar productos</h4>
+    <div id="cod-js-9"></div>
+    <p class="explain">Este <code>addEventListener("click")</code> está en el contenedor del carrito, también con delegación de eventos, porque las filas se destruyen y se vuelven a crear cada vez que se llama a <code>renderCarrito()</code>. Tras encontrar el botón exacto que se presionó y el item del carrito al que pertenece, se revisa qué clase tiene ese botón: si es <code>btnSumar</code>, se aumenta la cantidad en 1; si es <code>btnRestar</code>, se disminuye en 1, y si llega a 0 o menos, se elimina ese producto del carrito por completo con <code>filter</code> (que crea un nuevo array sin ese <code>id</code>); si es <code>btnEliminarItem</code>, se elimina directamente sin importar la cantidad. En los tres casos, se termina llamando a <code>renderCarrito()</code> para reflejar el cambio.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 10: vaciar el carrito manualmente</h4>
+    <div id="cod-js-10"></div>
+    <p class="explain">El botón "Vaciar carrito" simplemente reemplaza <code>carrito</code> por un array vacío, limpia cualquier mensaje anterior del checkout y vuelve a pintar el carrito (que ahora mostrará el mensaje de carrito vacío y guardará ese estado vacío en <code>localStorage</code>).</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 11: el checkout que limpia el carrito</h4>
+    <div id="cod-js-11"></div>
+    <p class="explain">Al hacer clic en "Finalizar compra", primero se comprueba si el carrito está vacío; si lo está, se muestra un mensaje de error (con la clase <code>"error"</code>, que el CSS pinta de rojo) y no se continúa. Si hay productos, se calcula el <code>totalPagado</code> con la función <code>calcularTotal()</code> del segmento 6, y se muestra un mensaje de éxito (con la clase <code>"exito"</code>, en verde) confirmando la compra con el total ya formateado. Justo después viene la parte más importante de este paso: <code>carrito = []</code> vacía el carrito por completo, y <code>renderCarrito()</code> refleja ese vaciado en pantalla y en <code>localStorage</code>, dejando la tienda lista para una compra nueva.</p>
+
+    <h4 style="margin:22px 0 6px; font-size:0.95rem;">Segmento 12: iniciar la tienda al cargar la página</h4>
+    <div id="cod-js-12"></div>
+    <p class="explain">Estas tres líneas finales son las que realmente ponen en marcha todo lo anterior, en un orden preciso: primero <code>cargarCarrito()</code> intenta recuperar un carrito guardado de una visita anterior; luego <code>renderProductos()</code> dibuja el catálogo (que siempre es el mismo); y por último <code>renderCarrito()</code> dibuja el carrito ya sea vacío o con lo que se haya recuperado de <code>localStorage</code>, y lo vuelve a guardar para mantener todo sincronizado desde el primer instante.</p>
+
+    <h3 class="subhead" id="checkout"><span class="dot"></span> Checkpoint final: el checkout en acción</h3>
+    <div class="checkpoint">
+      <div class="checkpoint-label">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-4 4-3-3-6 6"></path></svg>
+        Checkpoint visual 3 de 3
+      </div>
+      <svg class="mockup" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="638" height="318" rx="12" fill="#ffffff"></rect>
+        <text x="24" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Catálogo</text>
+
+        <g font-family="Segoe UI, Arial">
+          <rect x="24" y="46" width="130" height="120" rx="8" fill="#f7f8fd" stroke="#e3e5ee"></rect>
+          <circle cx="89" cy="76" r="14" fill="#2451c4"></circle>
+          <text x="45" y="112" font-size="10" fill="#1f2430">Audífonos</text>
+          <text x="45" y="126" font-size="10" fill="#2451c4" font-weight="700">$120.000</text>
+          <rect x="34" y="134" width="110" height="20" rx="5" fill="#2451c4"></rect>
+          <text x="46" y="148" font-size="8" fill="#ffffff">Agregar al carrito</text>
+        </g>
+
+        <line x1="330" y1="24" x2="330" y2="296" stroke="#e3e5ee"></line>
+
+        <text x="350" y="32" font-size="16" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Carrito de compras</text>
+        <text x="350" y="60" font-size="11" fill="#5b6270" font-style="italic" font-family="Segoe UI, Arial">Tu carrito está vacío.</text>
+        <text x="350" y="180" font-size="13" font-weight="700" fill="#1f2430" font-family="Segoe UI, Arial">Total: $0</text>
+        <rect x="350" y="194" width="270" height="26" rx="7" fill="#eceefb"></rect>
+        <text x="440" y="211" font-size="10" fill="#444a5e" font-family="Segoe UI, Arial">Vaciar carrito</text>
+        <rect x="350" y="226" width="270" height="26" rx="7" fill="#17a673"></rect>
+        <text x="430" y="243" font-size="10" fill="#ffffff" font-weight="600" font-family="Segoe UI, Arial">Finalizar compra</text>
+        <text x="350" y="266" font-size="11" font-weight="600" fill="#146c43" font-family="Segoe UI, Arial">Compra confirmada por $370.000.</text>
+        <text x="350" y="282" font-size="11" font-weight="600" fill="#146c43" font-family="Segoe UI, Arial">Gracias por tu compra.</text>
+      </svg>
+      <p class="checkpoint-caption">Después de hacer clic en "Finalizar compra": aparece el mensaje de confirmación en verde con el total pagado, y el carrito quedó completamente vacío otra vez (y así se guardó en localStorage).</p>
+    </div>
+  </section>
+
+  <div class="resumen-card">
+    <h2>Para seguir practicando</h2>
+    <p class="explain">Una vez que la tienda funcione, prueba agregar un campo de cantidad disponible por producto (para no dejar agregar más unidades de las que hay en stock), un descuento por cantidad, o una lista de "compras anteriores" guardada también en <code>localStorage</code> bajo otra clave distinta a <code>"carritoTienda"</code>.</p>
+  </div>
+
+</main>
+
+<footer>Guía práctica: carrito de compras con localStorage · HTML + CSS + JavaScript puro · Código completo, sin sandboxes</footer>
+
+<div class="copy-toast" id="copyToast">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+  <span>Este código es para transcribir a mano, no para copiar.</span>
+</div>
+
+<script>
+/* =========================================================
+   RESALTADO DE SINTAXIS (sin librerías externas)
+   ========================================================= */
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+var JS_PATTERN = /(\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:const|let|var|function|return|if|else|new|this|class|true|false|null|undefined|for|while|typeof|of|in)\b)|(\b[a-zA-Z_$][\w$]*(?=\())|(\.[a-zA-Z_$][\w$]*)|(\b\d+\b)/g;
+
+function highlightJSLine(line) {
+  JS_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = JS_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "str" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "kw" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "fn" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "prop" });
+    else if (m[6]) tokens.push({ text: m[6], cls: "num" });
+    last = JS_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+var HTML_PATTERN = /(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][\w-]*)|([a-zA-Z-]+(?==))|("[^"]*")|(\/?>)/g;
+
+function highlightHTMLLine(line) {
+  HTML_PATTERN.lastIndex = 0;
+  var tokens = [];
+  var last = 0, m;
+  while ((m = HTML_PATTERN.exec(line)) !== null) {
+    if (m.index > last) tokens.push({ text: line.slice(last, m.index), cls: "" });
+    if (m[1]) tokens.push({ text: m[1], cls: "cm" });
+    else if (m[2]) tokens.push({ text: m[2], cls: "tag" });
+    else if (m[3]) tokens.push({ text: m[3], cls: "attr" });
+    else if (m[4]) tokens.push({ text: m[4], cls: "str" });
+    else if (m[5]) tokens.push({ text: m[5], cls: "tag" });
+    last = HTML_PATTERN.lastIndex;
+  }
+  if (last < line.length) tokens.push({ text: line.slice(last), cls: "" });
+  if (tokens.length === 0) tokens.push({ text: line.length ? line : " ", cls: "" });
+  return tokens;
+}
+
+function highlightCSSLine(line) {
+  var trimmed = line.trim();
+  if (trimmed === "" || trimmed === "}") {
+    return [{ text: line, cls: "" }];
+  }
+  var idxLlave = line.indexOf("{");
+  if (idxLlave !== -1) {
+    return [
+      { text: line.slice(0, idxLlave), cls: "tag" },
+      { text: line.slice(idxLlave), cls: "" }
+    ];
+  }
+  var idxDosPuntos = line.indexOf(":");
+  if (idxDosPuntos !== -1) {
+    return [
+      { text: line.slice(0, idxDosPuntos), cls: "attr" },
+      { text: line.slice(idxDosPuntos), cls: "str" }
+    ];
+  }
+  return [{ text: line, cls: "" }];
+}
+
+function tokensToHtml(tokens) {
+  return tokens.map(function (t) {
+    var escaped = escapeHtml(t.text);
+    return t.cls ? '<span class="' + t.cls + '">' + escaped + "</span>" : escaped;
+  }).join("");
+}
+
+function renderCodeBlock(containerId, code, lang, filename) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+
+  var highlightFn = highlightJSLine;
+  if (lang === "html") highlightFn = highlightHTMLLine;
+  if (lang === "css") highlightFn = highlightCSSLine;
+
+  var lines = code.split("\n");
+  var bodyHtml = lines.map(function (line, i) {
+    var num = String(i + 1).padStart(2, "0");
+    var tokens = highlightFn(line);
+    return '<div class="code-line"><span class="ln">' + num + '</span><span class="txt">' + tokensToHtml(tokens) + "</span></div>";
+  }).join("");
+
+  var lockIcon = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+
+  el.innerHTML =
+    '<div class="code-header">' +
+      '<span class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>' +
+      '<span class="fname">' + filename + "</span>" +
+      '<span class="lang">' + lang.toUpperCase() + "</span>" +
+      '<span class="lock">' + lockIcon + "</span>" +
+    "</div>" +
+    '<div class="code-body">' + bodyHtml + "</div>";
+
+  el.classList.add("code-window", "code-lock");
+}
+
+/* =========================================================
+   CÓDIGO DE LA GUÍA (fuente para los bloques de código)
+   ========================================================= */
+
+var CODIGO_HTML =
+`<div class="tienda">
+  <section class="catalogo">
+    <h3>Catálogo</h3>
+    <div class="listaProductos" id="listaProductos"></div>
+  </section>
+
+  <aside class="carrito">
+    <h3>Carrito de compras</h3>
+    <div class="itemsCarrito" id="itemsCarrito"></div>
+    <p class="totalCarrito">Total: <span id="totalCarrito">$0</span></p>
+    <button id="btnVaciarCarrito">Vaciar carrito</button>
+    <button id="btnCheckout">Finalizar compra</button>
+    <p class="mensajeCheckout" id="mensajeCheckout"></p>
+  </aside>
+</div>`;
+
+var CODIGO_CSS =
+`.tienda {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.listaProductos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.tarjetaProducto {
+  border: 1px solid #e3e5ee;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.iconoProducto {
+  margin-bottom: 8px;
+}
+
+.nombreProducto {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.precioProducto {
+  font-size: 0.9rem;
+  color: #2451c4;
+  font-weight: 700;
+  margin: 4px 0 10px;
+}
+
+.btnAgregar {
+  width: 100%;
+  background: #2451c4;
+  color: #ffffff;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.carrito {
+  background: #f7f8fd;
+  border: 1px solid #e3e5ee;
+  border-radius: 12px;
+  padding: 18px;
+  height: fit-content;
+}
+
+.itemCarritoFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e8f5;
+  font-size: 0.82rem;
+}
+
+.controlesCantidad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.controlesCantidad button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #c9cce0;
+  background: #ffffff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btnEliminarItem {
+  background: none;
+  border: none;
+  color: #d1435b;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.totalCarrito {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.carritoVacio {
+  color: #5b6270;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+#btnVaciarCarrito {
+  background: #eceefb;
+  color: #444444;
+  border: 1px solid #d8dae8;
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#btnCheckout {
+  background: #17a673;
+  color: #ffffff;
+  border: none;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.mensajeCheckout {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mensajeCheckout.exito {
+  color: #146c43;
+}
+
+.mensajeCheckout.error {
+  color: #d1435b;
+}`;
+
+var CODIGO_JS_1 =
+`const productos = [
+  { id: 1, nombre: "Audífonos inalámbricos", precio: 120000, categoria: "circulo" },
+  { id: 2, nombre: "Teclado mecánico", precio: 250000, categoria: "cuadrado" },
+  { id: 3, nombre: "Mouse ergonómico", precio: 85000, categoria: "triangulo" },
+  { id: 4, nombre: "Monitor 24 pulgadas", precio: 650000, categoria: "estrella" }
+];
+
+let carrito = [];`;
+
+var CODIGO_JS_2 =
+`const listaProductos = document.getElementById("listaProductos");
+const itemsCarrito = document.getElementById("itemsCarrito");
+const totalCarritoEl = document.getElementById("totalCarrito");
+const btnVaciarCarrito = document.getElementById("btnVaciarCarrito");
+const btnCheckout = document.getElementById("btnCheckout");
+const mensajeCheckout = document.getElementById("mensajeCheckout");`;
+
+var CODIGO_JS_3 =
+`function crearSvgIcono(categoria) {
+  if (categoria === "circulo") {
+    return "<svg viewBox='0 0 40 40' width='40' height='40'><circle cx='20' cy='20' r='16' fill='#2451c4'></circle></svg>";
+  }
+  if (categoria === "cuadrado") {
+    return "<svg viewBox='0 0 40 40' width='40' height='40'><rect x='6' y='6' width='28' height='28' fill='#17a673'></rect></svg>";
+  }
+  if (categoria === "triangulo") {
+    return "<svg viewBox='0 0 40 40' width='40' height='40'><polygon points='20,6 34,34 6,34' fill='#d9782d'></polygon></svg>";
+  }
+  return "<svg viewBox='0 0 40 40' width='40' height='40'><polygon points='20,4 24,16 37,16 26,24 30,36 20,28 10,36 14,24 3,16 16,16' fill='#d1435b'></polygon></svg>";
+}`;
+
+var CODIGO_JS_4 =
+`function renderProductos() {
+  listaProductos.innerHTML = "";
+
+  productos.forEach(function (producto) {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "tarjetaProducto";
+
+    const icono = document.createElement("div");
+    icono.className = "iconoProducto";
+    icono.innerHTML = crearSvgIcono(producto.categoria);
+
+    const nombre = document.createElement("p");
+    nombre.className = "nombreProducto";
+    nombre.textContent = producto.nombre;
+
+    const precio = document.createElement("p");
+    precio.className = "precioProducto";
+    precio.textContent = "$" + producto.precio.toLocaleString("es-CO");
+
+    const boton = document.createElement("button");
+    boton.className = "btnAgregar";
+    boton.textContent = "Agregar al carrito";
+    boton.dataset.id = producto.id;
+
+    tarjeta.appendChild(icono);
+    tarjeta.appendChild(nombre);
+    tarjeta.appendChild(precio);
+    tarjeta.appendChild(boton);
+
+    listaProductos.appendChild(tarjeta);
+  });
+}`;
+
+var CODIGO_JS_5 =
+`function guardarCarrito() {
+  localStorage.setItem("carritoTienda", JSON.stringify(carrito));
+}
+
+function cargarCarrito() {
+  const datosGuardados = localStorage.getItem("carritoTienda");
+
+  if (datosGuardados) {
+    carrito = JSON.parse(datosGuardados);
+  }
+}`;
+
+var CODIGO_JS_6 =
+`function calcularTotal() {
+  return carrito.reduce(function (acumulado, itemCarrito) {
+    const producto = productos.find(function (p) {
+      return p.id === itemCarrito.id;
+    });
+
+    if (!producto) {
+      return acumulado;
+    }
+
+    return acumulado + producto.precio * itemCarrito.cantidad;
+  }, 0);
+}`;
+
+var CODIGO_JS_7 =
+`function renderCarrito() {
+  itemsCarrito.innerHTML = "";
+
+  if (carrito.length === 0) {
+    itemsCarrito.innerHTML = "<p class='carritoVacio'>Tu carrito está vacío.</p>";
+  }
+
+  carrito.forEach(function (itemCarrito) {
+    const producto = productos.find(function (p) {
+      return p.id === itemCarrito.id;
+    });
+
+    if (!producto) {
+      return;
+    }
+
+    const subtotal = producto.precio * itemCarrito.cantidad;
+
+    const fila = document.createElement("div");
+    fila.className = "itemCarritoFila";
+    fila.innerHTML =
+      "<span class='nombreItem'>" + producto.nombre + "</span>" +
+      "<div class='controlesCantidad'>" +
+      "<button class='btnRestar' data-id='" + producto.id + "'>-</button>" +
+      "<span class='cantidadItem'>" + itemCarrito.cantidad + "</span>" +
+      "<button class='btnSumar' data-id='" + producto.id + "'>+</button>" +
+      "</div>" +
+      "<span class='subtotalItem'>$" + subtotal.toLocaleString("es-CO") + "</span>" +
+      "<button class='btnEliminarItem' data-id='" + producto.id + "'>Eliminar</button>";
+
+    itemsCarrito.appendChild(fila);
+  });
+
+  totalCarritoEl.textContent = "$" + calcularTotal().toLocaleString("es-CO");
+  guardarCarrito();
+}`;
+
+var CODIGO_JS_8 =
+`function agregarAlCarrito(idProducto) {
+  const itemExistente = carrito.find(function (itemCarrito) {
+    return itemCarrito.id === idProducto;
+  });
+
+  if (itemExistente) {
+    itemExistente.cantidad = itemExistente.cantidad + 1;
+  } else {
+    carrito.push({ id: idProducto, cantidad: 1 });
+  }
+
+  renderCarrito();
+}
+
+listaProductos.addEventListener("click", function (evento) {
+  const boton = evento.target.closest(".btnAgregar");
+
+  if (!boton) {
+    return;
+  }
+
+  const idProducto = Number(boton.dataset.id);
+  agregarAlCarrito(idProducto);
+});`;
+
+var CODIGO_JS_9 =
+`itemsCarrito.addEventListener("click", function (evento) {
+  const boton = evento.target.closest("button");
+
+  if (!boton) {
+    return;
+  }
+
+  const idProducto = Number(boton.dataset.id);
+  const itemCarrito = carrito.find(function (i) {
+    return i.id === idProducto;
+  });
+
+  if (!itemCarrito) {
+    return;
+  }
+
+  if (boton.classList.contains("btnSumar")) {
+    itemCarrito.cantidad = itemCarrito.cantidad + 1;
+  } else if (boton.classList.contains("btnRestar")) {
+    itemCarrito.cantidad = itemCarrito.cantidad - 1;
+
+    if (itemCarrito.cantidad <= 0) {
+      carrito = carrito.filter(function (i) {
+        return i.id !== idProducto;
+      });
+    }
+  } else if (boton.classList.contains("btnEliminarItem")) {
+    carrito = carrito.filter(function (i) {
+      return i.id !== idProducto;
+    });
+  }
+
+  renderCarrito();
+});`;
+
+var CODIGO_JS_10 =
+`btnVaciarCarrito.addEventListener("click", function () {
+  carrito = [];
+  mensajeCheckout.textContent = "";
+  renderCarrito();
+});`;
+
+var CODIGO_JS_11 =
+`btnCheckout.addEventListener("click", function () {
+  if (carrito.length === 0) {
+    mensajeCheckout.textContent = "Agrega productos al carrito antes de finalizar la compra.";
+    mensajeCheckout.className = "mensajeCheckout error";
+    return;
+  }
+
+  const totalPagado = calcularTotal();
+
+  mensajeCheckout.textContent = "Compra confirmada por $" + totalPagado.toLocaleString("es-CO") + ". Gracias por tu compra.";
+  mensajeCheckout.className = "mensajeCheckout exito";
+
+  carrito = [];
+  renderCarrito();
+});`;
+
+var CODIGO_JS_12 =
+`cargarCarrito();
+renderProductos();
+renderCarrito();`;
+
+/* =========================================================
+   RENDERIZAR TODOS LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+renderCodeBlock("cod-html", CODIGO_HTML, "html", "index.html");
+renderCodeBlock("cod-css", CODIGO_CSS, "css", "style.css");
+
+renderCodeBlock("cod-js-1", CODIGO_JS_1, "javascript", "script.js");
+renderCodeBlock("cod-js-2", CODIGO_JS_2, "javascript", "script.js");
+renderCodeBlock("cod-js-3", CODIGO_JS_3, "javascript", "script.js");
+renderCodeBlock("cod-js-4", CODIGO_JS_4, "javascript", "script.js");
+renderCodeBlock("cod-js-5", CODIGO_JS_5, "javascript", "script.js");
+renderCodeBlock("cod-js-6", CODIGO_JS_6, "javascript", "script.js");
+renderCodeBlock("cod-js-7", CODIGO_JS_7, "javascript", "script.js");
+renderCodeBlock("cod-js-8", CODIGO_JS_8, "javascript", "script.js");
+renderCodeBlock("cod-js-9", CODIGO_JS_9, "javascript", "script.js");
+renderCodeBlock("cod-js-10", CODIGO_JS_10, "javascript", "script.js");
+renderCodeBlock("cod-js-11", CODIGO_JS_11, "javascript", "script.js");
+renderCodeBlock("cod-js-12", CODIGO_JS_12, "javascript", "script.js");
+
+/* =========================================================
+   CANDADO ANTI COPIAR/PEGAR EN LOS BLOQUES DE CÓDIGO
+   ========================================================= */
+var toast = document.getElementById("copyToast");
+var toastTimer = null;
+function mostrarToast() {
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2200);
+}
+
+document.querySelectorAll(".code-lock").forEach(function (bloque) {
+  bloque.addEventListener("copy", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("cut", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("contextmenu", function (e) { e.preventDefault(); mostrarToast(); });
+  bloque.addEventListener("dragstart", function (e) { e.preventDefault(); });
+  bloque.addEventListener("selectstart", function (e) { e.preventDefault(); });
+});
+</script>
+</body>
+</html>
