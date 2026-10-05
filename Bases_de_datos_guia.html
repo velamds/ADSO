@@ -141,6 +141,20 @@ figcaption{font-family:var(--sans);font-size:.9rem;color:var(--muted);margin-top
 .diagram{overflow-x:auto;background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:16px;text-align:center}
 .diagram svg{max-width:100%;height:auto}
 pre.mermaid{margin:0;background:none;white-space:pre;text-align:center}
+
+svg.dg{display:block;max-width:100%;height:auto;margin:0 auto}
+.eb{fill:var(--paper);stroke:var(--ink);stroke-width:1.6}
+.eh{fill:var(--ink)}
+.el{stroke:var(--line);stroke-width:1}
+.et{fill:var(--paper);font:700 13px var(--sans);text-anchor:middle;dominant-baseline:central}
+.an{fill:var(--ink);font:11.5px var(--mono);dominant-baseline:central}
+.an.pk{font-weight:700}
+.at{fill:var(--muted);font:11px var(--sans);text-anchor:end;dominant-baseline:central}
+.ak{fill:var(--blue);font:700 10.5px var(--sans);text-anchor:end;dominant-baseline:central}
+.rl{fill:var(--ink);font:italic 12.5px var(--sans)}
+.bgc{fill:var(--paper2);stroke:var(--ink);stroke-width:1.6}
+.ah{fill:var(--ink)}
+.card svg.dg{margin-top:8px;margin-bottom:8px}
 .sh{fill:var(--paper);stroke:var(--ink);stroke-width:1.6}
 .sh2{fill:none;stroke:var(--ink);stroke-width:1.6}
 .dash{stroke-dasharray:5 4}
@@ -461,14 +475,7 @@ footer.end{grid-column:1/-1;font-family:var(--sans);font-size:.9rem;color:var(--
 
 <h3>Cómo se comunica el usuario con los datos</h3>
 <figure>
-<div class="diagram"><pre class="mermaid">
-flowchart LR
-  U["Usuario o aplicación<br/>(app web, móvil, informe)"] -->|"consulta SQL"| A
-  subgraph SG["SGBD"]
-    A["Analizador<br/>(valida la sintaxis)"] --> O["Optimizador<br/>(elige el plan más rápido)"] --> M["Motor de almacenamiento<br/>(lee y escribe)"]
-  end
-  M --> D[("Archivos en disco<br/>tablas e índices")]
-</pre></div>
+<div class="diagram"><svg class="dg" viewBox="0 0 660 165" style="min-width:560px" role="img" aria-label="Flujo de una consulta: usuario, analizador, optimizador, motor de almacenamiento y archivos en disco" xmlns="http://www.w3.org/2000/svg"><defs><marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ah" d="M0,0L10,5L0,10z"/></marker></defs><rect class="sh" x="10" y="45" width="100" height="70" rx="7"/><text class="tx b" x="60.0" y="71.0">Usuario</text><text class="tx s" x="60.0" y="90.0">app o sitio web</text><rect class="sh dash" x="148" y="8" width="368" height="144" rx="9" style="fill:none"/><text class="tx b" x="162" y="25" style="text-anchor:start">SGBD</text><rect class="sh" x="162" y="45" width="100" height="70" rx="7"/><text class="tx b" x="212.0" y="71.0">Analizador</text><text class="tx s" x="212.0" y="90.0">valida sintaxis</text><rect class="sh" x="282" y="45" width="100" height="70" rx="7"/><text class="tx b" x="332.0" y="71.0">Optimizador</text><text class="tx s" x="332.0" y="90.0">elige plan rápido</text><rect class="sh" x="402" y="45" width="100" height="70" rx="7"/><text class="tx b" x="452.0" y="71.0">Motor</text><text class="tx s" x="452.0" y="90.0">lee y escribe</text><path class="ln" d="M110,80 L162,80" marker-end="url(#m1)"/><path class="ln" d="M262,80 L282,80" marker-end="url(#m1)"/><path class="ln" d="M382,80 L402,80" marker-end="url(#m1)"/><path class="ln" d="M502,80 L562,80" marker-end="url(#m1)"/><text class="tx s" x="129" y="68">SQL</text><path class="sh" d="M562,55 v50 a38,9 0 0 0 76,0 v-50 z"/><ellipse class="sh" cx="600" cy="55" rx="38" ry="9"/><text class="tx b" x="600" y="82">Archivos</text><text class="tx s" x="600" y="98">en disco</text><text class="tx s" x="600" y="135">tablas e índices</text></svg></div>
 <figcaption>El usuario pide <i>qué</i> quiere (SQL declarativo); el SGBD decide <i>cómo</i> obtenerlo.</figcaption>
 </figure>
 
@@ -483,13 +490,7 @@ flowchart LR
 <h3>Arquitectura de tres niveles (ANSI/SPARC)</h3>
 <p>Para que los cambios en un nivel no rompan los demás, se separa la base de datos en tres vistas:</p>
 <figure>
-<div class="diagram"><pre class="mermaid">
-flowchart TB
-  E1["NIVEL EXTERNO<br/>Vistas de cada usuario<br/>Cajero: ventas del día<br/>Gerente: ventas por sucursal"]
-  C["NIVEL CONCEPTUAL<br/>Estructura lógica de toda la base<br/>tablas, columnas, relaciones, restricciones"]
-  I["NIVEL INTERNO<br/>Almacenamiento físico<br/>archivos, índices, discos"]
-  E1 --- C --- I
-</pre></div>
+<div class="diagram"><svg class="dg" viewBox="0 0 560 330" style="min-width:500px" role="img" aria-label="Arquitectura de tres niveles: externo, conceptual e interno" xmlns="http://www.w3.org/2000/svg"><defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ah" d="M0,0L10,5L0,10z"/></marker></defs><rect class="sh" x="20" y="10" width="520" height="70" rx="7"/><text class="tx b" x="280" y="28">Nivel externo</text><text class="tx s" x="280" y="48">Vistas de cada usuario:</text><text class="tx s" x="280" y="64">cajero ve ventas del día, gerente ve ventas por sucursal</text><rect class="sh" x="20" y="130" width="520" height="70" rx="7"/><text class="tx b" x="280" y="148">Nivel conceptual</text><text class="tx s" x="280" y="168">Estructura lógica de toda la base:</text><text class="tx s" x="280" y="184">tablas, columnas, relaciones y restricciones</text><rect class="sh" x="20" y="250" width="520" height="70" rx="7"/><text class="tx b" x="280" y="268">Nivel interno</text><text class="tx s" x="280" y="288">Almacenamiento físico:</text><text class="tx s" x="280" y="304">archivos, índices y discos</text><path class="ln" d="M60,80 L60,130" marker-end="url(#m2)" marker-start="url(#m2)"/><path class="ln" d="M60,200 L60,250" marker-end="url(#m2)" marker-start="url(#m2)"/><text class="tx b" x="80" y="98" style="text-anchor:start">Independencia lógica</text><text class="tx s" x="80" y="116" style="text-anchor:start">cambiar tablas sin romper las vistas</text><text class="tx b" x="80" y="218" style="text-anchor:start">Independencia física</text><text class="tx s" x="80" y="236" style="text-anchor:start">cambiar el almacenamiento sin tocar las tablas</text></svg></div>
 <figcaption>Cada nivel se ve distinto, pero todos describen los mismos datos.</figcaption>
 </figure>
 <ul>
@@ -773,15 +774,7 @@ id_pedido | id_producto | cantidad
 
 <h3>El ciclo de diseño</h3>
 <figure>
-<div class="diagram"><pre class="mermaid">
-flowchart LR
-  R["1. Requisitos<br/>qué necesita el negocio"] --> C["2. Modelo conceptual<br/>diagrama entidad-relación"]
-  C --> L["3. Modelo lógico<br/>tablas, claves, normalización"]
-  L --> F["4. Modelo físico<br/>SQL del motor elegido, índices"]
-  F --> I["5. Implementación<br/>y carga de datos"]
-  I --> M["6. Mantenimiento<br/>y evolución"]
-  M -.-> R
-</pre></div>
+<div class="diagram"><svg class="dg" viewBox="0 0 610 225" style="min-width:540px" role="img" aria-label="Ciclo de diseño de una base de datos en seis etapas" xmlns="http://www.w3.org/2000/svg"><defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ah" d="M0,0L10,5L0,10z"/></marker></defs><rect class="sh" x="20" y="20" width="170" height="64" rx="7"/><text class="tx b" x="105.0" y="43.0">1. Requisitos</text><text class="tx s" x="105.0" y="62.0">qué necesita el negocio</text><rect class="sh" x="220" y="20" width="170" height="64" rx="7"/><text class="tx b" x="305.0" y="43.0">2. Modelo conceptual</text><text class="tx s" x="305.0" y="62.0">diagrama entidad-relación</text><rect class="sh" x="420" y="20" width="170" height="64" rx="7"/><text class="tx b" x="505.0" y="43.0">3. Modelo lógico</text><text class="tx s" x="505.0" y="62.0">tablas y normalización</text><rect class="sh" x="420" y="140" width="170" height="64" rx="7"/><text class="tx b" x="505.0" y="163.0">4. Modelo físico</text><text class="tx s" x="505.0" y="182.0">SQL del motor, índices</text><rect class="sh" x="220" y="140" width="170" height="64" rx="7"/><text class="tx b" x="305.0" y="163.0">5. Implementación</text><text class="tx s" x="305.0" y="182.0">y carga de datos</text><rect class="sh" x="20" y="140" width="170" height="64" rx="7"/><text class="tx b" x="105.0" y="163.0">6. Mantenimiento</text><text class="tx s" x="105.0" y="182.0">y evolución</text><path class="ln" d="M190,52 L220,52" marker-end="url(#m3)"/><path class="ln" d="M390,52 L420,52" marker-end="url(#m3)"/><path class="ln" d="M505,84 L505,140" marker-end="url(#m3)"/><path class="ln" d="M420,172 L390,172" marker-end="url(#m3)"/><path class="ln" d="M220,172 L190,172" marker-end="url(#m3)"/><path class="ln dash" d="M105,140 L105,84" marker-end="url(#m3)"/><text class="tx s" x="115" y="112" style="text-anchor:start">nuevos requisitos</text></svg></div>
 <figcaption>El proceso es iterativo: lo que se descubre en una etapa a menudo obliga a corregir la anterior.</figcaption>
 </figure>
 
@@ -857,7 +850,7 @@ flowchart LR
 <h3>Símbolos del modelo de Chen</h3>
 <figure>
 <div class="diagram">
-<svg viewBox="0 0 720 230" role="img" aria-label="Leyenda de símbolos de la notación de Chen">
+<svg class="dg" style="min-width:620px" viewBox="0 0 720 230" role="img" aria-label="Leyenda de símbolos de la notación de Chen">
   <rect class="sh" x="35" y="18" width="110" height="44"/><text class="tx" x="90" y="40">Cliente</text>
   <text class="tx s" x="90" y="88">Entidad</text>
 
@@ -897,7 +890,7 @@ flowchart LR
 <h3>Primer diagrama: estudiantes y cursos (notación de Chen)</h3>
 <figure>
 <div class="diagram">
-<svg viewBox="0 0 720 300" role="img" aria-label="Diagrama entidad-relación de estudiantes y cursos en notación de Chen">
+<svg class="dg" style="min-width:620px" viewBox="0 0 720 300" role="img" aria-label="Diagrama entidad-relación de estudiantes y cursos en notación de Chen">
   <!-- Estudiante -->
   <rect class="sh" x="40" y="120" width="130" height="50"/><text class="tx b" x="105" y="145">ESTUDIANTE</text>
   <ellipse class="sh" cx="55" cy="45" rx="50" ry="20"/><text class="tx u" x="55" y="45">matrícula</text>
@@ -943,26 +936,17 @@ flowchart LR
 <div class="card"><h4>Uno a uno (1:1)</h4>
 <p>Una instancia de A se asocia con <b>a lo sumo una</b> de B y viceversa.</p>
 <p><i>Ejemplo:</i> un usuario tiene un perfil; un perfil pertenece a un usuario. Un país tiene una capital.</p>
-<pre class="mermaid">
-erDiagram
-  USUARIO ||--o| PERFIL : "tiene"
-</pre></div>
+<svg class="dg" viewBox="0 0 380 100" role="img" aria-label="Relación uno a uno entre usuario y perfil" xmlns="http://www.w3.org/2000/svg"><path class="ln" d="M120,50 L260,50"/><g transform="translate(120,50) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(260,50) rotate(0.0)"><path class="ln" d="M-12,-8 V8"/><circle class="bgc" cx="-24" cy="0" r="5"/></g><text class="rl" x="190" y="36" style="text-anchor:middle">tiene</text><rect class="eb" x="10" y="32" width="110" height="36" rx="3"/><rect class="eh" x="10" y="32" width="110" height="36" rx="3"/><text class="et" x="65.0" y="50.0">USUARIO</text><rect class="eb" x="260" y="32" width="110" height="36" rx="3"/><rect class="eh" x="260" y="32" width="110" height="36" rx="3"/><text class="et" x="315.0" y="50.0">PERFIL</text></svg></div>
 <div class="card"><h4>Uno a muchos (1:N)</h4>
 <p>Una instancia de A se asocia con <b>muchas</b> de B, pero cada B tiene <b>una sola</b> A.</p>
 <p><i>Ejemplo:</i> un cliente realiza muchos pedidos; cada pedido es de un solo cliente. Es la más común.</p>
-<pre class="mermaid">
-erDiagram
-  CLIENTE ||--o{ PEDIDO : "realiza"
-</pre></div>
+<svg class="dg" viewBox="0 0 380 100" role="img" aria-label="Relación uno a muchos entre cliente y pedido" xmlns="http://www.w3.org/2000/svg"><path class="ln" d="M120,50 L260,50"/><g transform="translate(120,50) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(260,50) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="190" y="36" style="text-anchor:middle">realiza</text><rect class="eb" x="10" y="32" width="110" height="36" rx="3"/><rect class="eh" x="10" y="32" width="110" height="36" rx="3"/><text class="et" x="65.0" y="50.0">CLIENTE</text><rect class="eb" x="260" y="32" width="110" height="36" rx="3"/><rect class="eh" x="260" y="32" width="110" height="36" rx="3"/><text class="et" x="315.0" y="50.0">PEDIDO</text></svg></div>
 </div>
 <div class="grid2">
 <div class="card"><h4>Muchos a muchos (N:M)</h4>
 <p>Una instancia de A se asocia con muchas de B <b>y</b> una de B con muchas de A.</p>
 <p><i>Ejemplo:</i> estudiantes y cursos; productos y pedidos; actores y películas. Siempre requiere una tabla intermedia (capítulo 12).</p>
-<pre class="mermaid">
-erDiagram
-  ESTUDIANTE }o--o{ CURSO : "se inscribe"
-</pre></div>
+<svg class="dg" viewBox="0 0 380 100" role="img" aria-label="Relación muchos a muchos entre estudiante y curso" xmlns="http://www.w3.org/2000/svg"><path class="ln" d="M120,50 L260,50"/><g transform="translate(120,50) rotate(180.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><g transform="translate(260,50) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="190" y="36" style="text-anchor:middle">se inscribe</text><rect class="eb" x="10" y="32" width="110" height="36" rx="3"/><rect class="eh" x="10" y="32" width="110" height="36" rx="3"/><text class="et" x="65.0" y="50.0">ESTUDIANTE</text><rect class="eb" x="260" y="32" width="110" height="36" rx="3"/><rect class="eh" x="260" y="32" width="110" height="36" rx="3"/><text class="et" x="315.0" y="50.0">CURSO</text></svg></div>
 <div class="card"><h4>Cómo averiguarla: dos preguntas</h4>
 <p>Para cada relación pregunta en los dos sentidos:</p>
 <ol><li>“¿Un <b>A</b> puede estar asociado con más de un <b>B</b>?”</li><li>“¿Un <b>B</b> puede estar asociado con más de un <b>A</b>?”</li></ol>
@@ -983,7 +967,7 @@ erDiagram
 <p>Es la más usada en herramientas profesionales. Cada extremo de la línea lleva un símbolo que combina mínimo y máximo: el <b>círculo</b> significa “cero” (opcional), la <b>barra</b> significa “uno”, y la <b>pata de gallo</b> (tres ramas) significa “muchos”.</p>
 <figure>
 <div class="diagram">
-<svg viewBox="0 0 720 130" role="img" aria-label="Símbolos de cardinalidad en notación de pata de gallo">
+<svg class="dg" style="min-width:620px" viewBox="0 0 720 130" role="img" aria-label="Símbolos de cardinalidad en notación de pata de gallo">
   <g transform="translate(20,10)">
     <line class="ln" x1="0" y1="30" x2="90" y2="30"/>
     <line class="ln" x1="70" y1="16" x2="70" y2="44"/><line class="ln" x1="78" y1="16" x2="78" y2="44"/>
@@ -1016,10 +1000,7 @@ erDiagram
 </figure>
 
 <h4>Cómo leer una relación</h4>
-<pre class="mermaid">
-erDiagram
-  CLIENTE ||--o{ PEDIDO : "realiza"
-</pre>
+<div class="diagram"><svg class="dg" viewBox="0 0 380 100" role="img" aria-label="Cliente realiza pedidos" xmlns="http://www.w3.org/2000/svg"><path class="ln" d="M120,50 L260,50"/><g transform="translate(120,50) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(260,50) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="190" y="36" style="text-anchor:middle">realiza</text><rect class="eb" x="10" y="32" width="110" height="36" rx="3"/><rect class="eh" x="10" y="32" width="110" height="36" rx="3"/><text class="et" x="65.0" y="50.0">CLIENTE</text><rect class="eb" x="260" y="32" width="110" height="36" rx="3"/><rect class="eh" x="260" y="32" width="110" height="36" rx="3"/><text class="et" x="315.0" y="50.0">PEDIDO</text></svg></div>
 <p>Se lee en dos frases, una por cada extremo:</p>
 <ul>
 <li>Del lado de <b>PEDIDO</b> hay “cero o muchos” (<code>o{</code>): <i>un cliente realiza cero o muchos pedidos.</i></li>
@@ -1030,30 +1011,12 @@ erDiagram
 
 <h4>Relación recursiva (unaria)</h4>
 <p>Una entidad se relaciona consigo misma. Muy común en jerarquías: un empleado tiene un jefe, que también es empleado; una categoría tiene una subcategoría; un comentario responde a otro comentario.</p>
-<pre class="mermaid">
-erDiagram
-  EMPLEADO |o--o{ EMPLEADO : "supervisa"
-  EMPLEADO {
-    int id_empleado PK
-    varchar nombre
-    int id_jefe FK "referencia a otro empleado"
-  }
-</pre>
+<div class="diagram"><svg class="dg" viewBox="0 0 440 150" style="min-width:380px" role="img" aria-label="Relación recursiva: un empleado supervisa a otros empleados" xmlns="http://www.w3.org/2000/svg"><rect class="eb" x="30" y="20" width="230" height="104" rx="3"/><path class="eh" d="M30,50 V23 Q30,20 33,20 H257 Q260,20 260,23 V50 Z"/><text class="et" x="145.0" y="35.0">EMPLEADO</text><text class="an pk" x="40" y="62.0">id_empleado</text><text class="at" x="222" y="62.0">int</text><text class="ak" x="252" y="62.0">PK</text><line class="el" x1="30" y1="72" x2="260" y2="72"/><text class="an" x="40" y="84.0">nombre</text><text class="at" x="250" y="84.0">varchar</text><line class="el" x1="30" y1="94" x2="260" y2="94"/><text class="an" x="40" y="106.0">id_jefe</text><text class="at" x="222" y="106.0">int</text><text class="ak" x="252" y="106.0">FK</text><path class="ln" d="M260,40 L330,40 L330,100 L260,100"/><g transform="translate(260,40) rotate(180.0)"><path class="ln" d="M-12,-8 V8"/><circle class="bgc" cx="-24" cy="0" r="5"/></g><g transform="translate(260,100) rotate(180.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="342" y="74" style="text-anchor:start">supervisa</text></svg></div>
 <p>Lectura: un empleado supervisa a cero o muchos empleados; y cada empleado tiene cero o un jefe (el director general no tiene jefe).</p>
 
 <h4>Relación N:M con atributos: entidad asociativa</h4>
 <p>Cuando la relación N:M tiene datos propios (nota, fecha, cantidad, precio), se convierte en una entidad intermedia. Es el patrón más importante que debes dominar:</p>
-<pre class="mermaid">
-erDiagram
-  ESTUDIANTE ||--o{ MATRICULA : "tiene"
-  CURSO ||--o{ MATRICULA : "recibe"
-  MATRICULA {
-    int id_estudiante PK, FK
-    varchar codigo_curso PK, FK
-    date fecha
-    decimal nota
-  }
-</pre>
+<div class="diagram"><svg class="dg" viewBox="0 0 730 160" style="min-width:640px" role="img" aria-label="Entidad asociativa MATRICULA entre ESTUDIANTE y CURSO" xmlns="http://www.w3.org/2000/svg"><rect class="eb" x="10" y="20" width="190" height="82" rx="3"/><path class="eh" d="M10,50 V23 Q10,20 13,20 H197 Q200,20 200,23 V50 Z"/><text class="et" x="105.0" y="35.0">ESTUDIANTE</text><text class="an pk" x="20" y="62.0">id_estudiante</text><text class="at" x="162" y="62.0">int</text><text class="ak" x="192" y="62.0">PK</text><line class="el" x1="10" y1="72" x2="200" y2="72"/><text class="an" x="20" y="84.0">nombre</text><text class="at" x="190" y="84.0">varchar</text><rect class="eb" x="260" y="20" width="210" height="126" rx="3"/><path class="eh" d="M260,50 V23 Q260,20 263,20 H467 Q470,20 470,23 V50 Z"/><text class="et" x="365.0" y="35.0">MATRICULA</text><text class="an pk" x="270" y="62.0">id_estudiante</text><text class="at" x="410" y="62.0">int</text><text class="ak" x="462" y="62.0">PK, FK</text><line class="el" x1="260" y1="72" x2="470" y2="72"/><text class="an pk" x="270" y="84.0">codigo_curso</text><text class="at" x="410" y="84.0">varchar</text><text class="ak" x="462" y="84.0">PK, FK</text><line class="el" x1="260" y1="94" x2="470" y2="94"/><text class="an" x="270" y="106.0">fecha</text><text class="at" x="460" y="106.0">date</text><line class="el" x1="260" y1="116" x2="470" y2="116"/><text class="an" x="270" y="128.0">nota</text><text class="at" x="460" y="128.0">decimal</text><rect class="eb" x="530" y="20" width="190" height="82" rx="3"/><path class="eh" d="M530,50 V23 Q530,20 533,20 H717 Q720,20 720,23 V50 Z"/><text class="et" x="625.0" y="35.0">CURSO</text><text class="an pk" x="540" y="62.0">codigo_curso</text><text class="at" x="682" y="62.0">varchar</text><text class="ak" x="712" y="62.0">PK</text><line class="el" x1="530" y1="72" x2="720" y2="72"/><text class="an" x="540" y="84.0">nombre</text><text class="at" x="710" y="84.0">varchar</text><path class="ln" d="M200,50 L260,50"/><g transform="translate(200,50) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(260,50) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="230" y="38" style="text-anchor:middle">tiene</text><path class="ln" d="M530,50 L470,50"/><g transform="translate(530,50) rotate(0.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(470,50) rotate(180.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="500" y="38" style="text-anchor:middle">recibe</text></svg></div>
 
 <h4>Relación ternaria</h4>
 <p>Tres entidades participan a la vez y la asociación no se puede descomponer en dos binarias sin perder información. Ejemplo: un <b>proveedor</b> suministra un <b>producto</b> para un <b>proyecto</b>. Saber que “Aceros SA vende varillas” y que “el proyecto Puente usa varillas” no te dice <i>quién</i> suministra las varillas <i>del Puente</i>.</p>
@@ -1122,63 +1085,7 @@ erDiagram
 
 <h3>Paso 4: el diagrama completo</h3>
 <figure>
-<div class="diagram"><pre class="mermaid">
-erDiagram
-  CLIENTE ||--o{ DIRECCION : "tiene"
-  CLIENTE ||--o{ PEDIDO : "realiza"
-  DIRECCION ||--o{ PEDIDO : "recibe"
-  PEDIDO ||--|{ DETALLE_PEDIDO : "contiene"
-  PRODUCTO ||--o{ DETALLE_PEDIDO : "aparece en"
-  CATEGORIA ||--o{ PRODUCTO : "clasifica"
-  PEDIDO ||--o{ PAGO : "se paga con"
-
-  CLIENTE {
-    int id_cliente PK
-    varchar nombre
-    varchar correo UK
-    varchar telefono
-    timestamp fecha_registro
-  }
-  DIRECCION {
-    int id_direccion PK
-    int id_cliente FK
-    varchar calle
-    varchar ciudad
-    varchar codigo_postal
-  }
-  CATEGORIA {
-    int id_categoria PK
-    varchar nombre UK
-  }
-  PRODUCTO {
-    int id_producto PK
-    int id_categoria FK
-    varchar nombre
-    text descripcion
-    decimal precio
-    int stock
-  }
-  PEDIDO {
-    int id_pedido PK
-    int id_cliente FK
-    int id_direccion FK
-    timestamp fecha
-    varchar estado
-  }
-  DETALLE_PEDIDO {
-    int id_pedido PK, FK
-    int id_producto PK, FK
-    int cantidad
-    decimal precio_unitario
-  }
-  PAGO {
-    int id_pago PK
-    int id_pedido FK
-    decimal monto
-    timestamp fecha
-    varchar metodo
-  }
-</pre></div>
+<div class="diagram"><div class="diagram"><svg class="dg" viewBox="0 0 790 625" style="min-width:620px" role="img" aria-label="Diagrama entidad-relación completo de la tienda en línea" xmlns="http://www.w3.org/2000/svg"><path class="ln" d="M220,35 L290,35"/><g transform="translate(220,35) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(290,35) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="255" y="22" style="text-anchor:middle">realiza</text><path class="ln" d="M115,168 L115,290"/><g transform="translate(115,168) rotate(-90.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(115,290) rotate(90.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="125" y="232" style="text-anchor:start">tiene</text><path class="ln" d="M220,305 L255,305 L255,95 L290,95"/><g transform="translate(220,305) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(290,95) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="263" y="200" style="text-anchor:start">recibe</text><path class="ln" d="M395,168 L395,290"/><g transform="translate(395,168) rotate(-90.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(395,290) rotate(90.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><path class="ln" d="M-22,-8 V8"/></g><text class="rl" x="405" y="232" style="text-anchor:start">contiene</text><path class="ln" d="M500,35 L570,35"/><g transform="translate(500,35) rotate(180.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(570,35) rotate(0.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="535" y="22" style="text-anchor:middle">se paga con</text><path class="ln" d="M570,305 L500,305"/><g transform="translate(570,305) rotate(0.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(500,305) rotate(180.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="535" y="292" style="text-anchor:middle">aparece en</text><path class="ln" d="M675,520 L675,460"/><g transform="translate(675,520) rotate(90.0)"><path class="ln" d="M-12,-8 V8 M-19,-8 V8"/></g><g transform="translate(675,460) rotate(-90.0)"><path class="ln" d="M-16,0 L0,-9 M-16,0 L0,9"/><circle class="bgc" cx="-28" cy="0" r="5"/></g><text class="rl" x="685" y="494" style="text-anchor:start">clasifica</text><rect class="eb" x="10" y="20" width="210" height="148" rx="3"/><path class="eh" d="M10,50 V23 Q10,20 13,20 H217 Q220,20 220,23 V50 Z"/><text class="et" x="115.0" y="35.0">CLIENTE</text><text class="an pk" x="20" y="62.0">id_cliente</text><text class="at" x="182" y="62.0">int</text><text class="ak" x="212" y="62.0">PK</text><line class="el" x1="10" y1="72" x2="220" y2="72"/><text class="an" x="20" y="84.0">nombre</text><text class="at" x="210" y="84.0">varchar</text><line class="el" x1="10" y1="94" x2="220" y2="94"/><text class="an" x="20" y="106.0">correo</text><text class="at" x="182" y="106.0">varchar</text><text class="ak" x="212" y="106.0">UK</text><line class="el" x1="10" y1="116" x2="220" y2="116"/><text class="an" x="20" y="128.0">telefono</text><text class="at" x="210" y="128.0">varchar</text><line class="el" x1="10" y1="138" x2="220" y2="138"/><text class="an" x="20" y="150.0">fecha_registro</text><text class="at" x="210" y="150.0">timestamp</text><rect class="eb" x="290" y="20" width="210" height="148" rx="3"/><path class="eh" d="M290,50 V23 Q290,20 293,20 H497 Q500,20 500,23 V50 Z"/><text class="et" x="395.0" y="35.0">PEDIDO</text><text class="an pk" x="300" y="62.0">id_pedido</text><text class="at" x="462" y="62.0">int</text><text class="ak" x="492" y="62.0">PK</text><line class="el" x1="290" y1="72" x2="500" y2="72"/><text class="an" x="300" y="84.0">id_cliente</text><text class="at" x="462" y="84.0">int</text><text class="ak" x="492" y="84.0">FK</text><line class="el" x1="290" y1="94" x2="500" y2="94"/><text class="an" x="300" y="106.0">id_direccion</text><text class="at" x="462" y="106.0">int</text><text class="ak" x="492" y="106.0">FK</text><line class="el" x1="290" y1="116" x2="500" y2="116"/><text class="an" x="300" y="128.0">fecha</text><text class="at" x="490" y="128.0">timestamp</text><line class="el" x1="290" y1="138" x2="500" y2="138"/><text class="an" x="300" y="150.0">estado</text><text class="at" x="490" y="150.0">varchar</text><rect class="eb" x="570" y="20" width="210" height="148" rx="3"/><path class="eh" d="M570,50 V23 Q570,20 573,20 H777 Q780,20 780,23 V50 Z"/><text class="et" x="675.0" y="35.0">PAGO</text><text class="an pk" x="580" y="62.0">id_pago</text><text class="at" x="742" y="62.0">int</text><text class="ak" x="772" y="62.0">PK</text><line class="el" x1="570" y1="72" x2="780" y2="72"/><text class="an" x="580" y="84.0">id_pedido</text><text class="at" x="742" y="84.0">int</text><text class="ak" x="772" y="84.0">FK</text><line class="el" x1="570" y1="94" x2="780" y2="94"/><text class="an" x="580" y="106.0">monto</text><text class="at" x="770" y="106.0">decimal</text><line class="el" x1="570" y1="116" x2="780" y2="116"/><text class="an" x="580" y="128.0">fecha</text><text class="at" x="770" y="128.0">timestamp</text><line class="el" x1="570" y1="138" x2="780" y2="138"/><text class="an" x="580" y="150.0">metodo</text><text class="at" x="770" y="150.0">varchar</text><rect class="eb" x="10" y="290" width="210" height="148" rx="3"/><path class="eh" d="M10,320 V293 Q10,290 13,290 H217 Q220,290 220,293 V320 Z"/><text class="et" x="115.0" y="305.0">DIRECCION</text><text class="an pk" x="20" y="332.0">id_direccion</text><text class="at" x="182" y="332.0">int</text><text class="ak" x="212" y="332.0">PK</text><line class="el" x1="10" y1="342" x2="220" y2="342"/><text class="an" x="20" y="354.0">id_cliente</text><text class="at" x="182" y="354.0">int</text><text class="ak" x="212" y="354.0">FK</text><line class="el" x1="10" y1="364" x2="220" y2="364"/><text class="an" x="20" y="376.0">calle</text><text class="at" x="210" y="376.0">varchar</text><line class="el" x1="10" y1="386" x2="220" y2="386"/><text class="an" x="20" y="398.0">ciudad</text><text class="at" x="210" y="398.0">varchar</text><line class="el" x1="10" y1="408" x2="220" y2="408"/><text class="an" x="20" y="420.0">codigo_postal</text><text class="at" x="210" y="420.0">varchar</text><rect class="eb" x="290" y="290" width="210" height="126" rx="3"/><path class="eh" d="M290,320 V293 Q290,290 293,290 H497 Q500,290 500,293 V320 Z"/><text class="et" x="395.0" y="305.0">DETALLE_PEDIDO</text><text class="an pk" x="300" y="332.0">id_pedido</text><text class="at" x="440" y="332.0">int</text><text class="ak" x="492" y="332.0">PK, FK</text><line class="el" x1="290" y1="342" x2="500" y2="342"/><text class="an pk" x="300" y="354.0">id_producto</text><text class="at" x="440" y="354.0">int</text><text class="ak" x="492" y="354.0">PK, FK</text><line class="el" x1="290" y1="364" x2="500" y2="364"/><text class="an" x="300" y="376.0">cantidad</text><text class="at" x="490" y="376.0">int</text><line class="el" x1="290" y1="386" x2="500" y2="386"/><text class="an" x="300" y="398.0">precio_unitario</text><text class="at" x="490" y="398.0">decimal</text><rect class="eb" x="570" y="290" width="210" height="170" rx="3"/><path class="eh" d="M570,320 V293 Q570,290 573,290 H777 Q780,290 780,293 V320 Z"/><text class="et" x="675.0" y="305.0">PRODUCTO</text><text class="an pk" x="580" y="332.0">id_producto</text><text class="at" x="742" y="332.0">int</text><text class="ak" x="772" y="332.0">PK</text><line class="el" x1="570" y1="342" x2="780" y2="342"/><text class="an" x="580" y="354.0">id_categoria</text><text class="at" x="742" y="354.0">int</text><text class="ak" x="772" y="354.0">FK</text><line class="el" x1="570" y1="364" x2="780" y2="364"/><text class="an" x="580" y="376.0">nombre</text><text class="at" x="770" y="376.0">varchar</text><line class="el" x1="570" y1="386" x2="780" y2="386"/><text class="an" x="580" y="398.0">descripcion</text><text class="at" x="770" y="398.0">text</text><line class="el" x1="570" y1="408" x2="780" y2="408"/><text class="an" x="580" y="420.0">precio</text><text class="at" x="770" y="420.0">decimal</text><line class="el" x1="570" y1="430" x2="780" y2="430"/><text class="an" x="580" y="442.0">stock</text><text class="at" x="770" y="442.0">int</text><rect class="eb" x="570" y="520" width="210" height="82" rx="3"/><path class="eh" d="M570,550 V523 Q570,520 573,520 H777 Q780,520 780,523 V550 Z"/><text class="et" x="675.0" y="535.0">CATEGORIA</text><text class="an pk" x="580" y="562.0">id_categoria</text><text class="at" x="742" y="562.0">int</text><text class="ak" x="772" y="562.0">PK</text><line class="el" x1="570" y1="572" x2="780" y2="572"/><text class="an" x="580" y="584.0">nombre</text><text class="at" x="742" y="584.0">varchar</text><text class="ak" x="772" y="584.0">UK</text></svg></div></div>
 <figcaption>Diagrama entidad-relación en notación de pata de gallo. PK: clave primaria; FK: clave foránea; UK: valor único.</figcaption>
 </figure>
 
@@ -1807,82 +1714,5 @@ erDiagram
 
 })();
 </script>
-
-<!--claude-mermaid-runtime-begin:3477-->
-<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
-<script src="/_runtime/mermaid-11.16.1.min.js"></script>
-<script>(function(){
-var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
-if(typeof mermaid==='undefined')return;
-var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
-if(!pres.length)return;
-var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
-var root=document.documentElement;
-var items=pres.map(function(pre){
-var mount=document.createElement('div');mount.className='mermaid-diagram';
-return {pre:pre,mount:mount,src:pre.textContent||''};
-});
-var seq=0;
-var renderGen=0;
-var lastKey='';
-function pageBg(fallback){
-var els=[document.body,document.documentElement];
-for(var i=0;i<els.length;i++){
-var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
-if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
-}
-return fallback;
-}
-function render(){
-var theme=root.getAttribute('data-theme');
-var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
-var pal=dark?CFG.palettes.dark:CFG.palettes.light;
-var bg=pageBg(pal.bg);
-var key=(dark?'d':'l')+'|'+bg;
-if(key===lastKey)return;
-lastKey=key;
-var gen=++renderGen;
-var font=getComputedStyle(document.body).fontFamily||'sans-serif';
-var nat={useMaxWidth:false};
-mermaid.initialize({
-startOnLoad:false,securityLevel:'strict',theme:'base',
-flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
-gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
-quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
-packet:nat,kanban:nat,architecture:nat,radar:nat,
-themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
-primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
-nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
-clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
-darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
-attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
-fontSize:'16px',fontFamily:font},
-themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
-});
-items.forEach(function(it){
-var id='claude-mermaid-'+seq++;
-mermaid.render(id,it.src).then(function(r){
-if(gen!==renderGen)return;
-var prev=it.pre.previousElementSibling;
-if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
-it.mount.innerHTML=r.svg;
-if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
-it.pre.style.display='none';
-},function(){
-var scratch=document.getElementById(id);
-if(scratch)scratch.parentNode.removeChild(scratch);
-scratch=document.getElementById('d'+id);
-if(scratch)scratch.parentNode.removeChild(scratch);
-if(gen!==renderGen)return;
-if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
-it.pre.style.display='';
-});
-});
-}
-render();
-if(mq&&mq.addEventListener)mq.addEventListener('change',render);
-if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
-})();</script>
-<!--claude-mermaid-runtime-end-->
 </body>
 </html>
