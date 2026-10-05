@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bases de datos desde cero: guía completa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F6; --paper:#FFFFFF; --paper2:#F4F7FB; --ink:#14213D; --muted:#4F5D75; --line:#CBD5E3; --grid:rgba(20,33,61,.055);
+  --hl:rgba(255,205,40,.6);
+  --teal:#0B6F61; --teal-bg:#E3F4F0;
+  --amber:#8A5300; --amber-bg:#FFF3D6;
+  --red:#B42318; --red-bg:#FDEAE7;
+  --blue:#1D4ED8; --blue-bg:#E6EDFD;
+  --code-bg:#0F1B33; --code-ink:#E4EBF8;
+  --serif:'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --sans:'Bricolage Grotesque', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1526; --paper:#141F36; --paper2:#1A2742; --ink:#E7EDF8; --muted:#9FADC7; --line:#2B3B5C; --grid:rgba(231,237,248,.045);
+    --hl:rgba(245,190,40,.38);
+    --teal:#5FD6BF; --teal-bg:#12302C;
+    --amber:#F2BE5C; --amber-bg:#35290F;
+    --red:#FF9E92; --red-bg:#3A1A18;
+    --blue:#8FB0FF; --blue-bg:#18284F;
+    --code-bg:#0A1222; --code-ink:#E4EBF8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1526; --paper:#141F36; --paper2:#1A2742; --ink:#E7EDF8; --muted:#9FADC7; --line:#2B3B5C; --grid:rgba(231,237,248,.045);
+  --hl:rgba(245,190,40,.38);
+  --teal:#5FD6BF; --teal-bg:#12302C;
+  --amber:#F2BE5C; --amber-bg:#35290F;
+  --red:#FF9E92; --red-bg:#3A1A18;
+  --blue:#8FB0FF; --blue-bg:#18284F;
+  --code-bg:#0A1222; --code-ink:#E4EBF8;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background-color:var(--bg);color:var(--ink);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  font-family:var(--serif);font-size:18px;line-height:1.72;
+}
+a{color:var(--blue);text-underline-offset:3px}
+a:focus-visible,summary:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:3px}
+#bar{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:3px;width:0;background:var(--ink);z-index:50}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 80px;display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+@media (min-width:1000px){.wrap{grid-template-columns:280px minmax(0,1fr);gap:56px;padding:0 32px 100px}}
+
+/* Portada */
+.hero{grid-column:1/-1;padding:56px 0 8px}
+.hero h1{font-family:var(--sans);font-weight:700;font-size:clamp(2.5rem,7vw,5rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 20px;max-width:15ch}
+.hero .lead{font-size:clamp(1.1rem,2.2vw,1.35rem);max-width:60ch;color:var(--muted);margin:0 0 36px}
+.journey{display:grid;grid-template-columns:1fr;gap:0;border:1.5px solid var(--ink);background:var(--paper);border-radius:6px;overflow:hidden}
+@media (min-width:860px){.journey{grid-template-columns:.8fr 1.3fr 1.3fr}}
+.step{padding:22px 24px;border-bottom:1.5px solid var(--ink)}
+.step:last-child{border-bottom:0}
+@media (min-width:860px){.step{border-bottom:0;border-right:1.5px solid var(--ink)}.step:last-child{border-right:0}}
+.step .lbl{font-family:var(--sans);font-weight:700;font-size:.95rem;display:inline-block;padding:1px 8px;background:var(--ink);color:var(--paper);border-radius:3px;margin-bottom:12px}
+.step .big{font-family:var(--sans);font-weight:700;font-size:clamp(3rem,8vw,4.6rem);line-height:1;letter-spacing:-.03em;margin-bottom:10px}
+.step .mid{font-family:var(--sans);font-weight:500;font-size:1.25rem;line-height:1.3;margin-bottom:10px}
+.step p{margin:0;font-size:.95rem;line-height:1.5;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:22px;font-family:var(--sans);font-size:.95rem;color:var(--muted)}
+.meta b{color:var(--ink)}
+
+/* Índice */
+.toc{align-self:start}
+@media (min-width:1000px){
+  .toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto;padding-right:6px}
+  .toc summary{display:none}
+}
+.toc details{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+@media (min-width:1000px){.toc details{background:transparent;border:0;padding:0}}
+.toc summary{font-family:var(--sans);font-weight:700;cursor:pointer;padding:6px 0}
+.toc ol{list-style:none;margin:8px 0 0;padding:0;font-family:var(--sans);font-size:.93rem;line-height:1.3}
+.toc li a{display:grid;grid-template-columns:2.1em 1fr;gap:4px;padding:6px 8px;border-radius:4px;color:var(--muted);text-decoration:none;border-left:3px solid transparent}
+.toc li a .n{font-weight:700;color:var(--ink)}
+.toc li a:hover{background:var(--paper)}
+.toc li a.on{color:var(--ink);background:var(--paper);border-left-color:var(--ink);font-weight:700}
+.toc .tools{margin-top:14px;display:flex;gap:8px;font-family:var(--sans)}
+.toc button{font:inherit;font-size:.85rem;padding:6px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:4px;cursor:pointer}
+
+/* Contenido */
+main{min-width:0}
+.chapter{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:28px 22px 12px;margin:0 0 28px}
+@media (min-width:700px){.chapter{padding:40px 44px 20px}}
+.chapter>header{margin-bottom:22px;padding-bottom:18px;border-bottom:1.5px solid var(--ink)}
+.chapter h2{font-family:var(--sans);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.1;letter-spacing:-.015em;margin:0 0 8px;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.chapter h2 .num{background:var(--hl);padding:0 10px;border-radius:3px;font-size:.85em}
+.chapter header p{margin:0;color:var(--muted);font-size:1rem;line-height:1.55}
+h3{font-family:var(--sans);font-weight:700;font-size:1.35rem;line-height:1.2;margin:2.2em 0 .5em;letter-spacing:-.005em}
+h4{font-family:var(--sans);font-weight:700;font-size:1.08rem;margin:1.6em 0 .3em}
+p{margin:0 0 1em;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:1.3em;margin:0 0 1.1em}
+li{margin:.3em 0}
+mark{background:linear-gradient(transparent 52%,var(--hl) 52%);color:inherit;padding:0 2px}
+code{font-family:var(--mono);font-size:.82em;background:var(--paper2);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+.def{font-size:1.12rem;border-left:4px solid var(--ink);padding:4px 0 4px 18px;margin:1.2em 0;max-width:68ch}
+
+.box{border-left:5px solid var(--blue);background:var(--blue-bg);padding:14px 18px 6px;margin:1.5em 0;border-radius:0 6px 6px 0;max-width:80ch}
+.box>.t{font-family:var(--sans);font-weight:700;font-size:.98rem;margin-bottom:4px;display:block}
+.box p,.box ul,.box ol{font-size:.98rem;line-height:1.6}
+.box.ex{border-color:var(--teal);background:var(--teal-bg)}
+.box.ex>.t{color:var(--teal)}
+.box.warn{border-color:var(--red);background:var(--red-bg)}
+.box.warn>.t{color:var(--red)}
+.box.tip{border-color:var(--amber);background:var(--amber-bg)}
+.box.tip>.t{color:var(--amber)}
+.box.key>.t{color:var(--blue)}
+
+.tw{overflow-x:auto;margin:1.3em 0;border:1px solid var(--line);border-radius:6px;-webkit-overflow-scrolling:touch}
+table.dt{border-collapse:collapse;width:100%;min-width:480px;font-family:var(--sans);font-size:.93rem;line-height:1.4}
+table.dt caption{caption-side:top;text-align:left;font-weight:700;padding:10px 12px;background:var(--paper2);border-bottom:1px solid var(--line)}
+table.dt th{background:var(--ink);color:var(--paper);text-align:left;padding:9px 12px;font-weight:700;white-space:nowrap}
+table.dt td{padding:8px 12px;border-top:1px solid var(--line);vertical-align:top}
+table.dt tbody tr:nth-child(even) td{background:var(--paper2)}
+table.dt td.k{font-weight:700}
+table.dt .pk{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+table.dt .fk{font-style:italic}
+table.dt .null{color:var(--muted);font-style:italic}
+
+pre.code{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:.82rem;line-height:1.6;padding:16px 18px;border-radius:6px;overflow-x:auto;margin:1.3em 0;max-width:100%;tab-size:2}
+pre.code code{background:none;border:0;padding:0;font-size:inherit;color:inherit}
+.kw{color:#8CB4FF;font-weight:600}.ty{color:#E7A8FF}.str{color:#A5E3B0}.num{color:#FFC27A}.cm{color:#7F8DAA;font-style:italic}
+
+figure{margin:1.6em 0}
+figcaption{font-family:var(--sans);font-size:.9rem;color:var(--muted);margin-top:8px}
+.diagram{overflow-x:auto;background:var(--paper2);border:1px solid var(--line);border-radius:6px;padding:16px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+pre.mermaid{margin:0;background:none;white-space:pre;text-align:center}
+.sh{fill:var(--paper);stroke:var(--ink);stroke-width:1.6}
+.sh2{fill:none;stroke:var(--ink);stroke-width:1.6}
+.dash{stroke-dasharray:5 4}
+.ln{stroke:var(--ink);stroke-width:1.6;fill:none}
+.tx{fill:var(--ink);font-family:var(--sans);font-size:13px;text-anchor:middle;dominant-baseline:central}
+.tx.u{text-decoration:underline}
+.tx.s{font-size:12px;fill:var(--muted)}
+.tx.b{font-weight:700}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:16px;margin:1.3em 0}
+@media (min-width:720px){.grid2{grid-template-columns:1fr 1fr}}
+.card{border:1px solid var(--line);border-radius:6px;padding:14px 16px 6px;background:var(--paper2)}
+.card h4{margin:0 0 .3em}
+.card p,.card ul{font-size:.96rem;line-height:1.55}
+
+details.ans{border:1px solid var(--line);border-radius:6px;margin:1em 0;background:var(--paper2)}
+details.ans summary{cursor:pointer;padding:10px 14px;font-family:var(--sans);font-weight:700}
+details.ans .in{padding:4px 16px 10px;border-top:1px solid var(--line)}
+
+.quiz .q{border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin:14px 0;background:var(--paper2)}
+.quiz .q p{margin:0 0 8px;font-weight:600}
+.quiz label{display:block;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:.98rem;line-height:1.45}
+.quiz label:hover{background:var(--paper)}
+.quiz input{margin-right:8px}
+.quiz .fb{font-family:var(--sans);font-size:.92rem;margin-top:6px;display:none}
+.quiz .q.ok{border-color:var(--teal)}.quiz .q.ok .fb{color:var(--teal);display:block}
+.quiz .q.bad{border-color:var(--red)}.quiz .q.bad .fb{color:var(--red);display:block}
+.btn{font-family:var(--sans);font-weight:700;font-size:1rem;padding:10px 18px;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:5px;cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink)}
+#score{font-family:var(--sans);font-weight:700;margin-left:12px}
+
+dl.gl{max-width:76ch}
+dl.gl dt{font-family:var(--sans);font-weight:700;margin-top:1em}
+dl.gl dd{margin:0 0 0 0;font-size:.98rem;line-height:1.55}
+footer.end{grid-column:1/-1;font-family:var(--sans);font-size:.9rem;color:var(--muted);text-align:center;padding-top:8px}
+@media print{#bar,.toc{display:none}.wrap{display:block}body{background:#fff}}
+</style>
+</head>
+<body>
+<div id="bar" aria-hidden="true"></div>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Bases de datos desde cero</h1>
+  <p class="lead">Una guía completa para entender cómo se guarda, organiza y consulta la información: desde qué es un dato hasta cómo dibujar un diagrama entidad-relación y convertirlo en tablas reales.</p>
+  <div class="journey" aria-label="Ejemplo del camino de dato a conocimiento">
+    <div class="step">
+      <span class="lbl">Dato</span>
+      <div class="big">38.5</div>
+      <p>Solo un número. ¿Una temperatura? ¿Kilos? ¿Un precio? Sin contexto no dice nada.</p>
+    </div>
+    <div class="step">
+      <span class="lbl">Información</span>
+      <div class="mid">Marta Ruiz, 14 de marzo, 08:15: temperatura corporal 38.5 °C.</div>
+      <p>Con paciente, fecha y unidad, el dato ya significa algo.</p>
+    </div>
+    <div class="step">
+      <span class="lbl">Conocimiento</span>
+      <div class="mid">Marta lleva tres días con fiebre: hay que avisar al médico.</div>
+      <p>Al comparar registros aparece un patrón y se puede decidir.</p>
+    </div>
+  </div>
+  <div class="meta">
+    <span><b>16 capítulos</b> con ejemplos reales</span>
+    <span><b>Nivel:</b> principiante, sin conocimientos previos</span>
+    <span><b>Lectura:</b> unas 3 horas con ejercicios</span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contenido de la guía">
+  <details id="tocd" open>
+    <summary>Contenido de la guía</summary>
+    <ol id="tocl">
+      <li><a href="#c1"><span class="n">1</span><span>Datos, información y conocimiento</span></a></li>
+      <li><a href="#c2"><span class="n">2</span><span>Campo, registro, tabla y archivo</span></a></li>
+      <li><a href="#c3"><span class="n">3</span><span>Qué es una base de datos</span></a></li>
+      <li><a href="#c4"><span class="n">4</span><span>El sistema gestor (SGBD)</span></a></li>
+      <li><a href="#c5"><span class="n">5</span><span>Modelos y tipos de bases de datos</span></a></li>
+      <li><a href="#c6"><span class="n">6</span><span>El modelo relacional</span></a></li>
+      <li><a href="#c7"><span class="n">7</span><span>Tipos de dato y restricciones</span></a></li>
+      <li><a href="#c8"><span class="n">8</span><span>Etapas del diseño: conceptual, lógico, físico</span></a></li>
+      <li><a href="#c9"><span class="n">9</span><span>El modelo entidad-relación</span></a></li>
+      <li><a href="#c10"><span class="n">10</span><span>Cardinalidad, participación y notaciones</span></a></li>
+      <li><a href="#c11"><span class="n">11</span><span>Caso completo: tienda en línea</span></a></li>
+      <li><a href="#c12"><span class="n">12</span><span>Del diagrama ER a tablas</span></a></li>
+      <li><a href="#c13"><span class="n">13</span><span>Normalización</span></a></li>
+      <li><a href="#c14"><span class="n">14</span><span>Primeros pasos con SQL</span></a></li>
+      <li><a href="#c15"><span class="n">15</span><span>Índices, vistas, transacciones y seguridad</span></a></li>
+      <li><a href="#c16"><span class="n">16</span><span>Buenas prácticas, ejercicios y quiz</span></a></li>
+      <li><a href="#glosario"><span class="n">A</span><span>Glosario</span></a></li>
+    </ol>
+    <div class="tools"><button type="button" id="themeBtn">Cambiar tema</button><button type="button" onclick="window.print()">Imprimir</button></div>
+  </details>
+</nav>
+
+<main>
+
+<!-- ============ 1 ============ -->
+<section class="chapter" id="c1">
+<header>
+  <h2><span class="num">1</span>Datos, información y conocimiento</h2>
+  <p>Antes de hablar de bases de datos hay que tener claro qué se guarda en ellas y para qué sirve.</p>
+</header>
+
+<h3>Qué es un dato</h3>
+<p class="def">Un <mark>dato</mark> es la representación simbólica (un número, un texto, una fecha, una imagen) de un hecho, una medida o una característica de algo del mundo real. Por sí solo no tiene significado completo.</p>
+<p>Observa estos datos sueltos: <code>7</code>, <code>Lima</code>, <code>1987-03-14</code>, <code>true</code>. Sabes de qué tipo son (número, texto, fecha, lógico), pero no sabes qué describen. Un dato es la materia prima: necesita contexto.</p>
+
+<div class="tw"><table class="dt">
+<caption>El mismo dato con distinto contexto</caption>
+<thead><tr><th>Dato</th><th>Contexto (campo)</th><th>Información que resulta</th></tr></thead>
+<tbody>
+<tr><td class="k">7</td><td>nota_final</td><td>El estudiante sacó 7 sobre 10.</td></tr>
+<tr><td class="k">7</td><td>piso</td><td>El cliente vive en el séptimo piso.</td></tr>
+<tr><td class="k">7</td><td>edad</td><td>Es un niño de siete años.</td></tr>
+<tr><td class="k">7</td><td>numero_camiseta</td><td>El delantero lleva la camiseta 7.</td></tr>
+</tbody></table></div>
+
+<h3>Qué es información</h3>
+<p class="def"><mark>Información</mark> es el conjunto de datos procesados, organizados y puestos en contexto de manera que adquieren significado y sirven a quien los lee.</p>
+<p>Lo que convierte un dato en información es: (1) <b>contexto</b> (a quién o a qué se refiere), (2) <b>organización</b> (está ordenado o agrupado) y (3) <b>utilidad</b> (responde a una pregunta). Una base de datos existe para que esa conversión sea rápida, confiable y repetible.</p>
+
+<h3>Conocimiento y decisiones</h3>
+<p>Cuando la información se analiza, se compara y se interpreta, se obtiene <mark>conocimiento</mark>: patrones, causas y reglas que permiten actuar. A esta secuencia se le llama a veces la pirámide <i>DIKW</i> (datos, información, conocimiento, sabiduría).</p>
+
+<div class="tw"><table class="dt">
+<caption>Del dato a la decisión en un supermercado</caption>
+<thead><tr><th>Nivel</th><th>Qué es</th><th>Ejemplo</th></tr></thead>
+<tbody>
+<tr><td class="k">Dato</td><td>Hecho aislado registrado por el sistema</td><td>Ticket 88123, producto 4410, cantidad 3, 18:42</td></tr>
+<tr><td class="k">Información</td><td>Datos agrupados y contextualizados</td><td>El viernes se vendieron 1 240 cajas de cerveza.</td></tr>
+<tr><td class="k">Conocimiento</td><td>Patrón o regla descubierta</td><td>Los viernes por la tarde la cerveza se vende 30 % más que el resto de la semana.</td></tr>
+<tr><td class="k">Decisión</td><td>Acción basada en lo anterior</td><td>Reforzar el inventario y poner personal extra los viernes.</td></tr>
+</tbody></table></div>
+
+<div class="box ex"><span class="t">Ejemplo real: tu banco</span>
+<p>Cada vez que pagas con tarjeta se genera un dato (monto, comercio, hora, ubicación). El banco los guarda en una base de datos. Con ellos produce información (tu estado de cuenta) y conocimiento (si de pronto aparece una compra en otro país a las 3 a. m., el sistema detecta un patrón anómalo y bloquea la tarjeta).</p></div>
+
+<h3>Tipos de datos según su naturaleza</h3>
+<div class="grid2">
+<div class="card"><h4>Cualitativos (categóricos)</h4>
+<ul><li><b>Nominales:</b> categorías sin orden. Color de ojos, ciudad, método de pago.</li><li><b>Ordinales:</b> categorías con orden. Nivel educativo, talla (S, M, L), calificación de 1 a 5 estrellas.</li></ul></div>
+<div class="card"><h4>Cuantitativos (numéricos)</h4>
+<ul><li><b>Discretos:</b> se cuentan. Número de hijos, unidades vendidas.</li><li><b>Continuos:</b> se miden. Estatura, temperatura, saldo, tiempo.</li></ul></div>
+</div>
+
+<h3>Tipos de datos según su estructura</h3>
+<div class="tw"><table class="dt">
+<caption>Estructurados, semiestructurados y no estructurados</caption>
+<thead><tr><th>Tipo</th><th>Característica</th><th>Ejemplos</th><th>Dónde se guardan</th></tr></thead>
+<tbody>
+<tr><td class="k">Estructurados</td><td>Siguen un esquema fijo de filas y columnas.</td><td>Clientes, facturas, inventario, nómina.</td><td>Bases de datos relacionales.</td></tr>
+<tr><td class="k">Semiestructurados</td><td>Tienen etiquetas o jerarquía, pero el esquema es flexible.</td><td>JSON, XML, CSV, registros de logs.</td><td>Bases documentales (MongoDB), columnas JSON en PostgreSQL.</td></tr>
+<tr><td class="k">No estructurados</td><td>No tienen un formato tabular predefinido.</td><td>Fotos, videos, audios, PDF, correos, publicaciones en redes.</td><td>Sistemas de archivos, almacenamiento de objetos; en la base se guarda solo la ruta y los metadatos.</td></tr>
+</tbody></table></div>
+
+<h3>Metadatos: datos sobre los datos</h3>
+<p>Los <mark>metadatos</mark> describen a otros datos. Una foto es un dato no estructurado; sus metadatos son la fecha, el modelo de la cámara, la resolución y las coordenadas GPS. En una base de datos, los metadatos incluyen los nombres de las tablas, los tipos de cada columna y las restricciones: todo eso se almacena en el <i>catálogo</i> o <i>diccionario de datos</i> (lo veremos en el capítulo 4).</p>
+
+<h3>Calidad de los datos</h3>
+<p>De nada sirve una base enorme si los datos son malos. Se evalúan estas dimensiones:</p>
+<div class="tw"><table class="dt">
+<thead><tr><th>Dimensión</th><th>Pregunta que responde</th><th>Ejemplo de falla</th></tr></thead>
+<tbody>
+<tr><td class="k">Exactitud</td><td>¿Refleja la realidad?</td><td>La edad del cliente es 250.</td></tr>
+<tr><td class="k">Completitud</td><td>¿Faltan datos necesarios?</td><td>Pedidos sin dirección de entrega.</td></tr>
+<tr><td class="k">Consistencia</td><td>¿Se contradice con otros datos?</td><td>Dos teléfonos distintos para el mismo cliente en dos sistemas.</td></tr>
+<tr><td class="k">Validez</td><td>¿Cumple el formato y las reglas?</td><td>Fecha “31/02/2025”; correo sin arroba.</td></tr>
+<tr><td class="k">Unicidad</td><td>¿Hay duplicados?</td><td>“Ana Pérez” registrada tres veces con ligeras variaciones.</td></tr>
+<tr><td class="k">Actualidad</td><td>¿Está al día?</td><td>Dirección de hace cinco años.</td></tr>
+</tbody></table></div>
+<div class="box key"><span class="t">Idea clave</span><p>Las bases de datos existen, en gran parte, para <b>proteger la calidad de los datos</b>: con tipos, restricciones y relaciones impiden que entren valores inválidos, duplicados o inconsistentes.</p></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="chapter" id="c2">
+<header>
+  <h2><span class="num">2</span>Campo, registro, tabla y archivo</h2>
+  <p>El vocabulario básico que se usa en todo el curso. Cada concepto contiene al anterior.</p>
+</header>
+
+<h3>La jerarquía de los datos</h3>
+<div class="tw"><table class="dt">
+<caption>De lo más pequeño a lo más grande</caption>
+<thead><tr><th>Nivel</th><th>Qué es</th><th>Ejemplo</th></tr></thead>
+<tbody>
+<tr><td class="k">Bit / carácter</td><td>Unidad mínima: 0/1 o una letra, dígito o símbolo.</td><td>“M”, “5”, “@”</td></tr>
+<tr><td class="k">Campo (atributo)</td><td>Un dato elemental con nombre propio; la unidad con significado más pequeña.</td><td><code>nombre</code> = “Marta”</td></tr>
+<tr><td class="k">Registro (fila)</td><td>Conjunto de campos relacionados que describen un solo elemento.</td><td>Todos los datos de una estudiante: id, nombre, carrera…</td></tr>
+<tr><td class="k">Archivo / tabla</td><td>Conjunto de registros del mismo tipo.</td><td>La tabla <code>estudiante</code> con todos los alumnos.</td></tr>
+<tr><td class="k">Base de datos</td><td>Conjunto de tablas relacionadas entre sí.</td><td>Estudiantes, cursos, matrículas, docentes, pagos.</td></tr>
+</tbody></table></div>
+
+<h3>Anatomía de una tabla</h3>
+<div class="tw"><table class="dt">
+<caption>Tabla: estudiante</caption>
+<thead><tr><th>id_estudiante</th><th>nombre</th><th>carrera</th><th>fecha_ingreso</th><th>telefono</th></tr></thead>
+<tbody>
+<tr><td class="k pk">1001</td><td>Marta Ruiz</td><td>Ingeniería de Sistemas</td><td>2024-02-05</td><td>300 555 0101</td></tr>
+<tr><td class="k pk">1002</td><td>Luis Gómez</td><td>Medicina</td><td>2023-08-14</td><td class="null">NULL</td></tr>
+<tr><td class="k pk">1003</td><td>Ana Torres</td><td>Derecho</td><td>2024-02-05</td><td>311 555 0177</td></tr>
+</tbody></table></div>
+<ul>
+<li>Cada <b>columna</b> es un <mark>campo</mark> (o atributo): todas las celdas de una columna son del mismo tipo y significan lo mismo.</li>
+<li>Cada <b>fila</b> es un <mark>registro</mark> (o tupla): describe a un estudiante concreto. “Marta Ruiz” es un registro; “Marta Ruiz” solo es un valor.</li>
+<li>Cada <b>celda</b> es un <mark>valor</mark>: la intersección de una fila y una columna.</li>
+<li>La columna subrayada (<code>id_estudiante</code>) es la <b>clave primaria</b>: identifica cada fila de forma única (capítulo 6).</li>
+<li>El valor <code>NULL</code> de Luis significa “no hay dato” (no se conoce o no aplica). No es lo mismo que cero ni que una cadena vacía.</li>
+</ul>
+
+<h3>Equivalencia de términos</h3>
+<p>Según el contexto, el mismo concepto recibe nombres distintos. Esta tabla te evitará confusiones al leer libros y documentación:</p>
+<div class="tw"><table class="dt">
+<caption>Un concepto, varios nombres</caption>
+<thead><tr><th>Archivos tradicionales</th><th>Modelo relacional (teoría)</th><th>SQL / uso diario</th><th>Modelo entidad-relación</th></tr></thead>
+<tbody>
+<tr><td>Archivo</td><td>Relación</td><td>Tabla</td><td>Conjunto de entidades</td></tr>
+<tr><td>Registro</td><td>Tupla</td><td>Fila</td><td>Instancia (ocurrencia) de entidad</td></tr>
+<tr><td>Campo</td><td>Atributo</td><td>Columna</td><td>Atributo</td></tr>
+<tr><td>Tipo de campo</td><td>Dominio</td><td>Tipo de dato</td><td>Dominio</td></tr>
+<tr><td>Identificador</td><td>Clave</td><td>Primary key</td><td>Atributo identificador</td></tr>
+</tbody></table></div>
+
+<h3>Esquema e instancia</h3>
+<div class="grid2">
+<div class="card"><h4>Esquema</h4><p>La <b>estructura</b>: qué tablas hay, qué columnas tiene cada una y qué reglas cumplen. Cambia poco.</p>
+<p><code>estudiante(id_estudiante, nombre, carrera, fecha_ingreso, telefono)</code></p></div>
+<div class="card"><h4>Instancia (estado)</h4><p>Los <b>datos que hay en un momento dado</b>. Cambia constantemente: cada inserción, modificación o borrado produce una nueva instancia.</p><p>Hoy: 3 estudiantes. Mañana: 4.</p></div>
+</div>
+
+<h3>Dominio</h3>
+<p>El <mark>dominio</mark> de un atributo es el conjunto de valores permitidos. El dominio de <code>nota</code> puede ser “decimales entre 0 y 10”; el de <code>estado_civil</code>, “soltero, casado, divorciado, viudo, unión libre”. Definir bien los dominios es la primera defensa contra datos basura.</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="chapter" id="c3">
+<header>
+  <h2><span class="num">3</span>Qué es una base de datos</h2>
+  <p>Definición, ejemplos cotidianos y por qué no basta con una carpeta de archivos o una hoja de cálculo.</p>
+</header>
+
+<p class="def">Una <mark>base de datos</mark> es una colección organizada de datos relacionados entre sí, almacenados de forma persistente, que representan una parte del mundo real y que pueden ser consultados y modificados de manera controlada por varios usuarios y aplicaciones.</p>
+
+<p>A la parte del mundo real que modelamos (por ejemplo, “una universidad” o “una tienda”) se le llama <i>minimundo</i> o <i>universo de discurso</i>. Los cambios en ese mundo deben reflejarse en la base.</p>
+
+<h3>Bases de datos que usas todos los días</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Sistema</th><th>Qué guarda</th><th>Preguntas que responde</th></tr></thead>
+<tbody>
+<tr><td class="k">Banco</td><td>Clientes, cuentas, movimientos, tarjetas</td><td>¿Cuál es mi saldo? ¿Quién transfirió a quién y cuándo?</td></tr>
+<tr><td class="k">Hospital</td><td>Pacientes, citas, diagnósticos, medicamentos, médicos</td><td>¿Qué alergias tiene este paciente? ¿Qué médico atiende el martes?</td></tr>
+<tr><td class="k">Tienda en línea</td><td>Productos, clientes, pedidos, pagos, envíos</td><td>¿Hay stock? ¿Dónde está mi paquete?</td></tr>
+<tr><td class="k">Streaming de video</td><td>Catálogo, usuarios, historial de reproducción, valoraciones</td><td>¿Qué serie recomendar a este usuario?</td></tr>
+<tr><td class="k">Aerolínea</td><td>Vuelos, asientos, pasajeros, reservas</td><td>¿Queda el asiento 14C libre en este vuelo?</td></tr>
+<tr><td class="k">Mensajería</td><td>Usuarios, chats, mensajes, estados de entrega</td><td>¿Ya leyeron mi mensaje?</td></tr>
+<tr><td class="k">Registro civil</td><td>Personas, nacimientos, matrimonios, defunciones</td><td>¿Quiénes son los padres de esta persona?</td></tr>
+</tbody></table></div>
+
+<h3>Cómo se guardaba antes: archivos sueltos</h3>
+<p>Antes de las bases de datos, cada aplicación guardaba sus propios archivos. Imagina una universidad en la que Matrícula, Biblioteca y Finanzas tienen cada una su archivo de estudiantes. Aparecen estos problemas:</p>
+<ul>
+<li><b>Redundancia:</b> la dirección de Marta está copiada en tres archivos. Se desperdicia espacio y trabajo.</li>
+<li><b>Inconsistencia:</b> Marta se muda y se actualiza solo en Matrícula. Ahora hay tres direcciones distintas y nadie sabe cuál es la correcta.</li>
+<li><b>Aislamiento:</b> para cruzar “estudiantes con deuda en biblioteca y matrícula activa” hay que escribir un programa a medida que lea formatos distintos.</li>
+<li><b>Dependencia programa-datos:</b> si se agrega un campo al archivo, hay que reescribir todos los programas que lo leen.</li>
+<li><b>Problemas de concurrencia:</b> dos cajeros modifican el mismo saldo a la vez y uno sobrescribe el cambio del otro.</li>
+<li><b>Falta de seguridad e integridad:</b> es difícil decidir quién ve qué, y nada impide guardar una nota de 85 en una escala de 0 a 10.</li>
+<li><b>Sin recuperación:</b> si el sistema se cae a mitad de una operación, nadie garantiza que los datos queden coherentes.</li>
+</ul>
+
+<h3>¿Y una hoja de cálculo?</h3>
+<p>Excel o Google Sheets son excelentes para análisis personal y volúmenes pequeños. Pero no son un sistema de bases de datos:</p>
+<div class="tw"><table class="dt">
+<caption>Hoja de cálculo frente a base de datos</caption>
+<thead><tr><th>Aspecto</th><th>Hoja de cálculo</th><th>Base de datos</th></tr></thead>
+<tbody>
+<tr><td class="k">Volumen</td><td>Miles de filas; se vuelve lenta.</td><td>Millones o miles de millones de filas con índices.</td></tr>
+<tr><td class="k">Usuarios simultáneos</td><td>Pocos; conflictos de edición.</td><td>Cientos o miles, con control de concurrencia.</td></tr>
+<tr><td class="k">Relaciones entre datos</td><td>Se copian valores entre hojas.</td><td>Claves foráneas que garantizan la relación.</td></tr>
+<tr><td class="k">Validación</td><td>Opcional y fácil de saltar.</td><td>Tipos y restricciones obligatorios.</td></tr>
+<tr><td class="k">Seguridad</td><td>Por archivo completo.</td><td>Por usuario, tabla, columna e incluso fila.</td></tr>
+<tr><td class="k">Consultas</td><td>Filtros y fórmulas manuales.</td><td>Lenguaje SQL, potente y declarativo.</td></tr>
+<tr><td class="k">Recuperación</td><td>Copias manuales.</td><td>Transacciones, registros de cambios y respaldos.</td></tr>
+</tbody></table></div>
+
+<h3>Propiedades de una buena base de datos</h3>
+<ul>
+<li><b>Persistente:</b> los datos sobreviven aunque se apague el programa o el equipo.</li>
+<li><b>Integrada:</b> unifica datos que antes estaban dispersos, evitando duplicados.</li>
+<li><b>Compartida:</b> varios usuarios y aplicaciones acceden a los mismos datos a la vez.</li>
+<li><b>Íntegra:</b> las reglas del negocio se verifican automáticamente.</li>
+<li><b>Segura:</b> cada usuario ve y hace solo lo que le corresponde.</li>
+<li><b>Independiente de las aplicaciones:</b> cambiar la estructura física no obliga a reescribir los programas.</li>
+</ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="chapter" id="c4">
+<header>
+  <h2><span class="num">4</span>El sistema gestor de bases de datos (SGBD)</h2>
+  <p>La base de datos son los datos; el SGBD es el programa que los administra.</p>
+</header>
+
+<p class="def">Un <mark>Sistema Gestor de Bases de Datos</mark> (SGBD, o DBMS en inglés) es el software que permite crear, almacenar, consultar, modificar y proteger una base de datos, y que sirve de intermediario entre los datos físicos y los usuarios o aplicaciones.</p>
+<div class="box warn"><span class="t">Ojo con la confusión frecuente</span><p>“MySQL” o “PostgreSQL” no son bases de datos: son <b>SGBD</b>. La base de datos es, por ejemplo, <code>tienda_en_linea</code>, que vive dentro de uno de ellos. Un mismo SGBD puede gestionar muchas bases de datos.</p></div>
+
+<h3>Qué hace un SGBD</h3>
+<ul>
+<li><b>Definición:</b> crear tablas, tipos y reglas (lenguaje DDL).</li>
+<li><b>Manipulación:</b> insertar, consultar, actualizar y borrar datos (lenguaje DML).</li>
+<li><b>Integridad:</b> aplicar las restricciones (claves, tipos, valores permitidos).</li>
+<li><b>Seguridad:</b> autenticar usuarios y controlar permisos.</li>
+<li><b>Concurrencia:</b> coordinar a muchos usuarios simultáneos con bloqueos o versiones.</li>
+<li><b>Recuperación:</b> deshacer operaciones incompletas y restaurar tras fallos.</li>
+<li><b>Optimización:</b> decidir la forma más rápida de ejecutar cada consulta.</li>
+<li><b>Catálogo:</b> mantener el diccionario de datos (metadatos).</li>
+</ul>
+
+<h3>Cómo se comunica el usuario con los datos</h3>
+<figure>
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  U["Usuario o aplicación<br/>(app web, móvil, informe)"] -->|"consulta SQL"| A
+  subgraph SG["SGBD"]
+    A["Analizador<br/>(valida la sintaxis)"] --> O["Optimizador<br/>(elige el plan más rápido)"] --> M["Motor de almacenamiento<br/>(lee y escribe)"]
+  end
+  M --> D[("Archivos en disco<br/>tablas e índices")]
+</pre></div>
+<figcaption>El usuario pide <i>qué</i> quiere (SQL declarativo); el SGBD decide <i>cómo</i> obtenerlo.</figcaption>
+</figure>
+
+<h3>Quiénes intervienen</h3>
+<div class="grid2">
+<div class="card"><h4>Administrador de BD (DBA)</h4><p>Instala el SGBD, crea usuarios, vigila el rendimiento, programa respaldos y asegura la disponibilidad.</p></div>
+<div class="card"><h4>Diseñador de datos</h4><p>Entrevista a los usuarios y define qué datos se guardan y cómo se relacionan (lo que aprenderás en esta guía).</p></div>
+<div class="card"><h4>Desarrollador</h4><p>Escribe las aplicaciones que usan la base: sitios web, apps, informes.</p></div>
+<div class="card"><h4>Usuario final</h4><p>Consulta o registra datos mediante la aplicación, sin conocer SQL: la cajera, el médico, el cliente que compra.</p></div>
+</div>
+
+<h3>Arquitectura de tres niveles (ANSI/SPARC)</h3>
+<p>Para que los cambios en un nivel no rompan los demás, se separa la base de datos en tres vistas:</p>
+<figure>
+<div class="diagram"><pre class="mermaid">
+flowchart TB
+  E1["NIVEL EXTERNO<br/>Vistas de cada usuario<br/>Cajero: ventas del día<br/>Gerente: ventas por sucursal"]
+  C["NIVEL CONCEPTUAL<br/>Estructura lógica de toda la base<br/>tablas, columnas, relaciones, restricciones"]
+  I["NIVEL INTERNO<br/>Almacenamiento físico<br/>archivos, índices, discos"]
+  E1 --- C --- I
+</pre></div>
+<figcaption>Cada nivel se ve distinto, pero todos describen los mismos datos.</figcaption>
+</figure>
+<ul>
+<li><b>Independencia lógica:</b> puedes agregar una columna a una tabla sin que fallen las vistas ni los programas que no la usan.</li>
+<li><b>Independencia física:</b> puedes mover los datos a otro disco o crear un índice sin cambiar el esquema conceptual ni las aplicaciones.</li>
+</ul>
+
+<h3>Los lenguajes de un SGBD</h3>
+<div class="tw"><table class="dt">
+<caption>Sublenguajes de SQL</caption>
+<thead><tr><th>Sigla</th><th>Nombre</th><th>Para qué sirve</th><th>Instrucciones</th></tr></thead>
+<tbody>
+<tr><td class="k">DDL</td><td>Definición de datos</td><td>Crear y modificar la estructura.</td><td><code>CREATE</code>, <code>ALTER</code>, <code>DROP</code></td></tr>
+<tr><td class="k">DML</td><td>Manipulación de datos</td><td>Trabajar con los datos.</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td></tr>
+<tr><td class="k">DQL</td><td>Consulta de datos</td><td>Leer datos.</td><td><code>SELECT</code></td></tr>
+<tr><td class="k">DCL</td><td>Control de datos</td><td>Dar o quitar permisos.</td><td><code>GRANT</code>, <code>REVOKE</code></td></tr>
+<tr><td class="k">TCL</td><td>Control de transacciones</td><td>Confirmar o deshacer cambios.</td><td><code>COMMIT</code>, <code>ROLLBACK</code></td></tr>
+</tbody></table></div>
+
+<h3>El catálogo o diccionario de datos</h3>
+<p>Es una base de datos interna donde el SGBD guarda <b>los metadatos</b>: qué tablas existen, sus columnas, tipos, claves, índices, usuarios y permisos. Cuando haces un <code>CREATE TABLE</code>, en realidad estás escribiendo en el catálogo.</p>
+
+<h3>SGBD populares</h3>
+<div class="tw"><table class="dt">
+<caption>Panorama de motores</caption>
+<thead><tr><th>SGBD</th><th>Tipo</th><th>Licencia</th><th>Uso típico</th></tr></thead>
+<tbody>
+<tr><td class="k">PostgreSQL</td><td>Relacional</td><td>Libre</td><td>Aplicaciones empresariales, datos geoespaciales, análisis.</td></tr>
+<tr><td class="k">MySQL / MariaDB</td><td>Relacional</td><td>Libre (con versión comercial)</td><td>Sitios web y aplicaciones, WordPress.</td></tr>
+<tr><td class="k">SQLite</td><td>Relacional embebida</td><td>Dominio público</td><td>Apps móviles, navegadores, aplicaciones pequeñas: es solo un archivo.</td></tr>
+<tr><td class="k">SQL Server</td><td>Relacional</td><td>Comercial</td><td>Entornos Microsoft, banca, ERP.</td></tr>
+<tr><td class="k">Oracle Database</td><td>Relacional</td><td>Comercial</td><td>Grandes corporaciones y sistemas críticos.</td></tr>
+<tr><td class="k">MongoDB</td><td>Documental (NoSQL)</td><td>Libre / comercial</td><td>Catálogos flexibles, contenido, aplicaciones web.</td></tr>
+<tr><td class="k">Redis</td><td>Clave-valor en memoria</td><td>Libre / comercial</td><td>Cachés, sesiones, colas, rankings.</td></tr>
+<tr><td class="k">Neo4j</td><td>Grafos</td><td>Libre / comercial</td><td>Redes sociales, detección de fraude, recomendaciones.</td></tr>
+</tbody></table></div>
+<div class="box tip"><span class="t">Para empezar a practicar</span><p>Para aprender SQL basta con <b>SQLite</b> (no requiere instalar un servidor) o <b>PostgreSQL</b>. Todo lo que aprendas del modelo relacional sirve en cualquiera de ellos.</p></div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="chapter" id="c5">
+<header>
+  <h2><span class="num">5</span>Modelos y tipos de bases de datos</h2>
+  <p>Hay muchas formas de organizar datos. Conocerlas te ayuda a elegir bien y a entender por qué el modelo relacional domina.</p>
+</header>
+
+<h3>Qué es un modelo de datos</h3>
+<p class="def">Un <mark>modelo de datos</mark> es un conjunto de herramientas conceptuales para describir los datos, sus relaciones, su significado y las restricciones que deben cumplir. Es un “lenguaje” para representar la realidad antes de convertirla en tablas o documentos.</p>
+<p>Los modelos se clasifican por su nivel de abstracción:</p>
+<ul>
+<li><b>Modelos conceptuales (alto nivel):</b> cercanos a cómo piensa una persona. El más famoso es el <i>entidad-relación</i> (capítulos 9 y 10).</li>
+<li><b>Modelos lógicos o de implementación:</b> se acercan a cómo lo organiza un SGBD. Ejemplos: relacional, documental, de grafos.</li>
+<li><b>Modelos físicos (bajo nivel):</b> describen cómo se guardan los bits: archivos, índices, páginas de disco.</li>
+</ul>
+
+<h3>Un poco de historia</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Época</th><th>Modelo</th><th>Idea central</th></tr></thead>
+<tbody>
+<tr><td class="k">1960</td><td>Jerárquico (IBM IMS)</td><td>Datos en árbol: cada registro tiene un solo “padre”.</td></tr>
+<tr><td class="k">1960-70</td><td>En red (CODASYL)</td><td>Grafo de registros; un registro puede tener varios padres. Muy complejo de programar.</td></tr>
+<tr><td class="k">1970</td><td>Relacional (E. F. Codd)</td><td>Datos en tablas y relaciones lógicas basadas en matemática (álgebra relacional). Nace SQL.</td></tr>
+<tr><td class="k">1976</td><td>Entidad-relación (P. Chen)</td><td>Herramienta gráfica para diseñar el esquema conceptual.</td></tr>
+<tr><td class="k">1990</td><td>Orientado a objetos</td><td>Guardar objetos de los lenguajes de programación directamente.</td></tr>
+<tr><td class="k">2000-hoy</td><td>NoSQL y NewSQL</td><td>Escalar a enormes volúmenes y datos flexibles; combinar escala con SQL.</td></tr>
+</tbody></table></div>
+
+<h3>Tipos de bases de datos hoy</h3>
+<div class="tw"><table class="dt">
+<caption>Comparación de modelos</caption>
+<thead><tr><th>Tipo</th><th>Cómo guarda los datos</th><th>Fortalezas</th><th>Ejemplo de uso real</th></tr></thead>
+<tbody>
+<tr><td class="k">Relacional</td><td>Tablas con filas y columnas, unidas por claves.</td><td>Integridad fuerte, SQL, transacciones ACID.</td><td>Bancos, facturación, inventario, universidades.</td></tr>
+<tr><td class="k">Documental</td><td>Documentos JSON/BSON con estructura anidada.</td><td>Esquema flexible, lectura rápida de un objeto completo.</td><td>Catálogo de productos con atributos distintos por categoría.</td></tr>
+<tr><td class="k">Clave-valor</td><td>Pares <code>clave → valor</code>.</td><td>Velocidad extrema, simplicidad.</td><td>Carrito temporal, sesión de usuario, caché.</td></tr>
+<tr><td class="k">Columnar (familia de columnas)</td><td>Datos agrupados por columnas, distribuidos en muchos nodos.</td><td>Escritura masiva y escala horizontal.</td><td>Historial de eventos de millones de dispositivos.</td></tr>
+<tr><td class="k">Grafos</td><td>Nodos y aristas con propiedades.</td><td>Consultas sobre conexiones profundas.</td><td>“Amigos de amigos”, detección de fraude, rutas.</td></tr>
+<tr><td class="k">Series de tiempo</td><td>Mediciones ordenadas por tiempo.</td><td>Compresión y agregación temporal.</td><td>Sensores IoT, monitoreo de servidores, bolsa de valores.</td></tr>
+<tr><td class="k">Orientada a objetos</td><td>Objetos con atributos y métodos.</td><td>Sin conversión entre objeto y tabla.</td><td>CAD, sistemas científicos específicos.</td></tr>
+</tbody></table></div>
+
+<h3>El mismo dato en dos modelos</h3>
+<p>Un pedido con dos productos, guardado de forma relacional (varias tablas) y de forma documental (un solo documento anidado):</p>
+<div class="grid2">
+<div>
+<h4>Relacional</h4>
+<pre class="code"><code>pedido
+id_pedido | fecha      | id_cliente
+5001      | 2025-03-14 | 12
+
+detalle_pedido
+id_pedido | id_producto | cantidad
+5001      | 77          | 2
+5001      | 91          | 1</code></pre>
+</div>
+<div>
+<h4>Documental (JSON)</h4>
+<pre class="code"><code>{
+  "_id": 5001,
+  "fecha": "2025-03-14",
+  "cliente": { "id": 12, "nombre": "Marta" },
+  "items": [
+    { "producto": 77, "cantidad": 2 },
+    { "producto": 91, "cantidad": 1 }
+  ]
+}</code></pre>
+</div>
+</div>
+<p>El modelo documental simplifica leer “un pedido completo”, pero si el nombre de Marta cambia, hay que actualizarlo en cada documento donde se copió. El relacional lo guarda una sola vez y lo referencia.</p>
+
+<h3>Uso transaccional frente a analítico</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th></th><th>OLTP (transaccional)</th><th>OLAP (analítico)</th></tr></thead>
+<tbody>
+<tr><td class="k">Objetivo</td><td>Operar el negocio día a día.</td><td>Analizar y tomar decisiones.</td></tr>
+<tr><td class="k">Operaciones</td><td>Muchas lecturas y escrituras pequeñas y rápidas.</td><td>Consultas grandes que resumen millones de filas.</td></tr>
+<tr><td class="k">Ejemplo</td><td>Registrar una venta en caja.</td><td>Ventas por región y mes durante cinco años.</td></tr>
+<tr><td class="k">Diseño</td><td>Muy normalizado.</td><td>Esquemas en estrella, datos agregados (almacén de datos).</td></tr>
+</tbody></table></div>
+
+<div class="box key"><span class="t">¿Cuál elegir?</span>
+<p>Si no tienes una razón fuerte para otra cosa, empieza por una base <b>relacional</b>: la mayoría de aplicaciones tienen datos con relaciones claras y necesitan integridad. Considera NoSQL cuando el esquema cambie constantemente, necesites escalar masivamente o tus datos sean naturalmente grafos, documentos o series temporales. Muchas empresas combinan varios (<i>persistencia políglota</i>): relacional para pedidos, Redis para caché, un motor de búsqueda para el catálogo.</p></div>
+<p>Esta guía se centra en el modelo relacional y en su herramienta de diseño, el diagrama entidad-relación, porque son la base sobre la que se construye todo lo demás.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="chapter" id="c6">
+<header>
+  <h2><span class="num">6</span>El modelo relacional</h2>
+  <p>Tablas, claves y reglas de integridad: los ladrillos de casi todas las bases de datos empresariales.</p>
+</header>
+
+<p>Propuesto por Edgar F. Codd en 1970, el modelo relacional representa todos los datos mediante <mark>relaciones</mark> (tablas). Su fuerza está en que la estructura se separa del almacenamiento físico y que los datos se enlazan por <i>valores</i> (claves), no por punteros.</p>
+
+<h3>Elementos del modelo</h3>
+<div class="grid2">
+<div class="card"><h4>Relación</h4><p>Tabla con nombre. <code>CLIENTE</code>, <code>PEDIDO</code>.</p></div>
+<div class="card"><h4>Atributo</h4><p>Columna con nombre y dominio. <code>email</code>, <code>fecha</code>.</p></div>
+<div class="card"><h4>Tupla</h4><p>Fila: un elemento concreto de la relación.</p></div>
+<div class="card"><h4>Grado y cardinalidad</h4><p><b>Grado:</b> número de columnas. <b>Cardinalidad:</b> número de filas (cambia con el tiempo).</p></div>
+</div>
+<p>Una tabla del modelo relacional cumple estas propiedades:</p>
+<ul>
+<li>Cada columna tiene un nombre único dentro de la tabla.</li>
+<li>Cada celda contiene un <b>valor atómico</b> (un solo valor, no una lista).</li>
+<li>No existen filas completamente duplicadas.</li>
+<li>El orden de las filas y de las columnas no tiene significado.</li>
+</ul>
+<p>Notación textual abreviada del esquema, con la clave primaria subrayada y la foránea precedida por <code>#</code>:</p>
+<p><code>CLIENTE(<u>id_cliente</u>, nombre, email, ciudad)</code><br><code>PEDIDO(<u>id_pedido</u>, fecha, total, #id_cliente)</code></p>
+
+<h3>Claves: cómo se identifica una fila</h3>
+<div class="tw"><table class="dt">
+<caption>Tabla: persona</caption>
+<thead><tr><th>id_persona</th><th>cedula</th><th>email</th><th>nombre</th><th>ciudad</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>10234567</td><td>marta@correo.com</td><td>Marta Ruiz</td><td>Bogotá</td></tr>
+<tr><td>2</td><td>79876543</td><td>luis@correo.com</td><td>Luis Gómez</td><td>Cali</td></tr>
+<tr><td>3</td><td>52345678</td><td>ana@correo.com</td><td>Ana Torres</td><td>Bogotá</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="dt">
+<thead><tr><th>Tipo de clave</th><th>Definición</th><th>En la tabla anterior</th></tr></thead>
+<tbody>
+<tr><td class="k">Superclave</td><td>Cualquier conjunto de atributos que identifica de forma única cada fila (puede traer atributos sobrantes).</td><td><code>{cedula, nombre}</code> identifica, pero <code>nombre</code> sobra.</td></tr>
+<tr><td class="k">Clave candidata</td><td>Superclave <b>mínima</b>: si quitas cualquier atributo, deja de ser única.</td><td><code>id_persona</code>, <code>cedula</code> y <code>email</code>.</td></tr>
+<tr><td class="k">Clave primaria (PK)</td><td>La candidata elegida como identificador oficial. No admite <code>NULL</code> ni repetidos.</td><td><code>id_persona</code></td></tr>
+<tr><td class="k">Clave alternativa</td><td>Las candidatas no elegidas. Suelen declararse <code>UNIQUE</code>.</td><td><code>cedula</code>, <code>email</code></td></tr>
+<tr><td class="k">Clave compuesta</td><td>Clave formada por dos o más atributos.</td><td>En <code>matricula(id_estudiante, id_curso)</code> solo el par identifica la fila.</td></tr>
+<tr><td class="k">Clave foránea (FK)</td><td>Atributo que referencia la clave primaria de otra tabla. Es lo que “une” las tablas.</td><td><code>pedido.id_cliente</code> → <code>cliente.id_cliente</code></td></tr>
+</tbody></table></div>
+
+<h4>Clave natural o clave sustituta</h4>
+<ul>
+<li><b>Natural:</b> un dato real que ya identifica (cédula, ISBN, placa). Parece cómodo, pero puede cambiar, repetirse por error o ser privado.</li>
+<li><b>Sustituta (surrogate):</b> un número sin significado generado por el sistema (<code>id</code> autoincremental o UUID). Es estable y simple. Es la opción más habitual; se complementa declarando la clave natural como <code>UNIQUE</code>.</li>
+</ul>
+<div class="box tip"><span class="t">Criterios para elegir una PK</span><p>Debe ser <b>única, obligatoria, inmutable y corta</b>. Un correo electrónico cumple mal “inmutable”: la gente lo cambia. Por eso se usa un <code>id</code> y el correo queda como <code>UNIQUE</code>.</p></div>
+
+<h3>Reglas de integridad</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Regla</th><th>Qué exige</th><th>Ejemplo de violación que se bloquea</th></tr></thead>
+<tbody>
+<tr><td class="k">De entidad</td><td>La clave primaria nunca es <code>NULL</code> ni se repite.</td><td>Insertar un cliente sin id o con un id que ya existe.</td></tr>
+<tr><td class="k">Referencial</td><td>Una FK debe coincidir con una PK existente (o ser <code>NULL</code> si se permite).</td><td>Crear un pedido para el cliente 999 que no existe.</td></tr>
+<tr><td class="k">De dominio</td><td>El valor pertenece al dominio del atributo.</td><td>Guardar “abc” como edad o una nota de 85.</td></tr>
+<tr><td class="k">Del negocio</td><td>Reglas propias de la organización.</td><td>Un empleado no puede ganar más que su jefe; el stock no puede ser negativo.</td></tr>
+</tbody></table></div>
+
+<h4>Integridad referencial en acción</h4>
+<div class="grid2">
+<div class="tw"><table class="dt">
+<caption>departamento</caption>
+<thead><tr><th>id_depto</th><th>nombre</th></tr></thead>
+<tbody><tr><td class="k pk">10</td><td>Ventas</td></tr><tr><td class="k pk">20</td><td>Contabilidad</td></tr><tr><td class="k pk">30</td><td>Sistemas</td></tr></tbody></table></div>
+<div class="tw"><table class="dt">
+<caption>empleado</caption>
+<thead><tr><th>id_emp</th><th>nombre</th><th>id_depto</th></tr></thead>
+<tbody><tr><td class="k pk">1</td><td>Marta</td><td class="fk">10</td></tr><tr><td class="k pk">2</td><td>Luis</td><td class="fk">30</td></tr><tr><td class="k pk">3</td><td>Ana</td><td class="fk">10</td></tr></tbody></table></div>
+</div>
+<p>La columna <code>empleado.id_depto</code> es una FK (en cursiva). Si intentas insertar un empleado con <code>id_depto = 99</code>, el SGBD lo rechaza porque no existe ese departamento. ¿Y si borras el departamento 10, que tiene empleados? Tú decides la política:</p>
+<div class="tw"><table class="dt">
+<thead><tr><th>Acción</th><th>Qué hace al borrar o actualizar la fila padre</th></tr></thead>
+<tbody>
+<tr><td class="k">RESTRICT / NO ACTION</td><td>Rechaza la operación mientras existan filas hijas. Es la opción más segura.</td></tr>
+<tr><td class="k">CASCADE</td><td>Propaga: se borran también las filas hijas. Útil en detalles de un pedido; peligroso en general.</td></tr>
+<tr><td class="k">SET NULL</td><td>Las filas hijas quedan con la FK en <code>NULL</code> (empleado “sin departamento”).</td></tr>
+<tr><td class="k">SET DEFAULT</td><td>La FK pasa a un valor por defecto (por ejemplo, departamento “Sin asignar”).</td></tr>
+</tbody></table></div>
+
+<h3>El valor NULL</h3>
+<p><code>NULL</code> significa “ausencia de valor”: desconocido, no aplicable o aún no asignado. No es cero ni texto vacío. Tiene un comportamiento propio: <code>NULL = NULL</code> no es verdadero, es “desconocido”. Para consultarlo se usa <code>IS NULL</code> o <code>IS NOT NULL</code>. Usa <code>NOT NULL</code> en todo atributo que realmente sea obligatorio.</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="chapter" id="c7">
+<header>
+  <h2><span class="num">7</span>Tipos de dato y restricciones</h2>
+  <p>Cada columna declara qué clase de valor guarda y qué reglas debe cumplir.</p>
+</header>
+
+<h3>Tipos de dato más comunes en SQL</h3>
+<div class="tw"><table class="dt">
+<caption>Los nombres varían un poco entre motores</caption>
+<thead><tr><th>Categoría</th><th>Tipo</th><th>Cuándo usarlo</th><th>Ejemplo</th></tr></thead>
+<tbody>
+<tr><td class="k" rowspan="3">Numéricos enteros</td><td><code>SMALLINT</code></td><td>Cantidades pequeñas</td><td>Edad, cantidad de hijos</td></tr>
+<tr><td><code>INT</code></td><td>Uso general</td><td>Identificadores, unidades en stock</td></tr>
+<tr><td><code>BIGINT</code></td><td>Contadores enormes</td><td>Id de millones de transacciones</td></tr>
+<tr><td class="k" rowspan="2">Numéricos con decimales</td><td><code>DECIMAL(p,s)</code></td><td><b>Dinero</b> y valores exactos</td><td><code>DECIMAL(10,2)</code> → 12345678.90</td></tr>
+<tr><td><code>FLOAT / DOUBLE</code></td><td>Mediciones científicas aproximadas</td><td>Temperatura, coordenadas</td></tr>
+<tr><td class="k" rowspan="3">Texto</td><td><code>CHAR(n)</code></td><td>Longitud fija</td><td>Código de país “CO”</td></tr>
+<tr><td><code>VARCHAR(n)</code></td><td>Longitud variable con tope</td><td>Nombre, correo</td></tr>
+<tr><td><code>TEXT</code></td><td>Texto largo</td><td>Descripción de producto, comentarios</td></tr>
+<tr><td class="k" rowspan="3">Fecha y hora</td><td><code>DATE</code></td><td>Solo fecha</td><td>Fecha de nacimiento</td></tr>
+<tr><td><code>TIME</code></td><td>Solo hora</td><td>Hora de apertura</td></tr>
+<tr><td><code>TIMESTAMP</code></td><td>Fecha y hora</td><td>Momento exacto de una compra</td></tr>
+<tr><td class="k">Lógico</td><td><code>BOOLEAN</code></td><td>Verdadero/falso</td><td>¿Cuenta activa?</td></tr>
+<tr><td class="k">Binarios y otros</td><td><code>BLOB, JSON, UUID</code></td><td>Archivos pequeños, documentos, identificadores únicos globales</td><td>Configuración en JSON</td></tr>
+</tbody></table></div>
+
+<div class="box warn"><span class="t">Errores típicos al elegir tipos</span>
+<ul>
+<li><b>Dinero en <code>FLOAT</code>:</b> los decimales binarios acumulan errores (0.1 + 0.2 no es exactamente 0.3). Usa <code>DECIMAL</code>.</li>
+<li><b>Teléfonos o códigos postales como número:</b> perderías el cero inicial y el “+57”. Son <code>VARCHAR</code>: no se suman ni se promedian.</li>
+<li><b>Fechas como texto:</b> no podrás ordenarlas ni calcular diferencias con fiabilidad. Usa <code>DATE</code>/<code>TIMESTAMP</code>.</li>
+<li><b>Todo en <code>VARCHAR(255)</code> “por si acaso”:</b> pierdes validación y rendimiento.</li>
+</ul></div>
+
+<h3>Restricciones (constraints)</h3>
+<p>Son reglas declarativas que el SGBD aplica automáticamente en cada inserción o modificación.</p>
+<div class="tw"><table class="dt">
+<thead><tr><th>Restricción</th><th>Efecto</th><th>Ejemplo</th></tr></thead>
+<tbody>
+<tr><td class="k"><code>PRIMARY KEY</code></td><td>Identifica la fila: único y no nulo.</td><td><code>id_cliente</code></td></tr>
+<tr><td class="k"><code>FOREIGN KEY</code></td><td>Referencia a otra tabla.</td><td><code>pedido.id_cliente</code></td></tr>
+<tr><td class="k"><code>NOT NULL</code></td><td>Obliga a tener valor.</td><td><code>nombre</code> del producto</td></tr>
+<tr><td class="k"><code>UNIQUE</code></td><td>No permite repetidos (admite NULL según el motor).</td><td><code>email</code></td></tr>
+<tr><td class="k"><code>CHECK</code></td><td>Condición que debe cumplirse.</td><td><code>precio &gt; 0</code></td></tr>
+<tr><td class="k"><code>DEFAULT</code></td><td>Valor si no se indica otro.</td><td><code>estado = 'pendiente'</code></td></tr>
+</tbody></table></div>
+
+<pre class="code"><code><span class="cm">-- Ejemplo: tabla producto con tipos y restricciones</span>
+<span class="kw">CREATE TABLE</span> producto (
+  id_producto  <span class="ty">INT</span>            <span class="kw">PRIMARY KEY</span>,
+  nombre       <span class="ty">VARCHAR</span>(100)   <span class="kw">NOT NULL</span>,
+  sku          <span class="ty">VARCHAR</span>(20)    <span class="kw">UNIQUE NOT NULL</span>,
+  precio       <span class="ty">DECIMAL</span>(10,2)  <span class="kw">NOT NULL CHECK</span> (precio &gt; 0),
+  stock        <span class="ty">INT</span>            <span class="kw">NOT NULL DEFAULT</span> 0 <span class="kw">CHECK</span> (stock &gt;= 0),
+  activo       <span class="ty">BOOLEAN</span>        <span class="kw">NOT NULL DEFAULT</span> <span class="kw">TRUE</span>,
+  creado_en    <span class="ty">TIMESTAMP</span>      <span class="kw">NOT NULL DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>
+);</code></pre>
+<p>Con esto, intentar insertar un producto con precio negativo, sin nombre o con un SKU repetido falla de inmediato, sin que ninguna aplicación tenga que verificarlo.</p>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="chapter" id="c8">
+<header>
+  <h2><span class="num">8</span>Etapas del diseño: conceptual, lógico y físico</h2>
+  <p>Una base de datos no se empieza creando tablas: se empieza entendiendo el problema.</p>
+</header>
+
+<h3>El ciclo de diseño</h3>
+<figure>
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  R["1. Requisitos<br/>qué necesita el negocio"] --> C["2. Modelo conceptual<br/>diagrama entidad-relación"]
+  C --> L["3. Modelo lógico<br/>tablas, claves, normalización"]
+  L --> F["4. Modelo físico<br/>SQL del motor elegido, índices"]
+  F --> I["5. Implementación<br/>y carga de datos"]
+  I --> M["6. Mantenimiento<br/>y evolución"]
+  M -.-> R
+</pre></div>
+<figcaption>El proceso es iterativo: lo que se descubre en una etapa a menudo obliga a corregir la anterior.</figcaption>
+</figure>
+
+<h3>Etapa 1: levantar requisitos</h3>
+<p>Se trata de averiguar <b>qué datos hay que guardar, quién los usa y qué preguntas debe responder el sistema</b>. Fuentes habituales:</p>
+<ul>
+<li>Entrevistas con usuarios y dueños del proceso.</li>
+<li>Formularios, facturas, informes y hojas de cálculo que ya se usan (excelente fuente de campos reales).</li>
+<li>Observación del trabajo diario.</li>
+<li>Sistemas existentes y sus problemas.</li>
+</ul>
+<div class="box ex"><span class="t">Ejemplo real: requisitos de una tienda en línea</span>
+<p>“Vendemos productos organizados en categorías. Los clientes se registran con nombre, correo y dirección de envío. Un cliente puede hacer muchos pedidos; cada pedido incluye uno o varios productos con su cantidad y el precio al momento de la compra. Necesitamos saber el estado del pedido (pendiente, pagado, enviado, entregado) y el método de pago. Cada producto tiene un stock, y queremos reportes de ventas por categoría y por mes.”</p></div>
+<p>De este párrafo se extraen las <b>reglas de negocio</b>: “un cliente puede tener muchos pedidos”, “un pedido tiene al menos un producto”, “el precio se guarda en el momento de la compra”. Cada regla se traduce después en una relación o restricción.</p>
+<div class="box tip"><span class="t">Truco: sustantivos y verbos</span><p>Subraya los <b>sustantivos</b> del texto de requisitos: son candidatos a <i>entidades</i> (cliente, pedido, producto, categoría) o a <i>atributos</i> (nombre, correo, stock). Subraya los <b>verbos</b>: son candidatos a <i>relaciones</i> (el cliente <u>realiza</u> pedidos; el pedido <u>incluye</u> productos).</p></div>
+
+<h3>Los tres niveles del modelado</h3>
+<div class="tw"><table class="dt">
+<caption>El mismo problema en tres niveles de detalle</caption>
+<thead><tr><th>Nivel</th><th>Qué describe</th><th>Depende de un SGBD</th><th>Ejemplo (tienda)</th></tr></thead>
+<tbody>
+<tr><td class="k">Conceptual</td><td>Qué entidades existen y cómo se relacionan, en lenguaje del negocio.</td><td>No</td><td>“Un CLIENTE realiza muchos PEDIDOS.” Diagrama ER.</td></tr>
+<tr><td class="k">Lógico</td><td>Tablas, columnas, claves primarias y foráneas; datos normalizados.</td><td>Solo del modelo (relacional), no de un motor.</td><td><code>PEDIDO(<u>id_pedido</u>, fecha, estado, #id_cliente)</code></td></tr>
+<tr><td class="k">Físico</td><td>Tipos exactos, índices, particiones, almacenamiento.</td><td>Sí</td><td><code>CREATE TABLE pedido (...)</code> + <code>CREATE INDEX</code> para PostgreSQL.</td></tr>
+</tbody></table></div>
+<p>Separar los niveles permite <b>discutir con el cliente</b> usando el conceptual (sin tecnicismos), y dejar las decisiones de rendimiento para el final.</p>
+
+<div class="box key"><span class="t">Regla de oro del diseño</span><p>Un buen modelo se mide por la facilidad con que responde a las preguntas reales del negocio sin duplicar datos ni permitir estados imposibles. Una hora más en el diseño ahorra días de correcciones con la base ya llena de datos.</p></div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="chapter" id="c9">
+<header>
+  <h2><span class="num">9</span>El modelo entidad-relación</h2>
+  <p>La herramienta gráfica para pensar una base de datos antes de construirla: entidades, atributos y relaciones.</p>
+</header>
+
+<p>El modelo <mark>entidad-relación</mark> (ER o E-R) fue propuesto por Peter Chen en 1976. Representa el mundo real con tres elementos básicos: <b>entidades</b> (las “cosas” sobre las que guardamos datos), <b>atributos</b> (sus características) y <b>relaciones</b> (cómo se asocian). El resultado se dibuja como un <i>diagrama entidad-relación</i> (DER) que cualquier persona, sea técnica o no, puede leer y validar.</p>
+
+<h3>Entidades</h3>
+<p class="def">Una <mark>entidad</mark> es un objeto, persona, lugar, concepto o evento del mundo real, distinguible de los demás, sobre el cual interesa guardar información.</p>
+<ul>
+<li><b>Entidad</b> (o tipo de entidad / conjunto de entidades): el concepto general. <code>ESTUDIANTE</code>.</li>
+<li><b>Instancia</b> (ocurrencia): un caso concreto. “Marta Ruiz, matrícula 1001”.</li>
+<li>Pueden ser <b>concretas</b> (persona, producto, vehículo) o <b>abstractas</b> (pedido, curso, cuenta, reserva).</li>
+<li>Por convención se nombran en <b>singular</b> y con sustantivos: <code>CLIENTE</code>, no <code>CLIENTES</code> ni <code>COMPRAR</code>.</li>
+</ul>
+
+<h4>Entidad fuerte y entidad débil</h4>
+<div class="grid2">
+<div class="card"><h4>Fuerte</h4><p>Tiene identidad propia: se identifica con sus propios atributos. <code>CLIENTE</code> con su <code>id_cliente</code>.</p></div>
+<div class="card"><h4>Débil</h4><p>No se puede identificar solo con sus atributos: <b>depende de otra entidad</b> (la propietaria) y desaparece con ella.</p></div>
+</div>
+<div class="box ex"><span class="t">Ejemplo real: hoteles y habitaciones</span>
+<p>Todos los hoteles tienen una “habitación 101”. El número 101 solo no identifica nada: hay que decir “la habitación 101 <i>del Hotel Andino</i>”. <code>HABITACION</code> es una entidad débil: su identificador es <i>(id_hotel, numero)</i>. El atributo que distingue a las instancias débiles dentro de su propietaria (aquí <code>numero</code>) se llama <b>discriminante</b>.</p></div>
+
+<h3>Atributos</h3>
+<p class="def">Un <mark>atributo</mark> es una propiedad o característica que describe a una entidad (o a una relación).</p>
+<div class="tw"><table class="dt">
+<caption>Clasificación de atributos</caption>
+<thead><tr><th>Tipo</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+<tbody>
+<tr><td class="k">Simple (atómico)</td><td>No se divide en partes con significado propio.</td><td><code>edad</code>, <code>precio</code></td></tr>
+<tr><td class="k">Compuesto</td><td>Se descompone en subpartes.</td><td><code>dirección</code> → calle, número, ciudad, código postal. <code>nombre</code> → nombres, apellidos.</td></tr>
+<tr><td class="k">Monovalorado</td><td>Un solo valor por instancia.</td><td><code>fecha_nacimiento</code></td></tr>
+<tr><td class="k">Multivalorado</td><td>Puede tener varios valores a la vez.</td><td><code>teléfonos</code>, <code>correos</code>, <code>idiomas</code> de una persona.</td></tr>
+<tr><td class="k">Derivado</td><td>Se calcula a partir de otros atributos.</td><td><code>edad</code> (de fecha_nacimiento), <code>total</code> (suma de las líneas).</td></tr>
+<tr><td class="k">Clave (identificador)</td><td>Distingue de forma única cada instancia.</td><td><code>id_cliente</code>, <code>isbn</code></td></tr>
+<tr><td class="k">Opcional</td><td>Puede quedar sin valor (NULL).</td><td><code>segundo_apellido</code>, <code>telefono</code></td></tr>
+</tbody></table></div>
+<div class="box warn"><span class="t">Error común</span><p>Guardar <code>edad</code> como atributo normal: mañana estará desactualizada. Guarda <code>fecha_nacimiento</code> y calcula la edad al consultar.</p></div>
+
+<h3>Símbolos del modelo de Chen</h3>
+<figure>
+<div class="diagram">
+<svg viewBox="0 0 720 230" role="img" aria-label="Leyenda de símbolos de la notación de Chen">
+  <rect class="sh" x="35" y="18" width="110" height="44"/><text class="tx" x="90" y="40">Cliente</text>
+  <text class="tx s" x="90" y="88">Entidad</text>
+
+  <rect class="sh" x="215" y="18" width="110" height="44"/><rect class="sh2" x="220" y="23" width="100" height="34"/><text class="tx" x="270" y="40">Habitación</text>
+  <text class="tx s" x="270" y="88">Entidad débil</text>
+
+  <ellipse class="sh" cx="450" cy="40" rx="52" ry="22"/><text class="tx" x="450" y="40">nombre</text>
+  <text class="tx s" x="450" y="88">Atributo</text>
+
+  <ellipse class="sh" cx="630" cy="40" rx="52" ry="22"/><text class="tx u" x="630" y="40">id_cliente</text>
+  <text class="tx s" x="630" y="88">Atributo clave (subrayado)</text>
+
+  <ellipse class="sh" cx="90" cy="140" rx="52" ry="22"/><ellipse class="sh2" cx="90" cy="140" rx="46" ry="17"/><text class="tx" x="90" y="140">teléfono</text>
+  <text class="tx s" x="90" y="188">Multivalorado (doble óvalo)</text>
+
+  <ellipse class="sh dash" cx="270" cy="140" rx="52" ry="22"/><text class="tx" x="270" y="140">edad</text>
+  <text class="tx s" x="270" y="188">Derivado (línea punteada)</text>
+
+  <polygon class="sh" points="450,110 505,140 450,170 395,140"/><text class="tx" x="450" y="140">realiza</text>
+  <text class="tx s" x="450" y="188">Relación (rombo)</text>
+
+  <polygon class="sh" points="630,108 692,140 630,172 568,140"/><polygon class="sh2" points="630,115 682,140 630,165 578,140"/><text class="tx" x="630" y="140">tiene</text>
+  <text class="tx s" x="630" y="188">Relación identificadora</text>
+</svg>
+</div>
+<figcaption>Los rectángulos son entidades, los óvalos son atributos y los rombos son relaciones. Las líneas unen cada elemento con su dueño.</figcaption>
+</figure>
+
+<h3>Relaciones</h3>
+<p class="def">Una <mark>relación</mark> es una asociación entre dos o más entidades. Se nombra con un <b>verbo</b> y se lee como una frase: “Un estudiante <i>se inscribe</i> en cursos”.</p>
+<ul>
+<li><b>Grado:</b> número de entidades que participan. <i>Unaria</i> (recursiva): una entidad con ella misma. <i>Binaria</i>: dos entidades (la más común, más del 90 % de los casos). <i>Ternaria</i>: tres.</li>
+<li><b>Atributos de la relación:</b> hay datos que no pertenecen a ninguna de las entidades por separado sino a la asociación. La <i>nota</i> no es del estudiante ni del curso: es de la inscripción de ese estudiante en ese curso.</li>
+<li><b>Roles:</b> el papel que juega cada entidad. En “un empleado <i>supervisa</i> a empleados” los roles son “jefe” y “subordinado”.</li>
+</ul>
+
+<h3>Primer diagrama: estudiantes y cursos (notación de Chen)</h3>
+<figure>
+<div class="diagram">
+<svg viewBox="0 0 720 300" role="img" aria-label="Diagrama entidad-relación de estudiantes y cursos en notación de Chen">
+  <!-- Estudiante -->
+  <rect class="sh" x="40" y="120" width="130" height="50"/><text class="tx b" x="105" y="145">ESTUDIANTE</text>
+  <ellipse class="sh" cx="55" cy="45" rx="50" ry="20"/><text class="tx u" x="55" y="45">matrícula</text>
+  <line class="ln" x1="70" y1="64" x2="88" y2="120"/>
+  <ellipse class="sh" cx="170" cy="45" rx="42" ry="20"/><text class="tx" x="170" y="45">nombre</text>
+  <line class="ln" x1="160" y1="64" x2="128" y2="120"/>
+  <ellipse class="sh" cx="105" cy="255" rx="52" ry="20"/><ellipse class="sh2" cx="105" cy="255" rx="46" ry="15"/><text class="tx" x="105" y="255">teléfono</text>
+  <line class="ln" x1="105" y1="235" x2="105" y2="170"/>
+  <!-- Relación -->
+  <polygon class="sh" points="360,103 432,145 360,187 288,145"/><text class="tx" x="360" y="145">se inscribe</text>
+  <line class="ln" x1="170" y1="145" x2="288" y2="145"/><text class="tx b" x="229" y="132">N</text>
+  <line class="ln" x1="432" y1="145" x2="550" y2="145"/><text class="tx b" x="491" y="132">M</text>
+  <ellipse class="sh" cx="300" cy="45" rx="38" ry="20"/><text class="tx" x="300" y="45">fecha</text>
+  <line class="ln" x1="312" y1="64" x2="342" y2="115"/>
+  <ellipse class="sh" cx="420" cy="45" rx="38" ry="20"/><text class="tx" x="420" y="45">nota</text>
+  <line class="ln" x1="408" y1="64" x2="378" y2="115"/>
+  <!-- Curso -->
+  <rect class="sh" x="550" y="120" width="130" height="50"/><text class="tx b" x="615" y="145">CURSO</text>
+  <ellipse class="sh" cx="560" cy="45" rx="44" ry="20"/><text class="tx u" x="560" y="45">código</text>
+  <line class="ln" x1="574" y1="64" x2="595" y2="120"/>
+  <ellipse class="sh" cx="665" cy="45" rx="44" ry="20"/><text class="tx" x="665" y="45">nombre</text>
+  <line class="ln" x1="655" y1="64" x2="640" y2="120"/>
+  <ellipse class="sh" cx="615" cy="255" rx="46" ry="20"/><text class="tx" x="615" y="255">créditos</text>
+  <line class="ln" x1="615" y1="235" x2="615" y2="170"/>
+</svg>
+</div>
+<figcaption>Un estudiante se inscribe en muchos cursos (N) y un curso tiene muchos estudiantes (M). La fecha y la nota son atributos de la relación. El teléfono es multivalorado.</figcaption>
+</figure>
+<p>Esta notación es excelente para aprender los conceptos. En la práctica profesional se usa más la <b>notación de pata de gallo</b> (capítulo 10), más compacta cuando hay muchas entidades.</p>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="chapter" id="c10">
+<header>
+  <h2><span class="num">10</span>Cardinalidad, participación y notaciones</h2>
+  <p>Cuántas instancias de una entidad pueden asociarse con cuántas de otra. Es lo que más errores produce al diseñar.</p>
+</header>
+
+<h3>Cardinalidad</h3>
+<p class="def">La <mark>cardinalidad</mark> de una relación indica el número máximo de instancias de una entidad que pueden asociarse con una instancia de la otra. Se lee en <b>ambos sentidos</b>.</p>
+
+<div class="grid2">
+<div class="card"><h4>Uno a uno (1:1)</h4>
+<p>Una instancia de A se asocia con <b>a lo sumo una</b> de B y viceversa.</p>
+<p><i>Ejemplo:</i> un usuario tiene un perfil; un perfil pertenece a un usuario. Un país tiene una capital.</p>
+<pre class="mermaid">
+erDiagram
+  USUARIO ||--o| PERFIL : "tiene"
+</pre></div>
+<div class="card"><h4>Uno a muchos (1:N)</h4>
+<p>Una instancia de A se asocia con <b>muchas</b> de B, pero cada B tiene <b>una sola</b> A.</p>
+<p><i>Ejemplo:</i> un cliente realiza muchos pedidos; cada pedido es de un solo cliente. Es la más común.</p>
+<pre class="mermaid">
+erDiagram
+  CLIENTE ||--o{ PEDIDO : "realiza"
+</pre></div>
+</div>
+<div class="grid2">
+<div class="card"><h4>Muchos a muchos (N:M)</h4>
+<p>Una instancia de A se asocia con muchas de B <b>y</b> una de B con muchas de A.</p>
+<p><i>Ejemplo:</i> estudiantes y cursos; productos y pedidos; actores y películas. Siempre requiere una tabla intermedia (capítulo 12).</p>
+<pre class="mermaid">
+erDiagram
+  ESTUDIANTE }o--o{ CURSO : "se inscribe"
+</pre></div>
+<div class="card"><h4>Cómo averiguarla: dos preguntas</h4>
+<p>Para cada relación pregunta en los dos sentidos:</p>
+<ol><li>“¿Un <b>A</b> puede estar asociado con más de un <b>B</b>?”</li><li>“¿Un <b>B</b> puede estar asociado con más de un <b>A</b>?”</li></ol>
+<p>Si es “no/sí”, es 1:N. Si es “sí/sí”, es N:M. Si es “no/no”, es 1:1. <b>La respuesta depende de las reglas del negocio</b>, no de la lógica universal.</p></div>
+</div>
+<div class="box warn"><span class="t">La cardinalidad depende del contexto</span>
+<p>¿Un empleado trabaja en un solo departamento? En una empresa, sí (1:N). En otra con proyectos matriciales, un empleado puede estar en varios (N:M). Pregunta siempre al negocio; no supongas.</p></div>
+
+<h3>Participación (cardinalidad mínima)</h3>
+<p>Además del máximo, hay que saber el <b>mínimo</b>: ¿es obligatorio estar relacionado?</p>
+<ul>
+<li><b>Participación total (obligatoria, mínimo 1):</b> toda instancia debe participar. Todo <i>pedido</i> debe pertenecer a un cliente.</li>
+<li><b>Participación parcial (opcional, mínimo 0):</b> puede no participar. Un <i>cliente</i> recién registrado puede no tener ningún pedido.</li>
+</ul>
+<p>Se expresa con pares <b>(mínimo, máximo)</b>: <code>(0,N)</code> opcional-muchos; <code>(1,1)</code> obligatorio-uno; <code>(1,N)</code> obligatorio-muchos; <code>(0,1)</code> opcional-uno.</p>
+
+<h3>Notación de pata de gallo (crow’s foot)</h3>
+<p>Es la más usada en herramientas profesionales. Cada extremo de la línea lleva un símbolo que combina mínimo y máximo: el <b>círculo</b> significa “cero” (opcional), la <b>barra</b> significa “uno”, y la <b>pata de gallo</b> (tres ramas) significa “muchos”.</p>
+<figure>
+<div class="diagram">
+<svg viewBox="0 0 720 130" role="img" aria-label="Símbolos de cardinalidad en notación de pata de gallo">
+  <g transform="translate(20,10)">
+    <line class="ln" x1="0" y1="30" x2="90" y2="30"/>
+    <line class="ln" x1="70" y1="16" x2="70" y2="44"/><line class="ln" x1="78" y1="16" x2="78" y2="44"/>
+    <rect class="sh" x="90" y="10" width="60" height="40"/><text class="tx s" x="120" y="30">Entidad</text>
+    <text class="tx b" x="75" y="82">Uno y solo uno</text><text class="tx s" x="75" y="102">(1,1)  ||</text>
+  </g>
+  <g transform="translate(200,10)">
+    <line class="ln" x1="0" y1="30" x2="90" y2="30"/>
+    <circle class="sh" cx="64" cy="30" r="6"/><line class="ln" x1="78" y1="16" x2="78" y2="44"/>
+    <rect class="sh" x="90" y="10" width="60" height="40"/><text class="tx s" x="120" y="30">Entidad</text>
+    <text class="tx b" x="75" y="82">Cero o uno</text><text class="tx s" x="75" y="102">(0,1)  o|</text>
+  </g>
+  <g transform="translate(380,10)">
+    <line class="ln" x1="0" y1="30" x2="90" y2="30"/>
+    <line class="ln" x1="56" y1="16" x2="56" y2="44"/>
+    <line class="ln" x1="64" y1="30" x2="90" y2="12"/><line class="ln" x1="64" y1="30" x2="90" y2="48"/>
+    <rect class="sh" x="90" y="10" width="60" height="40"/><text class="tx s" x="120" y="30">Entidad</text>
+    <text class="tx b" x="75" y="82">Uno o muchos</text><text class="tx s" x="75" y="102">(1,N)  |{</text>
+  </g>
+  <g transform="translate(560,10)">
+    <line class="ln" x1="0" y1="30" x2="90" y2="30"/>
+    <circle class="sh" cx="48" cy="30" r="6"/>
+    <line class="ln" x1="64" y1="30" x2="90" y2="12"/><line class="ln" x1="64" y1="30" x2="90" y2="48"/>
+    <rect class="sh" x="90" y="10" width="60" height="40"/><text class="tx s" x="120" y="30">Entidad</text>
+    <text class="tx b" x="75" y="82">Cero o muchos</text><text class="tx s" x="75" y="102">(0,N)  o{</text>
+  </g>
+</svg>
+</div>
+<figcaption>El símbolo más cercano a la entidad indica el máximo; el que está a su lado, el mínimo.</figcaption>
+</figure>
+
+<h4>Cómo leer una relación</h4>
+<pre class="mermaid">
+erDiagram
+  CLIENTE ||--o{ PEDIDO : "realiza"
+</pre>
+<p>Se lee en dos frases, una por cada extremo:</p>
+<ul>
+<li>Del lado de <b>PEDIDO</b> hay “cero o muchos” (<code>o{</code>): <i>un cliente realiza cero o muchos pedidos.</i></li>
+<li>Del lado de <b>CLIENTE</b> hay “uno y solo uno” (<code>||</code>): <i>un pedido es realizado por exactamente un cliente.</i></li>
+</ul>
+
+<h3>Casos especiales que conviene reconocer</h3>
+
+<h4>Relación recursiva (unaria)</h4>
+<p>Una entidad se relaciona consigo misma. Muy común en jerarquías: un empleado tiene un jefe, que también es empleado; una categoría tiene una subcategoría; un comentario responde a otro comentario.</p>
+<pre class="mermaid">
+erDiagram
+  EMPLEADO |o--o{ EMPLEADO : "supervisa"
+  EMPLEADO {
+    int id_empleado PK
+    varchar nombre
+    int id_jefe FK "referencia a otro empleado"
+  }
+</pre>
+<p>Lectura: un empleado supervisa a cero o muchos empleados; y cada empleado tiene cero o un jefe (el director general no tiene jefe).</p>
+
+<h4>Relación N:M con atributos: entidad asociativa</h4>
+<p>Cuando la relación N:M tiene datos propios (nota, fecha, cantidad, precio), se convierte en una entidad intermedia. Es el patrón más importante que debes dominar:</p>
+<pre class="mermaid">
+erDiagram
+  ESTUDIANTE ||--o{ MATRICULA : "tiene"
+  CURSO ||--o{ MATRICULA : "recibe"
+  MATRICULA {
+    int id_estudiante PK, FK
+    varchar codigo_curso PK, FK
+    date fecha
+    decimal nota
+  }
+</pre>
+
+<h4>Relación ternaria</h4>
+<p>Tres entidades participan a la vez y la asociación no se puede descomponer en dos binarias sin perder información. Ejemplo: un <b>proveedor</b> suministra un <b>producto</b> para un <b>proyecto</b>. Saber que “Aceros SA vende varillas” y que “el proyecto Puente usa varillas” no te dice <i>quién</i> suministra las varillas <i>del Puente</i>.</p>
+<p>Se resuelve con una entidad asociativa que tiene tres claves foráneas: <code>SUMINISTRO(id_proveedor, id_producto, id_proyecto, cantidad)</code>.</p>
+
+<h4>Generalización y especialización (herencia)</h4>
+<p>Cuando varias entidades comparten atributos y además tienen otros propios, se extrae una <b>superentidad</b>. Ejemplo: <code>PERSONA</code> (id, nombre, correo) es la superclase de <code>ESTUDIANTE</code> (carrera, semestre) y <code>PROFESOR</code> (departamento, salario).</p>
+<ul>
+<li><b>Total o parcial:</b> ¿toda persona debe ser estudiante o profesor? (total) ¿o puede haber personas que no sean ninguno? (parcial).</li>
+<li><b>Disjunta o solapada:</b> ¿una persona puede ser a la vez estudiante y profesor? (solapada) ¿o solo una de ellas? (disjunta).</li>
+</ul>
+
+<h3>Notaciones del modelo ER</h3>
+<div class="tw"><table class="dt">
+<caption>Distintas formas de dibujar lo mismo</caption>
+<thead><tr><th>Notación</th><th>Cómo se ve</th><th>Ventaja</th><th>Dónde se usa</th></tr></thead>
+<tbody>
+<tr><td class="k">Chen</td><td>Rectángulos, óvalos y rombos.</td><td>Muy didáctica; muestra atributos y relaciones como elementos.</td><td>Libros de texto y cursos.</td></tr>
+<tr><td class="k">Pata de gallo (Information Engineering)</td><td>Entidades como cajas con columnas; símbolos en los extremos de las líneas.</td><td>Compacta; fácil de pasar a tablas.</td><td>Herramientas profesionales: MySQL Workbench, dbdiagram, ERwin, Lucidchart.</td></tr>
+<tr><td class="k">UML (diagrama de clases)</td><td>Cajas con multiplicidades <code>1</code>, <code>0..*</code>, <code>1..*</code>.</td><td>Integra el modelo de datos con el de objetos.</td><td>Equipos que ya usan UML para software.</td></tr>
+<tr><td class="k">IDEF1X / Barker</td><td>Cajas con esquinas redondeadas o líneas sólidas/punteadas.</td><td>Estándar formal.</td><td>Gobierno y defensa; metodologías específicas.</td></tr>
+</tbody></table></div>
+<p>El contenido es el mismo; lo que cambia es el dibujo. En el resto de la guía usaremos pata de gallo por ser la más práctica.</p>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="chapter" id="c11">
+<header>
+  <h2><span class="num">11</span>Caso completo: tienda en línea</h2>
+  <p>Seguimos el proceso completo, paso a paso, desde un texto de requisitos hasta un diagrama final.</p>
+</header>
+
+<div class="box ex"><span class="t">Requisitos del cliente</span>
+<p>“Vendemos productos de varias categorías. Los clientes se registran con su nombre, correo y teléfono, y pueden guardar varias direcciones de envío. Cada cliente puede hacer muchos pedidos. Un pedido incluye uno o varios productos con cantidad y el precio de ese momento; se envía a una de las direcciones del cliente y tiene un estado (pendiente, pagado, enviado, entregado). Los pedidos se pagan con un método de pago (tarjeta, transferencia, contraentrega) y puede haber pagos parciales. De cada producto queremos nombre, descripción, precio actual y stock.”</p></div>
+
+<h3>Paso 1: identificar entidades</h3>
+<p>Sustantivos importantes: <b>cliente, dirección, pedido, producto, categoría, pago</b>. Descartamos “estado” y “método de pago” como entidades por ahora (son atributos con pocos valores fijos). Aparece además algo escondido: la relación entre pedido y producto tiene datos propios (cantidad, precio), así que será una entidad asociativa: <b>detalle de pedido</b>.</p>
+
+<h3>Paso 2: definir atributos e identificadores</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Entidad</th><th>Atributos</th><th>Notas de diseño</th></tr></thead>
+<tbody>
+<tr><td class="k">CLIENTE</td><td><u>id_cliente</u>, nombre, correo, teléfono, fecha_registro</td><td>correo es <code>UNIQUE</code>.</td></tr>
+<tr><td class="k">DIRECCION</td><td><u>id_direccion</u>, calle, ciudad, departamento, código_postal, #id_cliente</td><td>Un cliente tiene varias: por eso es entidad, no atributo.</td></tr>
+<tr><td class="k">CATEGORIA</td><td><u>id_categoria</u>, nombre</td><td>Nombre único.</td></tr>
+<tr><td class="k">PRODUCTO</td><td><u>id_producto</u>, nombre, descripción, precio, stock, #id_categoria</td><td>precio actual; stock ≥ 0.</td></tr>
+<tr><td class="k">PEDIDO</td><td><u>id_pedido</u>, fecha, estado, #id_cliente, #id_direccion</td><td>El total se <b>deriva</b> sumando las líneas.</td></tr>
+<tr><td class="k">DETALLE_PEDIDO</td><td><u>id_pedido</u>, <u>id_producto</u>, cantidad, precio_unitario</td><td>PK compuesta. precio_unitario guarda el precio <i>del momento</i>.</td></tr>
+<tr><td class="k">PAGO</td><td><u>id_pago</u>, monto, fecha, metodo, #id_pedido</td><td>Un pedido puede tener varios pagos parciales.</td></tr>
+</tbody></table></div>
+
+<div class="box key"><span class="t">¿Por qué guardar precio_unitario en el detalle si el producto ya tiene precio?</span>
+<p>Porque el precio del producto cambia. Si mañana subes el precio de 50 a 60, los pedidos de ayer no deben cambiar su valor. Guardar el precio en el momento de la venta es una <b>copia intencional</b> para preservar el historial: no es redundancia por descuido.</p></div>
+
+<h3>Paso 3: definir relaciones y cardinalidades</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Relación</th><th>Lectura en ambos sentidos</th><th>Cardinalidad</th></tr></thead>
+<tbody>
+<tr><td class="k">CLIENTE – DIRECCION</td><td>Un cliente tiene una o muchas direcciones. Una dirección pertenece a un cliente.</td><td>1:N</td></tr>
+<tr><td class="k">CLIENTE – PEDIDO</td><td>Un cliente realiza cero o muchos pedidos. Un pedido es de un cliente.</td><td>1:N</td></tr>
+<tr><td class="k">DIRECCION – PEDIDO</td><td>Una dirección recibe cero o muchos pedidos. Un pedido se envía a una dirección.</td><td>1:N</td></tr>
+<tr><td class="k">PEDIDO – PRODUCTO</td><td>Un pedido incluye muchos productos; un producto está en muchos pedidos.</td><td>N:M → se resuelve con DETALLE_PEDIDO</td></tr>
+<tr><td class="k">CATEGORIA – PRODUCTO</td><td>Una categoría agrupa cero o muchos productos. Un producto pertenece a una categoría.</td><td>1:N</td></tr>
+<tr><td class="k">PEDIDO – PAGO</td><td>Un pedido se paga con cero o muchos pagos. Un pago corresponde a un pedido.</td><td>1:N</td></tr>
+</tbody></table></div>
+
+<h3>Paso 4: el diagrama completo</h3>
+<figure>
+<div class="diagram"><pre class="mermaid">
+erDiagram
+  CLIENTE ||--o{ DIRECCION : "tiene"
+  CLIENTE ||--o{ PEDIDO : "realiza"
+  DIRECCION ||--o{ PEDIDO : "recibe"
+  PEDIDO ||--|{ DETALLE_PEDIDO : "contiene"
+  PRODUCTO ||--o{ DETALLE_PEDIDO : "aparece en"
+  CATEGORIA ||--o{ PRODUCTO : "clasifica"
+  PEDIDO ||--o{ PAGO : "se paga con"
+
+  CLIENTE {
+    int id_cliente PK
+    varchar nombre
+    varchar correo UK
+    varchar telefono
+    timestamp fecha_registro
+  }
+  DIRECCION {
+    int id_direccion PK
+    int id_cliente FK
+    varchar calle
+    varchar ciudad
+    varchar codigo_postal
+  }
+  CATEGORIA {
+    int id_categoria PK
+    varchar nombre UK
+  }
+  PRODUCTO {
+    int id_producto PK
+    int id_categoria FK
+    varchar nombre
+    text descripcion
+    decimal precio
+    int stock
+  }
+  PEDIDO {
+    int id_pedido PK
+    int id_cliente FK
+    int id_direccion FK
+    timestamp fecha
+    varchar estado
+  }
+  DETALLE_PEDIDO {
+    int id_pedido PK, FK
+    int id_producto PK, FK
+    int cantidad
+    decimal precio_unitario
+  }
+  PAGO {
+    int id_pago PK
+    int id_pedido FK
+    decimal monto
+    timestamp fecha
+    varchar metodo
+  }
+</pre></div>
+<figcaption>Diagrama entidad-relación en notación de pata de gallo. PK: clave primaria; FK: clave foránea; UK: valor único.</figcaption>
+</figure>
+
+<h3>Paso 5: validar el modelo con preguntas reales</h3>
+<p>Antes de construir, comprueba que el diseño responde a lo que el negocio necesita:</p>
+<div class="tw"><table class="dt">
+<thead><tr><th>Pregunta del negocio</th><th>Camino por el diagrama</th></tr></thead>
+<tbody>
+<tr><td>¿Cuánto vendimos en enero por categoría?</td><td>Categoría → Producto → Detalle → Pedido (fecha)</td></tr>
+<tr><td>¿Qué clientes tienen pedidos sin pagar?</td><td>Cliente → Pedido → (comparar total de Detalle con suma de Pago)</td></tr>
+<tr><td>¿A qué dirección enviamos el pedido 5001?</td><td>Pedido → Dirección</td></tr>
+<tr><td>¿Cuáles son los 10 productos más vendidos?</td><td>Producto → Detalle (suma de cantidad)</td></tr>
+<tr><td>¿Cuánto costaba este producto cuando lo compró Marta?</td><td>Detalle.precio_unitario (¡por eso se guarda!)</td></tr>
+</tbody></table></div>
+<p>Si alguna pregunta importante no se puede responder con el modelo, falta una entidad, un atributo o una relación: corrige el diagrama <b>ahora</b>, no cuando ya existan millones de filas.</p>
+
+<h3>Mejoras que podrías añadir</h3>
+<ul>
+<li>Entidad <code>ESTADO_PEDIDO</code> con su historial (quién lo cambió y cuándo), para trazabilidad.</li>
+<li>Entidad <code>METODO_PAGO</code> si los métodos cambian a menudo o llevan datos propios.</li>
+<li>Entidad <code>RESEÑA</code> (cliente califica producto): relación N:M con atributos puntuación y comentario.</li>
+<li>Categorías jerárquicas: relación recursiva en <code>CATEGORIA</code> (Electrónica → Celulares).</li>
+</ul>
+</section>
+
+<!-- ============ 12 ============ -->
+<section class="chapter" id="c12">
+<header>
+  <h2><span class="num">12</span>Del diagrama ER a tablas</h2>
+  <p>Reglas mecánicas para convertir el modelo conceptual en el modelo relacional.</p>
+</header>
+
+<div class="tw"><table class="dt">
+<caption>Reglas de transformación</caption>
+<thead><tr><th>Elemento del ER</th><th>Se convierte en…</th></tr></thead>
+<tbody>
+<tr><td class="k">Entidad fuerte</td><td>Una tabla. Su identificador pasa a ser la clave primaria.</td></tr>
+<tr><td class="k">Atributo simple</td><td>Una columna.</td></tr>
+<tr><td class="k">Atributo compuesto</td><td>Una columna por cada componente (<code>calle</code>, <code>ciudad</code>…).</td></tr>
+<tr><td class="k">Atributo multivalorado</td><td>Una tabla aparte con una FK a la entidad original (<code>telefono_cliente</code>).</td></tr>
+<tr><td class="k">Atributo derivado</td><td>No se almacena: se calcula en consultas o vistas (salvo razones de rendimiento).</td></tr>
+<tr><td class="k">Relación 1:N</td><td>La clave primaria del lado “1” viaja como <b>FK al lado “N”</b>.</td></tr>
+<tr><td class="k">Relación N:M</td><td>Una <b>tabla intermedia</b> con las PK de ambas entidades como FK; juntas forman la PK compuesta. Aquí se ponen los atributos de la relación.</td></tr>
+<tr><td class="k">Relación 1:1</td><td>Una FK con restricción <code>UNIQUE</code> en una de las dos tablas (la de participación opcional o la que se consulta menos); o fusionar ambas en una sola tabla.</td></tr>
+<tr><td class="k">Entidad débil</td><td>Tabla cuya PK es compuesta: la PK de la entidad propietaria + el discriminante.</td></tr>
+<tr><td class="k">Relación recursiva</td><td>FK que apunta a la PK de la misma tabla.</td></tr>
+<tr><td class="k">Relación ternaria</td><td>Tabla con tres FK (y posiblemente atributos propios).</td></tr>
+<tr><td class="k">Generalización</td><td>Tres estrategias: (a) una sola tabla con columna “tipo”; (b) una tabla por subtipo; (c) una tabla de la superclase y una por subtipo enlazadas por PK=FK.</td></tr>
+</tbody></table></div>
+
+<h3>Ejemplos de cada regla</h3>
+
+<h4>1:N: la FK va en el lado “muchos”</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> pedido (
+  id_pedido  <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+  fecha      <span class="ty">DATE</span> <span class="kw">NOT NULL</span>,
+  id_cliente <span class="ty">INT</span> <span class="kw">NOT NULL</span> <span class="kw">REFERENCES</span> cliente(id_cliente)  <span class="cm">-- FK al lado "uno"</span>
+);</code></pre>
+
+<h4>N:M: tabla intermedia con clave compuesta</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> matricula (
+  id_estudiante <span class="ty">INT</span>         <span class="kw">REFERENCES</span> estudiante(id_estudiante),
+  codigo_curso  <span class="ty">VARCHAR</span>(10) <span class="kw">REFERENCES</span> curso(codigo_curso),
+  fecha         <span class="ty">DATE</span>        <span class="kw">NOT NULL</span>,
+  nota          <span class="ty">DECIMAL</span>(3,1) <span class="kw">CHECK</span> (nota <span class="kw">BETWEEN</span> 0 <span class="kw">AND</span> 10),
+  <span class="kw">PRIMARY KEY</span> (id_estudiante, codigo_curso)   <span class="cm">-- un estudiante no se inscribe dos veces al mismo curso</span>
+);</code></pre>
+<div class="tw"><table class="dt">
+<caption>Así quedan los datos de matricula</caption>
+<thead><tr><th>id_estudiante</th><th>codigo_curso</th><th>fecha</th><th>nota</th></tr></thead>
+<tbody>
+<tr><td>1001</td><td>BD101</td><td>2025-02-10</td><td>9.0</td></tr>
+<tr><td>1001</td><td>MAT201</td><td>2025-02-10</td><td>7.5</td></tr>
+<tr><td>1002</td><td>BD101</td><td>2025-02-11</td><td class="null">NULL</td></tr>
+</tbody></table></div>
+
+<h4>1:1: FK con UNIQUE</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> perfil (
+  id_perfil  <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+  id_usuario <span class="ty">INT</span> <span class="kw">NOT NULL UNIQUE</span> <span class="kw">REFERENCES</span> usuario(id_usuario),
+  biografia  <span class="ty">TEXT</span>
+);</code></pre>
+
+<h4>Multivalorado: tabla aparte</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> telefono_cliente (
+  id_cliente <span class="ty">INT</span> <span class="kw">REFERENCES</span> cliente(id_cliente) <span class="kw">ON DELETE CASCADE</span>,
+  telefono   <span class="ty">VARCHAR</span>(20),
+  tipo       <span class="ty">VARCHAR</span>(10) <span class="kw">DEFAULT</span> <span class="str">'móvil'</span>,
+  <span class="kw">PRIMARY KEY</span> (id_cliente, telefono)
+);</code></pre>
+
+<h4>Entidad débil: clave compuesta con la propietaria</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> habitacion (
+  id_hotel <span class="ty">INT</span> <span class="kw">REFERENCES</span> hotel(id_hotel) <span class="kw">ON DELETE CASCADE</span>,
+  numero   <span class="ty">VARCHAR</span>(5),
+  tipo     <span class="ty">VARCHAR</span>(20),
+  <span class="kw">PRIMARY KEY</span> (id_hotel, numero)
+);</code></pre>
+
+<h4>Recursiva: FK hacia la misma tabla</h4>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> empleado (
+  id_empleado <span class="ty">INT</span> <span class="kw">PRIMARY KEY</span>,
+  nombre      <span class="ty">VARCHAR</span>(80) <span class="kw">NOT NULL</span>,
+  id_jefe     <span class="ty">INT</span> <span class="kw">REFERENCES</span> empleado(id_empleado)   <span class="cm">-- NULL para el director</span>
+);</code></pre>
+
+<h3>Script completo de la tienda en línea</h3>
+<p>Aplicando las reglas al diagrama del capítulo anterior (sintaxis estándar, ligeramente adaptada a PostgreSQL; en MySQL se usa <code>AUTO_INCREMENT</code> en lugar de <code>GENERATED ... AS IDENTITY</code>):</p>
+<pre class="code"><code><span class="kw">CREATE TABLE</span> cliente (
+  id_cliente     <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  nombre         <span class="ty">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+  correo         <span class="ty">VARCHAR</span>(150) <span class="kw">NOT NULL UNIQUE</span>,
+  telefono       <span class="ty">VARCHAR</span>(20),
+  fecha_registro <span class="ty">TIMESTAMP</span> <span class="kw">NOT NULL DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>
+);
+
+<span class="kw">CREATE TABLE</span> direccion (
+  id_direccion  <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  id_cliente    <span class="ty">INT</span> <span class="kw">NOT NULL REFERENCES</span> cliente(id_cliente) <span class="kw">ON DELETE CASCADE</span>,
+  calle         <span class="ty">VARCHAR</span>(150) <span class="kw">NOT NULL</span>,
+  ciudad        <span class="ty">VARCHAR</span>(80)  <span class="kw">NOT NULL</span>,
+  codigo_postal <span class="ty">VARCHAR</span>(10)
+);
+
+<span class="kw">CREATE TABLE</span> categoria (
+  id_categoria <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  nombre       <span class="ty">VARCHAR</span>(60) <span class="kw">NOT NULL UNIQUE</span>
+);
+
+<span class="kw">CREATE TABLE</span> producto (
+  id_producto  <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  id_categoria <span class="ty">INT</span> <span class="kw">NOT NULL REFERENCES</span> categoria(id_categoria),
+  nombre       <span class="ty">VARCHAR</span>(120) <span class="kw">NOT NULL</span>,
+  descripcion  <span class="ty">TEXT</span>,
+  precio       <span class="ty">DECIMAL</span>(10,2) <span class="kw">NOT NULL CHECK</span> (precio &gt; 0),
+  stock        <span class="ty">INT</span> <span class="kw">NOT NULL DEFAULT</span> 0 <span class="kw">CHECK</span> (stock &gt;= 0)
+);
+
+<span class="kw">CREATE TABLE</span> pedido (
+  id_pedido    <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  id_cliente   <span class="ty">INT</span> <span class="kw">NOT NULL REFERENCES</span> cliente(id_cliente),
+  id_direccion <span class="ty">INT</span> <span class="kw">NOT NULL REFERENCES</span> direccion(id_direccion),
+  fecha        <span class="ty">TIMESTAMP</span> <span class="kw">NOT NULL DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>,
+  estado       <span class="ty">VARCHAR</span>(15) <span class="kw">NOT NULL DEFAULT</span> <span class="str">'pendiente'</span>
+               <span class="kw">CHECK</span> (estado <span class="kw">IN</span> (<span class="str">'pendiente'</span>,<span class="str">'pagado'</span>,<span class="str">'enviado'</span>,<span class="str">'entregado'</span>))
+);
+
+<span class="kw">CREATE TABLE</span> detalle_pedido (
+  id_pedido       <span class="ty">INT</span> <span class="kw">REFERENCES</span> pedido(id_pedido) <span class="kw">ON DELETE CASCADE</span>,
+  id_producto     <span class="ty">INT</span> <span class="kw">REFERENCES</span> producto(id_producto),
+  cantidad        <span class="ty">INT</span> <span class="kw">NOT NULL CHECK</span> (cantidad &gt; 0),
+  precio_unitario <span class="ty">DECIMAL</span>(10,2) <span class="kw">NOT NULL CHECK</span> (precio_unitario &gt; 0),
+  <span class="kw">PRIMARY KEY</span> (id_pedido, id_producto)
+);
+
+<span class="kw">CREATE TABLE</span> pago (
+  id_pago   <span class="ty">INT</span> <span class="kw">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+  id_pedido <span class="ty">INT</span> <span class="kw">NOT NULL REFERENCES</span> pedido(id_pedido),
+  monto     <span class="ty">DECIMAL</span>(10,2) <span class="kw">NOT NULL CHECK</span> (monto &gt; 0),
+  fecha     <span class="ty">TIMESTAMP</span> <span class="kw">NOT NULL DEFAULT</span> <span class="kw">CURRENT_TIMESTAMP</span>,
+  metodo    <span class="ty">VARCHAR</span>(20) <span class="kw">NOT NULL CHECK</span> (metodo <span class="kw">IN</span> (<span class="str">'tarjeta'</span>,<span class="str">'transferencia'</span>,<span class="str">'contraentrega'</span>))
+);</code></pre>
+<div class="box tip"><span class="t">Orden de creación</span><p>Las tablas “padre” (a las que otras apuntan) se crean primero: <code>cliente</code>, <code>categoria</code>, luego <code>direccion</code>, <code>producto</code>, <code>pedido</code>, y al final las que dependen de varias. Al borrar se hace el orden inverso.</p></div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="chapter" id="c13">
+<header>
+  <h2><span class="num">13</span>Normalización</h2>
+  <p>Cómo organizar las tablas para que cada dato viva en un solo lugar y no existan contradicciones.</p>
+</header>
+
+<p class="def">La <mark>normalización</mark> es un proceso de diseño que descompone las tablas según reglas (formas normales) para eliminar la redundancia y evitar anomalías al insertar, modificar o borrar datos.</p>
+
+<h3>El problema: una sola tabla gigante</h3>
+<p>Imagina que una tienda lleva todo en una única tabla, tal como lo haría en una hoja de cálculo:</p>
+<div class="tw"><table class="dt">
+<caption>Tabla plana: venta</caption>
+<thead><tr><th>id_pedido</th><th>fecha</th><th>cliente</th><th>correo</th><th>ciudad</th><th>depto.</th><th>producto</th><th>precio</th><th>cant.</th></tr></thead>
+<tbody>
+<tr><td>5001</td><td>2025-03-14</td><td>Marta Ruiz</td><td>marta@correo.com</td><td>Ibagué</td><td>Tolima</td><td>Mouse</td><td>25.00</td><td>2</td></tr>
+<tr><td>5001</td><td>2025-03-14</td><td>Marta Ruiz</td><td>marta@correo.com</td><td>Ibagué</td><td>Tolima</td><td>Teclado</td><td>45.00</td><td>1</td></tr>
+<tr><td>5002</td><td>2025-03-15</td><td>Luis Gómez</td><td>luis@correo.com</td><td>Cali</td><td>Valle</td><td>Monitor</td><td>180.00</td><td>1</td></tr>
+<tr><td>5002</td><td>2025-03-15</td><td>Luis Gómez</td><td>luis@correo.com</td><td>Cali</td><td>Valle</td><td>Mouse</td><td>25.00</td><td>1</td></tr>
+</tbody></table></div>
+
+<h4>Las tres anomalías</h4>
+<div class="tw"><table class="dt">
+<thead><tr><th>Anomalía</th><th>Qué pasa</th><th>En la tabla anterior</th></tr></thead>
+<tbody>
+<tr><td class="k">De inserción</td><td>No puedes registrar un dato sin otro que no existe aún.</td><td>No puedes dar de alta un producto nuevo hasta que alguien lo compre, ni un cliente que aún no pidió.</td></tr>
+<tr><td class="k">De actualización</td><td>Cambiar un dato exige modificar muchas filas; si olvidas una, hay contradicción.</td><td>Marta cambia de correo: hay que editar todas sus filas. Si omites una, tiene dos correos.</td></tr>
+<tr><td class="k">De borrado</td><td>Al eliminar un dato se pierde otro sin querer.</td><td>Si borras el pedido 5002 (la única compra del Monitor), desaparece también el Monitor y su precio, y el cliente Luis.</td></tr>
+</tbody></table></div>
+
+<h3>Dependencias funcionales</h3>
+<p>Se dice que <b>B depende funcionalmente de A</b> (se escribe <code>A → B</code>) si cada valor de A determina un único valor de B. Ejemplos:</p>
+<ul>
+<li><code>id_pedido → fecha</code>: un pedido tiene una sola fecha.</li>
+<li><code>correo → cliente</code>: un correo identifica a un cliente.</li>
+<li><code>producto → precio</code>: cada producto tiene un precio.</li>
+<li><code>ciudad → departamento</code>: Ibagué pertenece a Tolima.</li>
+<li><code>(id_pedido, producto) → cantidad</code>: la cantidad depende del par completo.</li>
+</ul>
+<p>La normalización consiste en agrupar en cada tabla solo los atributos que dependen de <b>la clave, de toda la clave y nada más que la clave</b>.</p>
+
+<h3>Primera forma normal (1FN)</h3>
+<p><b>Regla:</b> todos los valores son atómicos (un solo dato por celda) y no hay grupos repetidos.</p>
+<div class="box warn"><span class="t">Viola la 1FN</span>
+<p>Una columna <code>productos</code> con el valor “Mouse x2, Teclado x1”, o columnas <code>producto1</code>, <code>producto2</code>, <code>producto3</code>. Imposible consultar “pedidos que incluyen Teclado” de forma fiable.</p></div>
+<p><b>Solución:</b> una fila por cada combinación pedido-producto. La tabla plana anterior ya está en 1FN. Su clave primaria es <code>(id_pedido, producto)</code>.</p>
+
+<h3>Segunda forma normal (2FN)</h3>
+<p><b>Regla:</b> está en 1FN y ningún atributo no clave depende de <b>solo una parte</b> de una clave compuesta (sin dependencias parciales).</p>
+<p>En la tabla plana, con clave <code>(id_pedido, producto)</code>:</p>
+<ul>
+<li><code>fecha, cliente, correo, ciudad, depto.</code> dependen solo de <code>id_pedido</code> (parte de la clave).</li>
+<li><code>precio</code> depende solo de <code>producto</code> (otra parte de la clave).</li>
+<li>Solo <code>cantidad</code> depende de la clave completa.</li>
+</ul>
+<p><b>Solución:</b> separar en tres tablas.</p>
+<p><code>PEDIDO(<u>id_pedido</u>, fecha, cliente, correo, ciudad, depto)</code><br>
+<code>PRODUCTO(<u>id_producto</u>, nombre, precio)</code><br>
+<code>DETALLE(<u>#id_pedido</u>, <u>#id_producto</u>, cantidad)</code></p>
+
+<h3>Tercera forma normal (3FN)</h3>
+<p><b>Regla:</b> está en 2FN y ningún atributo no clave depende de <b>otro atributo no clave</b> (sin dependencias transitivas).</p>
+<p>En <code>PEDIDO</code>: <code>id_pedido → cliente</code> y <code>cliente → correo, ciudad</code>; y además <code>ciudad → depto</code>. Los datos del cliente dependen del cliente, no del pedido; el departamento depende de la ciudad.</p>
+<p><b>Solución:</b> separar cliente (y ciudad).</p>
+<p><code>PEDIDO(<u>id_pedido</u>, fecha, #id_cliente)</code><br>
+<code>CLIENTE(<u>id_cliente</u>, nombre, correo, #id_ciudad)</code><br>
+<code>CIUDAD(<u>id_ciudad</u>, nombre, departamento)</code><br>
+<code>PRODUCTO(<u>id_producto</u>, nombre, precio)</code><br>
+<code>DETALLE(<u>#id_pedido</u>, <u>#id_producto</u>, cantidad, precio_unitario)</code></p>
+
+<div class="tw"><table class="dt">
+<caption>Resultado: cada hecho se guarda una sola vez</caption>
+<thead><tr><th>Cambio</th><th>Antes (tabla plana)</th><th>Después (3FN)</th></tr></thead>
+<tbody>
+<tr><td class="k">Cambia el correo de Marta</td><td>Editar todas sus filas.</td><td>Editar una fila de <code>cliente</code>.</td></tr>
+<tr><td class="k">Nuevo producto sin ventas</td><td>Imposible.</td><td>Insertar en <code>producto</code>.</td></tr>
+<tr><td class="k">Se borra un pedido</td><td>Se pierde el producto y el cliente.</td><td>Solo se borra el pedido y sus líneas.</td></tr>
+</tbody></table></div>
+
+<div class="box key"><span class="t">Resumen en una frase</span>
+<p>Cada atributo debe depender de <b>la clave</b> (1FN), <b>de toda la clave</b> (2FN) y <b>nada más que la clave</b> (3FN).</p></div>
+
+<h3>Más allá: BCNF y otras formas</h3>
+<p>La <b>forma normal de Boyce-Codd (BCNF)</b> es una versión más estricta de la 3FN: todo determinante debe ser una clave candidata. Existen la 4FN y la 5FN (dependencias multivaluadas y de reunión), poco habituales. En la práctica, <b>llegar a 3FN o BCNF</b> es suficiente para la mayoría de sistemas.</p>
+
+<h3>Desnormalización: romper las reglas a propósito</h3>
+<p>Normalizar privilegia la integridad; pero dividir en muchas tablas obliga a hacer más uniones (<code>JOIN</code>), lo que puede ser lento en consultas analíticas gigantes. A veces se <b>desnormaliza deliberadamente</b>: copiar un dato o guardar un total precalculado para ganar velocidad. Es una decisión consciente, documentada y posterior a normalizar, nunca un punto de partida.</p>
+<div class="box ex"><span class="t">Ejemplo real</span><p>Una tienda guarda <code>cantidad_resenas</code> y <code>promedio_estrellas</code> dentro de <code>producto</code>, aunque se podrían calcular desde la tabla de reseñas. Lo hace porque el listado de productos se muestra millones de veces al día y recalcular cada vez sería carísimo.</p></div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section class="chapter" id="c14">
+<header>
+  <h2><span class="num">14</span>Primeros pasos con SQL</h2>
+  <p>El lenguaje con el que se pregunta y se modifica una base de datos. Aquí un recorrido mínimo con resultados.</p>
+</header>
+
+<p><mark>SQL</mark> (Structured Query Language) es el lenguaje estándar de las bases de datos relacionales. Es <b>declarativo</b>: describes <i>qué</i> quieres obtener y el SGBD decide <i>cómo</i>. Usaremos estos datos:</p>
+<div class="grid2">
+<div class="tw"><table class="dt"><caption>cliente</caption>
+<thead><tr><th>id_cliente</th><th>nombre</th><th>ciudad</th></tr></thead>
+<tbody><tr><td>1</td><td>Marta Ruiz</td><td>Ibagué</td></tr><tr><td>2</td><td>Luis Gómez</td><td>Cali</td></tr></tbody></table></div>
+<div class="tw"><table class="dt"><caption>producto</caption>
+<thead><tr><th>id_producto</th><th>nombre</th><th>precio</th></tr></thead>
+<tbody><tr><td>1</td><td>Mouse</td><td>25.00</td></tr><tr><td>2</td><td>Teclado</td><td>45.00</td></tr><tr><td>3</td><td>Monitor</td><td>180.00</td></tr></tbody></table></div>
+<div class="tw"><table class="dt"><caption>pedido</caption>
+<thead><tr><th>id_pedido</th><th>id_cliente</th><th>fecha</th></tr></thead>
+<tbody><tr><td>5001</td><td>1</td><td>2025-03-14</td></tr><tr><td>5002</td><td>2</td><td>2025-03-15</td></tr></tbody></table></div>
+<div class="tw"><table class="dt"><caption>detalle_pedido</caption>
+<thead><tr><th>id_pedido</th><th>id_producto</th><th>cantidad</th><th>precio_unitario</th></tr></thead>
+<tbody><tr><td>5001</td><td>1</td><td>2</td><td>25.00</td></tr><tr><td>5001</td><td>2</td><td>1</td><td>45.00</td></tr><tr><td>5002</td><td>3</td><td>1</td><td>180.00</td></tr><tr><td>5002</td><td>1</td><td>1</td><td>25.00</td></tr></tbody></table></div>
+</div>
+
+<h3>Insertar datos</h3>
+<pre class="code"><code><span class="kw">INSERT INTO</span> cliente (nombre, ciudad) <span class="kw">VALUES</span> (<span class="str">'Marta Ruiz'</span>, <span class="str">'Ibagué'</span>);
+<span class="kw">INSERT INTO</span> producto (nombre, precio) <span class="kw">VALUES</span> (<span class="str">'Mouse'</span>, 25.00), (<span class="str">'Teclado'</span>, 45.00);</code></pre>
+
+<h3>Consultar: SELECT, WHERE, ORDER BY</h3>
+<pre class="code"><code><span class="cm">-- Productos que cuestan más de 30, del más caro al más barato</span>
+<span class="kw">SELECT</span> nombre, precio
+<span class="kw">FROM</span> producto
+<span class="kw">WHERE</span> precio &gt; 30
+<span class="kw">ORDER BY</span> precio <span class="kw">DESC</span>;</code></pre>
+<div class="tw"><table class="dt"><caption>Resultado</caption>
+<thead><tr><th>nombre</th><th>precio</th></tr></thead>
+<tbody><tr><td>Monitor</td><td>180.00</td></tr><tr><td>Teclado</td><td>45.00</td></tr></tbody></table></div>
+<p>El orden lógico en que se piensa una consulta: <code>FROM</code> (de dónde) → <code>WHERE</code> (qué filas) → <code>GROUP BY</code> (agrupar) → <code>HAVING</code> (filtrar grupos) → <code>SELECT</code> (qué columnas) → <code>ORDER BY</code> (orden).</p>
+
+<h3>Unir tablas: JOIN</h3>
+<p>Es la operación que aprovecha las claves foráneas para reunir datos de varias tablas:</p>
+<pre class="code"><code><span class="cm">-- ¿Qué compró cada cliente?</span>
+<span class="kw">SELECT</span> c.nombre <span class="kw">AS</span> cliente, p.id_pedido, pr.nombre <span class="kw">AS</span> producto, d.cantidad
+<span class="kw">FROM</span> cliente c
+<span class="kw">JOIN</span> pedido p          <span class="kw">ON</span> p.id_cliente  = c.id_cliente
+<span class="kw">JOIN</span> detalle_pedido d  <span class="kw">ON</span> d.id_pedido   = p.id_pedido
+<span class="kw">JOIN</span> producto pr       <span class="kw">ON</span> pr.id_producto = d.id_producto
+<span class="kw">ORDER BY</span> p.id_pedido;</code></pre>
+<div class="tw"><table class="dt"><caption>Resultado</caption>
+<thead><tr><th>cliente</th><th>id_pedido</th><th>producto</th><th>cantidad</th></tr></thead>
+<tbody>
+<tr><td>Marta Ruiz</td><td>5001</td><td>Mouse</td><td>2</td></tr>
+<tr><td>Marta Ruiz</td><td>5001</td><td>Teclado</td><td>1</td></tr>
+<tr><td>Luis Gómez</td><td>5002</td><td>Monitor</td><td>1</td></tr>
+<tr><td>Luis Gómez</td><td>5002</td><td>Mouse</td><td>1</td></tr>
+</tbody></table></div>
+<div class="tw"><table class="dt">
+<caption>Tipos principales de JOIN</caption>
+<thead><tr><th>Tipo</th><th>Devuelve</th></tr></thead>
+<tbody>
+<tr><td class="k">INNER JOIN (o JOIN)</td><td>Solo las filas que tienen pareja en ambas tablas.</td></tr>
+<tr><td class="k">LEFT JOIN</td><td>Todas las filas de la tabla izquierda, con o sin pareja (los vacíos salen NULL). Ejemplo: todos los clientes, incluso los que nunca compraron.</td></tr>
+<tr><td class="k">RIGHT JOIN</td><td>Lo contrario del LEFT.</td></tr>
+<tr><td class="k">FULL JOIN</td><td>Todas las filas de ambas tablas.</td></tr>
+</tbody></table></div>
+
+<h3>Agrupar y resumir: GROUP BY</h3>
+<pre class="code"><code><span class="cm">-- Total de cada pedido</span>
+<span class="kw">SELECT</span> id_pedido, <span class="kw">SUM</span>(cantidad * precio_unitario) <span class="kw">AS</span> total
+<span class="kw">FROM</span> detalle_pedido
+<span class="kw">GROUP BY</span> id_pedido;</code></pre>
+<div class="tw"><table class="dt"><caption>Resultado</caption>
+<thead><tr><th>id_pedido</th><th>total</th></tr></thead>
+<tbody><tr><td>5001</td><td>95.00</td></tr><tr><td>5002</td><td>205.00</td></tr></tbody></table></div>
+<p>Funciones de agregación habituales: <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code>.</p>
+
+<h3>Modificar y borrar</h3>
+<pre class="code"><code><span class="kw">UPDATE</span> producto <span class="kw">SET</span> precio = 28.00 <span class="kw">WHERE</span> id_producto = 1;
+<span class="kw">DELETE FROM</span> cliente <span class="kw">WHERE</span> id_cliente = 2;</code></pre>
+<div class="box warn"><span class="t">Nunca olvides el WHERE</span>
+<p><code>UPDATE producto SET precio = 0;</code> sin <code>WHERE</code> deja <b>todos</b> los productos en cero. <code>DELETE FROM cliente;</code> borra <b>todos</b> los clientes. Antes de modificar, ejecuta un <code>SELECT</code> con el mismo <code>WHERE</code> para ver qué filas afectarás, y trabaja dentro de una transacción (capítulo siguiente).</p></div>
+<p>Observa también el efecto de la integridad referencial: el <code>DELETE</code> del cliente 2 falla si tiene pedidos, salvo que la FK se haya definido con <code>ON DELETE CASCADE</code>. Es el SGBD cuidando tus datos.</p>
+</section>
+
+<!-- ============ 15 ============ -->
+<section class="chapter" id="c15">
+<header>
+  <h2><span class="num">15</span>Índices, vistas, transacciones y seguridad</h2>
+  <p>Conceptos que hacen que una base de datos sea rápida, confiable y segura.</p>
+</header>
+
+<h3>Índices</h3>
+<p>Un <mark>índice</mark> es una estructura auxiliar (normalmente un árbol B) que permite encontrar filas sin leer toda la tabla. Funciona como el índice alfabético de un libro: en vez de hojear 500 páginas, vas directo a la página.</p>
+<pre class="code"><code><span class="kw">CREATE INDEX</span> idx_pedido_cliente <span class="kw">ON</span> pedido (id_cliente);</code></pre>
+<ul>
+<li><b>Ventaja:</b> las búsquedas, uniones y ordenamientos por esa columna son mucho más rápidos. Buscar un cliente entre 10 millones puede pasar de segundos a milisegundos.</li>
+<li><b>Costo:</b> ocupan espacio y hacen más lentas las escrituras (cada inserción debe actualizar el índice).</li>
+<li>Las claves primarias y las restricciones <code>UNIQUE</code> crean índices automáticamente.</li>
+<li>Indexa las columnas que usas con frecuencia en <code>WHERE</code>, <code>JOIN</code> y <code>ORDER BY</code>, sobre todo las claves foráneas. No indexes todo.</li>
+</ul>
+
+<h3>Vistas</h3>
+<p>Una <mark>vista</mark> es una consulta guardada con nombre que se usa como si fuera una tabla. No almacena datos propios: ejecuta la consulta cada vez.</p>
+<pre class="code"><code><span class="kw">CREATE VIEW</span> total_por_pedido <span class="kw">AS</span>
+<span class="kw">SELECT</span> id_pedido, <span class="kw">SUM</span>(cantidad * precio_unitario) <span class="kw">AS</span> total
+<span class="kw">FROM</span> detalle_pedido <span class="kw">GROUP BY</span> id_pedido;
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> total_por_pedido <span class="kw">WHERE</span> total &gt; 100;</code></pre>
+<p>Sirven para simplificar consultas complejas, para ocultar columnas sensibles (el nivel externo de la arquitectura de tres niveles) y para exponer el atributo derivado <code>total</code> sin guardarlo.</p>
+
+<h3>Transacciones y propiedades ACID</h3>
+<p class="def">Una <mark>transacción</mark> es un conjunto de operaciones que se ejecutan como una unidad indivisible: o se completan todas, o no se aplica ninguna.</p>
+<div class="box ex"><span class="t">Ejemplo real: transferencia bancaria</span>
+<p>Pasar 100 de la cuenta A a la cuenta B son dos pasos: restar a A y sumar a B. Si el sistema falla entre ambos, el dinero desaparecería. Con una transacción, o ocurren los dos pasos o ninguno.</p></div>
+<pre class="code"><code><span class="kw">BEGIN</span>;
+  <span class="kw">UPDATE</span> cuenta <span class="kw">SET</span> saldo = saldo - 100 <span class="kw">WHERE</span> id_cuenta = 1;
+  <span class="kw">UPDATE</span> cuenta <span class="kw">SET</span> saldo = saldo + 100 <span class="kw">WHERE</span> id_cuenta = 2;
+<span class="kw">COMMIT</span>;     <span class="cm">-- confirma ambos cambios. Con ROLLBACK se deshacen los dos.</span></code></pre>
+<div class="tw"><table class="dt">
+<caption>ACID: las cuatro garantías</caption>
+<thead><tr><th>Letra</th><th>Propiedad</th><th>Significa</th></tr></thead>
+<tbody>
+<tr><td class="k">A</td><td>Atomicidad</td><td>Todo o nada.</td></tr>
+<tr><td class="k">C</td><td>Consistencia</td><td>La transacción lleva la base de un estado válido a otro válido; se respetan las restricciones.</td></tr>
+<tr><td class="k">I</td><td>Aislamiento</td><td>Transacciones simultáneas no se interfieren: cada una actúa como si estuviera sola.</td></tr>
+<tr><td class="k">D</td><td>Durabilidad</td><td>Lo confirmado (COMMIT) sobrevive a cortes de energía o fallos.</td></tr>
+</tbody></table></div>
+
+<h3>Concurrencia</h3>
+<p>Cuando dos clientes compran la última unidad de un producto a la vez, el SGBD debe evitar vender dos veces. Lo logra con <b>bloqueos</b> (una transacción espera a que la otra termine) o con <b>versiones múltiples</b> (MVCC: cada transacción ve una “foto” coherente). Tú eliges el nivel de aislamiento: más aislamiento implica más seguridad pero menos paralelismo.</p>
+
+<h3>Seguridad</h3>
+<ul>
+<li><b>Autenticación y autorización:</b> usuarios con roles y el <i>principio de mínimo privilegio</i>. La aplicación web no debería conectarse como administrador.</li>
+</ul>
+<pre class="code"><code><span class="kw">CREATE ROLE</span> analista;
+<span class="kw">GRANT SELECT ON</span> total_por_pedido <span class="kw">TO</span> analista;   <span class="cm">-- solo puede leer esa vista</span>
+<span class="kw">REVOKE</span> <span class="kw">ALL ON</span> cliente <span class="kw">FROM</span> analista;</code></pre>
+<ul>
+<li><b>Contraseñas:</b> jamás se guardan en texto claro; se almacena un <i>hash</i> con sal (bcrypt, argon2).</li>
+<li><b>Inyección SQL:</b> ocurre cuando se pega texto del usuario dentro de una consulta. Se previene con <i>consultas parametrizadas</i> y nunca concatenando cadenas.</li>
+<li><b>Cifrado:</b> en tránsito (TLS) y en reposo, sobre todo para datos personales y financieros.</li>
+<li><b>Privacidad:</b> cumple la normativa de protección de datos que aplique (por ejemplo, la Ley 1581 de 2012 en Colombia, el RGPD en Europa): guarda solo lo necesario.</li>
+<li><b>Auditoría:</b> registrar quién cambió qué y cuándo.</li>
+</ul>
+
+<h3>Respaldo y recuperación</h3>
+<p>Los discos fallan, las personas borran por error y los sistemas sufren ataques. Una regla práctica es <b>3-2-1</b>: tres copias de los datos, en dos tipos de medios distintos, con una fuera del sitio. Y lo más importante: <b>probar periódicamente que la restauración funciona</b>. Un respaldo que nunca se probó es solo una esperanza.</p>
+</section>
+
+<!-- ============ 16 ============ -->
+<section class="chapter" id="c16">
+<header>
+  <h2><span class="num">16</span>Buenas prácticas, ejercicios y quiz</h2>
+  <p>Para consolidar lo aprendido y evitar los errores más frecuentes.</p>
+</header>
+
+<h3>Convenciones de nombres</h3>
+<ul>
+<li>Elige un idioma y una convención y <b>sé consistente</b>: <code>snake_case</code> en minúsculas es la más portable (<code>fecha_registro</code>).</li>
+<li>Tablas en <b>singular</b> (<code>cliente</code>) o plural (<code>clientes</code>), pero sin mezclar.</li>
+<li>Claves primarias con nombres claros: <code>id_cliente</code> en <code>cliente</code> y la misma FK <code>id_cliente</code> en <code>pedido</code>.</li>
+<li>Sin espacios, tildes ni caracteres especiales; evita palabras reservadas (<code>order</code>, <code>user</code>, <code>group</code>).</li>
+<li>Nombres descriptivos: <code>fecha_nacimiento</code>, no <code>fn</code> ni <code>campo7</code>.</li>
+</ul>
+
+<h3>Errores de diseño frecuentes</h3>
+<div class="tw"><table class="dt">
+<thead><tr><th>Error</th><th>Por qué es malo</th><th>Mejor alternativa</th></tr></thead>
+<tbody>
+<tr><td class="k">Listas en una celda (“555-1,555-2”)</td><td>Rompe la 1FN; imposible buscar o validar.</td><td>Tabla aparte de teléfonos.</td></tr>
+<tr><td class="k">Columnas repetidas (<code>tel1, tel2, tel3</code>)</td><td>Limita a tres y desperdicia espacio.</td><td>Tabla hija.</td></tr>
+<tr><td class="k">Sin claves foráneas “para ir más rápido”</td><td>Datos huérfanos e inconsistentes.</td><td>Declara siempre las FK; el costo es mínimo.</td></tr>
+<tr><td class="k">Una tabla “comodín” con todo</td><td>Anomalías y confusión.</td><td>Normalizar hasta 3FN.</td></tr>
+<tr><td class="k">Guardar campos calculados sin necesidad</td><td>Se desactualizan.</td><td>Calcular en consulta o vista.</td></tr>
+<tr><td class="k">Usar el nombre o el correo como PK</td><td>Cambian; ocupan más espacio.</td><td>Clave sustituta + <code>UNIQUE</code>.</td></tr>
+<tr><td class="k">Borrar físicamente datos históricos</td><td>Pierdes trazabilidad.</td><td>Borrado lógico (<code>activo = false</code>, <code>eliminado_en</code>).</td></tr>
+<tr><td class="k">No pensar en el futuro</td><td>Cambiar el esquema con millones de filas es doloroso.</td><td>Valida el modelo con preguntas reales antes de construir.</td></tr>
+</tbody></table></div>
+
+<h3>Lista de verificación al diseñar</h3>
+<ol>
+<li>¿Cada entidad tiene un identificador único y estable?</li>
+<li>¿Las relaciones tienen sus cardinalidades mínimas y máximas claras?</li>
+<li>¿Resolví todas las relaciones N:M con una tabla intermedia?</li>
+<li>¿Cada hecho se guarda en un solo lugar (3FN)?</li>
+<li>¿Los tipos de dato y las restricciones expresan las reglas del negocio?</li>
+<li>¿El modelo responde a las preguntas reales de los usuarios?</li>
+<li>¿Documenté el diagrama y un diccionario de datos con el significado de cada campo?</li>
+</ol>
+
+<h3>Ejercicios</h3>
+
+<h4>Ejercicio 1: clasificar</h4>
+<p>Indica si cada elemento es <i>dato</i>, <i>información</i> o <i>conocimiento</i>: (a) “450”; (b) “El pedido 5003 tiene un total de $450”; (c) “Los clientes que compran un monitor suelen comprar también un teclado en 70 % de los casos”.</p>
+<details class="ans"><summary>Ver respuesta</summary><div class="in">
+<p>(a) Dato: un valor suelto sin contexto. (b) Información: el dato con significado (pedido, concepto, monto). (c) Conocimiento: un patrón descubierto al analizar muchos registros, útil para decidir (recomendar teclados).</p></div></details>
+
+<h4>Ejercicio 2: diseñar una biblioteca</h4>
+<p>Una biblioteca presta libros a socios. Cada libro tiene ISBN, título y año; puede tener varios autores, y un autor puede haber escrito varios libros. La biblioteca puede tener varias copias físicas del mismo libro, cada una con un código de barras. Un socio (nombre, documento, correo) toma prestadas copias; de cada préstamo se registran la fecha de salida, la fecha pactada de devolución y la fecha real de devolución (vacía mientras no se devuelve). Dibuja el diagrama ER y define las tablas.</p>
+<details class="ans"><summary>Ver solución</summary><div class="in">
+<p><b>Entidades:</b> LIBRO, AUTOR, COPIA, SOCIO y PRESTAMO.</p>
+<p><b>Relaciones:</b> LIBRO–AUTOR es N:M (tabla <code>libro_autor</code>); LIBRO–COPIA es 1:N (un libro tiene una o muchas copias, cada copia es de un libro); SOCIO–COPIA es N:M a lo largo del tiempo con datos propios: se convierte en la entidad asociativa PRESTAMO (un socio realiza cero o muchos préstamos; una copia se presta cero o muchas veces).</p>
+<div class="tw"><table class="dt">
+<caption>Relaciones del modelo (pata de gallo)</caption>
+<thead><tr><th>Relación</th><th>Notación</th><th>Lectura</th></tr></thead>
+<tbody>
+<tr><td>LIBRO – COPIA</td><td><code>LIBRO ||--|{ COPIA</code></td><td>Un libro tiene una o muchas copias; cada copia es de un solo libro.</td></tr>
+<tr><td>LIBRO – AUTOR</td><td><code>LIBRO }|--|{ AUTOR</code></td><td>Un libro tiene uno o varios autores; un autor escribe uno o varios libros.</td></tr>
+<tr><td>SOCIO – PRESTAMO</td><td><code>SOCIO ||--o{ PRESTAMO</code></td><td>Un socio realiza cero o muchos préstamos; cada préstamo es de un socio.</td></tr>
+<tr><td>COPIA – PRESTAMO</td><td><code>COPIA ||--o{ PRESTAMO</code></td><td>Una copia se presta cero o muchas veces; cada préstamo es de una copia.</td></tr>
+</tbody></table></div>
+<p><b>Tablas:</b> <code>libro(<u>isbn</u>, titulo, anio)</code>, <code>autor(<u>id_autor</u>, nombre)</code>, <code>libro_autor(<u>#isbn</u>, <u>#id_autor</u>)</code>, <code>copia(<u>codigo_barras</u>, #isbn)</code>, <code>socio(<u>id_socio</u>, documento, nombre, correo)</code>, <code>prestamo(<u>id_prestamo</u>, #id_socio, #codigo_barras, fecha_salida, fecha_pactada, fecha_devolucion)</code>.</p>
+<p><b>Observa:</b> el préstamo es de una <i>copia</i>, no de un libro: por eso existe COPIA. Y como una misma copia se presta muchas veces, el préstamo necesita su propio identificador.</p></div></details>
+
+<h4>Ejercicio 3: normalizar</h4>
+<p>Normaliza esta tabla hasta 3FN: <code>inscripcion(id_estudiante, nombre_estudiante, codigo_curso, nombre_curso, id_profesor, nombre_profesor, nota)</code>, sabiendo que cada curso lo dicta un único profesor y que la clave es <code>(id_estudiante, codigo_curso)</code>.</p>
+<details class="ans"><summary>Ver solución</summary><div class="in">
+<p><b>2FN:</b> <code>nombre_estudiante</code> depende solo de <code>id_estudiante</code>; <code>nombre_curso</code>, <code>id_profesor</code> y <code>nombre_profesor</code> dependen solo de <code>codigo_curso</code>. Solo <code>nota</code> depende de la clave completa.</p>
+<p><b>3FN:</b> en curso, <code>codigo_curso → id_profesor → nombre_profesor</code> es una dependencia transitiva.</p>
+<p><b>Resultado:</b> <code>estudiante(<u>id_estudiante</u>, nombre)</code>; <code>profesor(<u>id_profesor</u>, nombre)</code>; <code>curso(<u>codigo_curso</u>, nombre, #id_profesor)</code>; <code>inscripcion(<u>#id_estudiante</u>, <u>#codigo_curso</u>, nota)</code>.</p></div></details>
+
+<h4>Ejercicio 4: leer cardinalidades</h4>
+<p>Escribe en palabras la relación <code>MEDICO ||--o{ CITA</code> y <code>PACIENTE ||--o{ CITA</code>. ¿Qué tipo de relación hay entre MEDICO y PACIENTE? ¿Qué atributos pondrías en CITA?</p>
+<details class="ans"><summary>Ver respuesta</summary><div class="in">
+<p>Un médico atiende cero o muchas citas; cada cita es atendida por exactamente un médico. Un paciente tiene cero o muchas citas; cada cita es de exactamente un paciente. Entre MEDICO y PACIENTE hay una relación N:M, resuelta por la entidad asociativa CITA, con atributos como <code>fecha_hora</code>, <code>motivo</code>, <code>estado</code> y <code>observaciones</code>.</p></div></details>
+
+<h3>Quiz de autoevaluación</h3>
+<div class="quiz" id="quiz"></div>
+<p><button class="btn" type="button" id="qcheck">Comprobar respuestas</button> <button class="btn alt" type="button" id="qreset">Reiniciar</button><span id="score" role="status"></span></p>
+</section>
+
+<!-- ============ Glosario ============ -->
+<section class="chapter" id="glosario">
+<header>
+  <h2><span class="num">A</span>Glosario</h2>
+  <p>Los términos principales de la guía, por orden alfabético.</p>
+</header>
+<dl class="gl">
+<dt>ACID</dt><dd>Atomicidad, consistencia, aislamiento y durabilidad: garantías de las transacciones.</dd>
+<dt>Atributo</dt><dd>Propiedad que describe una entidad o relación; se convierte en columna.</dd>
+<dt>Base de datos</dt><dd>Colección organizada y persistente de datos relacionados, accesible de forma controlada.</dd>
+<dt>Cardinalidad</dt><dd>Número máximo (y mínimo) de instancias que pueden asociarse en una relación: 1:1, 1:N, N:M.</dd>
+<dt>Catálogo (diccionario de datos)</dt><dd>Metadatos que el SGBD guarda sobre la propia base: tablas, columnas, usuarios.</dd>
+<dt>Clave candidata</dt><dd>Conjunto mínimo de atributos que identifica de forma única una fila.</dd>
+<dt>Clave foránea (FK)</dt><dd>Atributo que referencia la clave primaria de otra tabla.</dd>
+<dt>Clave primaria (PK)</dt><dd>Clave candidata elegida como identificador de la tabla; única y no nula.</dd>
+<dt>Conocimiento</dt><dd>Información interpretada que permite entender patrones y tomar decisiones.</dd>
+<dt>Dato</dt><dd>Representación simbólica de un hecho, sin contexto.</dd>
+<dt>DDL / DML / DCL / TCL</dt><dd>Sublenguajes de SQL: definición, manipulación, control de permisos y control de transacciones.</dd>
+<dt>Dependencia funcional</dt><dd>Relación A → B donde cada valor de A determina un único valor de B.</dd>
+<dt>Desnormalización</dt><dd>Introducir redundancia a propósito para mejorar el rendimiento.</dd>
+<dt>Dominio</dt><dd>Conjunto de valores permitidos para un atributo.</dd>
+<dt>Entidad</dt><dd>Objeto o concepto distinguible del mundo real sobre el que se guardan datos.</dd>
+<dt>Entidad débil</dt><dd>Entidad que no se identifica sola y depende de otra (la propietaria).</dd>
+<dt>Esquema</dt><dd>Descripción de la estructura de la base de datos.</dd>
+<dt>Índice</dt><dd>Estructura auxiliar que acelera las búsquedas.</dd>
+<dt>Información</dt><dd>Datos organizados y con contexto que tienen significado.</dd>
+<dt>Instancia</dt><dd>Caso concreto de una entidad, o el conjunto de datos de la base en un momento dado.</dd>
+<dt>Integridad referencial</dt><dd>Garantía de que cada clave foránea apunta a una fila existente.</dd>
+<dt>JOIN</dt><dd>Operación SQL que combina filas de varias tablas usando una condición.</dd>
+<dt>Metadatos</dt><dd>Datos que describen otros datos.</dd>
+<dt>Modelo de datos</dt><dd>Conjunto de herramientas conceptuales para describir datos, relaciones y restricciones.</dd>
+<dt>Normalización</dt><dd>Proceso de organizar tablas para eliminar redundancia y anomalías.</dd>
+<dt>NULL</dt><dd>Marca de ausencia de valor; no es cero ni texto vacío.</dd>
+<dt>OLTP / OLAP</dt><dd>Procesamiento transaccional (operación diaria) y analítico (consultas de análisis).</dd>
+<dt>Registro (fila, tupla)</dt><dd>Conjunto de valores de campos que describen un elemento.</dd>
+<dt>Relación (ER)</dt><dd>Asociación entre entidades. En el modelo relacional, sinónimo de tabla.</dd>
+<dt>SGBD</dt><dd>Sistema Gestor de Bases de Datos: software que administra las bases de datos.</dd>
+<dt>SQL</dt><dd>Lenguaje estándar para definir, consultar y modificar bases de datos relacionales.</dd>
+<dt>Tabla</dt><dd>Conjunto de filas con las mismas columnas.</dd>
+<dt>Transacción</dt><dd>Grupo de operaciones que se ejecutan como una unidad indivisible.</dd>
+<dt>Vista</dt><dd>Consulta guardada que se usa como si fuera una tabla.</dd>
+</dl>
+
+<div class="box key"><span class="t">Siguientes pasos</span>
+<ul>
+<li>Instala SQLite o PostgreSQL y crea la base de la tienda en línea con el script del capítulo 12.</li>
+<li>Practica SQL: <code>SELECT</code> con <code>JOIN</code>, <code>GROUP BY</code> y subconsultas.</li>
+<li>Diseña la base de un proyecto propio (un gimnasio, una clínica, una liga deportiva) siguiendo el ciclo: requisitos, ER, tablas, normalización.</li>
+<li>Explora temas avanzados: optimización de consultas, procedimientos almacenados, disparadores (<i>triggers</i>), replicación, bases NoSQL y almacenes de datos.</li>
+</ul></div>
+</section>
+
+</main>
+<footer class="end">Guía de bases de datos: de los datos al modelo entidad-relación.</footer>
+</div>
+
+<script>
+(function(){
+  // Tema
+  var root=document.documentElement;
+  var btn=document.getElementById('themeBtn');
+  function isDark(){
+    var t=root.getAttribute('data-theme');
+    if(t) return t==='dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  if(btn){btn.addEventListener('click',function(){root.setAttribute('data-theme',isDark()?'light':'dark');});}
+
+  // Índice: abierto en escritorio, plegado en móvil
+  var d=document.getElementById('tocd');
+  var mq=window.matchMedia('(min-width:1000px)');
+  function syncToc(){ d.open=mq.matches; }
+  syncToc();
+  if(mq.addEventListener){mq.addEventListener('change',syncToc);}
+  document.querySelectorAll('#tocl a').forEach(function(a){
+    a.addEventListener('click',function(){ if(!mq.matches){ d.open=false; } });
+  });
+
+  // Barra de progreso y capítulo activo
+  var bar=document.getElementById('bar');
+  var links=[].slice.call(document.querySelectorAll('#tocl a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?(window.scrollY/h)*100:0;
+    bar.style.width=p+'%';
+    var cur=0;
+    for(var i=0;i<secs.length;i++){
+      if(secs[i] && secs[i].getBoundingClientRect().top<window.innerHeight*0.35){cur=i;}
+    }
+    links.forEach(function(a,i){a.classList.toggle('on',i===cur);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+
+  // Quiz
+  var Q=[
+    {q:'¿Cuál de estas opciones es un dato y no información?',o:['El saldo de Marta al 14 de marzo es $1.200.000','1200000','Marta tiene un saldo mayor al promedio','Los saldos subieron 5 % este mes'],a:1,e:'Un número aislado, sin contexto, es solo un dato.'},
+    {q:'En una tabla, una fila completa se llama:',o:['Campo','Dominio','Registro (tupla)','Atributo'],a:2,e:'La fila es el registro o tupla; la columna es el campo o atributo.'},
+    {q:'PostgreSQL y MySQL son ejemplos de:',o:['Bases de datos','Sistemas gestores de bases de datos (SGBD)','Modelos entidad-relación','Lenguajes de consulta'],a:1,e:'Son SGBD: administran bases de datos, que son otra cosa.'},
+    {q:'¿Qué garantiza la integridad referencial?',o:['Que no haya valores nulos en ninguna columna','Que cada clave foránea apunte a una fila existente','Que la tabla esté normalizada','Que las consultas sean rápidas'],a:1,e:'Evita pedidos de clientes que no existen y otros datos huérfanos.'},
+    {q:'Un cliente realiza muchos pedidos y cada pedido es de un solo cliente. ¿Dónde va la clave foránea?',o:['En la tabla cliente','En la tabla pedido','En una tabla intermedia','En ninguna: no se necesita'],a:1,e:'En relaciones 1:N, la FK va en el lado “muchos”.'},
+    {q:'Una relación muchos a muchos (N:M) entre dos entidades se convierte en tablas mediante:',o:['Una columna con una lista de valores','Una clave primaria compuesta en una de las tablas','Una tabla intermedia con las claves de ambas','Duplicando una de las tablas'],a:2,e:'La tabla intermedia (asociativa) guarda las dos FK y los atributos de la relación.'},
+    {q:'Una tabla con la columna productos = “Mouse, Teclado” viola:',o:['La 1FN (valores atómicos)','La 2FN','La 3FN','Ninguna forma normal'],a:0,e:'Hay varios valores en una sola celda.'},
+    {q:'¿Por qué el teléfono se guarda como VARCHAR y no como INT?',o:['Porque INT no admite números grandes','Porque no se opera aritméticamente y puede llevar ceros iniciales o “+”','Porque VARCHAR es siempre más rápido','Porque SQL no permite INT en columnas únicas'],a:1,e:'Un teléfono es un identificador, no una cantidad.'},
+    {q:'Al transferir dinero entre cuentas, que se apliquen ambos movimientos o ninguno es la propiedad de:',o:['Aislamiento','Durabilidad','Atomicidad','Consistencia referencial'],a:2,e:'Atomicidad: la transacción es indivisible.'},
+    {q:'¿Qué representa el rombo en la notación de Chen?',o:['Una entidad','Un atributo','Una relación','Una restricción CHECK'],a:2,e:'Rectángulo = entidad; óvalo = atributo; rombo = relación.'}
+  ];
+  var qb=document.getElementById('quiz');
+  function build(){
+    qb.innerHTML='';
+    Q.forEach(function(it,i){
+      var d=document.createElement('div');d.className='q';
+      var p=document.createElement('p');p.textContent=(i+1)+'. '+it.q;d.appendChild(p);
+      it.o.forEach(function(t,j){
+        var l=document.createElement('label');
+        var r=document.createElement('input');r.type='radio';r.name='q'+i;r.value=j;
+        l.appendChild(r);l.appendChild(document.createTextNode(t));d.appendChild(l);
+      });
+      var f=document.createElement('div');f.className='fb';d.appendChild(f);
+      qb.appendChild(d);
+    });
+    document.getElementById('score').textContent='';
+  }
+  build();
+  document.getElementById('qcheck').addEventListener('click',function(){
+    var ok=0,answered=0;
+    [].forEach.call(qb.querySelectorAll('.q'),function(d,i){
+      var sel=d.querySelector('input:checked');
+      d.classList.remove('ok','bad');
+      var f=d.querySelector('.fb');
+      if(!sel){f.textContent='';return;}
+      answered++;
+      if(+sel.value===Q[i].a){ok++;d.classList.add('ok');f.textContent='Correcto. '+Q[i].e;}
+      else{d.classList.add('bad');f.textContent='No exactamente. '+Q[i].e;}
+    });
+    document.getElementById('score').textContent=answered<Q.length?('Respondidas '+answered+' de '+Q.length+'. Aciertos: '+ok):('Resultado: '+ok+' de '+Q.length);
+  });
+  document.getElementById('qreset').addEventListener('click',build);
+
+})();
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+</body>
+</html>
