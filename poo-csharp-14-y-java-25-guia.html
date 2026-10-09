@@ -1,0 +1,3415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>POO con C# 14 y Java 25: guía práctica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500;700&family=Literata:opsz,wght@7..72,400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F5FA;--surface:#FFFFFF;--ink:#1A1C29;--muted:#596079;--line:#DADDEA;
+  --cs:#6B3FA0;--cs-soft:#EEE7F8;--java:#AC4A00;--java-soft:#FCEBD8;
+  --ok:#17744A;--ok-soft:#DDF3E7;--bad:#B3261E;--bad-soft:#FBE3E1;
+  --code-bg:#EEF0F7;--on-cs:#FFFFFF;
+  --k:#B0306A;--t:#0B7683;--s:#2B7A30;--n:#9A5200;--c:#737A93;--f:#3558C9;--a:#7F6500;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --serif:'Literata',Georgia,'Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12131B;--surface:#1B1D29;--ink:#E9EBF5;--muted:#9EA3BC;--line:#2D3043;
+    --cs:#BC9BF2;--cs-soft:#2B2242;--java:#F2A653;--java-soft:#3A2A15;
+    --ok:#5FD39A;--ok-soft:#173528;--bad:#FF8F86;--bad-soft:#3D1D1B;
+    --code-bg:#0E0F16;--on-cs:#1B1030;
+    --k:#FF7FAF;--t:#5FD0D8;--s:#92D898;--n:#F2B466;--c:#7D839E;--f:#82A5FF;--a:#E3C763;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12131B;--surface:#1B1D29;--ink:#E9EBF5;--muted:#9EA3BC;--line:#2D3043;
+  --cs:#BC9BF2;--cs-soft:#2B2242;--java:#F2A653;--java-soft:#3A2A15;
+  --ok:#5FD39A;--ok-soft:#173528;--bad:#FF8F86;--bad-soft:#3D1D1B;
+  --code-bg:#0E0F16;--on-cs:#1B1030;
+  --k:#FF7FAF;--t:#5FD0D8;--s:#92D898;--n:#F2B466;--c:#7D839E;--f:#82A5FF;--a:#E3C763;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg);scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.7 var(--serif);-webkit-text-size-adjust:100%}
+a{color:var(--cs)}
+:focus-visible{outline:2px solid var(--cs);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+.app{display:grid;grid-template-columns:304px minmax(0,1fr)}
+.side{position:sticky;top:0;align-self:start;height:100vh;height:100dvh;overflow-y:auto;border-right:1px solid var(--line);background:var(--surface);padding:24px 16px 20px;display:flex;flex-direction:column;gap:18px;font-family:var(--sans)}
+.brand{font:800 1.3rem/1.15 var(--display);letter-spacing:-.01em;padding:0 8px}
+.brand small{display:block;margin-top:6px;font:500 .82rem/1.4 var(--sans);color:var(--muted);letter-spacing:0}
+.pills{display:flex;gap:6px;padding:0 8px;flex-wrap:wrap}
+.pill{font:700 .74rem var(--sans);padding:3px 9px;border-radius:99px}
+.pill.cs{background:var(--cs-soft);color:var(--cs)}
+.pill.java{background:var(--java-soft);color:var(--java)}
+.prog{padding:0 8px;font:500 .8rem var(--sans);color:var(--muted)}
+.prog .track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.prog .track i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font:500 .92rem/1.3 var(--sans)}
+.nav a:hover{background:var(--bg)}
+.nav a[aria-current="page"]{background:var(--cs-soft);color:var(--cs);font-weight:700}
+.nav .n{min-width:1.5em;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav .d{margin-left:auto;font:600 .75rem var(--mono);color:var(--muted)}
+.nav .d.full{color:var(--ok)}
+.side-foot{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;padding:0 8px}
+.side-foot .btn{flex:1 1 auto}
+.topbar{display:none}
+
+main{padding:44px clamp(18px,4vw,56px) 90px;max-width:1100px;width:100%}
+.mh{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:36px;align-items:start}
+h1{font:800 clamp(2.1rem,4.6vw,3.3rem)/1.04 var(--display);letter-spacing:-.028em;margin:0 0 16px}
+.lead{font-size:1.15rem;line-height:1.6;color:var(--muted);max-width:60ch;margin:0 0 20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;font:600 .88rem var(--sans)}
+.chips a{padding:6px 12px;border:1px solid var(--line);border-radius:99px;text-decoration:none;color:var(--ink);background:var(--surface)}
+.chips a:hover{border-color:var(--cs);color:var(--cs)}
+
+.uml{border:1.5px solid var(--ink);border-radius:4px;background:var(--surface);font:500 .82rem/1.55 var(--mono)}
+.uml>div{padding:8px 12px}
+.uml>div+div{border-top:1.5px solid var(--ink)}
+.uml .nm{text-align:center;font-weight:700;font-size:.92rem}
+.uml .cs14{color:var(--cs)}
+.uml .j25{color:var(--java)}
+
+section{margin-top:58px}
+h2{font:700 1.75rem/1.2 var(--display);letter-spacing:-.015em;margin:0 0 20px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h3{font:700 1.25rem/1.3 var(--display);margin:34px 0 8px}
+h4{font:700 1.05rem/1.3 var(--display);margin:22px 0 8px}
+.theory>*{max-width:72ch}
+.theory>.tw{max-width:none}
+.theory p{margin:0 0 14px}
+.theory ul{margin:0 0 14px;padding-left:1.3em}
+.theory li{margin:5px 0}
+code{font:500 .86em var(--mono);background:var(--code-bg);padding:.12em .38em;border-radius:5px;word-break:break-word}
+.co{margin:18px 0;padding:12px 16px;border-left:4px solid var(--muted);background:var(--surface);border-radius:0 8px 8px 0;font:400 .95rem/1.6 var(--sans)}
+.co b{display:block;margin-bottom:2px}
+.co.cs{border-color:var(--cs)}.co.cs b{color:var(--cs)}
+.co.java{border-color:var(--java)}.co.java b{color:var(--java)}
+.co.tip{border-color:var(--ok)}.co.tip b{color:var(--ok)}
+.co.ojo{border-color:var(--bad)}.co.ojo b{color:var(--bad)}
+.tw{overflow-x:auto;margin:16px 0 22px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font:400 .9rem/1.5 var(--sans);min-width:560px}
+th,td{padding:9px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-weight:700;background:var(--bg)}
+th.cs{color:var(--cs);background:var(--cs-soft)}
+th.java{color:var(--java);background:var(--java-soft)}
+td code{font-size:.84em}
+
+.cmpwrap{margin:30px 0}
+.cmpwrap h4{margin-top:0}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.col+.col{border-left:1px solid var(--line)}
+.lab{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;font:700 .82rem var(--sans)}
+.col.cs .lab{background:var(--cs-soft);color:var(--cs)}
+.col.java .lab{background:var(--java-soft);color:var(--java)}
+.cp{font:600 .76rem var(--sans);border:0;background:transparent;color:inherit;cursor:pointer;padding:3px 8px;border-radius:6px;text-decoration:underline}
+.cb{margin:0;padding:14px 16px;overflow-x:auto;font:400 13px/1.6 var(--mono);tab-size:4;color:var(--ink)}
+.cb code{background:none;padding:0;font:inherit;word-break:normal}
+.note{font:400 .93rem/1.55 var(--sans);color:var(--muted);margin:10px 0 0;max-width:80ch}
+.k{color:var(--k);font-weight:500}.t{color:var(--t)}.s{color:var(--s)}.n{color:var(--n)}.c{color:var(--c);font-style:italic}.f{color:var(--f)}.a{color:var(--a)}
+
+.ex{margin:24px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.ex-h{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);font-family:var(--sans)}
+.ex-h h3{margin:0;font-size:1.05rem}
+.kind{font:500 .8rem var(--sans);color:var(--muted);margin-right:8px}
+.badge{flex:none;font:700 .75rem var(--sans);padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.badge.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.ex-b{padding:16px 18px 18px;font-family:var(--sans)}
+.ex-desc{font-size:.96rem;line-height:1.6;margin-bottom:12px}
+.ex-desc p{margin:0 0 8px}
+.ex-desc ul{margin:0 0 8px;padding-left:1.2em}
+.ed{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ed-hl,.ed-ta{margin:0;padding:14px 16px 28px;border:0;font:400 13.5px/1.6 var(--mono);letter-spacing:0;tab-size:4;white-space:pre;word-spacing:0}
+.ed-hl{position:absolute;inset:0;overflow:hidden;pointer-events:none;color:var(--ink)}
+.ed-hl code{background:none;padding:0;font:inherit;word-break:normal}
+.ed-ta{position:relative;display:block;width:100%;min-height:160px;resize:none;background:transparent;color:transparent;caret-color:var(--ink);overflow-x:auto;overflow-y:hidden;outline:none;overflow-wrap:normal}
+.ed:focus-within{border-color:var(--cs);box-shadow:0 0 0 2px var(--cs-soft)}
+.ed-ta::selection{background:rgba(120,110,255,.3)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+.btn{font:600 .86rem var(--sans);padding:8px 14px;min-height:38px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--cs);color:var(--cs)}
+.btn.pri{background:var(--cs);color:var(--on-cs);border-color:var(--cs)}
+.btn.pri:hover{filter:brightness(1.08);color:var(--on-cs)}
+.hint{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--cs-soft);font-size:.92rem;line-height:1.55}
+.res{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:5px;font-size:.92rem;line-height:1.5}
+.res li{display:flex;gap:9px;align-items:flex-start;padding:6px 10px;border-radius:7px}
+.res li.ok{background:var(--ok-soft);color:var(--ok)}
+.res li.no{background:var(--bad-soft);color:var(--bad)}
+.res li b{flex:none;min-width:5.2em}
+.res li.msg{background:var(--bg);color:var(--ink)}
+.outbox{margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.outlab{padding:5px 12px;font:700 .78rem var(--sans);background:var(--bg);color:var(--muted)}
+.outbox .cb{background:var(--code-bg)}
+details.sol{margin-top:14px}
+details.sol summary{cursor:pointer;font:600 .9rem var(--sans);color:var(--cs)}
+details.sol .solbox{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:var(--code-bg);overflow:hidden}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--sans)}
+.pager a{display:block;padding:12px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);text-decoration:none;font:600 .95rem/1.3 var(--sans);max-width:48%}
+.pager a small{display:block;font:500 .78rem var(--sans);color:var(--muted);margin-bottom:2px}
+.pager a:hover{border-color:var(--cs)}
+.pager .nx{margin-left:auto;text-align:right}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);font:600 .88rem var(--sans);padding:9px 16px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.on{opacity:1}
+
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;z-index:40;left:0;top:0;bottom:0;width:min(86vw,320px);height:auto;padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-102%);visibility:hidden;transition:transform .22s,visibility .22s}
+  .side.open{transform:none;visibility:visible;box-shadow:0 0 40px rgba(0,0,0,.25)}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:39;display:none}
+  .scrim.on{display:block}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:30;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);font-family:var(--sans)}
+  .topbar b{font:700 .98rem var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .pg{margin-left:auto;font:600 .8rem var(--mono);color:var(--muted);flex:none}
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+  .mh{grid-template-columns:minmax(0,1fr);gap:24px}
+  .uml{max-width:340px}
+}
+@media (max-width:760px){
+  body{font-size:16.5px}
+  .cmp{grid-template-columns:minmax(0,1fr)}
+  .col+.col{border-left:0;border-top:1px solid var(--line)}
+  .ed-hl,.ed-ta{font-size:16px}
+  .pager a{max-width:none;flex:1}
+  .pager{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="topbar"><button class="btn" id="openNav" aria-label="Abrir lista de módulos">Módulos</button><b id="tbTitle"></b><span class="pg" id="tbProg"></span></div>
+<div class="scrim" id="scrim"></div>
+<div class="app">
+  <aside class="side" id="side" aria-label="Módulos de la guía">
+    <div class="brand">Programación orientada a objetos<small>Guía con ejercicios en el navegador</small></div>
+    <div class="pills"><span class="pill cs">C# 14 · .NET 10</span><span class="pill java">Java 25</span></div>
+    <div class="prog"><span id="progTxt"></span><div class="track"><i id="progBar"></i></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot"><button class="btn" id="themeBtn">Cambiar tema</button><button class="btn" id="resetBtn">Borrar progreso</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const R = String.raw;
+const MODS = [];
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/* ---------- almacenamiento (siempre con try/catch) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('poo:' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('poo:' + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem('poo:' + k); } catch (e) {} }
+};
+let done = new Set(store.get('done', []));
+
+/* ---------- resaltado de sintaxis ---------- */
+const KWS = {
+  cs: new Set('abstract as base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extension extern false field finally float for foreach goto if implicit in init int interface internal is lock long namespace new null object operator out override params partial private protected public readonly record ref required return sbyte sealed short static string struct switch this throw true try typeof uint ulong unchecked ushort using var virtual void volatile when where while with yield async await get set nameof'.split(' ')),
+  java: new Set('abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new null package private protected public return short static strictfp super switch synchronized this throw throws transient true false try var void volatile while record sealed permits yield'.split(' '))
+};
+const TOKSRC = String.raw`(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("""[\s\S]*?"""|\$@?"(?:[^"\\\n]|\\.)*"|@"(?:[^"]|"")*"|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)+')|(@[A-Za-z_]\w*)|(\b\d[\d_]*(?:\.\d+)?(?:[fFdDmMLlUu]+)?\b)|([A-Za-z_]\w*)`;
+function hl(code, lang) {
+  const kws = KWS[lang] || KWS.cs, re = new RegExp(TOKSRC, 'g');
+  let out = '', last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index)); last = re.lastIndex;
+    const t = m[0];
+    if (m[1]) out += `<span class="c">${esc(t)}</span>`;
+    else if (m[2]) out += `<span class="s">${esc(t)}</span>`;
+    else if (m[3]) out += `<span class="a">${esc(t)}</span>`;
+    else if (m[4]) out += `<span class="n">${esc(t)}</span>`;
+    else {
+      let cls = '';
+      if (kws.has(t)) cls = 'k'; else if (code[last] === '(') cls = 'f'; else if (/^[A-Z]/.test(t)) cls = 't';
+      out += cls ? `<span class="${cls}">${t}</span>` : t;
+    }
+  }
+  return out + esc(code.slice(last));
+}
+function strip(code) {
+  return code.replace(new RegExp(TOKSRC, 'g'), (m, c1, c2) => c1 ? ' ' : c2 ? '""' : m);
+}
+
+/* ---------- mini-markup para la teoría ---------- */
+function inline(s) {
+  return esc(s).split(/(§[^§]+§)/).map(p => p.startsWith('§') ? '<code>' + p.slice(1, -1) + '</code>'
+    : p.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+       .replace(/(^|[\s(])\*(?=\S)([^*\n]*?\S)\*(?=[\s).,;:]|$)/g, '$1<em>$2</em>')).join('');
+}
+const CO = { cs: 'C# 14', java: 'Java 25', tip: 'Consejo', ojo: 'Ojo' };
+function md(src) {
+  let out = '';
+  for (const b of src.trim().split(/\n\s*\n/)) {
+    const lines = b.split('\n').map(l => l.trim()), f = lines[0];
+    if (f.startsWith('## ')) out += `<h3>${inline(f.slice(3))}</h3>`;
+    else if (f.startsWith('### ')) out += `<h4>${inline(f.slice(4))}</h4>`;
+    else if (f.startsWith('|')) {
+      const rows = lines.filter(l => l.startsWith('|')).map(l => l.split('|').slice(1, -1).map(c => c.trim()))
+        .filter(r => !r.every(c => /^:?-{2,}:?$/.test(c)));
+      const th = rows[0].map(c => `<th class="${/^C#/.test(c) ? 'cs' : /^Java/.test(c) ? 'java' : ''}">${inline(c)}</th>`).join('');
+      const body = rows.slice(1).map(r => '<tr>' + r.map(c => `<td>${inline(c)}</td>`).join('') + '</tr>').join('');
+      out += `<div class="tw"><table><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`;
+    } else if (f.startsWith('- ')) {
+      const items = []; for (const l of lines) { if (l.startsWith('- ')) items.push(l.slice(2)); else items[items.length - 1] += ' ' + l; }
+      out += '<ul>' + items.map(i => `<li>${inline(i)}</li>`).join('') + '</ul>';
+    } else if (f.startsWith('> ')) {
+      let t = lines.map(l => l.replace(/^>\s?/, '')).join(' '), k = 'tip';
+      const m = t.match(/^\[(cs|java|tip|ojo)\]\s*/); if (m) { k = m[1]; t = t.slice(m[0].length); }
+      out += `<aside class="co ${k}"><b>${CO[k]}</b>${inline(t)}</aside>`;
+    } else out += `<p>${inline(lines.join(' '))}</p>`;
+  }
+  return out;
+}
+
+/* ---------- bloques de código estáticos ---------- */
+const clean = c => c.replace(/^\n/, '').replace(/\s+$/, '');
+const pre = (code, lang) => `<pre class="cb"><code>${hl(clean(code), lang)}</code></pre>`;
+function compare(c) {
+  return `<div class="cmpwrap"><h4>${esc(c.t)}</h4><div class="cmp">
+    <div class="col cs"><div class="lab">C# 14<button class="cp" data-copy>Copiar</button></div>${pre(c.cs, 'cs')}</div>
+    <div class="col java"><div class="lab">Java 25<button class="cp" data-copy>Copiar</button></div>${pre(c.java, 'java')}</div>
+  </div>${c.note ? `<p class="note">${inline(c.note)}</p>` : ''}</div>`;
+}
+
+/* ---------- utilidades ---------- */
+let toastT;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 1600); }
+function copy(text) {
+  const fb = () => { const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); toast('Copiado'); } catch (e) { toast('No se pudo copiar'); } t.remove(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast('Copiado'), fb); else fb();
+}
+function balanced(s) {
+  const st = [], p = { ')': '(', ']': '[', '}': '{' };
+  for (const ch of s) { if ('([{'.includes(ch)) st.push(ch); else if (')]}'.includes(ch) && st.pop() !== p[ch]) return false; }
+  return st.length === 0;
+}
+
+/* ---------- editor de código ---------- */
+function makeEditor(host, value, onChange) {
+  host.classList.add('ed');
+  host.innerHTML = '<pre class="ed-hl" aria-hidden="true"><code></code></pre><textarea class="ed-ta" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Editor de código C#. Pulsa Escape y luego Tab para salir del editor."></textarea>';
+  const code = $('code', host), pr = $('pre', host), ta = $('textarea', host);
+  let escaped = false;
+  const sync = () => {
+    code.innerHTML = hl(ta.value, 'cs') + '\n';
+    ta.style.height = 'auto';
+    ta.style.height = Math.max(ta.scrollHeight + 4, 160) + 'px';
+    pr.scrollLeft = ta.scrollLeft;
+  };
+  const insert = t => {
+    ta.focus();
+    if (!document.execCommand('insertText', false, t)) { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input')); }
+  };
+  ta.value = value; sync();
+  ta.addEventListener('input', () => { sync(); onChange && onChange(ta.value); });
+  ta.addEventListener('scroll', () => { pr.scrollLeft = ta.scrollLeft; });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && escaped) { escaped = false; return; }
+    escaped = e.key === 'Escape';
+    if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); insert('    '); }
+    else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      const before = ta.value.slice(0, ta.selectionStart), line = before.slice(before.lastIndexOf('\n') + 1);
+      let ind = line.match(/^\s*/)[0]; if (/\{\s*$/.test(line)) ind += '    ';
+      e.preventDefault(); insert('\n' + ind);
+    }
+  });
+  window.addEventListener('resize', sync);
+  return { get: () => ta.value, set: v => { ta.value = v; sync(); onChange && onChange(v); } };
+}
+
+/* ---------- ejercicios ---------- */
+function runChecks(codeRaw, checks) {
+  const s = strip(codeRaw), res = [{ ok: balanced(s), msg: 'Llaves, paréntesis y corchetes balanceados' }];
+  for (const [re, msg, neg] of checks) {
+    const hit = typeof re === 'function' ? !!re(s) : re.test(s);
+    res.push({ ok: neg ? !hit : hit, msg });
+  }
+  return res;
+}
+function exHTML(ex) {
+  return `<div class="ex" id="${ex.id}">
+  <div class="ex-h"><h3><span class="kind">${ex.kind}</span>${esc(ex.title)}</h3><span class="badge" data-badge>Pendiente</span></div>
+  <div class="ex-b">
+    <div class="ex-desc">${md(ex.desc)}</div>
+    <div data-ed></div>
+    <div class="bar">
+      <button class="btn pri" data-act="check">Verificar</button>
+      ${ex.hint ? '<button class="btn" data-act="hint">Pista</button>' : ''}
+      <button class="btn" data-act="copy">Copiar código</button>
+      <button class="btn" data-act="reset">Restablecer</button>
+    </div>
+    <div class="hint" data-hint hidden>${ex.hint ? inline(ex.hint) : ''}</div>
+    <ul class="res" data-res aria-live="polite"></ul>
+    ${ex.out ? `<div class="outbox"><div class="outlab">Salida esperada al ejecutarlo en tu máquina</div><pre class="cb" tabindex="0"><code>${esc(ex.out)}</code></pre></div>` : ''}
+    <details class="sol"><summary>Ver solución (inténtalo primero)</summary><div class="solbox">${pre(ex.solution, 'cs')}</div></details>
+  </div></div>`;
+}
+function wireEx(root, ex, onProgress) {
+  const draft = store.get('code:' + ex.id, null);
+  const ed = makeEditor($('[data-ed]', root), draft ?? clean(ex.starter), v => store.set('code:' + ex.id, v));
+  const badge = $('[data-badge]', root), res = $('[data-res]', root), hint = $('[data-hint]', root);
+  const paint = () => { const d = done.has(ex.id); badge.textContent = d ? 'Superado' : 'Pendiente'; badge.classList.toggle('ok', d); };
+  paint();
+  root.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const a = b.dataset.act;
+    if (a === 'hint') hint.hidden = !hint.hidden;
+    else if (a === 'copy') copy(ed.get());
+    else if (a === 'reset') { if (confirm('¿Volver al código inicial de este ejercicio?')) { ed.set(clean(ex.starter)); res.innerHTML = ''; } }
+    else if (a === 'check') {
+      const r = runChecks(ed.get(), ex.checks), ok = r.every(x => x.ok);
+      res.innerHTML = r.map(x => `<li class="${x.ok ? 'ok' : 'no'}"><b>${x.ok ? 'Cumple' : 'Falta'}</b><span>${esc(x.msg)}</span></li>`).join('') +
+        (ok ? '<li class="msg">Estructura correcta. Pégalo en tu <code>Program.cs</code> y ejecuta <code>dotnet run</code> para ver la salida real.</li>'
+            : '<li class="msg">Este verificador revisa la estructura del código; no lo compila. Ajusta lo que falta y vuelve a verificar.</li>');
+      if (ok) { done.add(ex.id); store.set('done', [...done]); paint(); onProgress(); toast('¡Ejercicio superado!'); }
+    }
+  });
+}
+
+/* ---------- vistas ---------- */
+let cur = 0;
+const exsOf = i => {
+  const m = MODS[i], l = [];
+  if (m.practice) l.push({ ...m.practice, id: `m${i}.p`, kind: 'Práctica · ' });
+  (m.retos || []).forEach((r, j) => l.push({ ...r, id: `m${i}.r${j + 1}`, kind: `Reto ${j + 1} · ` }));
+  return l;
+};
+function progress() {
+  let tot = 0, dn = 0;
+  const links = $('#nav').children;
+  MODS.forEach((m, i) => {
+    const l = exsOf(i), d = l.filter(x => done.has(x.id)).length; tot += l.length; dn += d;
+    const el = $('.d', links[i]); el.textContent = `${d}/${l.length}`; el.classList.toggle('full', l.length > 0 && d === l.length);
+  });
+  $('#progTxt').textContent = `${dn} de ${tot} ejercicios superados`;
+  $('#progBar').style.width = (tot ? dn / tot * 100 : 0) + '%';
+  $('#tbProg').textContent = `${dn}/${tot}`;
+}
+function buildNav() {
+  $('#nav').innerHTML = MODS.map((m, i) => `<a href="#/${i}"><span class="n">${i}</span><span>${esc(m.title)}</span><span class="d"></span></a>`).join('');
+}
+function render(i) {
+  cur = i; const m = MODS[i], list = exsOf(i), practice = list.find(x => x.id.endsWith('.p')), retos = list.filter(x => !x.id.endsWith('.p'));
+  [...$('#nav').children].forEach((a, j) => j === i ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  $('#tbTitle').textContent = m.title;
+  const prev = MODS[i - 1], next = MODS[i + 1];
+  $('#main').innerHTML = `
+  <header class="mh"><div>
+    <h1>${esc(m.title)}</h1><p class="lead">${inline(m.lead)}</p>
+    <nav class="chips" aria-label="Secciones del módulo"><a href="#teoria" data-jump="teoria">Teoría</a><a href="#comparativa" data-jump="comparativa">C# frente a Java</a>${practice ? '<a href="#practica" data-jump="practica">Práctica</a>' : ''}${retos.length ? '<a href="#retos" data-jump="retos">Retos</a>' : ''}</nav>
+  </div>
+  <aside class="uml" aria-label="Resumen del módulo como diagrama de clase"><div class="nm">${esc(m.uml.name)}</div>
+    <div>${m.uml.items.map(t => '+ ' + esc(t)).join('<br>')}</div>
+    <div><span class="cs14">C# 14&nbsp;&nbsp;${esc(m.uml.cs)}</span><br><span class="j25">Java 25&nbsp;${esc(m.uml.java)}</span></div></aside></header>
+  <section id="teoria"><h2>Teoría</h2><div class="theory">${md(m.theory)}</div></section>
+  <section id="comparativa"><h2>C# 14 frente a Java 25</h2>${m.compare.map(compare).join('')}</section>
+  ${practice ? `<section id="practica"><h2>Práctica guiada</h2>${exHTML(practice)}</section>` : ''}
+  ${retos.length ? `<section id="retos"><h2>Retos</h2>${retos.map(exHTML).join('')}</section>` : ''}
+  <nav class="pager" aria-label="Navegación entre módulos">${prev ? `<a href="#/${i - 1}"><small>Anterior</small>${esc(prev.title)}</a>` : '<span></span>'}${next ? `<a class="nx" href="#/${i + 1}"><small>Siguiente</small>${esc(next.title)}</a>` : ''}</nav>`;
+  list.forEach(ex => wireEx($('#' + CSS.escape(ex.id)), ex, progress));
+  progress(); closeNav();
+}
+function route() {
+  const m = location.hash.match(/^#\/(\d+)$/); let i = m ? +m[1] : 0; if (i >= MODS.length) i = 0;
+  render(i); window.scrollTo(0, 0);
+}
+function openNav() { $('#side').classList.add('open'); $('#scrim').classList.add('on'); }
+function closeNav() { $('#side').classList.remove('open'); $('#scrim').classList.remove('on'); }
+
+function boot() {
+  const th = store.get('theme', null); if (th) document.documentElement.setAttribute('data-theme', th);
+  buildNav();
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) { copy(c.closest('.col').querySelector('pre').textContent); return; }
+    const j = e.target.closest('[data-jump]');
+    if (j) { e.preventDefault(); const el = document.getElementById(j.dataset.jump); if (el) el.scrollIntoView(); }
+  });
+  $('#openNav').addEventListener('click', openNav);
+  $('#scrim').addEventListener('click', closeNav);
+  $('#themeBtn').addEventListener('click', () => {
+    const root = document.documentElement, t = root.getAttribute('data-theme');
+    const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    const nt = dark ? 'light' : 'dark'; root.setAttribute('data-theme', nt); store.set('theme', nt);
+  });
+  $('#resetBtn').addEventListener('click', () => {
+    if (!confirm('Se borrarán tu progreso y el código guardado de todos los ejercicios. ¿Continuar?')) return;
+    MODS.forEach((m, i) => exsOf(i).forEach(x => store.del('code:' + x.id))); done = new Set(); store.set('done', []); render(cur); toast('Progreso borrado');
+  });
+  window.addEventListener('hashchange', route);
+  route();
+}
+/* ===================== 0. ENTORNO ===================== */
+MODS.push({
+  title: 'Entorno y mapa mental',
+  lead: 'Qué es la programación orientada a objetos, cómo preparar C# 14 y Java 25 en tu máquina y cómo usar esta guía.',
+  uml: { name: 'Paradigma POO', items: ['abstracción', 'encapsulamiento', 'herencia', 'polimorfismo', 'composición'], cs: 'dotnet run', java: 'java Archivo.java' },
+  theory: R`
+## ¿Qué es la programación orientada a objetos?
+
+La POO organiza un programa como un conjunto de **objetos** que guardan datos (**estado**) y saben hacer cosas con ellos (**comportamiento**). Un objeto es una instancia concreta de una **clase**, que funciona como plano o molde.
+
+Cuatro ideas sostienen el paradigma:
+
+- **Abstracción**: modelar solo lo relevante de un concepto. Una cuenta bancaria tiene saldo y titular; no necesita su color.
+- **Encapsulamiento**: ocultar el estado interno y exponer operaciones controladas, para que el objeto nunca quede en un estado inválido.
+- **Herencia**: una clase especializada reutiliza y extiende a otra (relación "es un").
+- **Polimorfismo**: tratar objetos distintos a través de un contrato común y que cada uno responda a su manera.
+
+A estas se suma una práctica que verás en el módulo 6: preferir **composición** (relación "tiene un") antes que herencia.
+
+## Dos lenguajes, un mismo paradigma
+
+C# y Java comparten un linaje muy parecido: ambos son de tipado estático, compilan a un lenguaje intermedio, tienen recolector de basura y una sintaxis derivada de C. Por eso la mayoría de los conceptos se transfieren casi tal cual. Donde difieren es en los **detalles de diseño**, y esos detalles son lo que esta guía pone en paralelo.
+
+| Aspecto | C# 14 / .NET 10 | Java 25 |
+|---|---|---|
+| Plataforma de ejecución | CLR (.NET 10, LTS) | JVM (JDK 25, LTS) |
+| Código intermedio | IL dentro de ensamblados .dll | Bytecode en archivos .class / .jar |
+| Agrupar tipos | §namespace§ | §package§ |
+| Gestor de paquetes | NuGet | Maven Central con Maven o Gradle |
+| Archivo de proyecto | §.csproj§ | §pom.xml§ o §build.gradle§ |
+| Ejecutar rápido | §dotnet run§ | §java Archivo.java§ |
+
+> [tip] Esta guía usa C# como lenguaje principal. Cada concepto se explica en C# y luego se muestra el equivalente en Java 25 para que veas qué se parece y qué cambia.
+
+## Cómo usar esta guía
+
+Cada módulo sigue el mismo orden: **teoría**, **comparativa C# frente a Java**, una **práctica guiada** y varios **retos** cortos. En la práctica y en los retos hay un editor donde escribes C#.
+
+> [ojo] El navegador no puede compilar C#. El botón **Verificar** revisa que tu código tenga la estructura pedida (clases, firmas, palabras clave), pero no lo ejecuta. Para ver la salida real, copia el código y córrelo en tu máquina con los pasos de abajo. Cada ejercicio muestra la salida esperada para que compares.
+
+El editor autoindenta, inserta 4 espacios con Tab y guarda tu código en este navegador. Si quieres salir del editor con el teclado, pulsa Escape y luego Tab.
+
+## Preparar el entorno para ejecutar
+
+Para C# 14 necesitas el SDK de .NET 10. Para Java 25, el JDK 25. En una terminal:
+
+- Verifica versiones con §dotnet --version§ (debe empezar con 10) y §java --version§ (debe decir 25).
+- C#: crea un proyecto con §dotnet new console -n GuiaPOO§, entra a la carpeta, pega el código en §Program.cs§ y ejecuta §dotnet run§.
+- Java: guarda el código en un archivo, por ejemplo §Hola.java§, y ejecútalo con §java Hola.java§.
+
+> [cs] Con el SDK de .NET 10, un proyecto nuevo ya compila con C# 14. Los ejercicios usan **instrucciones de nivel superior**: el código de uso va arriba del archivo y las clases debajo, sin necesidad de escribir un §Main§.
+
+> [java] Desde Java 25 los **archivos fuente compactos** (JEP 512) permiten un método §void main()§ de instancia y usar §IO.println§ sin importar nada. Es la respuesta de Java a la ceremonia del "Hola mundo" clásico.
+`,
+  compare: [
+    {
+      t: 'Hola mundo',
+      cs: R`
+// Program.cs  (instrucciones de nivel superior)
+Console.WriteLine("Hola, POO");
+`,
+      java: R`
+// Hola.java  (archivo fuente compacto, Java 25)
+void main() {
+    IO.println("Hola, POO");
+}
+`,
+      note: 'Ambos lenguajes eliminaron la clase y el método estático obligatorios para programas pequeños. En C# llegó con C# 9; en Java se consolidó en Java 25.'
+    },
+    {
+      t: 'Una clase mínima con un objeto',
+      cs: R`
+var m = new Mascota("Misu");
+m.Saludar();
+
+class Mascota(string nombre)
+{
+    public void Saludar() =>
+        Console.WriteLine($"Miau, soy {nombre}");
+}
+`,
+      java: R`
+class Mascota {
+    private final String nombre;
+    Mascota(String nombre) { this.nombre = nombre; }
+    void saludar() {
+        IO.println("Miau, soy " + nombre);
+    }
+}
+
+void main() {
+    var m = new Mascota("Misu");
+    m.saludar();
+}
+`,
+      note: 'C# usa **constructor primario** en la cabecera de la clase (C# 12). Java requiere declarar el campo y el constructor a mano. La convención de nombres también cambia: métodos en PascalCase en C#, camelCase en Java.'
+    }
+  ],
+  practice: {
+    title: 'Tu primer objeto',
+    desc: R`
+El código de uso ya está escrito arriba. Define la clase **Mascota** debajo con:
+
+- un constructor que reciba **nombre** (string) y **edad** (int),
+- un método **Presentarse()** que no devuelva nada e imprima la presentación.
+`,
+    hint: 'Con un constructor primario basta: §class Mascota(string nombre, int edad)§. Dentro del cuerpo puedes usar esos parámetros directamente.',
+    starter: R`
+var gato = new Mascota("Misu", 3);
+gato.Presentarse();
+
+// TODO: define la clase Mascota aquí abajo
+`,
+    solution: R`
+var gato = new Mascota("Misu", 3);
+gato.Presentarse();
+
+class Mascota(string nombre, int edad)
+{
+    public void Presentarse() =>
+        Console.WriteLine($"Soy {nombre} y tengo {edad} años.");
+}
+`,
+    out: R`Soy Misu y tengo 3 años.`,
+    checks: [
+      [/class\s+Mascota\b/, 'Existe la clase Mascota'],
+      [/Mascota\s*\([^)]*string[^)]*int[^)]*\)/, 'Mascota recibe un string y un int (constructor)'],
+      [/void\s+Presentarse\s*\(\s*\)/, 'Método void Presentarse() sin parámetros'],
+      [/Console\.Write(Line)?\s*\(/, 'Imprime con Console.WriteLine']
+    ]
+  },
+  retos: [{
+    title: 'Un método que devuelve valor',
+    desc: 'Crea la clase **Saludo** con un método **Decir(string nombre)** que *devuelva* (no imprima) el texto "Hola, " seguido del nombre.',
+    hint: 'Un método de una sola expresión se escribe con flecha: §public string Decir(string nombre) => ...;§',
+    starter: R`
+Console.WriteLine(new Saludo().Decir("Ana"));
+
+// TODO: clase Saludo
+`,
+    solution: R`
+Console.WriteLine(new Saludo().Decir("Ana"));
+
+class Saludo
+{
+    public string Decir(string nombre) => $"Hola, {nombre}";
+}
+`,
+    out: 'Hola, Ana',
+    checks: [
+      [/class\s+Saludo\b/, 'Existe la clase Saludo'],
+      [/string\s+Decir\s*\(\s*string\s+\w+\s*\)/, 'Método string Decir(string nombre)'],
+      [s => /\breturn\b/.test(s) || /Decir\s*\([^)]*\)\s*=>/.test(s), 'Devuelve el valor (return o cuerpo con =>)']
+    ]
+  }]
+});
+
+/* ===================== 1. CLASES Y OBJETOS ===================== */
+MODS.push({
+  title: 'Clases y objetos',
+  lead: 'La unidad básica de la POO: cómo se declara una clase, cómo se crean objetos y qué significa que sean tipos por referencia.',
+  uml: { name: 'Clase', items: ['campos', 'métodos', 'constructores', 'this', 'new'], cs: 'constructor primario', java: 'constructor clásico' },
+  theory: R`
+## Clase y objeto
+
+Una **clase** describe qué datos tiene un tipo de cosa y qué operaciones admite. Un **objeto** es una instancia concreta creada con §new§. Muchas instancias de la misma clase comparten estructura pero tienen su propio estado.
+
+Los miembros principales son:
+
+- **Campos**: variables que guardan el estado de cada objeto.
+- **Métodos**: funciones que operan sobre ese estado.
+- **Constructores**: código que se ejecuta al crear el objeto y deja su estado inicial válido.
+- **§this§**: referencia al objeto actual, útil para distinguir un parámetro de un campo con el mismo nombre.
+
+## Tipos por referencia
+
+Tanto en C# como en Java, una variable de tipo clase **no contiene el objeto, sino una referencia** a él. Dos consecuencias importantes:
+
+- Asignar §var b = a;§ copia la referencia, no el objeto. Ambas variables apuntan al mismo objeto, y un cambio hecho por una se ve en la otra.
+- §null§ significa "no apunta a ningún objeto". Usar un miembro de una referencia nula lanza una excepción (§NullReferenceException§ en C#, §NullPointerException§ en Java).
+
+La memoria de los objetos la administra el **recolector de basura**: cuando ya nada los referencia, se liberan solos.
+
+## Constructores en C#
+
+Puedes definir varios constructores (sobrecarga) y encadenarlos con §: this(...)§ para no repetir lógica. Además, C# 12 añadió los **constructores primarios**: los parámetros se declaran en la cabecera de la clase y quedan disponibles en todo su cuerpo.
+
+C# también permite **inicializadores de objeto**: §new Persona { Nombre = "Ana" }§, que asignan propiedades justo después de construir.
+
+> [ojo] En una clase con constructor primario, los parámetros **no son campos ni propiedades** automáticamente: son valores capturados. Si quieres exponerlos, declara una propiedad inicializada con ellos (lo verás en el módulo 2).
+
+> [java] Java no tiene constructores primarios ni inicializadores de objeto. Para lo primero se usan constructores explícitos (o un §record§ si los datos son inmutables); para lo segundo, setters o el patrón *builder*. El encadenamiento se escribe §this(...)§ como primera instrucción del constructor.
+`,
+  compare: [
+    {
+      t: 'Campos, constructor y método',
+      cs: R`
+class Libro
+{
+    private string titulo;
+    private bool prestado;
+
+    public Libro(string titulo)
+    {
+        this.titulo = titulo;
+    }
+
+    public void Prestar() => prestado = true;
+}
+`,
+      java: R`
+class Libro {
+    private String titulo;
+    private boolean prestado;
+
+    Libro(String titulo) {
+        this.titulo = titulo;
+    }
+
+    void prestar() { prestado = true; }
+}
+`,
+      note: 'La estructura es casi idéntica. En C# los miembros son **privados** por defecto; en Java el acceso por defecto es **de paquete**.'
+    },
+    {
+      t: 'Encadenar constructores',
+      cs: R`
+class Libro
+{
+    string titulo, autor;
+
+    public Libro(string titulo, string autor)
+    {
+        this.titulo = titulo;
+        this.autor = autor;
+    }
+
+    public Libro(string titulo) : this(titulo, "Anónimo") { }
+}
+`,
+      java: R`
+class Libro {
+    String titulo, autor;
+
+    Libro(String titulo, String autor) {
+        this.titulo = titulo;
+        this.autor = autor;
+    }
+
+    Libro(String titulo) {
+        this(titulo, "Anónimo");
+    }
+}
+`,
+      note: 'En C# la llamada va **antes** del cuerpo, tras los dos puntos. En Java va **dentro** del cuerpo como primera instrucción.'
+    },
+    {
+      t: 'Crear e inicializar objetos',
+      cs: R`
+// Inicializador de objeto
+var p = new Persona { Nombre = "Ana", Edad = 30 };
+
+// Referencias: b y a apuntan al mismo objeto
+var a = new Persona { Nombre = "Luis" };
+var b = a;
+b.Nombre = "Marta";
+Console.WriteLine(a.Nombre);   // Marta
+`,
+      java: R`
+void main() {
+    // Sin inicializadores: constructor o setters
+    var p = new Persona("Ana", 30);
+
+    // Referencias: b y a apuntan al mismo objeto
+    var a = new Persona("Luis", 0);
+    var b = a;
+    b.setNombre("Marta");
+    IO.println(a.getNombre());     // Marta
+}
+`,
+      note: 'La semántica de referencias es la misma. Cambia la ergonomía de inicializar.'
+    }
+  ],
+  practice: {
+    title: 'La clase Libro con dos constructores',
+    desc: R`
+Define **Libro** para que el código de uso funcione:
+
+- campos privados: **titulo**, **autor** y **prestado** (bool),
+- un constructor con **titulo y autor**,
+- un segundo constructor solo con **titulo** que encadene al primero usando **"Anónimo"** como autor,
+- **Prestar()** marca el libro como prestado,
+- **Descripcion()** devuelve texto del tipo *Título - Autor [prestado]* o *[disponible]*.
+`,
+    hint: 'Calcula el estado en una variable aparte: §var estado = prestado ? "prestado" : "disponible";§ y luego interpólalo con §$"{titulo} - {autor} [{estado}]"§.',
+    starter: R`
+var l1 = new Libro("Cien años de soledad", "García Márquez");
+var l2 = new Libro("El coronel no tiene quien le escriba");
+l1.Prestar();
+Console.WriteLine(l1.Descripcion());
+Console.WriteLine(l2.Descripcion());
+
+// TODO: clase Libro
+`,
+    solution: R`
+var l1 = new Libro("Cien años de soledad", "García Márquez");
+var l2 = new Libro("El coronel no tiene quien le escriba");
+l1.Prestar();
+Console.WriteLine(l1.Descripcion());
+Console.WriteLine(l2.Descripcion());
+
+class Libro
+{
+    private string titulo;
+    private string autor;
+    private bool prestado;
+
+    public Libro(string titulo, string autor)
+    {
+        this.titulo = titulo;
+        this.autor = autor;
+    }
+
+    public Libro(string titulo) : this(titulo, "Anónimo") { }
+
+    public void Prestar() => prestado = true;
+
+    public string Descripcion()
+    {
+        var estado = prestado ? "prestado" : "disponible";
+        return $"{titulo} - {autor} [{estado}]";
+    }
+}
+`,
+    out: R`Cien años de soledad - García Márquez [prestado]
+El coronel no tiene quien le escriba - Anónimo [disponible]`,
+    checks: [
+      [/class\s+Libro\b/, 'Existe la clase Libro'],
+      [/private\s+bool\s+prestado/, 'Campo privado bool prestado'],
+      [/Libro\s*\(\s*string\s+\w+\s*,\s*string\s+\w+\s*\)/, 'Constructor Libro(string, string)'],
+      [/Libro\s*\(\s*string\s+\w+\s*\)\s*:\s*this\s*\(/, 'Constructor Libro(string) encadenado con : this(...)'],
+      [/Prestar\s*\(\s*\)/, 'Método Prestar()'],
+      [/string\s+Descripcion\s*\(\s*\)/, 'Método string Descripcion()']
+    ]
+  },
+  retos: [
+    {
+      title: 'Rectángulo',
+      desc: 'Crea la clase **Rectangulo** con un constructor **(double ancho, double alto)** y los métodos **Area()** y **Perimetro()**, ambos devolviendo double.',
+      hint: 'Con constructor primario puedes usar §ancho§ y §alto§ directamente: §public double Area() => ancho * alto;§',
+      starter: R`
+var r = new Rectangulo(3, 4);
+Console.WriteLine(r.Area());       // 12
+Console.WriteLine(r.Perimetro());  // 14
+
+// TODO: clase Rectangulo
+`,
+      solution: R`
+var r = new Rectangulo(3, 4);
+Console.WriteLine(r.Area());
+Console.WriteLine(r.Perimetro());
+
+class Rectangulo(double ancho, double alto)
+{
+    public double Area() => ancho * alto;
+    public double Perimetro() => 2 * (ancho + alto);
+}
+`,
+      out: '12\n14',
+      checks: [
+        [/class\s+Rectangulo\b/, 'Existe la clase Rectangulo'],
+        [/Rectangulo\s*\(\s*double\s+\w+\s*,\s*double\s+\w+\s*\)/, 'Constructor (double, double)'],
+        [/double\s+Area\s*\(\s*\)/, 'Método double Area()'],
+        [/double\s+Perimetro\s*\(\s*\)/, 'Método double Perimetro()']
+      ]
+    },
+    {
+      title: 'Copiar un objeto, no la referencia',
+      desc: 'Observa que **b** apunta al mismo objeto que **a**, mientras que **c** debe ser una copia independiente. Implementa **Clonar()** para que devuelva un **nuevo** Punto con los mismos valores.',
+      hint: 'Un método que devuelve §this§ no copia nada. Necesitas §new Punto(X, Y)§.',
+      starter: R`
+var a = new Punto(1, 2);
+var b = a;
+var c = a.Clonar();
+a.X = 99;
+Console.WriteLine($"{b.X} {c.X}");   // 99 1
+
+class Punto(int x, int y)
+{
+    public int X = x;
+    public int Y = y;
+    // TODO: método Clonar()
+}
+`,
+      solution: R`
+var a = new Punto(1, 2);
+var b = a;
+var c = a.Clonar();
+a.X = 99;
+Console.WriteLine($"{b.X} {c.X}");
+
+class Punto(int x, int y)
+{
+    public int X = x;
+    public int Y = y;
+    public Punto Clonar() => new Punto(X, Y);
+}
+`,
+      out: '99 1',
+      checks: [
+        [/Punto\s+Clonar\s*\(\s*\)/, 'Método Punto Clonar()'],
+        [/new\s+Punto\s*\(/, 'Crea un objeto nuevo con new Punto(...)'],
+        [/return\s+this\s*;|Clonar\s*\(\s*\)\s*=>\s*this\s*;/, 'No devuelve this (eso no copia)', true]
+      ]
+    }
+  ]
+});
+
+/* ===================== 2. ENCAPSULAMIENTO ===================== */
+MODS.push({
+  title: 'Encapsulamiento y propiedades',
+  lead: 'Proteger el estado de un objeto con modificadores de acceso y propiedades. Aquí aparece la primera novedad de C# 14: la palabra clave field.',
+  uml: { name: 'Encapsulamiento', items: ['private / public', 'propiedades', 'init / required', 'invariantes'], cs: 'palabra clave field', java: 'getters y setters' },
+  theory: R`
+## Ocultar el estado, exponer el comportamiento
+
+Si cualquiera puede escribir en cualquier campo, nadie puede garantizar que el objeto sea coherente. El **encapsulamiento** consiste en hacer privado el estado y dejar que los cambios pasen por métodos o propiedades que validan. Una cuenta no debería permitir un saldo negativo por accidente: la regla vive **dentro** de la clase, en un solo lugar.
+
+## Modificadores de acceso
+
+| Nivel | C# 14 | Java 25 |
+|---|---|---|
+| Visible en todas partes | §public§ | §public§ |
+| Solo dentro de la clase | §private§ (es el valor por defecto de un miembro) | §private§ |
+| Clase y derivadas | §protected§ | §protected§ (además, todo el paquete) |
+| Mismo proyecto o ensamblado | §internal§ | No existe. Lo más cercano es acceso de paquete |
+| Mismo paquete (sin escribir nada) | No existe | Acceso de paquete: es el valor por defecto |
+| Derivadas dentro del mismo ensamblado | §private protected§ | No existe |
+| Mismo ensamblado o derivadas | §protected internal§ | No existe |
+| Solo en el archivo actual | §file§ (tipos) | No existe |
+
+## Propiedades
+
+En C# una **propiedad** parece un campo desde fuera, pero por dentro son dos métodos (§get§ y §set§). Permiten validar sin cambiar la forma de uso. Variantes habituales:
+
+- **Autopropiedad**: §public int Edad { get; set; }§. El compilador crea el campo oculto.
+- **Solo lectura desde fuera**: §{ get; private set; }§.
+- **Solo en construcción**: §{ get; init; }§. Se asigna al crear el objeto y después es inmutable.
+- **§required§**: obliga a quien construye a asignar esa propiedad.
+- **Calculada**: §public double Area => ancho * alto;§.
+
+## La palabra clave field (C# 14)
+
+Antes, para añadir validación a una autopropiedad había que declarar a mano un campo de respaldo. Con C# 14 puedes escribir la lógica en un accessor y referirte al campo oculto con **§field§**, sin declararlo. Así conservas la sintaxis corta y solo escribes lo que cambia.
+
+> [cs] §public string Nombre { get; set => field = value.Trim(); }§ . El §get§ sigue siendo automático y el §set§ usa §field§.
+
+> [ojo] Si ya tenías una variable llamada §field§ en una clase, dentro de un accessor la palabra clave tiene prioridad. Puedes escribir §@field§ o §this.field§ para referirte a la tuya.
+
+## Y en Java
+
+Java no tiene propiedades. La convención es campo privado más **getter** y **setter**. Para inmutabilidad se usan campos §final§ asignados en el constructor, o un §record§. No existe equivalente de §init§ ni de §required§ en el lenguaje.
+`,
+  compare: [
+    {
+      t: 'Propiedad con validación',
+      cs: R`
+class Persona
+{
+    public string Nombre
+    {
+        get;
+        set => field = value?.Trim() ?? "";
+    } = "";
+
+    public int Edad { get; private set; }
+}
+`,
+      java: R`
+class Persona {
+    private String nombre = "";
+    private int edad;
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String valor) {
+        nombre = valor == null ? "" : valor.trim();
+    }
+
+    public int getEdad() { return edad; }
+}
+`,
+      note: 'Cuatro métodos y dos campos en Java frente a dos propiedades en C#. Antes de C# 14 habría hecho falta declarar un campo de respaldo para el caso de **Nombre**.'
+    },
+    {
+      t: 'Inmutabilidad en la construcción',
+      cs: R`
+var u = new Usuario { Email = "a@b.co" };
+// u.Rol = "admin";   // error de compilación
+
+class Usuario
+{
+    public required string Email { get; init; }
+    public string Rol { get; init; } = "invitado";
+}
+`,
+      java: R`
+class Usuario {
+    private final String email;
+    private final String rol;
+
+    Usuario(String email, String rol) {
+        this.email = email;
+        this.rol = rol;
+    }
+    String email() { return email; }
+    String rol()   { return rol; }
+}
+`,
+      note: 'En Java la inmutabilidad se logra con **final** y constructor. Si solo necesitas portar datos, un **record** (módulo 7) es la opción moderna.'
+    },
+    {
+      t: 'Asignación con navegación segura (C# 14)',
+      cs: R`
+// C# 14: asignar solo si el objeto no es null
+cliente?.Pedido = CrearPedido();
+cliente?.Visitas += 1;
+`,
+      java: R`
+// Java: no existe, se escribe el if
+if (cliente != null) {
+    cliente.setPedido(crearPedido());
+    cliente.setVisitas(cliente.getVisitas() + 1);
+}
+`,
+      note: 'La asignación condicional con **?.** es nueva en C# 14. Si **cliente** es null, ni siquiera se evalúa el lado derecho.'
+    }
+  ],
+  practice: {
+    title: 'Cuenta bancaria protegida',
+    desc: R`
+Implementa **CuentaBancaria**:
+
+- **Titular** (string): al asignarlo debe quitar espacios sobrantes con §Trim()§. Usa **field** de C# 14.
+- **Saldo** (decimal): legible desde fuera, pero con **setter privado**.
+- **Depositar(decimal monto)**: lanza **ArgumentException** si el monto es cero o negativo; si no, suma.
+- **Retirar(decimal monto)**: devuelve **false** si el monto no es positivo o supera el saldo; si no, resta y devuelve **true**.
+`,
+    hint: 'Titular: §public string Titular { get; set => field = value?.Trim() ?? ""; } = "";§. Saldo: §public decimal Saldo { get; private set; }§.',
+    starter: R`
+var cuenta = new CuentaBancaria { Titular = "  Laura Gómez  " };
+cuenta.Depositar(500_000m);
+bool ok = cuenta.Retirar(700_000m);
+Console.WriteLine($"{cuenta.Titular}|{cuenta.Saldo}|{ok}");
+cuenta.Retirar(200_000m);
+Console.WriteLine(cuenta.Saldo);
+
+// TODO: clase CuentaBancaria
+`,
+    solution: R`
+var cuenta = new CuentaBancaria { Titular = "  Laura Gómez  " };
+cuenta.Depositar(500_000m);
+bool ok = cuenta.Retirar(700_000m);
+Console.WriteLine($"{cuenta.Titular}|{cuenta.Saldo}|{ok}");
+cuenta.Retirar(200_000m);
+Console.WriteLine(cuenta.Saldo);
+
+class CuentaBancaria
+{
+    public string Titular
+    {
+        get;
+        set => field = value?.Trim() ?? "";
+    } = "";
+
+    public decimal Saldo { get; private set; }
+
+    public void Depositar(decimal monto)
+    {
+        if (monto <= 0)
+            throw new ArgumentException("El monto debe ser positivo");
+        Saldo += monto;
+    }
+
+    public bool Retirar(decimal monto)
+    {
+        if (monto <= 0 || monto > Saldo) return false;
+        Saldo -= monto;
+        return true;
+    }
+}
+`,
+    out: 'Laura Gómez|500000|False\n300000',
+    checks: [
+      [/class\s+CuentaBancaria\b/, 'Existe la clase CuentaBancaria'],
+      [/\bfield\b/, 'Usa la palabra clave field en un accessor'],
+      [/decimal\s+Saldo\s*\{[^}]*private\s+set/, 'Saldo es decimal con private set'],
+      [/void\s+Depositar\s*\(\s*decimal\s+\w+\s*\)/, 'Método void Depositar(decimal)'],
+      [/throw\s+new\s+ArgumentException/, 'Lanza ArgumentException en un depósito inválido'],
+      [/bool\s+Retirar\s*\(\s*decimal\s+\w+\s*\)/, 'Método bool Retirar(decimal)']
+    ]
+  },
+  retos: [
+    {
+      title: 'Temperatura con rango válido',
+      desc: 'Crea **Temperatura** con la propiedad **Celsius** (double) que rechace valores menores a -273.15 lanzando **ArgumentOutOfRangeException**, y una propiedad **solo de lectura** y calculada **Fahrenheit** (Celsius * 9 / 5 + 32).',
+      hint: 'En el setter completo usa §field = value;§ después de validar. Fahrenheit se escribe con flecha: §public double Fahrenheit => ...;§',
+      starter: R`
+var t = new Temperatura { Celsius = 100 };
+Console.WriteLine(t.Fahrenheit);   // 212
+
+// TODO: clase Temperatura
+`,
+      solution: R`
+var t = new Temperatura { Celsius = 100 };
+Console.WriteLine(t.Fahrenheit);
+
+class Temperatura
+{
+    public double Celsius
+    {
+        get;
+        set
+        {
+            if (value < -273.15)
+                throw new ArgumentOutOfRangeException(nameof(value));
+            field = value;
+        }
+    }
+
+    public double Fahrenheit => Celsius * 9 / 5 + 32;
+}
+`,
+      out: '212',
+      checks: [
+        [/double\s+Celsius\b/, 'Propiedad double Celsius'],
+        [/ArgumentOutOfRangeException/, 'Lanza ArgumentOutOfRangeException'],
+        [/-\s*273\.15/, 'Valida contra -273.15'],
+        [/double\s+Fahrenheit\s*=>/, 'Fahrenheit es calculada con =>']
+      ]
+    },
+    {
+      title: 'Objeto inmutable con required e init',
+      desc: 'Define **Usuario** con **Email** (string, **required**, solo asignable al construir) y **Rol** (string, solo asignable al construir, con valor por defecto "invitado").',
+      hint: 'Las dos usan §{ get; init; }§. A Rol añádele un inicializador al final: §= "invitado";§',
+      starter: R`
+var u = new Usuario { Email = "a@b.co" };
+Console.WriteLine($"{u.Email} {u.Rol}");   // a@b.co invitado
+
+// TODO: clase Usuario
+`,
+      solution: R`
+var u = new Usuario { Email = "a@b.co" };
+Console.WriteLine($"{u.Email} {u.Rol}");
+
+class Usuario
+{
+    public required string Email { get; init; }
+    public string Rol { get; init; } = "invitado";
+}
+`,
+      out: 'a@b.co invitado',
+      checks: [
+        [/required\s+string\s+Email\s*\{\s*get\s*;\s*init\s*;\s*\}/, 'required string Email { get; init; }'],
+        [/string\s+Rol\s*\{\s*get\s*;\s*init\s*;\s*\}\s*=/, 'Rol { get; init; } con valor inicial']
+      ]
+    }
+  ]
+});
+
+/* ===================== 3. HERENCIA ===================== */
+MODS.push({
+  title: 'Herencia',
+  lead: 'Reutilizar y especializar clases con la relación "es un". Incluye una diferencia sutil en el orden de construcción y una novedad de Java 25.',
+  uml: { name: 'Herencia', items: ['clase base y derivada', 'base(...)', 'protected', 'sealed', 'object'], cs: 'class B : A', java: 'class B extends A' },
+  theory: R`
+## La relación "es un"
+
+Una clase **derivada** hereda los miembros accesibles de una clase **base** y puede añadir los suyos. Un §Auto§ **es un** §Vehiculo§. La herencia sirve para compartir comportamiento común y para habilitar polimorfismo (módulo 4).
+
+Reglas comunes a C# y Java:
+
+- Una clase puede heredar de **una sola** clase base, pero implementar **varias** interfaces.
+- Toda clase termina heredando de una raíz común: §object§ en C#, §java.lang.Object§ en Java. De ahí vienen §ToString§, §Equals§ y §GetHashCode§ (en Java, §toString§, §equals§ y §hashCode§).
+- El constructor de la derivada debe llamar a uno de la base. Si no lo escribes, se invoca el constructor sin parámetros.
+
+## Sintaxis
+
+- C#: §class Auto : Vehiculo§ y la llamada a la base con §: base(...)§ en la cabecera del constructor, o §: Vehiculo(placa)§ si usas constructor primario.
+- Java: §class Auto extends Vehiculo§ y la llamada con §super(...)§ dentro del cuerpo.
+
+Para impedir que una clase se extienda se usa **§sealed§** en C# y **§final§** en Java. También puedes sellar un solo método ya sobrescrito.
+
+## Orden de construcción: una diferencia real
+
+Cuando creas un objeto derivado, ambos lenguajes inicializan la base antes de ejecutar el **cuerpo** del constructor de la derivada. Pero difieren en cuándo corren los **inicializadores de campos** de la derivada:
+
+- **C#**: los inicializadores de campo de la derivada se ejecutan **antes** que el constructor de la base.
+- **Java**: se ejecutan **después** de que termine el constructor de la base.
+
+Esto importa si el constructor de la base llama a un método sobrescrito: en Java ese método verá los campos de la derivada todavía con su valor por defecto.
+
+> [java] Java 25 finaliza los **cuerpos de constructor flexibles** (JEP 513): puedes escribir instrucciones antes de §super(...)§, por ejemplo para validar argumentos, siempre que no uses §this§. Antes, la llamada a §super§ tenía que ser la primera línea.
+
+> [cs] En C# la validación previa se hace con una función estática dentro de la llamada: §: base(Validar(id))§.
+
+## Cuándo no heredar
+
+Herencia crea un acoplamiento fuerte: un cambio en la base afecta a todas las derivadas. Úsala cuando la relación "es un" sea genuina y estable. Si solo quieres reutilizar código, la composición (módulo 6) suele ser mejor.
+`,
+  compare: [
+    {
+      t: 'Declarar una subclase',
+      cs: R`
+class Vehiculo(string placa)
+{
+    protected string Placa { get; } = placa;
+    public string Describir() => $"Vehículo {Placa}";
+}
+
+class Auto(string placa, int puertas) : Vehiculo(placa)
+{
+    public int Puertas { get; } = puertas;
+}
+`,
+      java: R`
+class Vehiculo {
+    protected final String placa;
+    Vehiculo(String placa) { this.placa = placa; }
+    String describir() { return "Vehículo " + placa; }
+}
+
+class Auto extends Vehiculo {
+    final int puertas;
+    Auto(String placa, int puertas) {
+        super(placa);
+        this.puertas = puertas;
+    }
+}
+`
+    },
+    {
+      t: 'Validar antes de llamar a la base',
+      cs: R`
+class Cuenta
+{
+    public Cuenta(string id) { /* ... */ }
+}
+
+class Ahorros : Cuenta
+{
+    public Ahorros(string id, decimal saldo)
+        : base(Validar(id))
+    {
+        // ...
+    }
+
+    static string Validar(string id) =>
+        string.IsNullOrWhiteSpace(id)
+            ? throw new ArgumentException("id vacío")
+            : id;
+}
+`,
+      java: R`
+class Cuenta {
+    Cuenta(String id) { /* ... */ }
+}
+
+class Ahorros extends Cuenta {
+    Ahorros(String id, double saldo) {
+        // Java 25: instrucciones antes de super()
+        if (id == null || id.isBlank())
+            throw new IllegalArgumentException("id vacío");
+        super(id);
+        // ...
+    }
+}
+`,
+      note: 'Con Java 25 el código se lee de forma natural. En C# se resuelve con un método estático o con una expresión **throw** dentro de la llamada a la base.'
+    },
+    {
+      t: 'Impedir más herencia',
+      cs: R`
+sealed class Gerente : Empleado { }
+
+// ya sobrescrito y sellado
+class Jefe : Empleado
+{
+    public sealed override string Rol() => "Jefe";
+}
+`,
+      java: R`
+final class Gerente extends Empleado { }
+
+// ya sobrescrito y sellado
+class Jefe extends Empleado {
+    @Override
+    public final String rol() { return "Jefe"; }
+}
+`,
+      note: 'Java además tiene **sealed** con **permits** para restringir quién puede extender una clase. Lo verás en el módulo 5.'
+    }
+  ],
+  practice: {
+    title: 'Jerarquía de vehículos',
+    desc: R`
+Crea tres clases:
+
+- **Vehiculo** con la placa y un método **Describir()** que devuelva *"Vehículo ABC123"*. La placa debe ser accesible para las derivadas (**protected**).
+- **Auto** que herede de Vehiculo, reciba además las **puertas** y tenga un método **Detalle()** que devuelva la descripción más *" con N puertas"*.
+- **Moto** que herede de Vehiculo y tenga **Detalle()** que añada *" de dos ruedas"*.
+`,
+    hint: 'Con constructor primario: §class Auto(string placa, int puertas) : Vehiculo(placa)§. Dentro de Detalle() reutiliza §Describir()§ de la base.',
+    starter: R`
+Console.WriteLine(new Auto("ABC123", 4).Detalle());
+Console.WriteLine(new Moto("XYZ987").Detalle());
+
+// TODO: Vehiculo, Auto y Moto
+`,
+    solution: R`
+Console.WriteLine(new Auto("ABC123", 4).Detalle());
+Console.WriteLine(new Moto("XYZ987").Detalle());
+
+class Vehiculo(string placa)
+{
+    protected string Placa { get; } = placa;
+    public string Describir() => $"Vehículo {Placa}";
+}
+
+class Auto(string placa, int puertas) : Vehiculo(placa)
+{
+    public string Detalle() => $"{Describir()} con {puertas} puertas";
+}
+
+class Moto(string placa) : Vehiculo(placa)
+{
+    public string Detalle() => $"{Describir()} de dos ruedas";
+}
+`,
+    out: 'Vehículo ABC123 con 4 puertas\nVehículo XYZ987 de dos ruedas',
+    checks: [
+      [/class\s+Vehiculo\b/, 'Existe la clase Vehiculo'],
+      [/protected\s+[\w<>?]+\s+Placa/, 'La placa es protected'],
+      [/class\s+Auto\b[^{]*:\s*(Vehiculo|base)\s*\(/, 'Auto hereda de Vehiculo y llama a la base'],
+      [/class\s+Moto\b[^{]*:\s*(Vehiculo|base)\s*\(/, 'Moto hereda de Vehiculo y llama a la base'],
+      [/class\s+Auto\b[\s\S]*string\s+Detalle\s*\(/, 'Auto tiene Detalle()'],
+      [/class\s+Moto\b[\s\S]*string\s+Detalle\s*\(/, 'Moto tiene Detalle()']
+    ]
+  },
+  retos: [
+    {
+      title: 'Clase sellada',
+      desc: 'Crea **Gerente**, una clase **sealed** que herede de Empleado, reciba un **bono** y tenga **Total()** = salario + bono.',
+      hint: '§sealed class Gerente(string nombre, decimal salario, decimal bono) : Empleado(nombre, salario)§',
+      starter: R`
+var g = new Gerente("Ana", 5_000_000m, 800_000m);
+Console.WriteLine($"{g.Nombre}: {g.Total()}");   // Ana: 5800000
+
+class Empleado(string nombre, decimal salario)
+{
+    public string Nombre { get; } = nombre;
+    public decimal Salario { get; } = salario;
+}
+
+// TODO: Gerente
+`,
+      solution: R`
+var g = new Gerente("Ana", 5_000_000m, 800_000m);
+Console.WriteLine($"{g.Nombre}: {g.Total()}");
+
+class Empleado(string nombre, decimal salario)
+{
+    public string Nombre { get; } = nombre;
+    public decimal Salario { get; } = salario;
+}
+
+sealed class Gerente(string nombre, decimal salario, decimal bono)
+    : Empleado(nombre, salario)
+{
+    public decimal Total() => Salario + bono;
+}
+`,
+      out: 'Ana: 5800000',
+      checks: [
+        [/sealed\s+class\s+Gerente\b/, 'Gerente es sealed'],
+        [/:\s*Empleado\s*\(\s*\w+\s*,\s*\w+\s*\)/, 'Pasa nombre y salario a Empleado'],
+        [/decimal\s+Total\s*\(\s*\)/, 'Método decimal Total()']
+      ]
+    },
+    {
+      title: 'Constructor con base(...) explícito',
+      desc: 'Esta vez sin constructor primario. Escribe **Perro** heredando de Animal, con un constructor **(string nombre, string raza)** que llame a **base(nombre)** y guarde la **Raza**.',
+      hint: '§public Perro(string nombre, string raza) : base(nombre) { Raza = raza; }§',
+      starter: R`
+var p = new Perro("Rex", "Labrador");
+Console.WriteLine($"{p.Nombre} ({p.Raza})");   // Rex (Labrador)
+
+class Animal
+{
+    public string Nombre { get; }
+    public Animal(string nombre) { Nombre = nombre; }
+}
+
+// TODO: Perro
+`,
+      solution: R`
+var p = new Perro("Rex", "Labrador");
+Console.WriteLine($"{p.Nombre} ({p.Raza})");
+
+class Animal
+{
+    public string Nombre { get; }
+    public Animal(string nombre) { Nombre = nombre; }
+}
+
+class Perro : Animal
+{
+    public string Raza { get; }
+    public Perro(string nombre, string raza) : base(nombre)
+    {
+        Raza = raza;
+    }
+}
+`,
+      out: 'Rex (Labrador)',
+      checks: [
+        [/class\s+Perro\s*:\s*Animal/, 'Perro hereda de Animal'],
+        [/Perro\s*\(\s*string\s+\w+\s*,\s*string\s+\w+\s*\)\s*:\s*base\s*\(\s*\w+\s*\)/, 'Constructor (string, string) con : base(nombre)'],
+        [/Raza\b/, 'Define la propiedad Raza']
+      ]
+    }
+  ]
+});
+/* ===================== 4. POLIMORFISMO ===================== */
+MODS.push({
+  title: 'Polimorfismo',
+  lead: 'Una misma llamada, comportamientos distintos según el objeto real. Aquí está la mayor diferencia de diseño entre C# y Java.',
+  uml: { name: 'Polimorfismo', items: ['virtual / override', 'despacho dinámico', 'sobrecarga', 'pattern matching'], cs: 'virtual + override', java: 'todo es virtual' },
+  theory: R`
+## Muchas formas, un contrato
+
+El **polimorfismo** permite escribir código contra un tipo general (una clase base o una interfaz) y que, en ejecución, se invoque la versión del objeto concreto. Una lista de §Figura§ puede contener círculos y rectángulos, y al pedir el área de cada uno se ejecuta el cálculo correcto.
+
+Hay varias formas, conviene distinguirlas:
+
+- **Polimorfismo de subtipos** (por herencia o interfaces): se decide en **ejecución** según el tipo real. Es el protagonista de este módulo.
+- **Sobrecarga**: varios métodos con el mismo nombre y distintos parámetros. Se decide en **compilación**.
+- **Paramétrico** (genéricos): el mismo código sirve para muchos tipos. Módulo 8.
+
+## Despacho dinámico: virtual y override
+
+Aquí C# y Java piensan distinto:
+
+- En **C#**, un método **no es sobrescribible por defecto**. La clase base debe marcarlo §virtual§ (o §abstract§) y la derivada debe marcarlo §override§. Es una decisión explícita.
+- En **Java**, todo método de instancia no privado, no estático y no §final§ **ya es virtual**. La anotación §@Override§ es opcional, pero el compilador la verifica y conviene usarla siempre.
+
+Para llamar a la implementación de la base desde un override se usa §base.Metodo()§ en C# y §super.metodo()§ en Java.
+
+## Ocultar con new (solo C#)
+
+Si una derivada declara un método con el mismo nombre **sin** override, C# permite **ocultarlo** con §new§. Es una trampa clásica: la versión que se ejecuta depende del **tipo de la variable**, no del objeto. Úsalo solo si sabes por qué.
+
+> [ojo] Ocultar no es sobrescribir. Con §Base b = new Derivada();§, una llamada a un método oculto ejecuta el de **Base**; con override ejecutaría el de **Derivada**.
+
+## Pattern matching
+
+Ambos lenguajes pueden decidir según el tipo real con §switch§ por patrones. C# tiene **expresiones switch** con patrones de tipo, de propiedad y de lista. Java 21 incorporó patrones de tipo y de registro en §switch§, y con jerarquías selladas el compilador comprueba que no falte ningún caso.
+
+> [java] En Java 25, los patrones con tipos primitivos (JEP 507) siguen en **vista previa**. Necesitas activar las funciones de preview para usarlos.
+`,
+  compare: [
+    {
+      t: 'Sobrescribir un método',
+      cs: R`
+Figura f = new Cuadrado(3);
+Console.WriteLine(f.Area());   // 9
+
+class Figura
+{
+    public virtual double Area() => 0;
+}
+
+class Cuadrado(double lado) : Figura
+{
+    public override double Area() => lado * lado;
+}
+`,
+      java: R`
+class Figura {
+    double area() { return 0; }
+}
+
+class Cuadrado extends Figura {
+    private final double lado;
+    Cuadrado(double lado) { this.lado = lado; }
+
+    @Override
+    double area() { return lado * lado; }
+}
+
+void main() {
+    Figura f = new Cuadrado(3);
+    IO.println(f.area());   // 9.0
+}
+`,
+      note: 'Fíjate en que Java imprime **9.0** y C# imprime **9**: son formatos distintos para el mismo double.'
+    },
+    {
+      t: 'Ocultar frente a sobrescribir (solo C#)',
+      cs: R`
+A x = new B();
+A y = new C();
+Console.WriteLine(x.Quien());   // B  (override)
+Console.WriteLine(y.Quien());   // A  (new oculta, no sobrescribe)
+
+class A { public virtual string Quien() => "A"; }
+class B : A { public override string Quien() => "B"; }
+class C : A { public new string Quien() => "C"; }
+`,
+      java: R`
+// En Java no existe "ocultar" para métodos de instancia:
+// un método con la misma firma siempre sobrescribe.
+class A { String quien() { return "A"; } }
+class B extends A { @Override String quien() { return "B"; } }
+
+void main() {
+    A x = new B();
+    IO.println(x.quien());   // B
+}
+`,
+      note: 'Java sí tiene ocultación para métodos **estáticos** y campos, pero no para métodos de instancia.'
+    },
+    {
+      t: 'Decidir por el tipo real',
+      cs: R`
+static string Describir(object? o) => o switch
+{
+    int n    => $"entero {n}",
+    string s => $"texto {s}",
+    null     => "nada",
+    _        => "otro"
+};
+`,
+      java: R`
+static String describir(Object o) {
+    return switch (o) {
+        case Integer n -> "entero " + n;
+        case String s  -> "texto " + s;
+        case null      -> "nada";
+        default        -> "otro";
+    };
+}
+`,
+      note: 'Casi idénticos. En Java el **default** es obligatorio salvo que el tipo sea sellado y los casos cubran todo.'
+    }
+  ],
+  practice: {
+    title: 'Figuras que se calculan solas',
+    desc: R`
+Crea una jerarquía para que el bucle funcione con **despacho dinámico**:
+
+- **Figura** (clase base normal) con dos métodos **virtuales**: **Nombre()** que devuelve "Figura genérica" y **Area()** que devuelve 0.
+- **Rectangulo(double ancho, double alto)**: sobrescribe ambos. Nombre "Rectángulo", área ancho por alto.
+- **Triangulo(double b, double h)**: sobrescribe ambos. Nombre "Triángulo", área base por altura entre 2.
+`,
+    hint: 'En la base escribe §public virtual string Nombre() => "Figura genérica";§. En cada derivada repite la firma con §override§ en lugar de §virtual§.',
+    starter: R`
+List<Figura> figuras = [new Figura(), new Rectangulo(2, 3), new Triangulo(4, 5)];
+foreach (var f in figuras)
+    Console.WriteLine($"{f.Nombre()}: {f.Area()}");
+
+// TODO: Figura, Rectangulo y Triangulo
+`,
+    solution: R`
+List<Figura> figuras = [new Figura(), new Rectangulo(2, 3), new Triangulo(4, 5)];
+foreach (var f in figuras)
+    Console.WriteLine($"{f.Nombre()}: {f.Area()}");
+
+class Figura
+{
+    public virtual string Nombre() => "Figura genérica";
+    public virtual double Area() => 0;
+}
+
+class Rectangulo(double ancho, double alto) : Figura
+{
+    public override string Nombre() => "Rectángulo";
+    public override double Area() => ancho * alto;
+}
+
+class Triangulo(double b, double h) : Figura
+{
+    public override string Nombre() => "Triángulo";
+    public override double Area() => b * h / 2;
+}
+`,
+    out: 'Figura genérica: 0\nRectángulo: 6\nTriángulo: 10',
+    checks: [
+      [/virtual\s+string\s+Nombre\s*\(/, 'Figura declara virtual string Nombre()'],
+      [/virtual\s+double\s+Area\s*\(/, 'Figura declara virtual double Area()'],
+      [/class\s+Rectangulo\b[^{]*:\s*Figura/, 'Rectangulo hereda de Figura'],
+      [/class\s+Triangulo\b[^{]*:\s*Figura/, 'Triangulo hereda de Figura'],
+      [s => (s.match(/\boverride\b/g) || []).length >= 4, 'Cuatro override (Nombre y Area en cada derivada)']
+    ]
+  },
+  retos: [
+    {
+      title: 'Switch por patrones',
+      desc: 'Escribe **Describir(object? o)** como **expresión switch** que devuelva: "entero N" si es int, "texto X" si es string, "nada" si es null y "otro" en cualquier otro caso.',
+      hint: 'Cada rama lleva la forma §tipo nombre => resultado§. El caso por defecto es §_ => ...§.',
+      starter: R`
+Console.WriteLine(Describir(42));
+Console.WriteLine(Describir("hola"));
+Console.WriteLine(Describir(null));
+Console.WriteLine(Describir(3.5));
+
+// TODO: static string Describir(object? o) => o switch { ... };
+`,
+      solution: R`
+Console.WriteLine(Describir(42));
+Console.WriteLine(Describir("hola"));
+Console.WriteLine(Describir(null));
+Console.WriteLine(Describir(3.5));
+
+static string Describir(object? o) => o switch
+{
+    int n => $"entero {n}",
+    string s => $"texto {s}",
+    null => "nada",
+    _ => "otro"
+};
+`,
+      out: 'entero 42\ntexto hola\nnada\notro',
+      checks: [
+        [/string\s+Describir\s*\(\s*object\??\s+\w+\s*\)/, 'Firma string Describir(object? o)'],
+        [/\bswitch\s*\{/, 'Usa una expresión switch'],
+        [/\bint\b[^=\n]*=>/, 'Rama para int'],
+        [/\bstring\b[^=\n]*=>/, 'Rama para string'],
+        [/\bnull\s*=>/, 'Rama para null'],
+        [/\b_\s*=>/, 'Rama por defecto _']
+      ]
+    },
+    {
+      title: 'Sobrescribir ToString',
+      desc: 'Toda clase hereda **ToString()** de object. Sobrescríbelo en **Producto** para que devuelva *"Nombre - Precio"*.',
+      hint: '§public override string ToString() => $"{nombre} - {precio}";§',
+      starter: R`
+Console.WriteLine(new Producto("Café", 4500));   // Café - 4500
+
+class Producto(string nombre, decimal precio)
+{
+    // TODO: override ToString()
+}
+`,
+      solution: R`
+Console.WriteLine(new Producto("Café", 4500));
+
+class Producto(string nombre, decimal precio)
+{
+    public override string ToString() => $"{nombre} - {precio}";
+}
+`,
+      out: 'Café - 4500',
+      checks: [
+        [/override\s+string\s+ToString\s*\(\s*\)/, 'override string ToString()'],
+        [/nombre/, 'Usa el nombre en el texto'],
+        [/precio/, 'Usa el precio en el texto']
+      ]
+    }
+  ]
+});
+
+/* ===================== 5. ABSTRACCIÓN E INTERFACES ===================== */
+MODS.push({
+  title: 'Abstracción e interfaces',
+  lead: 'Definir contratos sin decir cómo se cumplen. Clases abstractas para compartir estado y comportamiento; interfaces para describir capacidades.',
+  uml: { name: 'Abstracción', items: ['clase abstracta', 'interfaz', 'método por defecto', 'implementación explícita'], cs: 'default + static abstract', java: 'sealed + permits' },
+  theory: R`
+## Abstraer es decidir qué importa
+
+Una abstracción expone **qué** hace algo y esconde **cómo**. En código se materializa de dos maneras.
+
+## Clase abstracta
+
+Es una clase que **no se puede instanciar** y que puede mezclar miembros ya implementados con otros **abstractos** (sin cuerpo) que las derivadas están obligadas a implementar. Sirve cuando varias clases comparten **estado** y parte del comportamiento. Es la base del patrón *método plantilla*: la base define el algoritmo y las derivadas rellenan los pasos.
+
+Se declara con §abstract§ en ambos lenguajes.
+
+## Interfaz
+
+Una interfaz es un **contrato**: lista de miembros que una clase se compromete a ofrecer. Una clase puede implementar **muchas** interfaces. Describe una capacidad ("se puede comparar", "se puede pagar") más que una identidad.
+
+Diferencias de diseño:
+
+- **C#**: los miembros de una interfaz son públicos por defecto. Convención: el nombre empieza con **I** (§IPagable§). Admite miembros **por defecto** con cuerpo, miembros **estáticos** y **§static abstract§** (para contratos sobre el tipo, útiles en genéricos).
+- **Java**: la clase usa §implements§. Admite métodos §default§, §static§ y §private§. Los campos de una interfaz son constantes. Las interfaces pueden ser §sealed§ con §permits§ para limitar quién las implementa.
+- **Implementación explícita (solo C#)**: §void IA.Hacer()§ implementa un miembro de interfaz que solo se ve a través de esa interfaz. Resuelve conflictos de nombres entre dos interfaces.
+
+## ¿Abstracta o interfaz?
+
+- Usa **clase abstracta** si hay estado compartido o una relación "es un" fuerte con código común.
+- Usa **interfaz** para capacidades transversales que clases sin parentesco pueden ofrecer. Como solo puedes heredar de una clase, las interfaces son tu vía de "herencia múltiple" de comportamiento.
+
+> [ojo] En C#, un método por defecto de una interfaz **no es visible desde la clase** que la implementa. Para invocarlo necesitas una variable del tipo de la interfaz: §IDescontable d = new Camiseta(...);§.
+
+> [java] En Java las interfaces **sealed** cierran la jerarquía: §sealed interface Forma permits Circulo, Cuadrado§. Combinadas con §switch§ por patrones, el compilador verifica que cubras todos los casos. C# 14 no tiene jerarquías cerradas equivalentes.
+`,
+  compare: [
+    {
+      t: 'Clase abstracta',
+      cs: R`
+abstract class Notificador
+{
+    public void Notificar(string mensaje)
+    {
+        Console.WriteLine("[LOG]");
+        Enviar(mensaje);
+    }
+    protected abstract void Enviar(string mensaje);
+}
+
+class Email : Notificador
+{
+    protected override void Enviar(string m) =>
+        Console.WriteLine("Email: " + m);
+}
+`,
+      java: R`
+abstract class Notificador {
+    void notificar(String mensaje) {
+        IO.println("[LOG]");
+        enviar(mensaje);
+    }
+    protected abstract void enviar(String mensaje);
+}
+
+class Email extends Notificador {
+    @Override
+    protected void enviar(String m) {
+        IO.println("Email: " + m);
+    }
+}
+`
+    },
+    {
+      t: 'Interfaz con método por defecto',
+      cs: R`
+IDescontable d = new Camiseta();   // necesario: tipo interfaz
+Console.WriteLine(d.ConDescuento(20));
+
+interface IDescontable
+{
+    decimal Precio { get; }
+    decimal ConDescuento(decimal pct) =>
+        Precio - Precio * pct / 100;
+}
+
+class Camiseta : IDescontable
+{
+    public decimal Precio => 50_000m;
+}
+`,
+      java: R`
+interface Descontable {
+    double precio();
+    default double conDescuento(double pct) {
+        return precio() - precio() * pct / 100;
+    }
+}
+
+class Camiseta implements Descontable {
+    public double precio() { return 50_000; }
+}
+
+void main() {
+    var c = new Camiseta();        // Java sí lo ve directo
+    IO.println(c.conDescuento(20));
+}
+`,
+      note: 'Detalle importante: en Java el método **default** se invoca directamente sobre la clase. En C# solo a través de la interfaz.'
+    },
+    {
+      t: 'Cerrar la jerarquía (Java) frente a abierta (C#)',
+      cs: R`
+// C# 14: no hay jerarquías cerradas.
+// Cualquiera puede implementar IForma.
+interface IForma { double Area(); }
+record Circulo(double R) : IForma
+{
+    public double Area() => Math.PI * R * R;
+}
+`,
+      java: R`
+// Java 25: la lista de implementaciones es parte del tipo
+sealed interface Forma permits Circulo, Cuadrado {}
+record Circulo(double r) implements Forma {}
+record Cuadrado(double l) implements Forma {}
+
+double area(Forma f) {
+    return switch (f) {          // exhaustivo, sin default
+        case Circulo c  -> Math.PI * c.r() * c.r();
+        case Cuadrado q -> q.l() * q.l();
+    };
+}
+`,
+      note: 'Esta es una ventaja actual de Java para modelar datos algebraicos. En C# el equivalente (uniones y jerarquías cerradas) está en propuesta, no en C# 14.'
+    }
+  ],
+  practice: {
+    title: 'Notificaciones con método plantilla',
+    desc: R`
+Crea la clase abstracta **Notificador** y dos implementaciones:
+
+- **Notificador**: propiedad abstracta protegida **Canal** (string), método abstracto protegido **Enviar(string mensaje)**, y un método público **Notificar(string mensaje)** que primero imprime *"[LOG] Enviando por {Canal}"* y luego llama a Enviar.
+- **Email(string direccion)**: canal "Email"; Enviar imprime *"Email a {direccion}: {mensaje}"*.
+- **Sms(string numero)**: canal "Sms"; Enviar imprime *"Sms a {numero}: {mensaje}"*.
+`,
+    hint: 'La propiedad abstracta se declara §protected abstract string Canal { get; }§ y se implementa §protected override string Canal => "Email";§',
+    starter: R`
+Notificador[] canales = [new Email("ana@mail.com"), new Sms("3001234567")];
+foreach (var c in canales)
+    c.Notificar("Tu pedido salió");
+
+// TODO: Notificador, Email y Sms
+`,
+    solution: R`
+Notificador[] canales = [new Email("ana@mail.com"), new Sms("3001234567")];
+foreach (var c in canales)
+    c.Notificar("Tu pedido salió");
+
+abstract class Notificador
+{
+    protected abstract string Canal { get; }
+    protected abstract void Enviar(string mensaje);
+
+    public void Notificar(string mensaje)
+    {
+        Console.WriteLine($"[LOG] Enviando por {Canal}");
+        Enviar(mensaje);
+    }
+}
+
+class Email(string direccion) : Notificador
+{
+    protected override string Canal => "Email";
+    protected override void Enviar(string mensaje) =>
+        Console.WriteLine($"Email a {direccion}: {mensaje}");
+}
+
+class Sms(string numero) : Notificador
+{
+    protected override string Canal => "Sms";
+    protected override void Enviar(string mensaje) =>
+        Console.WriteLine($"Sms a {numero}: {mensaje}");
+}
+`,
+    out: '[LOG] Enviando por Email\nEmail a ana@mail.com: Tu pedido salió\n[LOG] Enviando por Sms\nSms a 3001234567: Tu pedido salió',
+    checks: [
+      [/abstract\s+class\s+Notificador\b/, 'Notificador es abstract'],
+      [/abstract\s+string\s+Canal/, 'Propiedad abstract string Canal'],
+      [/abstract\s+void\s+Enviar\s*\(\s*string/, 'Método abstract void Enviar(string)'],
+      [/public\s+void\s+Notificar\s*\(\s*string/, 'Método público Notificar(string)'],
+      [/class\s+Email\b[^{]*:\s*Notificador/, 'Email hereda de Notificador'],
+      [/class\s+Sms\b[^{]*:\s*Notificador/, 'Sms hereda de Notificador']
+    ]
+  },
+  retos: [
+    {
+      title: 'Interfaz con implementación por defecto',
+      desc: 'Declara **IDescontable** con la propiedad **Precio** (decimal, get) y un método **PrecioConDescuento(decimal pct)** con **cuerpo por defecto** que devuelva Precio - Precio * pct / 100. Luego implementa **Camiseta(decimal precio)**.',
+      hint: 'El método por defecto va dentro de la interfaz con flecha: §decimal PrecioConDescuento(decimal pct) => ...;§. La clase solo implementa Precio.',
+      starter: R`
+IDescontable item = new Camiseta(50_000m);
+Console.WriteLine(item.PrecioConDescuento(20));   // 40000
+
+// TODO: IDescontable y Camiseta
+`,
+      solution: R`
+IDescontable item = new Camiseta(50_000m);
+Console.WriteLine(item.PrecioConDescuento(20));
+
+interface IDescontable
+{
+    decimal Precio { get; }
+    decimal PrecioConDescuento(decimal pct) => Precio - Precio * pct / 100;
+}
+
+class Camiseta(decimal precio) : IDescontable
+{
+    public decimal Precio { get; } = precio;
+}
+`,
+      out: '40000',
+      checks: [
+        [/interface\s+IDescontable\b/, 'Existe la interfaz IDescontable'],
+        [/decimal\s+PrecioConDescuento\s*\(\s*decimal\s+\w+\s*\)\s*(=>|\{)/, 'PrecioConDescuento tiene cuerpo por defecto'],
+        [/class\s+Camiseta\b[^{]*:\s*IDescontable/, 'Camiseta implementa IDescontable'],
+        [/decimal\s+Precio\s*(\{|=>)/, 'Camiseta implementa la propiedad Precio']
+      ]
+    },
+    {
+      title: 'Dos interfaces a la vez',
+      desc: 'Una clase puede implementar varias interfaces. Crea **Robot** que implemente **IMovible** e **IHablante**.',
+      hint: '§class Robot : IMovible, IHablante§. Los métodos de una interfaz son públicos al implementarlos.',
+      starter: R`
+var r = new Robot();
+r.Mover();
+r.Hablar();
+
+interface IMovible { void Mover(); }
+interface IHablante { void Hablar(); }
+
+// TODO: Robot
+`,
+      solution: R`
+var r = new Robot();
+r.Mover();
+r.Hablar();
+
+interface IMovible { void Mover(); }
+interface IHablante { void Hablar(); }
+
+class Robot : IMovible, IHablante
+{
+    public void Mover() => Console.WriteLine("Avanzo");
+    public void Hablar() => Console.WriteLine("Hola, soy Robot");
+}
+`,
+      out: 'Avanzo\nHola, soy Robot',
+      checks: [
+        [/class\s+Robot\s*:\s*(IMovible\s*,\s*IHablante|IHablante\s*,\s*IMovible)/, 'Robot implementa IMovible e IHablante'],
+        [/void\s+Mover\s*\(\s*\)/, 'Implementa Mover()'],
+        [/void\s+Hablar\s*\(\s*\)/, 'Implementa Hablar()']
+      ]
+    }
+  ]
+});
+
+/* ===================== 6. COMPOSICIÓN ===================== */
+MODS.push({
+  title: 'Composición y asociaciones',
+  lead: 'La relación "tiene un": construir objetos complejos a partir de objetos simples, e inyectar dependencias por constructor.',
+  uml: { name: 'Composición', items: ['asociación', 'agregación', 'composición', 'inyección de dependencias'], cs: 'IReadOnlyList<T>', java: 'List.copyOf' },
+  theory: R`
+## "Tiene un" en lugar de "es un"
+
+Un §Pedido§ **tiene** líneas; un §Auto§ **tiene** un motor. Cuando un objeto guarda referencias a otros y les delega trabajo, hablamos de **composición** en sentido amplio. El principio de diseño clásico es: **favorece la composición sobre la herencia**, porque es más flexible (puedes cambiar las piezas en ejecución) y menos acoplada.
+
+Se suele distinguir el grado de dependencia:
+
+- **Asociación**: un objeto conoce a otro y lo usa. Ninguno es dueño del otro.
+- **Agregación**: un objeto agrupa a otros, pero estos pueden existir por separado (un equipo y sus jugadores).
+- **Composición**: el objeto contenedor es dueño del ciclo de vida de sus partes; si desaparece, las partes también (un pedido y sus líneas).
+
+## Delegación e inyección de dependencias
+
+En lugar de que una clase cree sus colaboradores con §new§, **los recibe por el constructor**, idealmente como interfaces. Así puedes sustituirlos por otros o por dobles de prueba. Esto es **inyección de dependencias** y es la base de los contenedores de DI de .NET y de Spring.
+
+## Proteger las colecciones internas
+
+Si una clase expone su lista directamente, cualquiera puede modificarla y romper tus invariantes. Opciones:
+
+- **C#**: guarda un §List<T>§ privado y expón §IReadOnlyList<T>§ (o §IEnumerable<T>§). Los literales de colección §[a, b, c]§ llegaron con C# 12.
+- **Java**: guarda una §List<T>§ privada y devuelve una vista de solo lectura con §Collections.unmodifiableList(...)§ o una copia con §List.copyOf(...)§. Los literales inmutables se crean con §List.of(...)§.
+
+> [ojo] §IReadOnlyList<T>§ es una **vista**: si el que la recibe hace un cast a §List<T>§, podría modificarla. Si necesitas blindaje real, devuelve una copia inmutable.
+
+> [tip] Pregúntate: ¿estas dos clases son realmente "es un"? Si dudas, usa composición. Es más fácil pasar de composición a herencia que al revés.
+`,
+  compare: [
+    {
+      t: 'Contenedor que protege su lista',
+      cs: R`
+class Carrito
+{
+    private readonly List<Item> items = [];
+    public IReadOnlyList<Item> Items => items;
+
+    public void Agregar(Item i) => items.Add(i);
+}
+`,
+      java: R`
+class Carrito {
+    private final List<Item> items = new ArrayList<>();
+
+    public List<Item> items() {
+        return List.copyOf(items);   // copia inmutable
+    }
+    public void agregar(Item i) { items.add(i); }
+}
+`,
+      note: 'C# expone una **vista** sin copiar; Java suele devolver una **copia** o un envoltorio **unmodifiableList**.'
+    },
+    {
+      t: 'Inyección por constructor',
+      cs: R`
+new Servicio(new ConsoleLogger()).Ejecutar();
+
+interface ILogger { void Log(string msg); }
+
+class Servicio(ILogger logger)
+{
+    public void Ejecutar() => logger.Log("Ejecutando");
+}
+`,
+      java: R`
+interface Logger { void log(String msg); }
+
+class Servicio {
+    private final Logger logger;
+    Servicio(Logger logger) { this.logger = logger; }
+    void ejecutar() { logger.log("Ejecutando"); }
+}
+
+void main() {
+    new Servicio(new ConsoleLogger()).ejecutar();
+}
+`,
+      note: 'La idea es idéntica. El constructor primario de C# ahorra el campo y la asignación.'
+    }
+  ],
+  practice: {
+    title: 'Carrito de compras',
+    desc: R`
+Implementa **Carrito**, que **tiene** una lista de **Item**:
+
+- **Items**: expone la lista como **IReadOnlyList<Item>** (sin poder agregar desde fuera).
+- **Agregar(string nombre, decimal precio)**: crea y guarda un Item.
+- **Total**: propiedad decimal calculada con la suma de precios.
+
+El record **Item** ya está dado; lo estudiarás en el módulo 7.
+`,
+    hint: 'Guarda §private readonly List<Item> items = [];§. El total sale de §items.Sum(i => i.Precio)§.',
+    starter: R`
+var carrito = new Carrito();
+carrito.Agregar("Café", 4500m);
+carrito.Agregar("Pan", 2500m);
+Console.WriteLine($"{carrito.Items.Count} ítems, total {carrito.Total}");
+
+record Item(string Nombre, decimal Precio);
+
+// TODO: clase Carrito
+`,
+    solution: R`
+var carrito = new Carrito();
+carrito.Agregar("Café", 4500m);
+carrito.Agregar("Pan", 2500m);
+Console.WriteLine($"{carrito.Items.Count} ítems, total {carrito.Total}");
+
+record Item(string Nombre, decimal Precio);
+
+class Carrito
+{
+    private readonly List<Item> items = [];
+
+    public IReadOnlyList<Item> Items => items;
+    public decimal Total => items.Sum(i => i.Precio);
+
+    public void Agregar(string nombre, decimal precio) =>
+        items.Add(new Item(nombre, precio));
+}
+`,
+    out: '2 ítems, total 7000',
+    checks: [
+      [/private\s+readonly\s+List\s*<\s*Item\s*>/, 'Lista privada readonly List<Item>'],
+      [/IReadOnlyList\s*<\s*Item\s*>\s+Items/, 'Expone Items como IReadOnlyList<Item>'],
+      [/decimal\s+Total\b/, 'Propiedad decimal Total'],
+      [/void\s+Agregar\s*\(\s*string\s+\w+\s*,\s*decimal\s+\w+\s*\)/, 'Método Agregar(string, decimal)']
+    ]
+  },
+  retos: [{
+    title: 'Inyección de dependencias',
+    desc: 'Crea **Servicio**, que reciba un **ILogger** por constructor (no lo crea él) y en **Ejecutar()** llame a **Log("Ejecutando")**.',
+    hint: 'Con constructor primario: §class Servicio(ILogger logger)§ y dentro §logger.Log(...)§.',
+    starter: R`
+new Servicio(new ConsoleLogger()).Ejecutar();
+
+interface ILogger { void Log(string mensaje); }
+class ConsoleLogger : ILogger
+{
+    public void Log(string mensaje) => Console.WriteLine("LOG: " + mensaje);
+}
+
+// TODO: Servicio
+`,
+    solution: R`
+new Servicio(new ConsoleLogger()).Ejecutar();
+
+interface ILogger { void Log(string mensaje); }
+class ConsoleLogger : ILogger
+{
+    public void Log(string mensaje) => Console.WriteLine("LOG: " + mensaje);
+}
+
+class Servicio(ILogger logger)
+{
+    public void Ejecutar() => logger.Log("Ejecutando");
+}
+`,
+    out: 'LOG: Ejecutando',
+    checks: [
+      [/class\s+Servicio\b/, 'Existe la clase Servicio'],
+      [/Servicio\s*\(\s*ILogger\s+\w+\s*\)/, 'Recibe un ILogger en el constructor'],
+      [/void\s+Ejecutar\s*\(\s*\)/, 'Método void Ejecutar()'],
+      [/\.\s*Log\s*\(/, 'Delega llamando a .Log(...)']
+    ]
+  }]
+});
+
+/* ===================== 7. RECORDS, STRUCTS, ENUMS ===================== */
+MODS.push({
+  title: 'Records, structs y enums',
+  lead: 'Tipos pensados para representar datos: records con igualdad por valor, structs que viven por valor y enumeraciones.',
+  uml: { name: 'Tipos de datos', items: ['record', 'struct', 'record struct', 'enum', 'igualdad por valor'], cs: 'with + record struct', java: 'record + enum con campos' },
+  theory: R`
+## Record: datos con igualdad por valor
+
+Un **record** es una forma corta de declarar un tipo cuyo propósito es **transportar datos**. El compilador genera por ti constructor, propiedades, igualdad **por valor**, §ToString§ legible y un método de copia.
+
+En C#, §record Punto(int X, int Y);§ crea un tipo por referencia, con propiedades **init**. Dos records con los mismos valores son iguales con §==§. La expresión §with§ crea una copia cambiando solo lo que indiques: §p with { Y = 9 }§.
+
+En Java, §record Punto(int x, int y) {}§ genera campos privados finales, constructor, accesores (§p.x()§), §equals§, §hashCode§ y §toString§. **No existe §with§**: para copiar con cambios escribes un método tú mismo.
+
+## Struct: tipo por valor (solo C#)
+
+Un §struct§ es un **tipo por valor**: la variable contiene los datos directamente y asignarla **copia** el contenido. Es ideal para tipos pequeños e inmutables (coordenadas, dinero, fechas). No admite herencia de clases, aunque sí implementa interfaces.
+
+- §readonly struct§: garantiza inmutabilidad.
+- §record struct§ y §readonly record struct§: structs con las ventajas de los records.
+
+> [java] Java 25 **no tiene structs ni tipos por valor definidos por el usuario**. Todo objeto es por referencia. El proyecto Valhalla trabaja en "clases de valor", pero no forman parte de la característica estándar de Java 25.
+
+## Enum
+
+En **C#**, un §enum§ es un conjunto de **constantes con nombre** respaldadas por un entero. No puede tener campos ni métodos propios; el comportamiento se pone aparte (un método estático, un §switch§ o un método de extensión). Con §[Flags]§ y potencias de dos se combinan valores con §|§.
+
+En **Java**, un §enum§ es una **clase completa**: cada constante es una instancia única que puede tener campos, constructor, métodos y hasta cuerpo propio. Para combinaciones se usa §EnumSet§.
+
+## Igualdad: ten claro qué compara cada cosa
+
+| Tipo | C# 14 | Java 25 |
+|---|---|---|
+| Clase normal con == | Compara **referencias** (salvo que se sobrecargue §==§) | Compara **referencias** siempre |
+| Contenido de dos objetos | §Equals§ y §GetHashCode§ | §equals§ y §hashCode§ |
+| string con == | Compara **contenido** | Compara **referencia** (usa §equals§) |
+| record | Igualdad **por valor** automática | Igualdad **por valor** automática |
+
+> [ojo] En Java, §"a" == new String("a")§ es falso. Usa siempre §.equals()§ para comparar contenido.
+`,
+  compare: [
+    {
+      t: 'Record y copia con cambios',
+      cs: R`
+var a = new Coordenada(4, 5);
+var b = a with { Y = 9 };
+
+Console.WriteLine(a);        // Coordenada { X = 4, Y = 5 }
+Console.WriteLine(b.Y);      // 9
+Console.WriteLine(a == new Coordenada(4, 5));  // True
+
+record Coordenada(int X, int Y);
+`,
+      java: R`
+record Coordenada(int x, int y) {}
+
+void main() {
+    var a = new Coordenada(4, 5);
+    var b = new Coordenada(a.x(), 9);   // no hay "with"
+
+    IO.println(a);        // Coordenada[x=4, y=5]
+    IO.println(b.y());    // 9
+    IO.println(a.equals(new Coordenada(4, 5)));  // true
+}
+`,
+      note: 'Fíjate en el formato de **ToString**: C# imprime con llaves y Java con corchetes.'
+    },
+    {
+      t: 'Enum con comportamiento',
+      cs: R`
+enum Estado { Activo, Suspendido }
+
+static class EstadoInfo
+{
+    public static string Etiqueta(Estado e) => e switch
+    {
+        Estado.Activo => "Cuenta activa",
+        Estado.Suspendido => "Cuenta suspendida",
+        _ => "Desconocido"
+    };
+}
+`,
+      java: R`
+enum Estado {
+    ACTIVO("Cuenta activa"),
+    SUSPENDIDO("Cuenta suspendida");
+
+    private final String etiqueta;
+    Estado(String etiqueta) { this.etiqueta = etiqueta; }
+    String etiqueta() { return etiqueta; }
+}
+`,
+      note: 'En Java el comportamiento vive **dentro** del enum. En C# se coloca fuera, porque un enum es solo un número con nombre.'
+    },
+    {
+      t: 'Struct frente a class (solo C#)',
+      cs: R`
+var s1 = new PuntoS { X = 1 }; var s2 = s1; s2.X = 99;
+var c1 = new PuntoC { X = 1 }; var c2 = c1; c2.X = 99;
+
+Console.WriteLine(s1.X);   // 1   (copia independiente)
+Console.WriteLine(c1.X);   // 99  (misma referencia)
+
+struct PuntoS { public int X; }
+class PuntoC { public int X; }
+`,
+      java: R`
+// Java 25: solo existe la semántica de referencia
+class Punto { int x; }
+
+void main() {
+    var c1 = new Punto(); c1.x = 1;
+    var c2 = c1;          c2.x = 99;
+
+    IO.println(c1.x);   // 99
+}
+`,
+      note: 'Los tipos por valor evitan reservar memoria en el montón para datos pequeños, algo muy útil en código sensible al rendimiento.'
+    }
+  ],
+  practice: {
+    title: 'Un record, un enum y una igualdad',
+    desc: R`
+Define:
+
+- el record posicional **Coordenada(int X, int Y)**,
+- el enum **Estado** con **Activo** y **Suspendido**,
+- la clase estática **EstadoInfo** con el método **Etiqueta(Estado e)** que use una expresión **switch** y devuelva "Cuenta activa" o "Cuenta suspendida".
+`,
+    hint: 'Un record posicional cabe en una línea: §record Coordenada(int X, int Y);§. El enum también: §enum Estado { Activo, Suspendido }§.',
+    starter: R`
+var a = new Coordenada(4, 5);
+var b = a with { Y = 9 };
+Console.WriteLine(a);
+Console.WriteLine(b);
+Console.WriteLine(a == new Coordenada(4, 5));
+Console.WriteLine(EstadoInfo.Etiqueta(Estado.Activo));
+
+// TODO: Coordenada, Estado y EstadoInfo
+`,
+    solution: R`
+var a = new Coordenada(4, 5);
+var b = a with { Y = 9 };
+Console.WriteLine(a);
+Console.WriteLine(b);
+Console.WriteLine(a == new Coordenada(4, 5));
+Console.WriteLine(EstadoInfo.Etiqueta(Estado.Activo));
+
+record Coordenada(int X, int Y);
+
+enum Estado { Activo, Suspendido }
+
+static class EstadoInfo
+{
+    public static string Etiqueta(Estado e) => e switch
+    {
+        Estado.Activo => "Cuenta activa",
+        Estado.Suspendido => "Cuenta suspendida",
+        _ => "Desconocido"
+    };
+}
+`,
+    out: 'Coordenada { X = 4, Y = 5 }\nCoordenada { X = 4, Y = 9 }\nTrue\nCuenta activa',
+    checks: [
+      [/record\s+Coordenada\s*\(\s*int\s+X\s*,\s*int\s+Y\s*\)/, 'record Coordenada(int X, int Y)'],
+      [/enum\s+Estado\s*\{[^}]*Activo[^}]*Suspendido/, 'enum Estado con Activo y Suspendido'],
+      [/static\s+class\s+EstadoInfo/, 'Clase estática EstadoInfo'],
+      [/string\s+Etiqueta\s*\(\s*Estado\s+\w+\s*\)/, 'Método string Etiqueta(Estado)'],
+      [/\bswitch\b/, 'Usa switch'],
+      [/Estado\.Activo\s*=>/, 'Rama para Estado.Activo']
+    ]
+  },
+  retos: [
+    {
+      title: 'Struct de solo lectura',
+      desc: 'Define **Precio** como **readonly record struct** con **Valor** (decimal) y **Divisa** (string). Comprueba que **with** crea otro valor sin tocar el original.',
+      hint: '§readonly record struct Precio(decimal Valor, string Divisa);§',
+      starter: R`
+var p1 = new Precio(10m, "USD");
+var p2 = p1 with { Valor = 20m };
+Console.WriteLine($"{p1.Valor} {p2.Valor}");   // 10 20
+
+// TODO: Precio
+`,
+      solution: R`
+var p1 = new Precio(10m, "USD");
+var p2 = p1 with { Valor = 20m };
+Console.WriteLine($"{p1.Valor} {p2.Valor}");
+
+readonly record struct Precio(decimal Valor, string Divisa);
+`,
+      out: '10 20',
+      checks: [
+        [/readonly\s+record\s+struct\s+Precio\s*\(\s*decimal\s+Valor\s*,\s*string\s+Divisa\s*\)/, 'readonly record struct Precio(decimal Valor, string Divisa)']
+      ]
+    },
+    {
+      title: 'Enum de banderas',
+      desc: 'Crea el enum **Permisos** marcado con **[Flags]**: Ninguno = 0, Leer = 1, Escribir = 2 y Ejecutar = 4. Así podrás combinar valores con **|**.',
+      hint: 'Los valores deben ser potencias de dos para no solaparse en bits. No olvides el atributo §[Flags]§ encima del enum.',
+      starter: R`
+var p = Permisos.Leer | Permisos.Escribir;
+Console.WriteLine(p.HasFlag(Permisos.Escribir));   // True
+Console.WriteLine(p);                               // Leer, Escribir
+
+// TODO: enum Permisos
+`,
+      solution: R`
+var p = Permisos.Leer | Permisos.Escribir;
+Console.WriteLine(p.HasFlag(Permisos.Escribir));
+Console.WriteLine(p);
+
+[Flags]
+enum Permisos
+{
+    Ninguno = 0,
+    Leer = 1,
+    Escribir = 2,
+    Ejecutar = 4
+}
+`,
+      out: 'True\nLeer, Escribir',
+      checks: [
+        [/\[\s*Flags\s*\]/, 'Atributo [Flags]'],
+        [/enum\s+Permisos\b/, 'enum Permisos'],
+        [/Ninguno\s*=\s*0/, 'Ninguno = 0'],
+        [/Leer\s*=\s*1/, 'Leer = 1'],
+        [/Escribir\s*=\s*2/, 'Escribir = 2'],
+        [/Ejecutar\s*=\s*4/, 'Ejecutar = 4']
+      ]
+    }
+  ]
+});
+/* ===================== 8. GENÉRICOS ===================== */
+MODS.push({
+  title: 'Genéricos',
+  lead: 'Escribir una vez código que funciona con muchos tipos. Aquí C# y Java se separan por dentro: tipos reales en C#, borrado de tipos en Java.',
+  uml: { name: 'Caja<T>', items: ['parámetros de tipo', 'restricciones', 'varianza', 'métodos genéricos'], cs: 'where T : ...', java: 'T extends ...' },
+  theory: R`
+## Parametrizar por tipo
+
+Un tipo o método **genérico** recibe uno o más **parámetros de tipo** (por convención §T§) que se concretan al usarlo. §List<string>§ es una lista de textos y §List<int>§ una de enteros, con la seguridad de tipos comprobada en compilación y sin conversiones manuales.
+
+## Restricciones
+
+A veces necesitas exigir algo del tipo, por ejemplo que se pueda comparar o que tenga constructor sin parámetros.
+
+- **C#**: cláusula §where§ al final: §where T : IComparable<T>§, §where T : class§, §where T : struct§, §where T : new()§, §where T : notnull§. Se pueden combinar.
+- **Java**: límite superior en la declaración: §<T extends Comparable<T>>§. Para varios límites se usa §&§.
+
+## La diferencia profunda: reificación frente a borrado
+
+- **C# reifica los genéricos**: el tipo concreto existe en ejecución. Por eso puedes escribir §typeof(T)§, §new T()§ (con restricción §new()§) o saber que una lista es §List<int>§. Además, §List<int>§ almacena enteros sin **boxing**.
+- **Java borra los tipos** en compilación (*type erasure*): en ejecución una §List<String>§ es solo una §List§. Consecuencias: no puedes hacer §new T()§, §T.class§, ni §instanceof List<String>§, y los genéricos **no admiten primitivos** (§List<int>§ no existe; se usa §List<Integer>§ con boxing).
+
+## Varianza
+
+Una §List<Perro>§ **no es** una §List<Animal>§ en ninguno de los dos lenguajes, porque permitiría insertar un gato. Para casos de solo lectura o solo escritura:
+
+- **C#** declara la varianza en la interfaz: §out T§ (covariante, solo produce) e §in T§ (contravariante, solo consume). §IEnumerable<out T>§ permite pasar §IEnumerable<Perro>§ donde se pide §IEnumerable<Animal>§.
+- **Java** la declara en el **uso** con comodines: §List<? extends Animal>§ (solo lectura) y §List<? super Perro>§ (solo escritura).
+
+> [cs] C# 14 mantiene todo esto; además, como parte de su trabajo con §Span<T>§, mejoró las conversiones implícitas entre arreglos y spans, útil en código genérico de alto rendimiento.
+
+> [java] Java 25 sigue sin tipos genéricos sobre primitivos. Es uno de los objetivos del proyecto Valhalla, todavía no disponible como función estándar.
+`,
+  compare: [
+    {
+      t: 'Una clase genérica',
+      cs: R`
+class Caja<T>
+{
+    private T? contenido;
+    public void Guardar(T valor) => contenido = valor;
+    public T? Sacar() => contenido;
+}
+
+var c = new Caja<int>();   // sin boxing
+c.Guardar(42);
+`,
+      java: R`
+class Caja<T> {
+    private T contenido;
+    void guardar(T valor) { contenido = valor; }
+    T sacar() { return contenido; }
+}
+
+var c = new Caja<Integer>();   // boxing, no admite int
+c.guardar(42);
+`
+    },
+    {
+      t: 'Restricciones',
+      cs: R`
+static T Mayor<T>(T a, T b) where T : IComparable<T>
+    => a.CompareTo(b) >= 0 ? a : b;
+
+static T Crear<T>() where T : new()
+    => new T();
+`,
+      java: R`
+static <T extends Comparable<T>> T mayor(T a, T b) {
+    return a.compareTo(b) >= 0 ? a : b;
+}
+
+// No existe "new T()". Se pasa una fábrica:
+static <T> T crear(java.util.function.Supplier<T> fabrica) {
+    return fabrica.get();
+}
+`,
+      note: 'Para crear instancias de **T**, Java necesita que se le entregue una fábrica, porque el tipo ya no existe en ejecución.'
+    },
+    {
+      t: 'Varianza',
+      cs: R`
+IEnumerable<Perro> perros = ObtenerPerros();
+IEnumerable<Animal> animales = perros;   // covarianza: OK
+
+// declarada en la interfaz estándar:
+// interface IEnumerable<out T> { ... }
+`,
+      java: R`
+List<Perro> perros = obtenerPerros();
+List<? extends Animal> animales = perros;   // comodín en el uso
+
+for (Animal a : animales) { /* leer */ }
+// animales.add(new Gato());   // error: solo lectura
+`,
+      note: 'Misma idea, distinto lugar: C# lo decide quien **diseña** la interfaz; Java lo decide quien la **usa**.'
+    }
+  ],
+  practice: {
+    title: 'Repositorio genérico',
+    desc: R`
+Crea **Repositorio<T>**, un almacén en memoria que sirve para cualquier tipo:
+
+- guarda los datos en una lista privada de T,
+- **Agregar(T item)** añade un elemento,
+- **Buscar(Func<T, bool> filtro)** devuelve un **IEnumerable<T>** con los que cumplan el filtro.
+`,
+    hint: 'Dentro usa §datos.Where(filtro)§. Recuerda que §Func<T, bool>§ es un delegado que recibe T y devuelve bool.',
+    starter: R`
+var repo = new Repositorio<string>();
+repo.Agregar("uno");
+repo.Agregar("dos");
+repo.Agregar("tres");
+Console.WriteLine(repo.Buscar(s => s.Length == 3).Count());
+
+// TODO: Repositorio<T>
+`,
+    solution: R`
+var repo = new Repositorio<string>();
+repo.Agregar("uno");
+repo.Agregar("dos");
+repo.Agregar("tres");
+Console.WriteLine(repo.Buscar(s => s.Length == 3).Count());
+
+class Repositorio<T>
+{
+    private readonly List<T> datos = [];
+
+    public void Agregar(T item) => datos.Add(item);
+
+    public IEnumerable<T> Buscar(Func<T, bool> filtro) => datos.Where(filtro);
+}
+`,
+    out: '2',
+    checks: [
+      [/class\s+Repositorio\s*<\s*T\s*>/, 'class Repositorio<T>'],
+      [/List\s*<\s*T\s*>/, 'Usa una List<T> interna'],
+      [/void\s+Agregar\s*\(\s*T\s+\w+\s*\)/, 'Método Agregar(T)'],
+      [/IEnumerable\s*<\s*T\s*>\s+Buscar\s*\(\s*Func\s*<\s*T\s*,\s*bool\s*>\s+\w+\s*\)/, 'IEnumerable<T> Buscar(Func<T, bool>)']
+    ]
+  },
+  retos: [
+    {
+      title: 'Método genérico con restricción',
+      desc: 'Escribe **Mayor<T>(T a, T b)** dentro de la clase estática **Utilidades**. Debe funcionar para cualquier tipo comparable, así que restringe T a **IComparable<T>** y usa **CompareTo**.',
+      hint: '§public static T Mayor<T>(T a, T b) where T : IComparable<T> => a.CompareTo(b) >= 0 ? a : b;§',
+      starter: R`
+Console.WriteLine(Utilidades.Mayor(3, 8));                 // 8
+Console.WriteLine(Utilidades.Mayor("manzana", "pera"));    // pera
+
+// TODO: static class Utilidades
+`,
+      solution: R`
+Console.WriteLine(Utilidades.Mayor(3, 8));
+Console.WriteLine(Utilidades.Mayor("manzana", "pera"));
+
+static class Utilidades
+{
+    public static T Mayor<T>(T a, T b) where T : IComparable<T>
+        => a.CompareTo(b) >= 0 ? a : b;
+}
+`,
+      out: '8\npera',
+      checks: [
+        [/static\s+class\s+Utilidades/, 'static class Utilidades'],
+        [/T\s+Mayor\s*<\s*T\s*>\s*\(\s*T\s+\w+\s*,\s*T\s+\w+\s*\)/, 'Firma T Mayor<T>(T a, T b)'],
+        [/where\s+T\s*:\s*IComparable\s*<\s*T\s*>/, 'Restricción where T : IComparable<T>'],
+        [/CompareTo\s*\(/, 'Usa CompareTo']
+      ]
+    },
+    {
+      title: 'Crear un T (algo que Java no puede)',
+      desc: 'Escribe **Fabrica.Crear<T>()** que devuelva una instancia nueva de T. Necesitas la restricción **new()** para poder escribir **new T()**.',
+      hint: '§public static T Crear<T>() where T : new() => new T();§',
+      starter: R`
+var w = Fabrica.Crear<Widget>();
+Console.WriteLine(w.GetType().Name);   // Widget
+
+class Widget { }
+
+// TODO: static class Fabrica
+`,
+      solution: R`
+var w = Fabrica.Crear<Widget>();
+Console.WriteLine(w.GetType().Name);
+
+class Widget { }
+
+static class Fabrica
+{
+    public static T Crear<T>() where T : new() => new T();
+}
+`,
+      out: 'Widget',
+      checks: [
+        [/T\s+Crear\s*<\s*T\s*>\s*\(\s*\)/, 'Firma T Crear<T>()'],
+        [/where\s+T\s*:\s*new\s*\(\s*\)/, 'Restricción where T : new()'],
+        [/new\s+T\s*\(\s*\)/, 'Crea la instancia con new T()']
+      ]
+    }
+  ]
+});
+
+/* ===================== 9. ESTÁTICOS, EXTENSIÓN, OPERADORES ===================== */
+MODS.push({
+  title: 'Estáticos, extensión y operadores',
+  lead: 'Miembros que pertenecen al tipo, nuevas capacidades para tipos existentes y operadores propios. Aquí C# 14 trae los extension members.',
+  uml: { name: 'Miembros de tipo', items: ['static', 'const / readonly', 'extension methods', 'operator +', 'indexadores'], cs: 'extension(...) { }', java: 'clase de utilidades' },
+  theory: R`
+## Miembros estáticos
+
+Un miembro §static§ pertenece al **tipo**, no a cada objeto. Existe una sola copia y se accede con el nombre del tipo: §Math.Max(...)§. Úsalos para utilidades sin estado, contadores compartidos o constantes.
+
+- Una **clase estática** (§static class§ en C#) no se puede instanciar ni heredar y solo contiene miembros estáticos.
+- En C# hay **constructores estáticos** (§static Clase() { }§) que inicializan el tipo una vez. En Java son los **bloques** §static { }§.
+- Constantes: §const§ y §static readonly§ en C#; §static final§ en Java.
+
+> [ojo] El estado estático es global y compartido. Si varios hilos lo modifican, necesitas sincronización. Evítalo para datos de negocio.
+
+## Métodos de extensión y extension members (C# 14)
+
+C# permite **añadir miembros a un tipo existente** sin modificarlo ni heredar de él. Históricamente eran solo **métodos** de extensión (§this§ en el primer parámetro). **C# 14** introduce los **bloques §extension§**, que además permiten **propiedades** de extensión y miembros **estáticos** de extensión, con una sintaxis más natural:
+
+§extension(string texto) { public bool EsVacio => texto.Length == 0; }§
+
+El parámetro entre paréntesis es el **receptor**: el objeto sobre el que se invoca.
+
+> [java] Java **no tiene** métodos de extensión. Se usan clases de utilidades con métodos estáticos (§Collections.sort(lista)§) o métodos §default§ en interfaces propias.
+
+## Sobrecarga de operadores
+
+C# permite definir el comportamiento de operadores (§+§, §-§, §==§, §<§, conversiones implícitas y explícitas) para tus tipos con §public static T operator +(T a, T b)§. Hace que tipos matemáticos o de dinero se lean con naturalidad: §a + b§.
+
+C# 14 añade **operadores de asignación compuesta definidos por el usuario** (§+=§ como método de instancia, sin crear un objeto nuevo), útil para tipos grandes y mutables.
+
+> [java] Java **no permite** sobrecargar operadores (el único que está sobrecargado es §+§ para texto). Se escriben métodos con nombre: §a.sumar(b)§, como en §BigDecimal§.
+
+## Indexadores
+
+Un **indexador** permite usar un objeto como un arreglo: §ventas["enero"]§. Se declara con §this[...]§. Java no los tiene; usa métodos §get(i)§ y §set(i, v)§.
+`,
+  compare: [
+    {
+      t: 'Constantes, estáticos y contador compartido',
+      cs: R`
+class Config
+{
+    public const string App = "POO";
+    public static readonly int Max = 10;
+    private static int contador;
+    public static int Creados => contador;
+    public Config() { contador++; }
+}
+`,
+      java: R`
+class Config {
+    public static final String APP = "POO";
+    public static final int MAX = 10;
+    private static int contador;
+    public static int creados() { return contador; }
+    public Config() { contador++; }
+}
+`,
+      note: 'Convención de nombres: constantes en PascalCase en C#; en MAYÚSCULAS en Java.'
+    },
+    {
+      t: 'Añadir una propiedad a string',
+      cs: R`
+static class TextoExtensions
+{
+    extension(string texto)
+    {
+        public bool EsBlanco => string.IsNullOrWhiteSpace(texto);
+        public string Cortar(int max) =>
+            texto.Length <= max ? texto : texto[..max];
+    }
+}
+
+Console.WriteLine("   ".EsBlanco);        // True
+Console.WriteLine("Hola mundo".Cortar(4)); // Hola
+`,
+      java: R`
+final class Texto {
+    private Texto() {}
+    static boolean esBlanco(String s) { return s.isBlank(); }
+    static String cortar(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max);
+    }
+}
+
+void main() {
+    IO.println(Texto.esBlanco("   "));         // true
+    IO.println(Texto.cortar("Hola mundo", 4)); // Hola
+}
+`,
+      note: 'Con C# 14 la extensión se usa como si **EsBlanco** fuera una propiedad de string. En Java hay que llamar a la utilidad pasando el objeto.'
+    },
+    {
+      t: 'Sobrecarga de operadores',
+      cs: R`
+record Vector(int X, int Y)
+{
+    public static Vector operator +(Vector a, Vector b)
+        => new(a.X + b.X, a.Y + b.Y);
+}
+
+var v = new Vector(1, 2) + new Vector(3, 4);
+`,
+      java: R`
+record Vector(int x, int y) {
+    Vector sumar(Vector o) {
+        return new Vector(x + o.x, y + o.y);
+    }
+}
+
+var v = new Vector(1, 2).sumar(new Vector(3, 4));
+`
+    }
+  ],
+  practice: {
+    title: 'Vectores que se suman y se escalan',
+    desc: R`
+Define el record **Vector(int X, int Y)** y sobrecarga dos operadores:
+
+- el operador §+§ entre dos vectores: suma componente a componente,
+- el operador §*§ entre un **Vector** y un **int**: multiplica ambos componentes.
+
+Los operadores se declaran **public static** y reciben todos sus operandos como parámetros.
+`,
+    hint: '§public static Vector operator +(Vector a, Vector b) => new(a.X + b.X, a.Y + b.Y);§ y para el escalado cambia el segundo parámetro a §int k§.',
+    starter: R`
+var v = new Vector(1, 2) + new Vector(3, 4);
+Console.WriteLine(v);
+Console.WriteLine(v * 2);
+
+// TODO: record Vector con operadores
+`,
+    solution: R`
+var v = new Vector(1, 2) + new Vector(3, 4);
+Console.WriteLine(v);
+Console.WriteLine(v * 2);
+
+record Vector(int X, int Y)
+{
+    public static Vector operator +(Vector a, Vector b)
+        => new(a.X + b.X, a.Y + b.Y);
+
+    public static Vector operator *(Vector v, int k)
+        => new(v.X * k, v.Y * k);
+}
+`,
+    out: 'Vector { X = 4, Y = 6 }\nVector { X = 8, Y = 12 }',
+    checks: [
+      [/record\s+Vector\s*\(\s*int\s+X\s*,\s*int\s+Y\s*\)/, 'record Vector(int X, int Y)'],
+      [/static\s+Vector\s+operator\s*\+\s*\(\s*Vector\s+\w+\s*,\s*Vector\s+\w+\s*\)/, 'Operador + entre dos Vector'],
+      [/static\s+Vector\s+operator\s*\*\s*\(\s*Vector\s+\w+\s*,\s*int\s+\w+\s*\)/, 'Operador * entre Vector e int']
+    ]
+  },
+  retos: [
+    {
+      title: 'Propiedad de extensión (C# 14)',
+      desc: 'Con un bloque **extension** sobre **string**, añade la propiedad **EsPalindromo** (bool) que sea verdadera si el texto se lee igual al derecho y al revés.',
+      hint: 'Dentro de §static class TextoExtensions§ abre §extension(string texto) { ... }§ y declara §public bool EsPalindromo => ...;§. Una forma: §texto.SequenceEqual(texto.Reverse())§.',
+      starter: R`
+Console.WriteLine("reconocer".EsPalindromo);   // True
+Console.WriteLine("hola".EsPalindromo);        // False
+
+// TODO: static class TextoExtensions con extension(string texto)
+`,
+      solution: R`
+Console.WriteLine("reconocer".EsPalindromo);
+Console.WriteLine("hola".EsPalindromo);
+
+static class TextoExtensions
+{
+    extension(string texto)
+    {
+        public bool EsPalindromo => texto.SequenceEqual(texto.Reverse());
+    }
+}
+`,
+      out: 'True\nFalse',
+      checks: [
+        [/static\s+class\s+\w+/, 'Una clase estática contenedora'],
+        [/extension\s*\(\s*string\s+\w+\s*\)/, 'Bloque extension(string texto)'],
+        [/bool\s+EsPalindromo\b/, 'Propiedad bool EsPalindromo']
+      ]
+    },
+    {
+      title: 'Contador compartido',
+      desc: 'Crea **Ticket**: cada instancia recibe un **Numero** correlativo (1, 2, 3...) y la propiedad **estática** **Emitidos** indica cuántos tickets se han creado.',
+      hint: 'Necesitas un campo §private static int contador;§. El número de cada objeto sale de §++contador§ al construirlo.',
+      starter: R`
+new Ticket();
+new Ticket();
+var t = new Ticket();
+Console.WriteLine($"{t.Numero} de {Ticket.Emitidos}");   // 3 de 3
+
+// TODO: clase Ticket
+`,
+      solution: R`
+new Ticket();
+new Ticket();
+var t = new Ticket();
+Console.WriteLine($"{t.Numero} de {Ticket.Emitidos}");
+
+class Ticket
+{
+    private static int contador;
+
+    public static int Emitidos => contador;
+    public int Numero { get; } = ++contador;
+}
+`,
+      out: '3 de 3',
+      checks: [
+        [/static\s+int\s+contador/, 'Campo static int contador'],
+        [/static\s+int\s+Emitidos/, 'Propiedad static int Emitidos'],
+        [/\+\+\s*contador|contador\s*\+\+|contador\s*\+=\s*1/, 'Incrementa el contador al crear'],
+        [/int\s+Numero\b/, 'Propiedad int Numero']
+      ]
+    }
+  ]
+});
+
+/* ===================== 10. DELEGADOS, EVENTOS, LAMBDAS ===================== */
+MODS.push({
+  title: 'Delegados, eventos y lambdas',
+  lead: 'Pasar comportamiento como dato y notificar cambios entre objetos. El patrón Observador es un evento de primera clase en C#.',
+  uml: { name: 'Comportamiento como dato', items: ['delegate', 'Action / Func', 'event', 'lambda', 'closure'], cs: 'event + lambda sin tipos', java: 'interfaz funcional' },
+  theory: R`
+## Delegados: funciones como valores
+
+Un **delegado** es un tipo que representa una referencia a un método con cierta firma. Permite pasar comportamiento como argumento, guardarlo o devolverlo. En la práctica casi nunca declaras uno propio, porque la biblioteca trae los genéricos:
+
+- §Action<T>§: recibe parámetros y no devuelve nada.
+- §Func<T, R>§: recibe parámetros y devuelve un valor (el último tipo es el de retorno).
+- §Predicate<T>§: devuelve bool.
+
+En Java no hay delegados: se usan **interfaces funcionales** (con un solo método abstracto) como §Runnable§, §Supplier<T>§, §Function<T,R>§, §Consumer<T>§ o §Predicate<T>§ del paquete §java.util.function§.
+
+## Lambdas y closures
+
+Una **lambda** es una función anónima: §x => x * x§ en C#, §x -> x * x§ en Java. Puede **capturar** variables de su entorno (*closure*). En Java, las variables capturadas deben ser **efectivamente finales**; en C# pueden cambiar.
+
+Java además ofrece **referencias a métodos** con §::§ (§String::length§); C# usa **grupos de métodos** (§Console.WriteLine§ pasado directamente).
+
+> [cs] C# 14 permite **modificadores en parámetros de lambda sin escribir los tipos**: §(texto, out resultado) => int.TryParse(texto, out resultado)§. Antes tenías que declarar el tipo de cada parámetro cuando usabas §out§, §ref§ o §in§.
+
+## Eventos: el patrón Observador integrado
+
+Un **evento** permite que un objeto (**publicador**) avise a otros (**suscriptores**) cuando algo ocurre, sin conocerlos. En C#:
+
+- el publicador declara §public event EventHandler<T>? Cambio;§,
+- los suscriptores usan §+=§ para registrarse y §-=§ para salir,
+- el publicador lo dispara con §Cambio?.Invoke(this, datos)§. El §?.§ evita fallar si nadie escucha.
+
+Desde fuera, un evento **solo** puede suscribirse o desuscribirse; solo la clase dueña puede dispararlo. Eso lo hace más seguro que exponer un delegado público.
+
+> [java] Java no tiene la palabra clave §event§. Se implementa con una **lista de oyentes** (interfaces) y métodos §agregarOyente§ / §quitarOyente§, o se usan utilidades como §PropertyChangeSupport§. La idea es la misma con más código manual.
+
+> [ojo] Un suscriptor que no se da de baja mantiene viva la referencia a su objeto: es una fuga de memoria típica en eventos de larga vida.
+`,
+  compare: [
+    {
+      t: 'Funciones como parámetros',
+      cs: R`
+static int[] Aplicar(int[] datos, Func<int, int> f) =>
+    datos.Select(f).ToArray();
+
+var cuadrados = Aplicar([1, 2, 3], x => x * x);
+`,
+      java: R`
+static int[] aplicar(int[] datos, java.util.function.IntUnaryOperator f) {
+    return java.util.Arrays.stream(datos).map(f).toArray();
+}
+
+var cuadrados = aplicar(new int[]{1, 2, 3}, x -> x * x);
+`,
+      note: 'Java tiene interfaces funcionales **especializadas para primitivos** (IntUnaryOperator, etc.) para evitar boxing.'
+    },
+    {
+      t: 'Observador: evento frente a lista de oyentes',
+      cs: R`
+class Termostato
+{
+    public event EventHandler<double>? TemperaturaCambiada;
+
+    public void Establecer(double grados) =>
+        TemperaturaCambiada?.Invoke(this, grados);
+}
+
+var t = new Termostato();
+t.TemperaturaCambiada += (s, g) => Console.WriteLine(g);
+t.Establecer(21);
+`,
+      java: R`
+interface OyenteTemperatura { void cambio(double grados); }
+
+class Termostato {
+    private final List<OyenteTemperatura> oyentes = new ArrayList<>();
+
+    void agregar(OyenteTemperatura o) { oyentes.add(o); }
+    void establecer(double grados) {
+        for (var o : oyentes) o.cambio(grados);
+    }
+}
+
+void main() {
+    var t = new Termostato();
+    t.agregar(g -> IO.println(g));
+    t.establecer(21);
+}
+`,
+      note: 'Como **OyenteTemperatura** tiene un solo método, se puede implementar con una lambda.'
+    }
+  ],
+  practice: {
+    title: 'Termostato con eventos',
+    desc: R`
+Crea **Termostato** con:
+
+- el evento **TemperaturaCambiada** de tipo **EventHandler<double>?**,
+- el método **Establecer(double grados)**, que dispara el evento pasando **this** y los grados. Usa **?.Invoke** para no fallar si no hay suscriptores.
+`,
+    hint: '§public event EventHandler<double>? TemperaturaCambiada;§ y dentro del método §TemperaturaCambiada?.Invoke(this, grados);§',
+    starter: R`
+var t = new Termostato();
+t.TemperaturaCambiada += (s, grados) => Console.WriteLine($"Ahora: {grados} grados");
+t.Establecer(21);
+t.Establecer(24);
+
+// TODO: clase Termostato
+`,
+    solution: R`
+var t = new Termostato();
+t.TemperaturaCambiada += (s, grados) => Console.WriteLine($"Ahora: {grados} grados");
+t.Establecer(21);
+t.Establecer(24);
+
+class Termostato
+{
+    public event EventHandler<double>? TemperaturaCambiada;
+
+    public void Establecer(double grados)
+    {
+        TemperaturaCambiada?.Invoke(this, grados);
+    }
+}
+`,
+    out: 'Ahora: 21 grados\nAhora: 24 grados',
+    checks: [
+      [/event\s+EventHandler\s*<\s*double\s*>\??\s+TemperaturaCambiada/, 'event EventHandler<double>? TemperaturaCambiada'],
+      [/void\s+Establecer\s*\(\s*double\s+\w+\s*\)/, 'Método void Establecer(double)'],
+      [/TemperaturaCambiada\s*\?\s*\.\s*Invoke\s*\(/, 'Dispara con ?.Invoke(...)']
+    ]
+  },
+  retos: [
+    {
+      title: 'Func como parámetro',
+      desc: 'Escribe **Aplicar(int[] datos, Func<int, int> f)** que devuelva un **nuevo arreglo** con f aplicada a cada elemento.',
+      hint: '§datos.Select(f).ToArray()§ hace todo el trabajo.',
+      starter: R`
+var r = Aplicar([1, 2, 3], x => x * x);
+Console.WriteLine(string.Join(",", r));   // 1,4,9
+
+// TODO: static int[] Aplicar(...)
+`,
+      solution: R`
+var r = Aplicar([1, 2, 3], x => x * x);
+Console.WriteLine(string.Join(",", r));
+
+static int[] Aplicar(int[] datos, Func<int, int> f) =>
+    datos.Select(f).ToArray();
+`,
+      out: '1,4,9',
+      checks: [
+        [/int\[\]\s+Aplicar\s*\(\s*int\[\]\s+\w+\s*,\s*Func\s*<\s*int\s*,\s*int\s*>\s+\w+\s*\)/, 'Firma int[] Aplicar(int[], Func<int, int>)'],
+        [/\.\s*Select\s*\(|\bfor(each)?\s*\(/, 'Recorre aplicando la función (Select o un bucle)']
+      ]
+    },
+    {
+      title: 'Botón con callback',
+      desc: 'Crea **Boton** con una propiedad **AlHacerClic** de tipo **Action?** y un método **Clic()** que la invoque de forma segura.',
+      hint: '§public Action? AlHacerClic { get; set; }§ y en Clic(): §AlHacerClic?.Invoke();§',
+      starter: R`
+var b = new Boton();
+b.AlHacerClic = () => Console.WriteLine("¡Clic!");
+b.Clic();
+
+// TODO: clase Boton
+`,
+      solution: R`
+var b = new Boton();
+b.AlHacerClic = () => Console.WriteLine("¡Clic!");
+b.Clic();
+
+class Boton
+{
+    public Action? AlHacerClic { get; set; }
+    public void Clic() => AlHacerClic?.Invoke();
+}
+`,
+      out: '¡Clic!',
+      checks: [
+        [/Action\??\s+AlHacerClic/, 'Propiedad Action? AlHacerClic'],
+        [/void\s+Clic\s*\(\s*\)/, 'Método void Clic()'],
+        [/AlHacerClic\s*\?\s*\.\s*Invoke\s*\(\s*\)|AlHacerClic\s*\(\s*\)/, 'Invoca el callback']
+      ]
+    }
+  ]
+});
+
+/* ===================== 11. EXCEPCIONES Y RECURSOS ===================== */
+MODS.push({
+  title: 'Excepciones y recursos',
+  lead: 'Qué hacer cuando algo sale mal y cómo liberar recursos con seguridad. Java obliga a declarar ciertas excepciones; C# no.',
+  uml: { name: 'Fallos y ciclo de vida', items: ['try / catch / finally', 'excepciones propias', 'IDisposable', 'recolector de basura'], cs: 'using + filtros when', java: 'try-with-resources' },
+  theory: R`
+## Excepciones
+
+Una **excepción** es un objeto que representa un error y que interrumpe el flujo normal hasta que alguien lo captura. Estructura común a ambos lenguajes:
+
+- §try§: código que puede fallar.
+- §catch§: maneja un tipo de excepción. Pon los más específicos primero.
+- §finally§: se ejecuta **siempre**, haya o no error. Ideal para limpiar.
+- §throw§: lanza una excepción.
+
+Para errores de dominio crea tu **excepción propia** heredando de §Exception§ (o de una subclase más específica).
+
+## La gran diferencia: checked frente a unchecked
+
+- **Java** distingue excepciones **comprobadas** (§Exception§ y derivadas, salvo §RuntimeException§): el compilador **obliga** a capturarlas o declararlas con §throws§ en la firma. Y **no comprobadas** (§RuntimeException§, §Error§).
+- **C#** **no tiene** excepciones comprobadas. Cualquier excepción puede lanzarse sin declararlo; la documentación indica cuáles esperar.
+
+Cada enfoque tiene defensores: Java hace visibles los fallos posibles en el contrato; C# evita firmas ruidosas y cambios en cascada.
+
+## Extras de C#
+
+- **Filtros de excepción**: §catch (HttpException e) when (e.Codigo == 404)§ solo captura si se cumple la condición, sin perder la pila de llamadas.
+- **Expresión throw**: §var x = valor ?? throw new ArgumentNullException(nameof(valor));§.
+
+## Liberar recursos
+
+Archivos, conexiones y sockets son recursos **no administrados** que el recolector de basura no cierra a tiempo. Hay que liberarlos de forma determinista:
+
+- **C#**: la clase implementa §IDisposable§ con un método §Dispose()§ y se usa con **§using§**. La forma de declaración §using var c = new Conexion();§ libera al salir del ámbito.
+- **Java**: la clase implementa §AutoCloseable§ con §close()§ y se usa con **try-with-resources**: §try (var c = new Conexion()) { ... }§.
+
+En ambos casos el cierre ocurre aunque haya excepción. Evita los **finalizadores** (§~Clase()§ en C#, §finalize()§ en Java, ya marcado para eliminación): son impredecibles y costosos.
+
+> [tip] Regla práctica: si tu clase crea o recibe algo que se cierra, tu clase probablemente también debe ser desechable.
+`,
+  compare: [
+    {
+      t: 'Excepción propia',
+      cs: R`
+class SaldoInsuficienteException(decimal faltante)
+    : Exception($"Faltan {faltante}")
+{
+    public decimal Faltante { get; } = faltante;
+}
+`,
+      java: R`
+class SaldoInsuficienteException extends Exception {
+    private final double faltante;
+
+    SaldoInsuficienteException(double faltante) {
+        super("Faltan " + faltante);
+        this.faltante = faltante;
+    }
+    double faltante() { return faltante; }
+}
+`,
+      note: 'Como en Java hereda de **Exception** (comprobada), quien la lance deberá declarar **throws** o capturarla.'
+    },
+    {
+      t: 'Liberar recursos',
+      cs: R`
+using (var c = new Conexion("db1"))
+{
+    c.Consultar("SELECT 1");
+}   // Dispose() se llama aquí, incluso con error
+
+// o en forma de declaración:
+using var c2 = new Conexion("db2");
+`,
+      java: R`
+try (var c = new Conexion("db1")) {
+    c.consultar("SELECT 1");
+}   // close() se llama aquí, incluso con error
+
+// La clase debe implementar AutoCloseable
+class Conexion implements AutoCloseable {
+    public void close() { /* ... */ }
+    void consultar(String sql) { /* ... */ }
+    Conexion(String n) { /* ... */ }
+}
+`
+    },
+    {
+      t: 'Declarar lo que se puede lanzar',
+      cs: R`
+// C#: la firma no dice nada de errores
+static string Leer(string ruta) =>
+    File.ReadAllText(ruta);   // puede lanzar IOException
+`,
+      java: R`
+// Java: IOException es comprobada, hay que declararla
+static String leer(String ruta) throws IOException {
+    return Files.readString(Path.of(ruta));
+}
+`
+    }
+  ],
+  practice: {
+    title: 'Conexión que se cierra sola',
+    desc: R`
+Crea **Conexion** implementando **IDisposable**:
+
+- el constructor recibe el **nombre** e imprime *"Abriendo {nombre}"*,
+- **Consultar(string sql)** imprime *"Consultando: {sql}"*,
+- **Dispose()** imprime *"Cerrando {nombre}"*.
+
+Observa en la salida esperada que el cierre ocurre **antes** de "Fin", gracias a **using**.
+`,
+    hint: 'Declara §class Conexion : IDisposable§ y guarda el nombre en un campo privado para poder usarlo en Dispose().',
+    starter: R`
+using (var c = new Conexion("db1"))
+{
+    c.Consultar("SELECT 1");
+}
+Console.WriteLine("Fin");
+
+// TODO: clase Conexion
+`,
+    solution: R`
+using (var c = new Conexion("db1"))
+{
+    c.Consultar("SELECT 1");
+}
+Console.WriteLine("Fin");
+
+class Conexion : IDisposable
+{
+    private readonly string nombre;
+
+    public Conexion(string nombre)
+    {
+        this.nombre = nombre;
+        Console.WriteLine($"Abriendo {nombre}");
+    }
+
+    public void Consultar(string sql) => Console.WriteLine($"Consultando: {sql}");
+
+    public void Dispose() => Console.WriteLine($"Cerrando {nombre}");
+}
+`,
+    out: 'Abriendo db1\nConsultando: SELECT 1\nCerrando db1\nFin',
+    checks: [
+      [/class\s+Conexion\s*:\s*IDisposable/, 'Conexion implementa IDisposable'],
+      [/void\s+Dispose\s*\(\s*\)/, 'Método void Dispose()'],
+      [/void\s+Consultar\s*\(\s*string\s+\w+\s*\)/, 'Método Consultar(string)']
+    ]
+  },
+  retos: [
+    {
+      title: 'Excepción de dominio',
+      desc: 'Define **SaldoInsuficienteException** que herede de **Exception**, reciba el **faltante** (decimal) y use el mensaje *"Faltan {faltante}"*.',
+      hint: 'Con constructor primario: §class SaldoInsuficienteException(decimal faltante) : Exception($"Faltan {faltante}")§',
+      starter: R`
+try
+{
+    Retirar(700m, 1000m);
+}
+catch (SaldoInsuficienteException ex)
+{
+    Console.WriteLine(ex.Message);   // Faltan 300
+}
+
+static void Retirar(decimal saldo, decimal monto)
+{
+    if (monto > saldo) throw new SaldoInsuficienteException(monto - saldo);
+}
+
+// TODO: SaldoInsuficienteException
+`,
+      solution: R`
+try
+{
+    Retirar(700m, 1000m);
+}
+catch (SaldoInsuficienteException ex)
+{
+    Console.WriteLine(ex.Message);
+}
+
+static void Retirar(decimal saldo, decimal monto)
+{
+    if (monto > saldo) throw new SaldoInsuficienteException(monto - saldo);
+}
+
+class SaldoInsuficienteException(decimal faltante)
+    : Exception($"Faltan {faltante}")
+{
+    public decimal Faltante { get; } = faltante;
+}
+`,
+      out: 'Faltan 300',
+      checks: [
+        [/class\s+SaldoInsuficienteException\b[^{]*:\s*Exception\b/, 'Hereda de Exception'],
+        [/SaldoInsuficienteException\s*\(\s*decimal\s+\w+\s*\)/, 'Constructor que recibe un decimal'],
+        [/:\s*Exception\s*\(|:\s*base\s*\(/, 'Pasa el mensaje a la clase base']
+      ]
+    },
+    {
+      title: 'try, catch y finally',
+      desc: 'Escribe **LeerEntero(string texto)**: devuelve el número si se puede convertir; si lanza **FormatException**, devuelve -1. En **finally** imprime siempre "Intento terminado".',
+      hint: 'Estructura: §try { return int.Parse(texto); } catch (FormatException) { return -1; } finally { Console.WriteLine(...); }§',
+      starter: R`
+Console.WriteLine(LeerEntero("42"));
+Console.WriteLine(LeerEntero("abc"));
+
+// TODO: static int LeerEntero(string texto)
+`,
+      solution: R`
+Console.WriteLine(LeerEntero("42"));
+Console.WriteLine(LeerEntero("abc"));
+
+static int LeerEntero(string texto)
+{
+    try
+    {
+        return int.Parse(texto);
+    }
+    catch (FormatException)
+    {
+        return -1;
+    }
+    finally
+    {
+        Console.WriteLine("Intento terminado");
+    }
+}
+`,
+      out: 'Intento terminado\n42\nIntento terminado\n-1',
+      checks: [
+        [/int\s+LeerEntero\s*\(\s*string\s+\w+\s*\)/, 'Firma int LeerEntero(string)'],
+        [/\btry\s*\{/, 'Bloque try'],
+        [/catch\s*\(\s*FormatException/, 'catch (FormatException)'],
+        [/\bfinally\s*\{/, 'Bloque finally'],
+        [/int\.Parse|Convert\.ToInt32/, 'Convierte con int.Parse o Convert.ToInt32']
+      ]
+    }
+  ]
+});
+
+/* ===================== 12. SOLID Y PROYECTO FINAL ===================== */
+MODS.push({
+  title: 'SOLID y proyecto final',
+  lead: 'Cinco principios para que tus clases envejezcan bien, una tabla resumen de C# frente a Java y un mini proyecto que junta todo.',
+  uml: { name: 'Diseño sólido', items: ['S: una razón de cambio', 'O: abierto a extensión', 'L: sustitución', 'I: interfaces pequeñas', 'D: depender de abstracciones'], cs: 'DI con constructor primario', java: 'sealed + records' },
+  theory: R`
+## Los cinco principios SOLID
+
+No son reglas del lenguaje, sino guías de diseño. Funcionan igual en C# y Java.
+
+- **S, responsabilidad única**: una clase debe tener **una sola razón para cambiar**. Si §Pedido§ calcula totales, imprime facturas y guarda en base de datos, son tres razones.
+- **O, abierto a extensión y cerrado a modificación**: añade comportamiento nuevo creando clases nuevas, no editando las existentes. El patrón *Strategy* (una interfaz con varias implementaciones) es el ejemplo típico.
+- **L, sustitución de Liskov**: una derivada debe poder usarse donde se espera la base **sin romper nada**. Si §Pinguino§ hereda de §Ave§ y lanza error al llamar a §Volar()§, la jerarquía está mal.
+- **I, segregación de interfaces**: mejor varias interfaces pequeñas y cohesivas que una enorme. Nadie debe depender de métodos que no usa.
+- **D, inversión de dependencias**: los módulos de alto nivel dependen de **abstracciones**, no de clases concretas. Se logra inyectando interfaces por constructor (módulo 6).
+
+## Tabla resumen: C# 14 frente a Java 25
+
+| Concepto | C# 14 | Java 25 |
+|---|---|---|
+| Heredar | §class B : A§ | §class B extends A§ |
+| Implementar interfaz | §class B : IA§ | §class B implements A§ |
+| Llamar a la base | §base.M()§, §: base(...)§ | §super.m()§, §super(...)§ |
+| Método sobrescribible | Solo si es §virtual§ / §abstract§ | Por defecto (salvo §final§) |
+| Sellar | §sealed§ | §final§ y §sealed ... permits§ |
+| Propiedades | Sí (§get§, §set§, §init§, §field§) | No: getters y setters |
+| Inmutables compactos | §record§, §record struct§ | §record§ |
+| Tipos por valor propios | §struct§ | No en Java 25 |
+| Enum | Constantes numéricas | Clase completa |
+| Genéricos | Reificados | Borrado de tipos |
+| Sobrecarga de operadores | Sí | No |
+| Métodos de extensión | Sí (y miembros en C# 14) | No |
+| Eventos | Palabra clave §event§ | Oyentes manuales |
+| Excepciones comprobadas | No | Sí |
+| Liberar recursos | §IDisposable§ y §using§ | §AutoCloseable§ y try-with-resources |
+| Nulabilidad | Tipos de referencia anulables (§string?§) | Sin sistema nativo (anotaciones y §Optional§) |
+| Clases parciales | §partial§ | No |
+
+## Para seguir aprendiendo
+
+- Practica los patrones *Strategy*, *Observer*, *Factory* y *Decorator* en ambos lenguajes.
+- Explora en C# el *pattern matching* avanzado, LINQ y los tipos anulables.
+- Explora en Java las jerarquías selladas con *switch* exhaustivo y los records anidados.
+- Escribe pruebas unitarias: la inyección de dependencias existe precisamente para facilitarlas.
+`,
+  compare: [
+    {
+      t: 'Abierto/cerrado con una estrategia',
+      cs: R`
+interface IDescuento { decimal Aplicar(decimal subtotal); }
+
+class SinDescuento : IDescuento
+{
+    public decimal Aplicar(decimal s) => s;
+}
+
+class Porcentaje(decimal pct) : IDescuento
+{
+    public decimal Aplicar(decimal s) => s - s * pct / 100;
+}
+`,
+      java: R`
+interface Descuento { double aplicar(double subtotal); }
+
+class SinDescuento implements Descuento {
+    public double aplicar(double s) { return s; }
+}
+
+record Porcentaje(double pct) implements Descuento {
+    public double aplicar(double s) { return s - s * pct / 100; }
+}
+`,
+      note: 'Para añadir un descuento nuevo creas **otra clase**; el código que usa la interfaz no se toca.'
+    },
+    {
+      t: 'Segregar interfaces',
+      cs: R`
+interface IComedor { void Comer(); }
+interface IVolador { void Volar(); }
+
+class Pinguino : IComedor
+{
+    public void Comer() => Console.WriteLine("Pescado");
+}
+class Aguila : IComedor, IVolador
+{
+    public void Comer() => Console.WriteLine("Conejo");
+    public void Volar() => Console.WriteLine("Planea");
+}
+`,
+      java: R`
+interface Comedor { void comer(); }
+interface Volador { void volar(); }
+
+class Pinguino implements Comedor {
+    public void comer() { IO.println("Pescado"); }
+}
+class Aguila implements Comedor, Volador {
+    public void comer() { IO.println("Conejo"); }
+    public void volar() { IO.println("Planea"); }
+}
+`
+    }
+  ],
+  practice: {
+    title: 'Proyecto final: la tienda',
+    desc: R`
+Une todo lo aprendido. Construye el modelo de una tienda:
+
+- **record Producto(string Nombre, decimal Precio)**,
+- **interface IDescuento** con **decimal Aplicar(decimal subtotal)**,
+- **SinDescuento** (devuelve el subtotal) y **DescuentoPorcentaje(decimal pct)** (resta el porcentaje),
+- **Pedido** que **recibe un IDescuento por constructor** (inyección), guarda líneas (producto y cantidad) con **Agregar(Producto, int)** y calcula **Total()** aplicando el descuento al subtotal.
+
+Fíjate en que Pedido no sabe qué tipo de descuento recibe: eso es polimorfismo, composición y DIP trabajando juntos.
+`,
+    hint: 'Guarda las líneas en §List<(Producto Producto, int Cantidad)>§. El subtotal es §lineas.Sum(l => l.Producto.Precio * l.Cantidad)§ y el total es §descuento.Aplicar(subtotal)§.',
+    starter: R`
+var pedido = new Pedido(new DescuentoPorcentaje(10));
+pedido.Agregar(new Producto("Teclado", 120_000m), 1);
+pedido.Agregar(new Producto("Mouse", 40_000m), 2);
+Console.WriteLine(pedido.Total());
+
+var sin = new Pedido(new SinDescuento());
+sin.Agregar(new Producto("Teclado", 120_000m), 1);
+Console.WriteLine(sin.Total());
+
+// TODO: Producto, IDescuento, SinDescuento, DescuentoPorcentaje y Pedido
+`,
+    solution: R`
+var pedido = new Pedido(new DescuentoPorcentaje(10));
+pedido.Agregar(new Producto("Teclado", 120_000m), 1);
+pedido.Agregar(new Producto("Mouse", 40_000m), 2);
+Console.WriteLine(pedido.Total());
+
+var sin = new Pedido(new SinDescuento());
+sin.Agregar(new Producto("Teclado", 120_000m), 1);
+Console.WriteLine(sin.Total());
+
+record Producto(string Nombre, decimal Precio);
+
+interface IDescuento
+{
+    decimal Aplicar(decimal subtotal);
+}
+
+class SinDescuento : IDescuento
+{
+    public decimal Aplicar(decimal subtotal) => subtotal;
+}
+
+class DescuentoPorcentaje(decimal pct) : IDescuento
+{
+    public decimal Aplicar(decimal subtotal) => subtotal - subtotal * pct / 100;
+}
+
+class Pedido(IDescuento descuento)
+{
+    private readonly List<(Producto Producto, int Cantidad)> lineas = [];
+
+    public void Agregar(Producto producto, int cantidad) =>
+        lineas.Add((producto, cantidad));
+
+    public decimal Total()
+    {
+        var subtotal = lineas.Sum(l => l.Producto.Precio * l.Cantidad);
+        return descuento.Aplicar(subtotal);
+    }
+}
+`,
+    out: '180000\n120000',
+    checks: [
+      [/record\s+Producto\s*\(\s*string\s+Nombre\s*,\s*decimal\s+Precio\s*\)/, 'record Producto(string Nombre, decimal Precio)'],
+      [/interface\s+IDescuento\b[^}]*decimal\s+Aplicar\s*\(\s*decimal\s+\w+\s*\)/, 'interface IDescuento con Aplicar(decimal)'],
+      [/class\s+SinDescuento\b[^{]*:\s*IDescuento/, 'SinDescuento implementa IDescuento'],
+      [/class\s+DescuentoPorcentaje\b[^{]*:\s*IDescuento/, 'DescuentoPorcentaje implementa IDescuento'],
+      [/Pedido\s*\(\s*IDescuento\s+\w+\s*\)/, 'Pedido recibe un IDescuento por constructor'],
+      [/void\s+Agregar\s*\(\s*Producto\s+\w+\s*,\s*int\s+\w+\s*\)/, 'Método Agregar(Producto, int)'],
+      [/decimal\s+Total\s*\(\s*\)/, 'Método decimal Total()']
+    ]
+  },
+  retos: [
+    {
+      title: 'Abierto a extensión: descuento fijo',
+      desc: 'Añade **DescuentoFijo(decimal monto)** que reste un monto fijo al subtotal (sin bajar de cero) **sin modificar Pedido**. Esa es la gracia del principio abierto/cerrado.',
+      hint: '§Math.Max(0, subtotal - monto)§ evita totales negativos. Solo necesitas crear una clase nueva que implemente IDescuento.',
+      starter: R`
+var p = new Pedido(new DescuentoFijo(5_000m));
+p.Agregar(20_000m);
+Console.WriteLine(p.Total());   // 15000
+
+interface IDescuento { decimal Aplicar(decimal subtotal); }
+
+class Pedido(IDescuento d)
+{
+    private decimal subtotal;
+    public void Agregar(decimal monto) => subtotal += monto;
+    public decimal Total() => d.Aplicar(subtotal);
+}
+
+// TODO: DescuentoFijo
+`,
+      solution: R`
+var p = new Pedido(new DescuentoFijo(5_000m));
+p.Agregar(20_000m);
+Console.WriteLine(p.Total());
+
+interface IDescuento { decimal Aplicar(decimal subtotal); }
+
+class Pedido(IDescuento d)
+{
+    private decimal subtotal;
+    public void Agregar(decimal monto) => subtotal += monto;
+    public decimal Total() => d.Aplicar(subtotal);
+}
+
+class DescuentoFijo(decimal monto) : IDescuento
+{
+    public decimal Aplicar(decimal subtotal) => Math.Max(0, subtotal - monto);
+}
+`,
+      out: '15000',
+      checks: [
+        [/class\s+DescuentoFijo\b[^{]*:\s*IDescuento/, 'DescuentoFijo implementa IDescuento'],
+        [/decimal\s+Aplicar\s*\(\s*decimal\s+\w+\s*\)/, 'Implementa decimal Aplicar(decimal)'],
+        [/DescuentoFijo\s*\(\s*decimal\s+\w+\s*\)/, 'Recibe el monto fijo por constructor']
+      ]
+    },
+    {
+      title: 'Segregación de interfaces',
+      desc: 'Separa las capacidades en **IComedor** (Comer) e **IVolador** (Volar). **Pinguino** solo debe implementar IComedor, porque no vuela.',
+      hint: 'Dos interfaces de un método cada una. §class Pinguino : IComedor§ y nada más en la lista.',
+      starter: R`
+new Pinguino().Comer();   // El pingüino come pescado
+
+// TODO: IComedor, IVolador y Pinguino
+`,
+      solution: R`
+new Pinguino().Comer();
+
+interface IComedor { void Comer(); }
+interface IVolador { void Volar(); }
+
+class Pinguino : IComedor
+{
+    public void Comer() => Console.WriteLine("El pingüino come pescado");
+}
+`,
+      out: 'El pingüino come pescado',
+      checks: [
+        [/interface\s+IComedor\b[^}]*void\s+Comer\s*\(\s*\)/, 'interface IComedor con Comer()'],
+        [/interface\s+IVolador\b[^}]*void\s+Volar\s*\(\s*\)/, 'interface IVolador con Volar()'],
+        [/class\s+Pinguino\b[^{]*:\s*IComedor\b/, 'Pinguino implementa IComedor'],
+        [/class\s+Pinguino\b[^{]*IVolador/, 'Pinguino NO debe implementar IVolador', true]
+      ]
+    }
+  ]
+});
+
+boot();
+
+</script>
+</body>
+</html>
