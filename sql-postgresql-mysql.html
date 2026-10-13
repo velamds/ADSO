@@ -1,0 +1,1161 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>SQL en PostgreSQL y MySQL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+ --bg:#f6f5f1; --surface:#ffffff; --surface2:#efede7; --fg:#1d2330; --muted:#5c6475; --line:#dcd9cf;
+ --pg:#2f6690; --pg-soft:#e3eef7; --my:#b4620a; --my-soft:#fbeedb; --accent:#1f5f5b; --accent-soft:#dcefed;
+ --code-bg:#14202e; --code-fg:#e6edf5; --code-line:#26384c;
+ --c-k:#7cc4ff; --c-s:#a5e3a0; --c-n:#ffc27a; --c-c:#7d8da1; --c-t:#d6a6ff; --c-f:#ffe08a;
+ --key:#e3eef7; --key-b:#2f6690; --tip:#dff1e4; --tip-b:#2c7a4b; --warn:#fbe9d6; --warn-b:#c2571a; --ex:#ece8f7; --ex-b:#6a52b3;
+ --head:'Archivo','Segoe UI',system-ui,sans-serif; --body:'Public Sans','Segoe UI',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+ --bg:#0f1520; --surface:#161e2c; --surface2:#1c2636; --fg:#e6ebf3; --muted:#9aa6ba; --line:#2a3548;
+ --pg:#6fb0e6; --pg-soft:#14283b; --my:#f0a24a; --my-soft:#35250f; --accent:#62c4bd; --accent-soft:#14312f;
+ --code-bg:#0a1019; --code-fg:#e6edf5; --code-line:#223044;
+ --key:#14283b; --key-b:#6fb0e6; --tip:#14301f; --tip-b:#58c486; --warn:#35210f; --warn-b:#f0975a; --ex:#231d3a; --ex-b:#a592e8; color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0f1520; --surface:#161e2c; --surface2:#1c2636; --fg:#e6ebf3; --muted:#9aa6ba; --line:#2a3548;
+ --pg:#6fb0e6; --pg-soft:#14283b; --my:#f0a24a; --my-soft:#35250f; --accent:#62c4bd; --accent-soft:#14312f;
+ --code-bg:#0a1019; --code-fg:#e6edf5; --code-line:#223044;
+ --key:#14283b; --key-b:#6fb0e6; --tip:#14301f; --tip-b:#58c486; --warn:#35210f; --warn-b:#f0975a; --ex:#231d3a; --ex-b:#a592e8; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(72px + env(safe-area-inset-top,0px))}
+body{background:var(--bg);color:var(--fg);font:16px/1.65 var(--body);margin:0;padding-inline:16px;padding-block:0;-webkit-text-size-adjust:100%}
+.wrap{max-width:900px;margin:0 auto}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .38em;border-radius:5px;overflow-wrap:anywhere}
+h1,h2,h3,h4{font-family:var(--head);line-height:1.2;text-wrap:balance;margin:0}
+p{margin:.75em 0} ul,ol{padding-left:1.3em;margin:.7em 0} li{margin:.3em 0}
+/* barra fija */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:-16px;padding:8px 16px 0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;padding-bottom:8px}
+.bar b{font:700 .95rem var(--head)} .bar .sub{font-size:.78rem;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:3px;gap:2px}
+.seg button{font:600 .8rem var(--body);border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{color:#fff}
+.seg button[data-d="pg"][aria-pressed="true"]{background:var(--pg)} .seg button[data-d="my"][aria-pressed="true"]{background:var(--my)} .seg button[data-d="both"][aria-pressed="true"]{background:var(--accent)}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{color:#0b1220}}
+.prog{height:3px;margin-inline:-16px;background:transparent}.prog i{display:block;height:100%;width:0;background:var(--accent)}
+/* hero */
+.hero{padding-block:48px 28px;display:grid;gap:22px}
+.kicker{font:600 .78rem var(--head);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.hero h1{font-size:clamp(2.1rem,6.5vw,3.6rem);letter-spacing:-.02em;font-weight:800}
+.hero h1 .a{color:var(--pg)} .hero h1 .b{color:var(--my)}
+.hero p.l{font-size:1.1rem;color:var(--muted);max-width:60ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px}.facts span{font-size:.82rem;border:1px solid var(--line);background:var(--surface);padding:5px 11px;border-radius:999px}
+.hero .code{margin:0}
+/* toc */
+.toc{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-block:12px 40px}
+.toc a{display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--fg);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-width:0}
+.toc a:hover{border-color:var(--accent)} .toc .tn{font:700 .85rem var(--mono);color:var(--accent);min-width:1.6em} .toc .tt{font-size:.9rem;font-weight:500}
+.toc-h{font:700 .78rem var(--head);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+/* capítulos */
+.chapter{padding-block:34px;border-top:1px solid var(--line)}
+.chapter>header{margin-bottom:12px}
+.chapter h2{font-size:clamp(1.6rem,4.5vw,2.2rem);font-weight:800;letter-spacing:-.015em;display:flex;gap:12px;align-items:baseline}
+.num{font:700 .55em var(--mono);color:#fff;background:var(--accent);border-radius:8px;padding:.2em .55em;flex:none;transform:translateY(-.12em)}
+:root[data-theme="dark"] .num{color:#0b1220}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .num{color:#0b1220}}
+.lead{color:var(--muted);font-size:1.05rem;margin:.5em 0 0}
+.chapter h3{font-size:1.28rem;margin-top:1.9em;font-weight:700}
+.chapter h4{font-size:1.05rem;margin-bottom:.3em}
+/* tarjetas motor */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-block:14px}
+.card{border:1px solid var(--line);border-top-width:4px;border-radius:12px;padding:14px 16px;background:var(--surface);min-width:0}
+.card p{margin:.4em 0 0;font-size:.95rem}.pgc{border-top-color:var(--pg)}.myc{border-top-color:var(--my)}.pgc h4{color:var(--pg)}.myc h4{color:var(--my)}
+/* cajas */
+.box{border-left:4px solid;border-radius:0 10px 10px 0;padding:10px 16px 10px;margin-block:16px}
+.box p{margin:.4em 0}.box .t{display:block;font:700 .78rem var(--head);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.box.key{background:var(--key);border-color:var(--key-b)}.box.key .t{color:var(--key-b)}
+.box.tip{background:var(--tip);border-color:var(--tip-b)}.box.tip .t{color:var(--tip-b)}
+.box.warn{background:var(--warn);border-color:var(--warn-b)}.box.warn .t{color:var(--warn-b)}
+.box.ex{background:var(--ex);border-color:var(--ex-b)}.box.ex .t{color:var(--ex-b)}
+/* código */
+pre.code{background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:14px 16px;margin:12px 0;overflow-x:auto;font:.84rem/1.6 var(--mono);tab-size:2;position:relative;border:1px solid var(--code-line)}
+pre.code code{display:block;padding-right:52px!important;background:none;padding:0;font:inherit;overflow-wrap:normal;color:inherit}
+.k{color:var(--c-k);font-weight:600}.s{color:var(--c-s)}.n{color:var(--c-n)}.c{color:var(--c-c);font-style:italic}.t{}pre .t{color:var(--c-t)}.f{color:var(--c-f)}
+.cp{position:absolute;top:6px;right:6px;font:600 .68rem var(--body);border:1px solid var(--code-line);background:rgba(255,255,255,.07);color:var(--code-fg);border-radius:6px;padding:3px 8px;cursor:pointer;opacity:.75}
+.cp:hover{opacity:1}
+/* dialectos */
+.dpair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-block:12px;align-items:start}
+.dpair>.dv,.dv{min-width:0}
+.dv{position:relative}.dv pre.code{margin:0}
+.dv .dl{display:inline-block;font:700 .7rem var(--head);letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:3px 10px;border-radius:7px 7px 0 0}
+.dv.pg .dl{background:var(--pg)}.dv.my .dl{background:var(--my)}
+.dv.pg pre.code{border-top:2px solid var(--pg);border-radius:0 10px 10px 10px}.dv.my pre.code{border-top:2px solid var(--my);border-radius:0 10px 10px 10px}
+:root[data-theme="dark"] .dv .dl{color:#0b1220}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dv .dl{color:#0b1220}}
+body[data-d="pg"] .dv.my,body[data-d="my"] .dv.pg{display:none}
+body[data-d="pg"] .dpair,body[data-d="my"] .dpair{grid-template-columns:1fr}
+@media (max-width:760px){.dpair{grid-template-columns:1fr}}
+/* tablas */
+.tw{overflow-x:auto;margin-block:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);max-width:100%}
+table.dt{border-collapse:collapse;width:100%;font-size:.9rem}
+table.dt caption{text-align:left;font:700 .8rem var(--head);padding:8px 12px;color:var(--muted)}
+.dt th{text-align:left;background:var(--surface2);font:700 .78rem var(--head);letter-spacing:.04em;padding:8px 12px;white-space:nowrap;border-bottom:1px solid var(--line)}
+.dt td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.dt tr:last-child td{border-bottom:0}.dt td.r{text-align:right;font-variant-numeric:tabular-nums}
+.dt.wide td:first-child{font-weight:600}
+.nl{color:var(--muted);font-style:italic;font-size:.85em}
+.rs{margin-top:-4px;margin-bottom:14px}.rs-h{font:600 .74rem var(--head);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);padding:2px 2px 0}
+.rs .tw{margin-top:4px}
+/* ejercicios */
+.ex{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px 18px;margin-block:14px;transition:border-color .2s}
+.ex.done{border-color:var(--tip-b)}
+.ex>header{display:flex;gap:12px;align-items:center}
+.ex h3{margin:0;font-size:1.08rem;display:flex;gap:10px;align-items:baseline}
+.en{font:700 .85rem var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:7px;padding:.15em .55em}
+.chk{position:relative;flex:none;width:26px;height:26px;cursor:pointer}
+.chk input{position:absolute;inset:0;opacity:0;cursor:pointer;margin:0;width:100%;height:100%}
+.chk span{position:absolute;inset:0;border:2px solid var(--line);border-radius:7px;background:var(--bg)}
+.chk input:checked+span{background:var(--tip-b);border-color:var(--tip-b)}
+.chk input:checked+span::after{content:"";position:absolute;left:8px;top:3px;width:6px;height:12px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.chk input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.stmt{margin:.8em 0}
+details{border:1px solid var(--line);border-radius:10px;margin-block:8px;background:var(--bg)}
+details>summary{cursor:pointer;font:600 .9rem var(--body);padding:9px 14px;list-style:none;display:flex;align-items:center;gap:8px;min-height:40px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--accent);transition:transform .15s}details[open]>summary::before{transform:rotate(90deg)}
+details>*:not(summary){margin-inline:14px}details>p{margin-top:0}details>:last-child{margin-bottom:14px}
+.hint summary{color:var(--tip-b)}.sol summary{color:var(--accent)}
+.note{font-size:.88rem;color:var(--muted);background:var(--surface2);padding:8px 12px;border-radius:8px}
+.score{display:flex;align-items:center;gap:10px;font:600 .9rem var(--body);margin-block:6px 14px;flex-wrap:wrap}
+.score .bk{flex:1;min-width:120px;height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}.score .bk i{display:block;height:100%;width:0;background:var(--tip-b);transition:width .3s}
+footer{padding-block:32px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.toc-wrap{padding-bottom:6px}
+@media (max-width:520px){.bar .sub{display:none}.seg button{padding:6px 10px}.chapter h2{font-size:1.5rem}.dt td,.dt th{padding:6px 9px}}
+</style>
+
+<div class="bar"><div class="bar-in"><div><b>SQL · PostgreSQL y MySQL</b> <span class="sub">Ver ejemplos para:</span></div>
+<div class="seg" role="group" aria-label="Motor de base de datos"><button type="button" data-d="pg" aria-pressed="false">PostgreSQL</button><button type="button" data-d="my" aria-pressed="false">MySQL</button><button type="button" data-d="both" aria-pressed="true">Ambos</button></div></div><div class="prog"><i></i></div></div>
+<div class="wrap">
+<section class="hero">
+<div class="kicker">Guía práctica · 16 capítulos · 20 ejercicios</div>
+<h1>Aprende SQL con <span class="a">PostgreSQL</span> y <span class="b">MySQL</span></h1>
+<p class="l">Desde tu primer <code>SELECT</code> hasta JOIN, subconsultas, funciones de ventana, transacciones e índices. Un mismo ejemplo, los dos motores, y cada diferencia señalada donde aparece.</p>
+<div class="facts"><span>Base de ejemplo: una tienda</span><span>Resultados reales de cada consulta</span><span>Solución de cada ejercicio en ambos motores</span></div>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre, <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+<span class="k">FROM</span> cliente c
+<span class="k">JOIN</span> pedido p         <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido  = p.id_pedido
+<span class="k">GROUP</span> <span class="k">BY</span> c.nombre
+<span class="k">ORDER</span> <span class="k">BY</span> total <span class="k">DESC</span>;</code></pre>
+</section>
+<nav class="toc-wrap" aria-label="Contenido"><p class="toc-h">Contenido</p><div class="toc"><a href="#c0"><span class="tn">0</span><span class="tt">Antes de empezar</span></a><a href="#c1"><span class="tn">1</span><span class="tt">Fundamentos de SQL</span></a><a href="#c2"><span class="tn">2</span><span class="tt">La base de ejemplo: una tienda</span></a><a href="#c3"><span class="tn">3</span><span class="tt">Consultar con SELECT</span></a><a href="#c4"><span class="tn">4</span><span class="tt">Filtrar con WHERE</span></a><a href="#c5"><span class="tn">5</span><span class="tt">Expresiones y funciones</span></a><a href="#c6"><span class="tn">6</span><span class="tt">Agrupar y resumir</span></a><a href="#c7"><span class="tn">7</span><span class="tt">Combinar tablas con JOIN</span></a><a href="#c8"><span class="tn">8</span><span class="tt">Subconsultas, CTE y conjuntos</span></a><a href="#c9"><span class="tn">9</span><span class="tt">Funciones de ventana</span></a><a href="#c10"><span class="tn">10</span><span class="tt">Modificar datos: INSERT, UPDATE, DELETE</span></a><a href="#c11"><span class="tn">11</span><span class="tt">Definir la estructura: DDL</span></a><a href="#c12"><span class="tn">12</span><span class="tt">Transacciones y concurrencia</span></a><a href="#c13"><span class="tn">13</span><span class="tt">Índices y rendimiento</span></a><a href="#c14"><span class="tn">14</span><span class="tt">PostgreSQL frente a MySQL</span></a><a href="#c15"><span class="tn">15</span><span class="tt">Seguridad, buenas prácticas y errores comunes</span></a><a href="#ej"><span class="tn">★</span><span class="tt">Ejercicios: 20 consultas para practicar</span></a></div></nav>
+<main><section class="chapter" id="c0"><header><h2><span class="num">0</span>Antes de empezar</h2><p class="lead">Qué vas a aprender, qué instalar y cómo se lee esta guía con dos motores.</p></header>
+<p>Esta guía enseña SQL desde cero con dos motores a la vez: <b>PostgreSQL</b> y <b>MySQL</b>. Casi todo el lenguaje es igual en ambos, así que la mayoría de los ejemplos se muestran una sola vez. Cuando una instrucción cambia, verás los dos dialectos lado a lado, cada uno con su color.</p>
+<div class="grid2">
+<div class="card pgc"><h4>PostgreSQL</h4><p>Muy fiel al estándar SQL, con tipos ricos (arreglos, JSONB, rangos) y transacciones muy estrictas. Se usa mucho en análisis y aplicaciones con reglas de negocio complejas.</p></div>
+<div class="card myc"><h4>MySQL</h4><p>Sencillo de instalar y muy extendido en aplicaciones web (WordPress, tiendas en línea, la mayoría de hostings). MariaDB es un derivado casi idéntico.</p></div>
+</div>
+<p>Usa el selector fijo de la parte superior para ver solo <b>PostgreSQL</b>, solo <b>MySQL</b> o <b>Ambos</b>. Tu elección se recuerda al volver a abrir la página.</p>
+<h3>Qué necesitas</h3>
+<ul>
+<li>PostgreSQL 14 o superior, o MySQL 8.0 o superior. Las funciones de ventana, las expresiones <code>WITH</code> y las restricciones <code>CHECK</code> que usamos requieren MySQL 8.</li>
+<li>Un cliente: la línea de comandos (<code>psql</code> o <code>mysql</code>) o una herramienta gráfica como DBeaver, pgAdmin o MySQL Workbench.</li>
+<li>Entre 3 y 5 horas para leer, probar los ejemplos y resolver los 20 ejercicios finales.</li>
+</ul>
+<h3>Conectarse y moverse</h3>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code>psql -U postgres            # entrar al servidor
+CREATE DATABASE tienda;
+\c tienda                  # conectarse a la base
+\l                         # listar bases de datos
+\dt                        # listar tablas
+\d producto                # describir una tabla
+\q                         # salir</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code>mysql -u root -p           # entrar al servidor
+CREATE DATABASE tienda CHARACTER SET utf8mb4;
+USE tienda;
+SHOW DATABASES;            -- listar bases de datos
+SHOW TABLES;               -- listar tablas
+DESCRIBE producto;         -- describir una tabla
+exit</code></pre></div></div>
+<p>Los comandos que empiezan por <code>\</code> en <code>psql</code> son del cliente, no son SQL. En MySQL, <code>USE</code>, <code>SHOW</code> y <code>DESCRIBE</code> sí se envían al servidor.</p>
+<h3>Reglas de escritura que verás en todo el texto</h3>
+<ul>
+<li>Cada sentencia termina con punto y coma <code>;</code>.</li>
+<li>Las palabras reservadas se escriben en mayúsculas por costumbre (<code>SELECT</code>, <code>FROM</code>). SQL no distingue mayúsculas en ellas; es solo legibilidad.</li>
+<li>Los <b>textos</b> van entre comillas simples: <code>'Bogotá'</code>. Las comillas dobles sirven para nombres de columnas en PostgreSQL y dan problemas en MySQL, así que no las uses para textos.</li>
+<li>Los comentarios son <code>-- hasta el final de la línea</code> (en MySQL debe haber un espacio después de los dos guiones) y <code>/* en bloque */</code>.</li>
+<li>Los nombres de tablas y columnas se escriben en minúscula con guion bajo (<code>fecha_registro</code>).</li>
+</ul>
+</section><section class="chapter" id="c1"><header><h2><span class="num">1</span>Fundamentos de SQL</h2><p class="lead">Qué es SQL, cómo se organiza y qué tipos de dato usarás.</p></header>
+<p>SQL (<i>Structured Query Language</i>) es el lenguaje con el que se pide información a una base de datos relacional y se modifican sus datos. Es <b>declarativo</b>: dices <i>qué</i> resultado quieres y el motor decide <i>cómo</i> obtenerlo.</p>
+<p>Una consulta se parece a una frase en inglés: «selecciona estas columnas, de esta tabla, donde se cumpla esta condición».</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, ciudad
+<span class="k">FROM</span> cliente
+<span class="k">WHERE</span> ciudad = <span class="s">&#x27;Bogotá&#x27;</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>ciudad</th></tr></thead><tbody><tr><td>Ana Torres</td><td>Bogotá</td></tr><tr><td>Sofía Díaz</td><td>Bogotá</td></tr></tbody></table></div></div>
+<h3>Las cinco familias de sentencias</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Familia</th><th>Para qué sirve</th><th>Sentencias principales</th></tr></thead><tbody><tr><td><b>DQL</b> · consulta</td><td>Leer datos</td><td><code>SELECT</code></td></tr><tr><td><b>DML</b> · manipulación</td><td>Insertar, cambiar y borrar filas</td><td><code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td></tr><tr><td><b>DDL</b> · definición</td><td>Crear y modificar la estructura</td><td><code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code></td></tr><tr><td><b>DCL</b> · control</td><td>Dar y quitar permisos</td><td><code>GRANT</code>, <code>REVOKE</code></td></tr><tr><td><b>TCL</b> · transacciones</td><td>Confirmar o deshacer cambios</td><td><code>BEGIN</code>, <code>COMMIT</code>, <code>ROLLBACK</code></td></tr></tbody></table></div>
+<h3>Tipos de dato esenciales</h3>
+<p>Cada columna guarda un solo tipo de valor. Los nombres cambian un poco entre motores.</p>
+<div class="tw"><table class="dt"><thead><tr><th>Qué guardas</th><th>Tipo</th><th>Ejemplo</th><th>Nota entre motores</th></tr></thead><tbody><tr><td>Enteros</td><td><code>INT</code>, <code>BIGINT</code>, <code>SMALLINT</code></td><td><code>25</code></td><td>Iguales en ambos.</td></tr><tr><td>Dinero y valores exactos</td><td><code>DECIMAL(12,2)</code> (o <code>NUMERIC</code>)</td><td><code>3200000.00</code></td><td>Nunca uses <code>FLOAT</code> para dinero.</td></tr><tr><td>Texto corto</td><td><code>VARCHAR(n)</code></td><td><code>'Ibagué'</code></td><td>Igual.</td></tr><tr><td>Texto largo</td><td><code>TEXT</code></td><td>una descripción</td><td>En MySQL <code>TEXT</code> no admite valor por defecto.</td></tr><tr><td>Fecha</td><td><code>DATE</code></td><td><code>'2025-03-14'</code></td><td>Formato año-mes-día en ambos.</td></tr><tr><td>Fecha y hora</td><td><code>TIMESTAMP</code></td><td><code>'2025-03-14 08:15:00'</code></td><td>MySQL también tiene <code>DATETIME</code>.</td></tr><tr><td>Verdadero/falso</td><td><code>BOOLEAN</code></td><td><code>TRUE</code></td><td>En MySQL es un alias de <code>TINYINT(1)</code> (0 o 1).</td></tr><tr><td>Documento JSON</td><td><code>JSONB</code> / <code>JSON</code></td><td><code>{"talla":"M"}</code></td><td>PostgreSQL ofrece <code>JSONB</code>, indexable y más rápido.</td></tr></tbody></table></div>
+<h3>NULL: la ausencia de valor</h3>
+<p><code>NULL</code> significa «no hay dato» (se desconoce o no aplica). No es cero ni texto vacío. Casi cualquier operación con <code>NULL</code> da <code>NULL</code>, y por eso se compara con <code>IS NULL</code> y no con <code>=</code>. Lo veremos en el capítulo 4.</p>
+</section><section class="chapter" id="c2"><header><h2><span class="num">2</span>La base de ejemplo: una tienda</h2><p class="lead">Crea las tablas y los datos con los que practicarás en todos los capítulos.</p></header>
+<p>Todos los ejemplos y ejercicios usan la misma base: una <b>tienda de tecnología</b> con clientes, productos, pedidos y empleados. Créala una vez y úsala hasta el final.</p>
+<h3>El modelo</h3>
+<ul>
+<li>Una <b>categoría</b> agrupa varios <b>productos</b>.</li>
+<li>Un <b>cliente</b> hace varios <b>pedidos</b>; cada pedido incluye varios productos, y esa relación muchos a muchos se guarda en <b>detalle_pedido</b> con la cantidad y el precio del momento.</li>
+<li>Un <b>empleado</b> puede tener un jefe, que también es un empleado.</li>
+</ul>
+<h3>1. Crear la base de datos</h3>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code>CREATE DATABASE tienda;
+\c tienda</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code>CREATE DATABASE tienda CHARACTER SET utf8mb4;
+USE tienda;</code></pre></div></div>
+<h3>2. Crear las tablas</h3>
+<p>La única diferencia está en la columna numérica que se genera sola: <code>GENERATED ALWAYS AS IDENTITY</code> en PostgreSQL y <code>AUTO_INCREMENT</code> en MySQL.</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> categoria (
+  id_categoria <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre       <span class="t">VARCHAR</span>(<span class="n">60</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">UNIQUE</span>
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> producto (
+  id_producto  <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre       <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_categoria <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="f">categoria</span>(id_categoria),
+  precio       <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (precio &gt; <span class="n">0</span>),
+  stock        <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">0</span> <span class="k">CHECK</span> (stock &gt;= <span class="n">0</span>)
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> cliente (
+  id_cliente     <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre         <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  correo         <span class="t">VARCHAR</span>(<span class="n">150</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">UNIQUE</span>,
+  ciudad         <span class="t">VARCHAR</span>(<span class="n">80</span>),
+  fecha_registro <span class="t">DATE</span> <span class="k">NOT</span> <span class="k">NULL</span>
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> pedido (
+  id_pedido  <span class="t">INT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_cliente <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="f">cliente</span>(id_cliente),
+  fecha      <span class="t">DATE</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  estado     <span class="t">VARCHAR</span>(<span class="n">15</span>) <span class="k">NOT</span> <span class="k">NULL</span>
+             <span class="k">CHECK</span> (estado <span class="k">IN</span> (<span class="s">&#x27;pendiente&#x27;</span>,<span class="s">&#x27;pagado&#x27;</span>,<span class="s">&#x27;enviado&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>,<span class="s">&#x27;cancelado&#x27;</span>))
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> detalle_pedido (
+  id_pedido       <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">pedido</span>(id_pedido),
+  id_producto     <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">producto</span>(id_producto),
+  cantidad        <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (cantidad &gt; <span class="n">0</span>),
+  precio_unitario <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> (id_pedido, id_producto)
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> empleado (
+  id_empleado <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre      <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  cargo       <span class="t">VARCHAR</span>(<span class="n">60</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  salario     <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_jefe     <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">empleado</span>(id_empleado)
+);</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> categoria (
+  id_categoria <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre       <span class="t">VARCHAR</span>(<span class="n">60</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">UNIQUE</span>
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> producto (
+  id_producto  <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre       <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_categoria <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="f">categoria</span>(id_categoria),
+  precio       <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (precio &gt; <span class="n">0</span>),
+  stock        <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="n">0</span> <span class="k">CHECK</span> (stock &gt;= <span class="n">0</span>)
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> cliente (
+  id_cliente     <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre         <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  correo         <span class="t">VARCHAR</span>(<span class="n">150</span>) <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">UNIQUE</span>,
+  ciudad         <span class="t">VARCHAR</span>(<span class="n">80</span>),
+  fecha_registro <span class="t">DATE</span> <span class="k">NOT</span> <span class="k">NULL</span>
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> pedido (
+  id_pedido  <span class="t">INT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_cliente <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> <span class="f">cliente</span>(id_cliente),
+  fecha      <span class="t">DATE</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  estado     <span class="t">VARCHAR</span>(<span class="n">15</span>) <span class="k">NOT</span> <span class="k">NULL</span>
+             <span class="k">CHECK</span> (estado <span class="k">IN</span> (<span class="s">&#x27;pendiente&#x27;</span>,<span class="s">&#x27;pagado&#x27;</span>,<span class="s">&#x27;enviado&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>,<span class="s">&#x27;cancelado&#x27;</span>))
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> detalle_pedido (
+  id_pedido       <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">pedido</span>(id_pedido),
+  id_producto     <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">producto</span>(id_producto),
+  cantidad        <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (cantidad &gt; <span class="n">0</span>),
+  precio_unitario <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  <span class="k">PRIMARY</span> <span class="k">KEY</span> (id_pedido, id_producto)
+);
+
+<span class="k">CREATE</span> <span class="k">TABLE</span> empleado (
+  id_empleado <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  nombre      <span class="t">VARCHAR</span>(<span class="n">100</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  cargo       <span class="t">VARCHAR</span>(<span class="n">60</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  salario     <span class="t">DECIMAL</span>(<span class="n">12</span>,<span class="n">2</span>) <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_jefe     <span class="t">INT</span> <span class="k">REFERENCES</span> <span class="f">empleado</span>(id_empleado)
+);</code></pre></div></div>
+<h3>3. Cargar los datos</h3>
+<p>Este script es idéntico en los dos motores. No indicamos el id de las filas con identificador automático: se asignan solos en orden 1, 2, 3…, y las claves foráneas de los ejemplos dependen de ese orden.</p>
+<pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> categoria (nombre) <span class="k">VALUES</span>
+  (<span class="s">&#x27;Computadores&#x27;</span>),(<span class="s">&#x27;Periféricos&#x27;</span>),(<span class="s">&#x27;Audio&#x27;</span>),(<span class="s">&#x27;Accesorios&#x27;</span>),(<span class="s">&#x27;Oficina&#x27;</span>);
+
+<span class="k">INSERT</span> <span class="k">INTO</span> producto (nombre, id_categoria, precio, stock) <span class="k">VALUES</span>
+  (<span class="s">&#x27;Portátil Aero 14&#x27;</span>,<span class="n">1</span>,<span class="n">3200000</span>,<span class="n">8</span>),  (<span class="s">&#x27;Portátil Nova 15&#x27;</span>,<span class="n">1</span>,<span class="n">2650000</span>,<span class="n">12</span>),
+  (<span class="s">&#x27;Mouse inalámbrico&#x27;</span>,<span class="n">2</span>,<span class="n">65000</span>,<span class="n">120</span>), (<span class="s">&#x27;Teclado mecánico&#x27;</span>,<span class="n">2</span>,<span class="n">280000</span>,<span class="n">45</span>),
+  (<span class="s">&#x27;Monitor 24 pulgadas&#x27;</span>,<span class="n">2</span>,<span class="n">690000</span>,<span class="n">30</span>),(<span class="s">&#x27;Audífonos Studio&#x27;</span>,<span class="n">3</span>,<span class="n">350000</span>,<span class="n">25</span>),
+  (<span class="s">&#x27;Parlante Bluetooth&#x27;</span>,<span class="n">3</span>,<span class="n">180000</span>,<span class="n">0</span>), (<span class="s">&#x27;Cable HDMI 2 m&#x27;</span>,<span class="n">4</span>,<span class="n">25000</span>,<span class="n">300</span>),
+  (<span class="s">&#x27;Hub USB-C&#x27;</span>,<span class="n">4</span>,<span class="n">120000</span>,<span class="n">60</span>),         (<span class="s">&#x27;Webcam HD&#x27;</span>,<span class="n">2</span>,<span class="n">150000</span>,<span class="n">18</span>);
+
+<span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro) <span class="k">VALUES</span>
+  (<span class="s">&#x27;Marta Ruiz&#x27;</span>,<span class="s">&#x27;marta@correo.com&#x27;</span>,<span class="s">&#x27;Ibagué&#x27;</span>,<span class="s">&#x27;2025-01-15&#x27;</span>),
+  (<span class="s">&#x27;Luis Gómez&#x27;</span>,<span class="s">&#x27;luis@correo.com&#x27;</span>,<span class="s">&#x27;Cali&#x27;</span>,<span class="s">&#x27;2025-02-20&#x27;</span>),
+  (<span class="s">&#x27;Ana Torres&#x27;</span>,<span class="s">&#x27;ana@correo.com&#x27;</span>,<span class="s">&#x27;Bogotá&#x27;</span>,<span class="s">&#x27;2025-03-05&#x27;</span>),
+  (<span class="s">&#x27;Carlos Pérez&#x27;</span>,<span class="s">&#x27;carlos@correo.com&#x27;</span>,<span class="s">&#x27;Medellín&#x27;</span>,<span class="s">&#x27;2025-03-18&#x27;</span>),
+  (<span class="s">&#x27;Sofía Díaz&#x27;</span>,<span class="s">&#x27;sofia@correo.com&#x27;</span>,<span class="s">&#x27;Bogotá&#x27;</span>,<span class="s">&#x27;2025-06-02&#x27;</span>),
+  (<span class="s">&#x27;Diego Rojas&#x27;</span>,<span class="s">&#x27;diego@correo.com&#x27;</span>,<span class="s">&#x27;Ibagué&#x27;</span>,<span class="s">&#x27;2025-07-11&#x27;</span>),
+  (<span class="s">&#x27;Valentina Mora&#x27;</span>,<span class="s">&#x27;valentina@correo.com&#x27;</span>,<span class="s">&#x27;Cali&#x27;</span>,<span class="s">&#x27;2025-09-01&#x27;</span>);
+
+<span class="k">INSERT</span> <span class="k">INTO</span> pedido (id_pedido, id_cliente, fecha, estado) <span class="k">VALUES</span>
+  (<span class="n">5001</span>,<span class="n">1</span>,<span class="s">&#x27;2025-03-14&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>),(<span class="n">5002</span>,<span class="n">2</span>,<span class="s">&#x27;2025-03-15&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>),
+  (<span class="n">5003</span>,<span class="n">1</span>,<span class="s">&#x27;2025-04-02&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>),(<span class="n">5004</span>,<span class="n">3</span>,<span class="s">&#x27;2025-04-10&#x27;</span>,<span class="s">&#x27;enviado&#x27;</span>),
+  (<span class="n">5005</span>,<span class="n">4</span>,<span class="s">&#x27;2025-05-21&#x27;</span>,<span class="s">&#x27;pagado&#x27;</span>),   (<span class="n">5006</span>,<span class="n">3</span>,<span class="s">&#x27;2025-06-30&#x27;</span>,<span class="s">&#x27;pendiente&#x27;</span>),
+  (<span class="n">5007</span>,<span class="n">5</span>,<span class="s">&#x27;2025-07-08&#x27;</span>,<span class="s">&#x27;entregado&#x27;</span>),(<span class="n">5008</span>,<span class="n">1</span>,<span class="s">&#x27;2025-08-19&#x27;</span>,<span class="s">&#x27;cancelado&#x27;</span>),
+  (<span class="n">5009</span>,<span class="n">2</span>,<span class="s">&#x27;2025-09-12&#x27;</span>,<span class="s">&#x27;pagado&#x27;</span>),   (<span class="n">5010</span>,<span class="n">5</span>,<span class="s">&#x27;2025-10-01&#x27;</span>,<span class="s">&#x27;enviado&#x27;</span>);
+
+<span class="k">INSERT</span> <span class="k">INTO</span> detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario) <span class="k">VALUES</span>
+  (<span class="n">5001</span>,<span class="n">3</span>,<span class="n">2</span>,<span class="n">65000</span>),(<span class="n">5001</span>,<span class="n">4</span>,<span class="n">1</span>,<span class="n">280000</span>),(<span class="n">5002</span>,<span class="n">5</span>,<span class="n">1</span>,<span class="n">690000</span>),(<span class="n">5002</span>,<span class="n">3</span>,<span class="n">1</span>,<span class="n">65000</span>),
+  (<span class="n">5003</span>,<span class="n">1</span>,<span class="n">1</span>,<span class="n">3200000</span>),(<span class="n">5004</span>,<span class="n">6</span>,<span class="n">1</span>,<span class="n">350000</span>),(<span class="n">5004</span>,<span class="n">8</span>,<span class="n">3</span>,<span class="n">25000</span>),(<span class="n">5005</span>,<span class="n">2</span>,<span class="n">1</span>,<span class="n">2650000</span>),
+  (<span class="n">5005</span>,<span class="n">3</span>,<span class="n">1</span>,<span class="n">65000</span>),(<span class="n">5006</span>,<span class="n">9</span>,<span class="n">2</span>,<span class="n">120000</span>),(<span class="n">5007</span>,<span class="n">4</span>,<span class="n">1</span>,<span class="n">280000</span>),(<span class="n">5007</span>,<span class="n">5</span>,<span class="n">2</span>,<span class="n">690000</span>),
+  (<span class="n">5007</span>,<span class="n">8</span>,<span class="n">2</span>,<span class="n">25000</span>),(<span class="n">5008</span>,<span class="n">7</span>,<span class="n">1</span>,<span class="n">180000</span>),(<span class="n">5009</span>,<span class="n">6</span>,<span class="n">1</span>,<span class="n">350000</span>),(<span class="n">5009</span>,<span class="n">10</span>,<span class="n">1</span>,<span class="n">150000</span>),
+  (<span class="n">5010</span>,<span class="n">3</span>,<span class="n">3</span>,<span class="n">65000</span>),(<span class="n">5010</span>,<span class="n">9</span>,<span class="n">1</span>,<span class="n">120000</span>);
+
+<span class="k">INSERT</span> <span class="k">INTO</span> empleado (nombre, cargo, salario, id_jefe) <span class="k">VALUES</span>
+  (<span class="s">&#x27;Patricia Londoño&#x27;</span>,<span class="s">&#x27;Gerente general&#x27;</span>,<span class="n">9000000</span>,<span class="k">NULL</span>),
+  (<span class="s">&#x27;Andrés Cárdenas&#x27;</span>,<span class="s">&#x27;Jefe de ventas&#x27;</span>,<span class="n">5200000</span>,<span class="n">1</span>),
+  (<span class="s">&#x27;Laura Mejía&#x27;</span>,<span class="s">&#x27;Jefe de bodega&#x27;</span>,<span class="n">4800000</span>,<span class="n">1</span>),
+  (<span class="s">&#x27;Camilo Herrera&#x27;</span>,<span class="s">&#x27;Vendedor&#x27;</span>,<span class="n">2800000</span>,<span class="n">2</span>),
+  (<span class="s">&#x27;Juliana Ortiz&#x27;</span>,<span class="s">&#x27;Vendedora&#x27;</span>,<span class="n">2900000</span>,<span class="n">2</span>),
+  (<span class="s">&#x27;Felipe Vargas&#x27;</span>,<span class="s">&#x27;Auxiliar de bodega&#x27;</span>,<span class="n">2000000</span>,<span class="n">3</span>);</code></pre>
+<h3>4. Comprobar</h3>
+<pre class="code "><code><span class="k">SELECT</span>
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> categoria)      <span class="k">AS</span> categorias,
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> producto)       <span class="k">AS</span> productos,
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> cliente)        <span class="k">AS</span> clientes,
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> pedido)         <span class="k">AS</span> pedidos,
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> detalle_pedido) <span class="k">AS</span> lineas,
+  (<span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">FROM</span> empleado)       <span class="k">AS</span> empleados;</code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>categorias</th><th>productos</th><th>clientes</th><th>pedidos</th><th>lineas</th><th>empleados</th></tr></thead><tbody><tr><td class="r">5</td><td class="r">10</td><td class="r">7</td><td class="r">10</td><td class="r">18</td><td class="r">6</td></tr></tbody></table></div></div>
+<p>Deberías ver 5, 10, 7, 10, 18 y 6. Así se ven las tablas principales:</p>
+<div class="tw"><table class="dt"><caption>producto</caption><thead><tr><th>id_producto</th><th>nombre</th><th>id_categoria</th><th>precio</th><th>stock</th></tr></thead><tbody><tr><td class="r">1</td><td>Portátil Aero 14</td><td class="r">1</td><td class="r">3200000.00</td><td class="r">8</td></tr><tr><td class="r">2</td><td>Portátil Nova 15</td><td class="r">1</td><td class="r">2650000.00</td><td class="r">12</td></tr><tr><td class="r">3</td><td>Mouse inalámbrico</td><td class="r">2</td><td class="r">65000.00</td><td class="r">120</td></tr><tr><td class="r">4</td><td>Teclado mecánico</td><td class="r">2</td><td class="r">280000.00</td><td class="r">45</td></tr><tr><td class="r">5</td><td>Monitor 24 pulgadas</td><td class="r">2</td><td class="r">690000.00</td><td class="r">30</td></tr><tr><td class="r">6</td><td>Audífonos Studio</td><td class="r">3</td><td class="r">350000.00</td><td class="r">25</td></tr><tr><td class="r">7</td><td>Parlante Bluetooth</td><td class="r">3</td><td class="r">180000.00</td><td class="r">0</td></tr><tr><td class="r">8</td><td>Cable HDMI 2 m</td><td class="r">4</td><td class="r">25000.00</td><td class="r">300</td></tr><tr><td class="r">9</td><td>Hub USB-C</td><td class="r">4</td><td class="r">120000.00</td><td class="r">60</td></tr><tr><td class="r">10</td><td>Webcam HD</td><td class="r">2</td><td class="r">150000.00</td><td class="r">18</td></tr></tbody></table></div><div class="tw"><table class="dt"><caption>cliente</caption><thead><tr><th>id_cliente</th><th>nombre</th><th>correo</th><th>ciudad</th><th>fecha_registro</th></tr></thead><tbody><tr><td class="r">1</td><td>Marta Ruiz</td><td>marta@correo.com</td><td>Ibagué</td><td>2025-01-15</td></tr><tr><td class="r">2</td><td>Luis Gómez</td><td>luis@correo.com</td><td>Cali</td><td>2025-02-20</td></tr><tr><td class="r">3</td><td>Ana Torres</td><td>ana@correo.com</td><td>Bogotá</td><td>2025-03-05</td></tr><tr><td class="r">4</td><td>Carlos Pérez</td><td>carlos@correo.com</td><td>Medellín</td><td>2025-03-18</td></tr><tr><td class="r">5</td><td>Sofía Díaz</td><td>sofia@correo.com</td><td>Bogotá</td><td>2025-06-02</td></tr><tr><td class="r">6</td><td>Diego Rojas</td><td>diego@correo.com</td><td>Ibagué</td><td>2025-07-11</td></tr><tr><td class="r">7</td><td>Valentina Mora</td><td>valentina@correo.com</td><td>Cali</td><td>2025-09-01</td></tr></tbody></table></div><div class="grid2"><div class="tw"><table class="dt"><caption>pedido</caption><thead><tr><th>id_pedido</th><th>id_cliente</th><th>fecha</th><th>estado</th></tr></thead><tbody><tr><td class="r">5001</td><td class="r">1</td><td>2025-03-14</td><td>entregado</td></tr><tr><td class="r">5002</td><td class="r">2</td><td>2025-03-15</td><td>entregado</td></tr><tr><td class="r">5003</td><td class="r">1</td><td>2025-04-02</td><td>entregado</td></tr><tr><td class="r">5004</td><td class="r">3</td><td>2025-04-10</td><td>enviado</td></tr><tr><td class="r">5005</td><td class="r">4</td><td>2025-05-21</td><td>pagado</td></tr><tr><td class="r">5006</td><td class="r">3</td><td>2025-06-30</td><td>pendiente</td></tr><tr><td class="r">5007</td><td class="r">5</td><td>2025-07-08</td><td>entregado</td></tr><tr><td class="r">5008</td><td class="r">1</td><td>2025-08-19</td><td>cancelado</td></tr><tr><td class="r">5009</td><td class="r">2</td><td>2025-09-12</td><td>pagado</td></tr><tr><td class="r">5010</td><td class="r">5</td><td>2025-10-01</td><td>enviado</td></tr></tbody></table></div><div class="tw"><table class="dt"><caption>detalle_pedido</caption><thead><tr><th>id_pedido</th><th>id_producto</th><th>cantidad</th><th>precio_unitario</th></tr></thead><tbody><tr><td class="r">5001</td><td class="r">3</td><td class="r">2</td><td class="r">65000.00</td></tr><tr><td class="r">5001</td><td class="r">4</td><td class="r">1</td><td class="r">280000.00</td></tr><tr><td class="r">5002</td><td class="r">5</td><td class="r">1</td><td class="r">690000.00</td></tr><tr><td class="r">5002</td><td class="r">3</td><td class="r">1</td><td class="r">65000.00</td></tr><tr><td class="r">5003</td><td class="r">1</td><td class="r">1</td><td class="r">3200000.00</td></tr><tr><td class="r">5004</td><td class="r">6</td><td class="r">1</td><td class="r">350000.00</td></tr><tr><td class="r">5004</td><td class="r">8</td><td class="r">3</td><td class="r">25000.00</td></tr><tr><td class="r">5005</td><td class="r">2</td><td class="r">1</td><td class="r">2650000.00</td></tr><tr><td class="r">5005</td><td class="r">3</td><td class="r">1</td><td class="r">65000.00</td></tr><tr><td class="r">5006</td><td class="r">9</td><td class="r">2</td><td class="r">120000.00</td></tr><tr><td class="r">5007</td><td class="r">4</td><td class="r">1</td><td class="r">280000.00</td></tr><tr><td class="r">5007</td><td class="r">5</td><td class="r">2</td><td class="r">690000.00</td></tr><tr><td class="r">5007</td><td class="r">8</td><td class="r">2</td><td class="r">25000.00</td></tr><tr><td class="r">5008</td><td class="r">7</td><td class="r">1</td><td class="r">180000.00</td></tr><tr><td class="r">5009</td><td class="r">6</td><td class="r">1</td><td class="r">350000.00</td></tr><tr><td class="r">5009</td><td class="r">10</td><td class="r">1</td><td class="r">150000.00</td></tr><tr><td class="r">5010</td><td class="r">3</td><td class="r">3</td><td class="r">65000.00</td></tr><tr><td class="r">5010</td><td class="r">9</td><td class="r">1</td><td class="r">120000.00</td></tr></tbody></table></div></div><div class="tw"><table class="dt"><caption>empleado</caption><thead><tr><th>id_empleado</th><th>nombre</th><th>cargo</th><th>salario</th><th>id_jefe</th></tr></thead><tbody><tr><td class="r">1</td><td>Patricia Londoño</td><td>Gerente general</td><td class="r">9000000.00</td><td><span class="nl">NULL</span></td></tr><tr><td class="r">2</td><td>Andrés Cárdenas</td><td>Jefe de ventas</td><td class="r">5200000.00</td><td class="r">1</td></tr><tr><td class="r">3</td><td>Laura Mejía</td><td>Jefe de bodega</td><td class="r">4800000.00</td><td class="r">1</td></tr><tr><td class="r">4</td><td>Camilo Herrera</td><td>Vendedor</td><td class="r">2800000.00</td><td class="r">2</td></tr><tr><td class="r">5</td><td>Juliana Ortiz</td><td>Vendedora</td><td class="r">2900000.00</td><td class="r">2</td></tr><tr><td class="r">6</td><td>Felipe Vargas</td><td>Auxiliar de bodega</td><td class="r">2000000.00</td><td class="r">3</td></tr></tbody></table></div><div class="box tip"><span class="t">Si algo falla</span><p>Si repites el script y aparece «la tabla ya existe», borra las tablas en orden inverso de dependencia (<code>detalle_pedido</code>, <code>pedido</code>, <code>producto</code>, <code>categoria</code>, <code>cliente</code>, <code>empleado</code>) con <code>DROP TABLE</code> y vuelve a empezar.</p></div></section><section class="chapter" id="c3"><header><h2><span class="num">3</span>Consultar con SELECT</h2><p class="lead">Elegir columnas, calcular valores, quitar repetidos, ordenar y limitar.</p></header>
+<h3>La forma mínima</h3>
+<p>Todo empieza con <code>SELECT</code> (qué columnas) y <code>FROM</code> (de qué tabla).</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto;</code></pre><div class="rs"><div class="rs-h">Resultado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td></tr><tr><td>Mouse inalámbrico</td><td class="r">65000.00</td></tr><tr><td>Teclado mecánico</td><td class="r">280000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td></tr><tr><td>Audífonos Studio</td><td class="r">350000.00</td></tr><tr><td>Parlante Bluetooth</td><td class="r">180000.00</td></tr><tr><td>Cable HDMI 2 m</td><td class="r">25000.00</td></tr><tr><td>Hub USB-C</td><td class="r">120000.00</td></tr><tr><td>Webcam HD</td><td class="r">150000.00</td></tr></tbody></table></div></div>
+<p><code>SELECT *</code> trae todas las columnas. Úsalo para explorar; en aplicaciones, pide solo las columnas que necesitas.</p>
+<pre class="code "><code><span class="k">SELECT</span> *
+<span class="k">FROM</span> categoria;</code></pre><div class="rs"><div class="rs-h">Resultado · 5 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_categoria</th><th>nombre</th></tr></thead><tbody><tr><td class="r">1</td><td>Computadores</td></tr><tr><td class="r">2</td><td>Periféricos</td></tr><tr><td class="r">3</td><td>Audio</td></tr><tr><td class="r">4</td><td>Accesorios</td></tr><tr><td class="r">5</td><td>Oficina</td></tr></tbody></table></div></div>
+<h3>Alias con AS</h3>
+<p>Un <b>alias</b> renombra una columna o una tabla en el resultado. Puedes calcular valores en la misma consulta.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre,
+       precio,
+       precio * <span class="n">1.19</span>       <span class="k">AS</span> precio_con_iva,
+       precio * stock      <span class="k">AS</span> valor_en_bodega
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> valor_en_bodega <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 5 filas (se muestran las primeras 5)</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th><th>precio_con_iva</th><th>valor_en_bodega</th></tr></thead><tbody><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td><td class="r">3153500.00</td><td class="r">31800000.00</td></tr><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td><td class="r">3808000.00</td><td class="r">25600000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td><td class="r">821100.00</td><td class="r">20700000.00</td></tr><tr><td>Teclado mecánico</td><td class="r">280000.00</td><td class="r">333200.00</td><td class="r">12600000.00</td></tr><tr><td>Audífonos Studio</td><td class="r">350000.00</td><td class="r">416500.00</td><td class="r">8750000.00</td></tr></tbody></table></div></div>
+<h3>DISTINCT: quitar repetidos</h3>
+<pre class="code "><code><span class="k">SELECT</span> <span class="k">DISTINCT</span> ciudad
+<span class="k">FROM</span> cliente
+<span class="k">ORDER</span> <span class="k">BY</span> ciudad;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>ciudad</th></tr></thead><tbody><tr><td>Bogotá</td></tr><tr><td>Cali</td></tr><tr><td>Ibagué</td></tr><tr><td>Medellín</td></tr></tbody></table></div></div>
+<h3>ORDER BY: ordenar</h3>
+<p>Por defecto el orden es ascendente (<code>ASC</code>). Con <code>DESC</code> se invierte. Puedes ordenar por varias columnas: si la primera empata, decide la segunda.</p>
+<pre class="code "><code><span class="k">SELECT</span> ciudad, nombre
+<span class="k">FROM</span> cliente
+<span class="k">ORDER</span> <span class="k">BY</span> ciudad <span class="k">ASC</span>, nombre <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 7 filas</div><div class="tw"><table class="dt"><thead><tr><th>ciudad</th><th>nombre</th></tr></thead><tbody><tr><td>Bogotá</td><td>Sofía Díaz</td></tr><tr><td>Bogotá</td><td>Ana Torres</td></tr><tr><td>Cali</td><td>Valentina Mora</td></tr><tr><td>Cali</td><td>Luis Gómez</td></tr><tr><td>Ibagué</td><td>Marta Ruiz</td></tr><tr><td>Ibagué</td><td>Diego Rojas</td></tr><tr><td>Medellín</td><td>Carlos Pérez</td></tr></tbody></table></div></div>
+<p>Sin <code>ORDER BY</code> las filas pueden salir en cualquier orden, aunque a veces parezca que salen en el de inserción. Nunca dependas de eso.</p>
+<h3>LIMIT y OFFSET: pocas filas y paginación</h3>
+<p><code>LIMIT n</code> devuelve las primeras <i>n</i> filas y <code>OFFSET m</code> se salta las primeras <i>m</i>. Funcionan igual en PostgreSQL y MySQL. Los tres productos más caros:</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> precio <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td></tr></tbody></table></div></div>
+<p>La página 2 de un listado con 4 elementos por página:</p>
+<pre class="code "><code><span class="k">SELECT</span> id_producto, nombre
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> id_producto
+<span class="k">LIMIT</span> <span class="n">4</span> <span class="k">OFFSET</span> <span class="n">4</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_producto</th><th>nombre</th></tr></thead><tbody><tr><td class="r">5</td><td>Monitor 24 pulgadas</td></tr><tr><td class="r">6</td><td>Audífonos Studio</td></tr><tr><td class="r">7</td><td>Parlante Bluetooth</td></tr><tr><td class="r">8</td><td>Cable HDMI 2 m</td></tr></tbody></table></div></div><div class="box warn"><span class="t">NULL al ordenar</span><p>Ordena así los valores nulos: en <b>PostgreSQL</b> aparecen <i>al final</i> con <code>ASC</code> y al principio con <code>DESC</code>. En <b>MySQL</b> ocurre al revés: son los más pequeños, así que van primero con <code>ASC</code>. PostgreSQL permite controlarlo con <code>ORDER BY col NULLS LAST</code>; en MySQL se logra con <code>ORDER BY col IS NULL, col</code>.</p></div>
+<h3>El comentario de una consulta</h3>
+<pre class="code "><code><span class="c">-- Los 5 clientes más antiguos</span>
+<span class="k">SELECT</span> nombre, fecha_registro   /* fecha de alta */
+<span class="k">FROM</span> cliente
+<span class="k">ORDER</span> <span class="k">BY</span> fecha_registro
+<span class="k">LIMIT</span> <span class="n">5</span>;</code></pre></section><section class="chapter" id="c4"><header><h2><span class="num">4</span>Filtrar con WHERE</h2><p class="lead">Condiciones, operadores, patrones de texto y el tratamiento de NULL.</p></header>
+<p><code>WHERE</code> deja pasar solo las filas que cumplen una condición. Va después de <code>FROM</code>.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> precio &gt; <span class="n">300000</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td></tr><tr><td>Audífonos Studio</td><td class="r">350000.00</td></tr></tbody></table></div></div>
+<h3>Operadores de comparación</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Operador</th><th>Significa</th><th>Ejemplo</th></tr></thead><tbody><tr><td><code>=</code></td><td>igual</td><td><code>ciudad = 'Cali'</code></td></tr><tr><td><code>&lt;&gt;</code> o <code>!=</code></td><td>distinto</td><td><code>estado &lt;&gt; 'cancelado'</code></td></tr><tr><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td><td>menor, mayor…</td><td><code>stock &lt;= 10</code></td></tr></tbody></table></div>
+<h3>AND, OR y NOT</h3>
+<p><code>AND</code> exige que se cumplan las dos condiciones; <code>OR</code>, que se cumpla al menos una. <code>AND</code> se evalúa antes que <code>OR</code>, así que usa paréntesis cuando mezcles ambos.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, precio, stock
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> (id_categoria = <span class="n">2</span> <span class="k">OR</span> id_categoria = <span class="n">3</span>)
+  <span class="k">AND</span> precio &lt; <span class="n">200000</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th><th>stock</th></tr></thead><tbody><tr><td>Mouse inalámbrico</td><td class="r">65000.00</td><td class="r">120</td></tr><tr><td>Parlante Bluetooth</td><td class="r">180000.00</td><td class="r">0</td></tr><tr><td>Webcam HD</td><td class="r">150000.00</td><td class="r">18</td></tr></tbody></table></div></div>
+<h3>IN y BETWEEN</h3>
+<p><code>IN</code> compara con una lista; <code>BETWEEN</code> con un rango que incluye los dos extremos.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, ciudad
+<span class="k">FROM</span> cliente
+<span class="k">WHERE</span> ciudad <span class="k">IN</span> (<span class="s">&#x27;Bogotá&#x27;</span>, <span class="s">&#x27;Cali&#x27;</span>);</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>ciudad</th></tr></thead><tbody><tr><td>Luis Gómez</td><td>Cali</td></tr><tr><td>Ana Torres</td><td>Bogotá</td></tr><tr><td>Sofía Díaz</td><td>Bogotá</td></tr><tr><td>Valentina Mora</td><td>Cali</td></tr></tbody></table></div></div><pre class="code "><code><span class="k">SELECT</span> id_pedido, fecha, estado
+<span class="k">FROM</span> pedido
+<span class="k">WHERE</span> fecha <span class="k">BETWEEN</span> <span class="s">&#x27;2025-04-01&#x27;</span> <span class="k">AND</span> <span class="s">&#x27;2025-06-30&#x27;</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>fecha</th><th>estado</th></tr></thead><tbody><tr><td class="r">5003</td><td>2025-04-02</td><td>entregado</td></tr><tr><td class="r">5004</td><td>2025-04-10</td><td>enviado</td></tr><tr><td class="r">5005</td><td>2025-05-21</td><td>pagado</td></tr><tr><td class="r">5006</td><td>2025-06-30</td><td>pendiente</td></tr></tbody></table></div></div>
+<h3>LIKE: buscar patrones de texto</h3>
+<p>En un patrón, <code>%</code> reemplaza cualquier cantidad de caracteres y <code>_</code> reemplaza exactamente uno.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> nombre <span class="k">LIKE</span> <span class="s">&#x27;Port%&#x27;</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th></tr></thead><tbody><tr><td>Portátil Aero 14</td></tr><tr><td>Portátil Nova 15</td></tr></tbody></table></div></div>
+<p><code>LIKE '%a'</code> termina en «a»; <code>'%bluetooth%'</code> la contiene en cualquier posición.</p>
+<div class="box warn"><span class="t">Mayúsculas y minúsculas</span><p>En <b>MySQL</b>, <code>LIKE</code> ignora las mayúsculas con la configuración habitual. En <b>PostgreSQL</b> <code>LIKE</code> las distingue: <code>'port%'</code> no encuentra «Portátil». Para ignorarlas usa <code>ILIKE</code>, que solo existe en PostgreSQL.</p></div><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> nombre
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> nombre <span class="k">ILIKE</span> <span class="s">&#x27;%bluetooth%&#x27;</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> nombre
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> nombre <span class="k">LIKE</span> <span class="s">&#x27;%bluetooth%&#x27;</span>;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th></tr></thead><tbody><tr><td>Parlante Bluetooth</td></tr></tbody></table></div></div>
+<p>Para una versión que funciona igual en ambos: <code>WHERE LOWER(nombre) LIKE '%bluetooth%'</code>.</p>
+<h3>IS NULL: preguntar por la ausencia de valor</h3>
+<p>Ninguna comparación con <code>NULL</code> es verdadera, ni siquiera <code>NULL = NULL</code>. La pregunta correcta es <code>IS NULL</code>. En la tabla <code>empleado</code>, solo el gerente no tiene jefe:</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, cargo
+<span class="k">FROM</span> empleado
+<span class="k">WHERE</span> id_jefe <span class="k">IS</span> <span class="k">NULL</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>cargo</th></tr></thead><tbody><tr><td>Patricia Londoño</td><td>Gerente general</td></tr></tbody></table></div></div><pre class="code "><code><span class="k">SELECT</span> nombre, cargo
+<span class="k">FROM</span> empleado
+<span class="k">WHERE</span> id_jefe <span class="k">IS</span> <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>cargo</th></tr></thead><tbody><tr><td>Andrés Cárdenas</td><td>Jefe de ventas</td></tr><tr><td>Laura Mejía</td><td>Jefe de bodega</td></tr><tr><td>Camilo Herrera</td><td>Vendedor</td></tr></tbody></table></div></div><div class="box key"><span class="t">Lógica de tres valores</span><p>Una condición puede ser verdadera, falsa o <b>desconocida</b>. <code>WHERE</code> solo deja pasar las verdaderas. Por eso <code>WHERE id_jefe = NULL</code> nunca devuelve nada, y <code>WHERE id_jefe &lt;&gt; 2</code> tampoco devuelve las filas con <code>id_jefe</code> nulo.</p></div>
+<h3>Orden de lectura de una consulta</h3>
+<p>Aunque escribes <code>SELECT</code> primero, el motor evalúa en este orden. Te ayudará a entender los errores más adelante:</p>
+<ol><li><code>FROM</code> y <code>JOIN</code>: de dónde salen las filas.</li><li><code>WHERE</code>: qué filas se conservan.</li><li><code>GROUP BY</code>: se agrupan.</li><li><code>HAVING</code>: qué grupos se conservan.</li><li><code>SELECT</code>: se calculan las columnas y los alias.</li><li><code>ORDER BY</code>, luego <code>LIMIT</code>.</li></ol>
+<p>Por eso el alias que defines en <code>SELECT</code> no se puede usar en <code>WHERE</code>, pero sí en <code>ORDER BY</code>.</p>
+</section><section class="chapter" id="c5"><header><h2><span class="num">5</span>Expresiones y funciones</h2><p class="lead">Calcular, transformar texto, usar fechas y tomar decisiones dentro de la consulta.</p></header>
+<h3>Aritmética</h3>
+<p>Se usan <code>+</code> <code>-</code> <code>*</code> <code>/</code> y <code>%</code> (resto). Con ellos se calculan columnas derivadas. La división tiene una diferencia importante:</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="n">7</span> / <span class="n">2</span>   <span class="k">AS</span> entera,      <span class="c">-- 3</span>
+       <span class="n">7</span> / <span class="n">2.0</span> <span class="k">AS</span> <span class="t">decimal</span>,    <span class="c">-- 3.5000000000000000</span>
+       <span class="n">7</span> % <span class="n">2</span>   <span class="k">AS</span> resto;      <span class="c">-- 1</span></code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="n">7</span> / <span class="n">2</span>     <span class="k">AS</span> <span class="t">decimal</span>,   <span class="c">-- 3.5000</span>
+       <span class="n">7</span> DIV <span class="n">2</span>   <span class="k">AS</span> entera,    <span class="c">-- 3</span>
+       <span class="n">7</span> % <span class="n">2</span>     <span class="k">AS</span> resto;     <span class="c">-- 1</span></code></pre></div></div>
+<p>En PostgreSQL, dividir dos enteros da un entero. En MySQL, <code>/</code> siempre da decimal y para la división entera se usa <code>DIV</code>.</p>
+<h3>Funciones de texto</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Qué hace</th><th>Función</th><th>Ejemplo → resultado</th></tr></thead><tbody><tr><td>Mayúsculas / minúsculas</td><td><code>UPPER</code>, <code>LOWER</code></td><td><code>UPPER('cali')</code> → CALI</td></tr><tr><td>Longitud</td><td><code>LENGTH(texto)</code></td><td><code>LENGTH('Hub')</code> → 3</td></tr><tr><td>Quitar espacios</td><td><code>TRIM(texto)</code></td><td><code>TRIM('  hola ')</code> → hola</td></tr><tr><td>Parte del texto</td><td><code>SUBSTRING(texto, inicio, largo)</code></td><td><code>SUBSTRING('Bogotá', 1, 3)</code> → Bog</td></tr><tr><td>Reemplazar</td><td><code>REPLACE(texto, viejo, nuevo)</code></td><td><code>REPLACE('a-b', '-', ' ')</code> → a b</td></tr><tr><td>Unir textos</td><td><code>CONCAT(a, b, …)</code></td><td><code>CONCAT('Hola ', nombre)</code></td></tr></tbody></table></div><pre class="code "><code><span class="k">SELECT</span> <span class="f">UPPER</span>(nombre)            <span class="k">AS</span> nombre,
+       <span class="f">LENGTH</span>(correo)           <span class="k">AS</span> largo_correo,
+       <span class="f">SUBSTRING</span>(ciudad, <span class="n">1</span>, <span class="n">3</span>)  <span class="k">AS</span> abreviatura,
+       <span class="f">CONCAT</span>(nombre, <span class="s">&#x27; (&#x27;</span>, ciudad, <span class="s">&#x27;)&#x27;</span>) <span class="k">AS</span> ficha
+<span class="k">FROM</span> cliente
+<span class="k">LIMIT</span> <span class="n">4</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>largo_correo</th><th>abreviatura</th><th>ficha</th></tr></thead><tbody><tr><td>MARTA RUIZ</td><td class="r">16</td><td>Iba</td><td>Marta Ruiz (Ibagué)</td></tr><tr><td>LUIS GóMEZ</td><td class="r">15</td><td>Cal</td><td>Luis Gómez (Cali)</td></tr><tr><td>ANA TORRES</td><td class="r">14</td><td>Bog</td><td>Ana Torres (Bogotá)</td></tr><tr><td>CARLOS PéREZ</td><td class="r">17</td><td>Med</td><td>Carlos Pérez (Medellín)</td></tr></tbody></table></div></div><div class="box warn"><span class="t">Unir textos</span><p><code>CONCAT</code> funciona en ambos. PostgreSQL además permite el operador <code>||</code> (<code>nombre || ' - ' || ciudad</code>), pero en MySQL <code>||</code> significa <code>OR</code>, así que no lo uses ahí. Otra diferencia: si un dato es <code>NULL</code>, en MySQL <code>CONCAT</code> devuelve <code>NULL</code>, y en PostgreSQL ignora ese dato.</p></div>
+<h3>Funciones numéricas</h3>
+<pre class="code "><code><span class="k">SELECT</span> <span class="f">ROUND</span>(<span class="n">2650000</span> / <span class="n">3.0</span>, <span class="n">2</span>) <span class="k">AS</span> redondeado,   <span class="c">-- 883333.33</span>
+       <span class="f">CEIL</span>(<span class="n">4.1</span>)  <span class="k">AS</span> hacia_arriba,           <span class="c">-- 5</span>
+       <span class="f">FLOOR</span>(<span class="n">4.9</span>) <span class="k">AS</span> hacia_abajo,            <span class="c">-- 4</span>
+       <span class="f">ABS</span>(-<span class="n">15</span>)   <span class="k">AS</span> absoluto;               <span class="c">-- 15</span></code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>redondeado</th><th>hacia_arriba</th><th>hacia_abajo</th><th>absoluto</th></tr></thead><tbody><tr><td class="r">883333.33</td><td class="r">5</td><td class="r">4</td><td class="r">15</td></tr></tbody></table></div></div>
+<h3>Fechas y horas</h3>
+<p>Aquí los motores se diferencian bastante. Las operaciones más comunes:</p>
+<div class="tw"><table class="dt"><thead><tr><th>Necesito</th><th>PostgreSQL</th><th>MySQL</th></tr></thead><tbody><tr><td>Fecha de hoy</td><td><code>CURRENT_DATE</code></td><td><code>CURDATE()</code> o <code>CURRENT_DATE</code></td></tr><tr><td>Fecha y hora actual</td><td><code>NOW()</code></td><td><code>NOW()</code></td></tr><tr><td>El año de una fecha</td><td><code>EXTRACT(YEAR FROM fecha)</code></td><td><code>YEAR(fecha)</code></td></tr><tr><td>El mes de una fecha</td><td><code>EXTRACT(MONTH FROM fecha)</code></td><td><code>MONTH(fecha)</code></td></tr><tr><td>Dar formato</td><td><code>TO_CHAR(fecha, 'YYYY-MM')</code></td><td><code>DATE_FORMAT(fecha, '%Y-%m')</code></td></tr><tr><td>Sumar 30 días</td><td><code>fecha + INTERVAL '30 days'</code></td><td><code>DATE_ADD(fecha, INTERVAL 30 DAY)</code></td></tr><tr><td>Días entre dos fechas</td><td><code>fecha2 - fecha1</code> (da un entero)</td><td><code>DATEDIFF(fecha2, fecha1)</code></td></tr><tr><td>Inicio del mes</td><td><code>DATE_TRUNC('month', fecha)</code></td><td><code>DATE_FORMAT(fecha, '%Y-%m-01')</code></td></tr></tbody></table></div><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> id_pedido,
+       fecha,
+       <span class="f">EXTRACT</span>(MONTH <span class="k">FROM</span> fecha)       <span class="k">AS</span> mes,
+       fecha + <span class="k">INTERVAL</span> <span class="s">&#x27;15 days&#x27;</span>      <span class="k">AS</span> limite_pago
+<span class="k">FROM</span> pedido
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> id_pedido,
+       fecha,
+       <span class="f">MONTH</span>(fecha)                    <span class="k">AS</span> mes,
+       <span class="f">DATE_ADD</span>(fecha, <span class="k">INTERVAL</span> <span class="n">15</span> DAY) <span class="k">AS</span> limite_pago
+<span class="k">FROM</span> pedido
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>fecha</th><th>mes</th><th>limite_pago</th></tr></thead><tbody><tr><td class="r">5001</td><td>2025-03-14</td><td class="r">3</td><td>2025-03-29</td></tr><tr><td class="r">5002</td><td>2025-03-15</td><td class="r">3</td><td>2025-03-30</td></tr><tr><td class="r">5003</td><td>2025-04-02</td><td class="r">4</td><td>2025-04-17</td></tr></tbody></table></div></div>
+<h3>CASE: condiciones dentro de la consulta</h3>
+<p><code>CASE</code> es el «si… entonces… si no…» de SQL. Sirve para clasificar valores.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, stock,
+  <span class="k">CASE</span>
+    <span class="k">WHEN</span> stock = <span class="n">0</span>   <span class="k">THEN</span> <span class="s">&#x27;Agotado&#x27;</span>
+    <span class="k">WHEN</span> stock &lt; <span class="n">20</span>  <span class="k">THEN</span> <span class="s">&#x27;Quedan pocos&#x27;</span>
+    <span class="k">ELSE</span> <span class="s">&#x27;Disponible&#x27;</span>
+  <span class="k">END</span> <span class="k">AS</span> disponibilidad
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> stock;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas (se muestran las primeras 6)</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>stock</th><th>disponibilidad</th></tr></thead><tbody><tr><td>Parlante Bluetooth</td><td class="r">0</td><td>Agotado</td></tr><tr><td>Portátil Aero 14</td><td class="r">8</td><td>Quedan pocos</td></tr><tr><td>Portátil Nova 15</td><td class="r">12</td><td>Quedan pocos</td></tr><tr><td>Webcam HD</td><td class="r">18</td><td>Quedan pocos</td></tr><tr><td>Audífonos Studio</td><td class="r">25</td><td>Disponible</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">30</td><td>Disponible</td></tr></tbody></table></div></div>
+<h3>COALESCE y NULLIF: trabajar con NULL</h3>
+<ul>
+<li><code>COALESCE(a, b, c)</code> devuelve el primer valor que no sea nulo.</li>
+<li><code>NULLIF(a, b)</code> devuelve <code>NULL</code> si <code>a</code> y <code>b</code> son iguales. Se usa para evitar dividir por cero: <code>x / NULLIF(y, 0)</code>.</li>
+</ul>
+<pre class="code "><code><span class="k">SELECT</span> nombre,
+       <span class="f">COALESCE</span>(id_jefe, <span class="n">0</span>)  <span class="k">AS</span> id_jefe
+<span class="k">FROM</span> empleado
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_jefe</th></tr></thead><tbody><tr><td>Patricia Londoño</td><td class="r">0</td></tr><tr><td>Andrés Cárdenas</td><td class="r">1</td></tr><tr><td>Laura Mejía</td><td class="r">1</td></tr></tbody></table></div></div>
+<h3>CAST: convertir de un tipo a otro</h3>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">CAST</span>(<span class="s">&#x27;2025-03-14&#x27;</span> <span class="k">AS</span> <span class="t">DATE</span>) <span class="k">AS</span> fecha,
+       <span class="s">&#x27;42&#x27;</span>::<span class="t">INT</span>              <span class="k">AS</span> numero,       <span class="c">-- forma corta de PostgreSQL</span>
+       <span class="f">CAST</span>(precio <span class="k">AS</span> <span class="t">INT</span>)     <span class="k">AS</span> precio_entero
+<span class="k">FROM</span> producto <span class="k">LIMIT</span> <span class="n">1</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">CAST</span>(<span class="s">&#x27;2025-03-14&#x27;</span> <span class="k">AS</span> <span class="t">DATE</span>) <span class="k">AS</span> fecha,
+       <span class="f">CAST</span>(<span class="s">&#x27;42&#x27;</span> <span class="k">AS</span> <span class="t">SIGNED</span>)    <span class="k">AS</span> numero,       <span class="c">-- enteros: SIGNED o UNSIGNED</span>
+       <span class="f">CAST</span>(precio <span class="k">AS</span> <span class="t">SIGNED</span>)  <span class="k">AS</span> precio_entero
+<span class="k">FROM</span> producto <span class="k">LIMIT</span> <span class="n">1</span>;</code></pre></div></div></section><section class="chapter" id="c6"><header><h2><span class="num">6</span>Agrupar y resumir</h2><p class="lead">COUNT, SUM, AVG, MIN, MAX, GROUP BY y HAVING.</p></header>
+<p>Hasta ahora cada fila de entrada producía una fila de salida. Las <b>funciones de agregación</b> resumen muchas filas en un solo valor.</p>
+<div class="tw"><table class="dt"><thead><tr><th>Función</th><th>Qué calcula</th><th>Detalle</th></tr></thead><tbody><tr><td><code>COUNT(*)</code></td><td>Número de filas</td><td>Cuenta todas, incluso las que tienen nulos</td></tr><tr><td><code>COUNT(columna)</code></td><td>Filas donde la columna <b>no es nula</b></td><td></td></tr><tr><td><code>COUNT(DISTINCT columna)</code></td><td>Valores distintos no nulos</td><td></td></tr><tr><td><code>SUM(columna)</code></td><td>Suma</td><td>Ignora los nulos</td></tr><tr><td><code>AVG(columna)</code></td><td>Promedio</td><td>Ignora los nulos (no los cuenta como cero)</td></tr><tr><td><code>MIN</code> / <code>MAX</code></td><td>Menor / mayor</td><td>Sirven también con texto y fechas</td></tr></tbody></table></div>
+<h3>Resumir toda la tabla</h3>
+<pre class="code "><code><span class="k">SELECT</span> <span class="f">COUNT</span>(*)      <span class="k">AS</span> productos,
+       <span class="f">MIN</span>(precio)    <span class="k">AS</span> mas_barato,
+       <span class="f">MAX</span>(precio)    <span class="k">AS</span> mas_caro,
+       <span class="f">ROUND</span>(<span class="f">AVG</span>(precio), <span class="n">0</span>) <span class="k">AS</span> promedio,
+       <span class="f">SUM</span>(stock)     <span class="k">AS</span> unidades_en_bodega
+<span class="k">FROM</span> producto;</code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>productos</th><th>mas_barato</th><th>mas_caro</th><th>promedio</th><th>unidades_en_bodega</th></tr></thead><tbody><tr><td class="r">10</td><td class="r">25000.00</td><td class="r">3200000.00</td><td class="r">771000.00</td><td class="r">618</td></tr></tbody></table></div></div><div class="box key"><span class="t">Diferencia entre COUNT(*) y COUNT(columna)</span><p>En <code>empleado</code> hay 6 filas, pero solo 5 tienen jefe. <code>COUNT(*)</code> devuelve 6 y <code>COUNT(id_jefe)</code> devuelve 5.</p></div><pre class="code "><code><span class="k">SELECT</span> <span class="f">COUNT</span>(*) <span class="k">AS</span> filas, <span class="f">COUNT</span>(id_jefe) <span class="k">AS</span> con_jefe
+<span class="k">FROM</span> empleado;</code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>filas</th><th>con_jefe</th></tr></thead><tbody><tr><td class="r">6</td><td class="r">5</td></tr></tbody></table></div></div>
+<h3>GROUP BY: un resumen por grupo</h3>
+<p><code>GROUP BY</code> divide las filas en grupos con el mismo valor y aplica la agregación a cada grupo. ¿Cuántos productos y qué stock hay por categoría?</p>
+<pre class="code "><code><span class="k">SELECT</span> id_categoria,
+       <span class="f">COUNT</span>(*)    <span class="k">AS</span> productos,
+       <span class="f">SUM</span>(stock)  <span class="k">AS</span> unidades
+<span class="k">FROM</span> producto
+<span class="k">GROUP</span> <span class="k">BY</span> id_categoria
+<span class="k">ORDER</span> <span class="k">BY</span> id_categoria;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_categoria</th><th>productos</th><th>unidades</th></tr></thead><tbody><tr><td class="r">1</td><td class="r">2</td><td class="r">20</td></tr><tr><td class="r">2</td><td class="r">4</td><td class="r">213</td></tr><tr><td class="r">3</td><td class="r">2</td><td class="r">25</td></tr><tr><td class="r">4</td><td class="r">2</td><td class="r">360</td></tr></tbody></table></div></div><div class="box warn"><span class="t">Regla de oro de GROUP BY</span><p>Toda columna del <code>SELECT</code> que <b>no</b> esté dentro de una función de agregación debe aparecer en el <code>GROUP BY</code>. PostgreSQL lo exige siempre. MySQL con <code>ONLY_FULL_GROUP_BY</code> (activo por defecto desde 5.7) también.</p></div>
+<p>Puedes agrupar por varias columnas. Pedidos por cliente y estado:</p>
+<pre class="code "><code><span class="k">SELECT</span> id_cliente, estado, <span class="f">COUNT</span>(*) <span class="k">AS</span> pedidos
+<span class="k">FROM</span> pedido
+<span class="k">GROUP</span> <span class="k">BY</span> id_cliente, estado
+<span class="k">ORDER</span> <span class="k">BY</span> id_cliente, estado
+<span class="k">LIMIT</span> <span class="n">6</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_cliente</th><th>estado</th><th>pedidos</th></tr></thead><tbody><tr><td class="r">1</td><td>cancelado</td><td class="r">1</td></tr><tr><td class="r">1</td><td>entregado</td><td class="r">2</td></tr><tr><td class="r">2</td><td>entregado</td><td class="r">1</td></tr><tr><td class="r">2</td><td>pagado</td><td class="r">1</td></tr><tr><td class="r">3</td><td>enviado</td><td class="r">1</td></tr><tr><td class="r">3</td><td>pendiente</td><td class="r">1</td></tr></tbody></table></div></div>
+<h3>Agrupar por una expresión</h3>
+<p>Pedidos por mes:</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">EXTRACT</span>(MONTH <span class="k">FROM</span> fecha) <span class="k">AS</span> mes,
+       <span class="f">COUNT</span>(*)                  <span class="k">AS</span> pedidos
+<span class="k">FROM</span> pedido
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="f">EXTRACT</span>(MONTH <span class="k">FROM</span> fecha)
+<span class="k">ORDER</span> <span class="k">BY</span> mes;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">MONTH</span>(fecha) <span class="k">AS</span> mes,
+       <span class="f">COUNT</span>(*)     <span class="k">AS</span> pedidos
+<span class="k">FROM</span> pedido
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="f">MONTH</span>(fecha)
+<span class="k">ORDER</span> <span class="k">BY</span> mes;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado · 8 filas</div><div class="tw"><table class="dt"><thead><tr><th>mes</th><th>pedidos</th></tr></thead><tbody><tr><td class="r">3</td><td class="r">2</td></tr><tr><td class="r">4</td><td class="r">2</td></tr><tr><td class="r">5</td><td class="r">1</td></tr><tr><td class="r">6</td><td class="r">1</td></tr><tr><td class="r">7</td><td class="r">1</td></tr><tr><td class="r">8</td><td class="r">1</td></tr><tr><td class="r">9</td><td class="r">1</td></tr><tr><td class="r">10</td><td class="r">1</td></tr></tbody></table></div></div>
+<h3>HAVING: filtrar grupos</h3>
+<p><code>WHERE</code> filtra filas <i>antes</i> de agrupar; <code>HAVING</code> filtra grupos <i>después</i> de agregar. Clientes con más de un pedido:</p>
+<pre class="code "><code><span class="k">SELECT</span> id_cliente, <span class="f">COUNT</span>(*) <span class="k">AS</span> pedidos
+<span class="k">FROM</span> pedido
+<span class="k">GROUP</span> <span class="k">BY</span> id_cliente
+<span class="k">HAVING</span> <span class="f">COUNT</span>(*) &gt; <span class="n">1</span>
+<span class="k">ORDER</span> <span class="k">BY</span> pedidos <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_cliente</th><th>pedidos</th></tr></thead><tbody><tr><td class="r">1</td><td class="r">3</td></tr><tr><td class="r">5</td><td class="r">2</td></tr><tr><td class="r">3</td><td class="r">2</td></tr><tr><td class="r">2</td><td class="r">2</td></tr></tbody></table></div></div><div class="box tip"><span class="t">¿WHERE o HAVING?</span><p>Si la condición habla de una fila individual (<code>estado = 'entregado'</code>), va en <code>WHERE</code>: es más rápido porque descarta filas antes de agrupar. Si habla de un resultado agregado (<code>COUNT(*) &gt; 1</code>), va en <code>HAVING</code>.</p></div><pre class="code "><code><span class="k">SELECT</span> id_cliente, <span class="f">COUNT</span>(*) <span class="k">AS</span> entregados
+<span class="k">FROM</span> pedido
+<span class="k">WHERE</span> estado = <span class="s">&#x27;entregado&#x27;</span>
+<span class="k">GROUP</span> <span class="k">BY</span> id_cliente
+<span class="k">HAVING</span> <span class="f">COUNT</span>(*) &gt;= <span class="n">1</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_cliente</th><th>entregados</th></tr></thead><tbody><tr><td class="r">1</td><td class="r">2</td></tr><tr><td class="r">2</td><td class="r">1</td></tr><tr><td class="r">5</td><td class="r">1</td></tr></tbody></table></div></div>
+<h3>Concatenar valores de un grupo</h3>
+<p>Para obtener una lista de productos por categoría en una sola celda, cada motor usa una función distinta:</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> id_categoria,
+       <span class="f">STRING_AGG</span>(nombre, <span class="s">&#x27;, &#x27;</span> <span class="k">ORDER</span> <span class="k">BY</span> nombre) <span class="k">AS</span> productos
+<span class="k">FROM</span> producto
+<span class="k">GROUP</span> <span class="k">BY</span> id_categoria;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> id_categoria,
+       <span class="f">GROUP_CONCAT</span>(nombre <span class="k">ORDER</span> <span class="k">BY</span> nombre <span class="k">SEPARATOR</span> <span class="s">&#x27;, &#x27;</span>) <span class="k">AS</span> productos
+<span class="k">FROM</span> producto
+<span class="k">GROUP</span> <span class="k">BY</span> id_categoria;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_categoria</th><th>productos</th></tr></thead><tbody><tr><td class="r">1</td><td>Portátil Aero 14, Portátil Nova 15</td></tr><tr><td class="r">2</td><td>Mouse inalámbrico, Teclado mecánico, Monitor 24 pulgadas, Webcam HD</td></tr><tr><td class="r">3</td><td>Audífonos Studio, Parlante Bluetooth</td></tr><tr><td class="r">4</td><td>Cable HDMI 2 m, Hub USB-C</td></tr></tbody></table></div></div></section><section class="chapter" id="c7"><header><h2><span class="num">7</span>Combinar tablas con JOIN</h2><p class="lead">INNER, LEFT, RIGHT, FULL, CROSS y auto-JOIN.</p></header>
+<p>La información está repartida en tablas relacionadas. Un <b>JOIN</b> las combina usando la clave foránea: se emparejan las filas donde <code>pedido.id_cliente = cliente.id_cliente</code>.</p>
+<h3>INNER JOIN: solo las filas que coinciden</h3>
+<pre class="code "><code><span class="k">SELECT</span> p.id_pedido, c.nombre <span class="k">AS</span> cliente, p.fecha, p.estado
+<span class="k">FROM</span> pedido <span class="k">AS</span> p
+<span class="k">INNER</span> <span class="k">JOIN</span> cliente <span class="k">AS</span> c
+        <span class="k">ON</span> c.id_cliente = p.id_cliente
+<span class="k">ORDER</span> <span class="k">BY</span> p.id_pedido;</code></pre><div class="rs"><div class="rs-h">Resultado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>cliente</th><th>fecha</th><th>estado</th></tr></thead><tbody><tr><td class="r">5001</td><td>Marta Ruiz</td><td>2025-03-14</td><td>entregado</td></tr><tr><td class="r">5002</td><td>Luis Gómez</td><td>2025-03-15</td><td>entregado</td></tr><tr><td class="r">5003</td><td>Marta Ruiz</td><td>2025-04-02</td><td>entregado</td></tr><tr><td class="r">5004</td><td>Ana Torres</td><td>2025-04-10</td><td>enviado</td></tr><tr><td class="r">5005</td><td>Carlos Pérez</td><td>2025-05-21</td><td>pagado</td></tr><tr><td class="r">5006</td><td>Ana Torres</td><td>2025-06-30</td><td>pendiente</td></tr><tr><td class="r">5007</td><td>Sofía Díaz</td><td>2025-07-08</td><td>entregado</td></tr><tr><td class="r">5008</td><td>Marta Ruiz</td><td>2025-08-19</td><td>cancelado</td></tr><tr><td class="r">5009</td><td>Luis Gómez</td><td>2025-09-12</td><td>pagado</td></tr><tr><td class="r">5010</td><td>Sofía Díaz</td><td>2025-10-01</td><td>enviado</td></tr></tbody></table></div></div><div class="box key"><span class="t">Alias de tabla</span><p><code>pedido AS p</code> da un nombre corto a la tabla. Cuando dos tablas tienen una columna con el mismo nombre (aquí <code>id_cliente</code>) debes calificarla: <code>p.id_cliente</code>. Un <code>INNER JOIN</code> puede escribirse solo <code>JOIN</code>.</p></div>
+<p>Diego Rojas y Valentina Mora no aparecen: no tienen pedidos, así que no hay con quién emparejarlos.</p>
+<h3>LEFT JOIN: conservar todo lo de la izquierda</h3>
+<p>Devuelve todas las filas de la tabla izquierda; si no hay pareja, las columnas de la derecha salen en <code>NULL</code>.</p>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre, p.id_pedido
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">LEFT</span> <span class="k">JOIN</span> pedido <span class="k">AS</span> p
+       <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">ORDER</span> <span class="k">BY</span> c.id_cliente, p.id_pedido;</code></pre><div class="rs"><div class="rs-h">Resultado · 12 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_pedido</th></tr></thead><tbody><tr><td>Marta Ruiz</td><td class="r">5001</td></tr><tr><td>Marta Ruiz</td><td class="r">5003</td></tr><tr><td>Marta Ruiz</td><td class="r">5008</td></tr><tr><td>Luis Gómez</td><td class="r">5002</td></tr><tr><td>Luis Gómez</td><td class="r">5009</td></tr><tr><td>Ana Torres</td><td class="r">5004</td></tr><tr><td>Ana Torres</td><td class="r">5006</td></tr><tr><td>Carlos Pérez</td><td class="r">5005</td></tr><tr><td>Sofía Díaz</td><td class="r">5007</td></tr><tr><td>Sofía Díaz</td><td class="r">5010</td></tr><tr><td>Diego Rojas</td><td><span class="nl">NULL</span></td></tr><tr><td>Valentina Mora</td><td><span class="nl">NULL</span></td></tr></tbody></table></div></div>
+<p>Truco muy usado: <b>encontrar lo que no tiene relación</b>. Clientes que nunca han comprado:</p>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">LEFT</span> <span class="k">JOIN</span> pedido <span class="k">AS</span> p
+       <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">WHERE</span> p.id_pedido <span class="k">IS</span> <span class="k">NULL</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th></tr></thead><tbody><tr><td>Diego Rojas</td></tr><tr><td>Valentina Mora</td></tr></tbody></table></div></div>
+<h3>RIGHT y FULL JOIN</h3>
+<p><code>RIGHT JOIN</code> es el espejo del <code>LEFT</code>; casi siempre se prefiere reescribir con <code>LEFT</code> cambiando el orden de las tablas. <code>FULL JOIN</code> conserva las filas sin pareja de ambos lados.</p>
+<div class="box warn"><span class="t">MySQL no tiene FULL JOIN</span><p>PostgreSQL soporta <code>FULL OUTER JOIN</code>. En MySQL se emula uniendo un <code>LEFT JOIN</code> y un <code>RIGHT JOIN</code> con <code>UNION</code>.</p></div><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> c.nombre, p.id_pedido
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">FULL</span> <span class="k">JOIN</span> pedido <span class="k">AS</span> p
+       <span class="k">ON</span> p.id_cliente = c.id_cliente;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> c.nombre, p.id_pedido
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">LEFT</span> <span class="k">JOIN</span> pedido <span class="k">AS</span> p <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">UNION</span>
+<span class="k">SELECT</span> c.nombre, p.id_pedido
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">RIGHT</span> <span class="k">JOIN</span> pedido <span class="k">AS</span> p <span class="k">ON</span> p.id_cliente = c.id_cliente;</code></pre></div></div>
+<h3>Unir más de dos tablas</h3>
+<p>Se encadenan los <code>JOIN</code>. ¿Qué compró cada cliente en el pedido 5001?</p>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre <span class="k">AS</span> cliente, pr.nombre <span class="k">AS</span> producto,
+       d.cantidad, d.precio_unitario
+<span class="k">FROM</span> pedido <span class="k">AS</span> p
+<span class="k">JOIN</span> cliente <span class="k">AS</span> c         <span class="k">ON</span> c.id_cliente  = p.id_cliente
+<span class="k">JOIN</span> detalle_pedido <span class="k">AS</span> d  <span class="k">ON</span> d.id_pedido   = p.id_pedido
+<span class="k">JOIN</span> producto <span class="k">AS</span> pr       <span class="k">ON</span> pr.id_producto = d.id_producto
+<span class="k">WHERE</span> p.id_pedido = <span class="n">5001</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>cliente</th><th>producto</th><th>cantidad</th><th>precio_unitario</th></tr></thead><tbody><tr><td>Marta Ruiz</td><td>Mouse inalámbrico</td><td class="r">2</td><td class="r">65000.00</td></tr><tr><td>Marta Ruiz</td><td>Teclado mecánico</td><td class="r">1</td><td class="r">280000.00</td></tr></tbody></table></div></div>
+<p>Combinar <code>JOIN</code> con <code>GROUP BY</code> es la base de los reportes. Total vendido por cliente (sin contar pedidos cancelados):</p>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre,
+       <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">JOIN</span> pedido <span class="k">AS</span> p         <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">JOIN</span> detalle_pedido <span class="k">AS</span> d <span class="k">ON</span> d.id_pedido  = p.id_pedido
+<span class="k">WHERE</span> p.estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+<span class="k">GROUP</span> <span class="k">BY</span> c.id_cliente, c.nombre
+<span class="k">ORDER</span> <span class="k">BY</span> total <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 5 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>total</th></tr></thead><tbody><tr><td>Marta Ruiz</td><td class="r">3610000.00</td></tr><tr><td>Carlos Pérez</td><td class="r">2715000.00</td></tr><tr><td>Sofía Díaz</td><td class="r">2025000.00</td></tr><tr><td>Luis Gómez</td><td class="r">1255000.00</td></tr><tr><td>Ana Torres</td><td class="r">665000.00</td></tr></tbody></table></div></div><div class="box tip"><span class="t">Agrupa por la clave</span><p>Se agrupa por <code>c.id_cliente</code> y también por <code>c.nombre</code>: dos clientes distintos pueden llamarse igual, y la clave los separa.</p></div>
+<h3>USING y NATURAL</h3>
+<p>Si la columna de unión se llama igual en ambas tablas, <code>USING (id_cliente)</code> acorta la sintaxis y funciona en ambos motores. Evita <code>NATURAL JOIN</code>: une por <i>todas</i> las columnas con el mismo nombre y es fácil que cambie de significado al modificar tablas.</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, id_pedido
+<span class="k">FROM</span> cliente
+<span class="k">JOIN</span> pedido <span class="k">USING</span> (id_cliente)
+<span class="k">LIMIT</span> <span class="n">3</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_pedido</th></tr></thead><tbody><tr><td>Marta Ruiz</td><td class="r">5001</td></tr><tr><td>Luis Gómez</td><td class="r">5002</td></tr><tr><td>Marta Ruiz</td><td class="r">5003</td></tr></tbody></table></div></div>
+<h3>CROSS JOIN: todas las combinaciones</h3>
+<p>Empareja cada fila de una tabla con cada fila de la otra (producto cartesiano). Rara vez se necesita, pero sirve para generar combinaciones.</p>
+<pre class="code "><code><span class="k">SELECT</span> c.nombre <span class="k">AS</span> categoria, e.estado
+<span class="k">FROM</span> categoria <span class="k">AS</span> c
+<span class="k">CROSS</span> <span class="k">JOIN</span> (<span class="k">SELECT</span> <span class="k">DISTINCT</span> estado <span class="k">FROM</span> pedido) <span class="k">AS</span> e
+<span class="k">ORDER</span> <span class="k">BY</span> c.nombre, e.estado
+<span class="k">LIMIT</span> <span class="n">4</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>categoria</th><th>estado</th></tr></thead><tbody><tr><td>Accesorios</td><td>cancelado</td></tr><tr><td>Accesorios</td><td>entregado</td></tr><tr><td>Accesorios</td><td>enviado</td></tr><tr><td>Accesorios</td><td>pagado</td></tr></tbody></table></div></div>
+<h3>Auto-JOIN: una tabla consigo misma</h3>
+<p><code>empleado.id_jefe</code> apunta a otro empleado. Usamos dos alias de la misma tabla:</p>
+<pre class="code "><code><span class="k">SELECT</span> e.nombre <span class="k">AS</span> empleado, j.nombre <span class="k">AS</span> jefe
+<span class="k">FROM</span> empleado <span class="k">AS</span> e
+<span class="k">LEFT</span> <span class="k">JOIN</span> empleado <span class="k">AS</span> j
+       <span class="k">ON</span> j.id_empleado = e.id_jefe
+<span class="k">ORDER</span> <span class="k">BY</span> e.id_empleado;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>empleado</th><th>jefe</th></tr></thead><tbody><tr><td>Patricia Londoño</td><td><span class="nl">NULL</span></td></tr><tr><td>Andrés Cárdenas</td><td>Patricia Londoño</td></tr><tr><td>Laura Mejía</td><td>Patricia Londoño</td></tr><tr><td>Camilo Herrera</td><td>Andrés Cárdenas</td></tr><tr><td>Juliana Ortiz</td><td>Andrés Cárdenas</td></tr><tr><td>Felipe Vargas</td><td>Laura Mejía</td></tr></tbody></table></div></div><div class="box warn"><span class="t">Error clásico: JOIN sin condición</span><p>Si olvidas el <code>ON</code> (o lo escribes mal), obtienes un producto cartesiano: 10 pedidos × 7 clientes = 70 filas basura. Si un resultado tiene muchas más filas de las esperadas, revisa primero las condiciones de unión.</p></div></section><section class="chapter" id="c8"><header><h2><span class="num">8</span>Subconsultas, CTE y conjuntos</h2><p class="lead">Consultas dentro de consultas, WITH, recursividad y UNION.</p></header>
+<h3>Subconsultas</h3>
+<p>Una <b>subconsulta</b> es un <code>SELECT</code> dentro de otro, entre paréntesis. Puede devolver un valor, una lista o una tabla.</p>
+<p><b>1. Un solo valor (subconsulta escalar).</b> Productos más caros que el promedio:</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> precio &gt; (<span class="k">SELECT</span> <span class="f">AVG</span>(precio) <span class="k">FROM</span> producto)
+<span class="k">ORDER</span> <span class="k">BY</span> precio <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td></tr></tbody></table></div></div>
+<p><b>2. Una lista, con IN.</b> Clientes que han comprado algún producto de la categoría 3 (Audio):</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre
+<span class="k">FROM</span> cliente
+<span class="k">WHERE</span> id_cliente <span class="k">IN</span> (
+  <span class="k">SELECT</span> p.id_cliente
+  <span class="k">FROM</span> pedido p
+  <span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+  <span class="k">JOIN</span> producto pr <span class="k">ON</span> pr.id_producto = d.id_producto
+  <span class="k">WHERE</span> pr.id_categoria = <span class="n">3</span>
+);</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th></tr></thead><tbody><tr><td>Marta Ruiz</td></tr><tr><td>Luis Gómez</td></tr><tr><td>Ana Torres</td></tr></tbody></table></div></div>
+<p><b>3. Una tabla, en FROM.</b> Las subconsultas en <code>FROM</code> exigen alias. Promedio de los totales por pedido:</p>
+<pre class="code "><code><span class="k">SELECT</span> <span class="f">ROUND</span>(<span class="f">AVG</span>(total), <span class="n">0</span>) <span class="k">AS</span> ticket_promedio
+<span class="k">FROM</span> (
+  <span class="k">SELECT</span> id_pedido, <span class="f">SUM</span>(cantidad * precio_unitario) <span class="k">AS</span> total
+  <span class="k">FROM</span> detalle_pedido
+  <span class="k">GROUP</span> <span class="k">BY</span> id_pedido
+) <span class="k">AS</span> t;</code></pre><div class="rs"><div class="rs-h">Resultado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>ticket_promedio</th></tr></thead><tbody><tr><td class="r">1045000.00</td></tr></tbody></table></div></div>
+<h3>EXISTS: ¿hay al menos una fila?</h3>
+<p><code>EXISTS</code> es verdadero si la subconsulta devuelve alguna fila. Es la forma natural de decir «que tenga…» o, con <code>NOT</code>, «que no tenga…».</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre
+<span class="k">FROM</span> cliente c
+<span class="k">WHERE</span> <span class="k">NOT</span> <span class="k">EXISTS</span> (
+  <span class="k">SELECT</span> <span class="n">1</span> <span class="k">FROM</span> pedido p
+  <span class="k">WHERE</span> p.id_cliente = c.id_cliente
+);</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th></tr></thead><tbody><tr><td>Diego Rojas</td></tr><tr><td>Valentina Mora</td></tr></tbody></table></div></div><div class="box warn"><span class="t">NOT IN y los nulos</span><p>Si la lista de <code>NOT IN (…)</code> contiene un solo <code>NULL</code>, el resultado es vacío para todas las filas. Prefiere <code>NOT EXISTS</code> o un <code>LEFT JOIN … IS NULL</code>.</p></div>
+<p>La subconsulta anterior es <b>correlacionada</b>: usa <code>c.id_cliente</code> de la consulta externa, así que se evalúa para cada cliente.</p>
+<h3>CTE: consultas con nombre (WITH)</h3>
+<p>Una <b>CTE</b> (<i>Common Table Expression</i>) da nombre a una subconsulta y la deja al inicio, lo que hace las consultas largas más legibles. Requiere PostgreSQL 8.4+ o MySQL 8.0+.</p>
+<pre class="code "><code><span class="k">WITH</span> total_pedido <span class="k">AS</span> (
+  <span class="k">SELECT</span> id_pedido, <span class="f">SUM</span>(cantidad * precio_unitario) <span class="k">AS</span> total
+  <span class="k">FROM</span> detalle_pedido
+  <span class="k">GROUP</span> <span class="k">BY</span> id_pedido
+)
+<span class="k">SELECT</span> p.id_pedido, p.estado, t.total
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> total_pedido t <span class="k">ON</span> t.id_pedido = p.id_pedido
+<span class="k">WHERE</span> t.total &gt; <span class="n">500000</span>
+<span class="k">ORDER</span> <span class="k">BY</span> t.total <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>estado</th><th>total</th></tr></thead><tbody><tr><td class="r">5003</td><td>entregado</td><td class="r">3200000.00</td></tr><tr><td class="r">5005</td><td>pagado</td><td class="r">2715000.00</td></tr><tr><td class="r">5007</td><td>entregado</td><td class="r">1710000.00</td></tr><tr><td class="r">5002</td><td>entregado</td><td class="r">755000.00</td></tr></tbody></table></div></div>
+<p>Se pueden encadenar varias CTE separadas por coma, y una puede usar las anteriores.</p>
+<h3>CTE recursiva: recorrer jerarquías</h3>
+<p>La tabla <code>empleado</code> es un árbol. Una CTE recursiva parte de un caso base y se repite uniendo con sus propios resultados. En PostgreSQL y MySQL se escribe <code>WITH RECURSIVE</code>.</p>
+<pre class="code "><code><span class="k">WITH</span> <span class="k">RECURSIVE</span> organigrama <span class="k">AS</span> (
+  <span class="k">SELECT</span> id_empleado, nombre, id_jefe, <span class="n">1</span> <span class="k">AS</span> nivel
+  <span class="k">FROM</span> empleado
+  <span class="k">WHERE</span> id_jefe <span class="k">IS</span> <span class="k">NULL</span>
+  <span class="k">UNION</span> <span class="k">ALL</span>
+  <span class="k">SELECT</span> e.id_empleado, e.nombre, e.id_jefe, o.nivel + <span class="n">1</span>
+  <span class="k">FROM</span> empleado e
+  <span class="k">JOIN</span> organigrama o <span class="k">ON</span> e.id_jefe = o.id_empleado
+)
+<span class="k">SELECT</span> nivel, nombre
+<span class="k">FROM</span> organigrama
+<span class="k">ORDER</span> <span class="k">BY</span> nivel, nombre;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>nivel</th><th>nombre</th></tr></thead><tbody><tr><td class="r">1</td><td>Patricia Londoño</td></tr><tr><td class="r">2</td><td>Andrés Cárdenas</td></tr><tr><td class="r">2</td><td>Laura Mejía</td></tr><tr><td class="r">3</td><td>Camilo Herrera</td></tr><tr><td class="r">3</td><td>Felipe Vargas</td></tr><tr><td class="r">3</td><td>Juliana Ortiz</td></tr></tbody></table></div></div>
+<h3>Operaciones de conjuntos</h3>
+<p>Combinan los resultados de dos consultas con las mismas columnas (misma cantidad y tipos compatibles).</p>
+<div class="tw"><table class="dt"><thead><tr><th>Operador</th><th>Resultado</th></tr></thead><tbody><tr><td><code>UNION</code></td><td>Filas de ambas, sin duplicados</td></tr><tr><td><code>UNION ALL</code></td><td>Filas de ambas, con duplicados (más rápido)</td></tr><tr><td><code>INTERSECT</code></td><td>Solo las filas que están en las dos</td></tr><tr><td><code>EXCEPT</code></td><td>Las de la primera que no están en la segunda</td></tr></tbody></table></div>
+<p>Ciudades de clientes que tienen pedidos <i>menos</i> las ciudades de clientes sin pedidos:</p>
+<pre class="code "><code><span class="k">SELECT</span> ciudad <span class="k">FROM</span> cliente
+<span class="k">EXCEPT</span>
+<span class="k">SELECT</span> ciudad <span class="k">FROM</span> cliente
+<span class="k">WHERE</span> id_cliente <span class="k">NOT</span> <span class="k">IN</span> (<span class="k">SELECT</span> id_cliente <span class="k">FROM</span> pedido);</code></pre><div class="rs"><div class="rs-h">Resultado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>ciudad</th></tr></thead><tbody><tr><td>Bogotá</td></tr><tr><td>Medellín</td></tr></tbody></table></div></div><div class="box warn"><span class="t">Versiones de MySQL</span><p><code>INTERSECT</code> y <code>EXCEPT</code> llegaron a MySQL en la versión 8.0.31. Antes se simulaban con <code>JOIN</code> o <code>NOT EXISTS</code>. En PostgreSQL <code>EXCEPT</code> existe desde siempre (en Oracle se llama <code>MINUS</code>).</p></div></section><section class="chapter" id="c9"><header><h2><span class="num">9</span>Funciones de ventana</h2><p class="lead">ROW_NUMBER, RANK, acumulados y LAG, sin perder el detalle de las filas.</p></header>
+<p>Una <b>función de ventana</b> calcula sobre un conjunto de filas relacionadas <i>sin colapsarlas</i>, a diferencia de <code>GROUP BY</code>. Cada fila conserva su detalle y además recibe un valor calculado. Se reconoce por la cláusula <code>OVER (…)</code>. Disponible en PostgreSQL 8.4+ y MySQL 8.0+.</p>
+<h3>Agregación como ventana</h3>
+<p>Cada producto junto con el promedio de su categoría y su diferencia:</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, id_categoria, precio,
+       <span class="f">ROUND</span>(<span class="f">AVG</span>(precio) <span class="k">OVER</span> (<span class="k">PARTITION</span> <span class="k">BY</span> id_categoria), <span class="n">0</span>) <span class="k">AS</span> prom_categoria
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> id_categoria, precio <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="n">6</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_categoria</th><th>precio</th><th>prom_categoria</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">1</td><td class="r">3200000.00</td><td class="r">2925000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">1</td><td class="r">2650000.00</td><td class="r">2925000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">2</td><td class="r">690000.00</td><td class="r">296250.00</td></tr><tr><td>Teclado mecánico</td><td class="r">2</td><td class="r">280000.00</td><td class="r">296250.00</td></tr><tr><td>Webcam HD</td><td class="r">2</td><td class="r">150000.00</td><td class="r">296250.00</td></tr><tr><td>Mouse inalámbrico</td><td class="r">2</td><td class="r">65000.00</td><td class="r">296250.00</td></tr></tbody></table></div></div>
+<p><code>PARTITION BY</code> parte las filas en grupos (como <code>GROUP BY</code> pero sin colapsar) y <code>ORDER BY</code> dentro de <code>OVER</code> define el orden dentro de cada grupo.</p>
+<h3>Rankings</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Función</th><th>Comportamiento con empates</th></tr></thead><tbody><tr><td><code>ROW_NUMBER()</code></td><td>1, 2, 3, 4: numera sin repetir</td></tr><tr><td><code>RANK()</code></td><td>1, 2, 2, 4: empatados comparten posición y se salta</td></tr><tr><td><code>DENSE_RANK()</code></td><td>1, 2, 2, 3: empatados comparten y no se salta</td></tr></tbody></table></div><pre class="code "><code><span class="k">SELECT</span> nombre, id_categoria, precio,
+       <span class="f">ROW_NUMBER</span>() <span class="k">OVER</span> (<span class="k">PARTITION</span> <span class="k">BY</span> id_categoria <span class="k">ORDER</span> <span class="k">BY</span> precio <span class="k">DESC</span>) <span class="k">AS</span> puesto
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> id_categoria, puesto;</code></pre><div class="rs"><div class="rs-h">Resultado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_categoria</th><th>precio</th><th>puesto</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">1</td><td class="r">3200000.00</td><td class="r">1</td></tr><tr><td>Portátil Nova 15</td><td class="r">1</td><td class="r">2650000.00</td><td class="r">2</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">2</td><td class="r">690000.00</td><td class="r">1</td></tr><tr><td>Teclado mecánico</td><td class="r">2</td><td class="r">280000.00</td><td class="r">2</td></tr><tr><td>Webcam HD</td><td class="r">2</td><td class="r">150000.00</td><td class="r">3</td></tr><tr><td>Mouse inalámbrico</td><td class="r">2</td><td class="r">65000.00</td><td class="r">4</td></tr><tr><td>Audífonos Studio</td><td class="r">3</td><td class="r">350000.00</td><td class="r">1</td></tr><tr><td>Parlante Bluetooth</td><td class="r">3</td><td class="r">180000.00</td><td class="r">2</td></tr><tr><td>Hub USB-C</td><td class="r">4</td><td class="r">120000.00</td><td class="r">1</td></tr><tr><td>Cable HDMI 2 m</td><td class="r">4</td><td class="r">25000.00</td><td class="r">2</td></tr></tbody></table></div></div>
+<p>Para quedarte con el <b>mejor de cada grupo</b>, envuelve la consulta y filtra el puesto (no se puede usar la ventana directamente en <code>WHERE</code>):</p>
+<pre class="code "><code><span class="k">SELECT</span> nombre, id_categoria, precio
+<span class="k">FROM</span> (
+  <span class="k">SELECT</span> nombre, id_categoria, precio,
+         <span class="f">ROW_NUMBER</span>() <span class="k">OVER</span> (<span class="k">PARTITION</span> <span class="k">BY</span> id_categoria <span class="k">ORDER</span> <span class="k">BY</span> precio <span class="k">DESC</span>) <span class="k">AS</span> puesto
+  <span class="k">FROM</span> producto
+) <span class="k">AS</span> t
+<span class="k">WHERE</span> puesto = <span class="n">1</span>
+<span class="k">ORDER</span> <span class="k">BY</span> id_categoria;</code></pre><div class="rs"><div class="rs-h">Resultado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>id_categoria</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">1</td><td class="r">3200000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">2</td><td class="r">690000.00</td></tr><tr><td>Audífonos Studio</td><td class="r">3</td><td class="r">350000.00</td></tr><tr><td>Hub USB-C</td><td class="r">4</td><td class="r">120000.00</td></tr></tbody></table></div></div>
+<h3>Acumulados</h3>
+<p>Con <code>SUM(...) OVER (ORDER BY ...)</code> se obtiene un total acumulado. Ventas por pedido y acumuladas en el tiempo:</p>
+<pre class="code "><code><span class="k">WITH</span> t <span class="k">AS</span> (
+  <span class="k">SELECT</span> p.id_pedido, p.fecha, <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+  <span class="k">FROM</span> pedido p <span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+  <span class="k">GROUP</span> <span class="k">BY</span> p.id_pedido, p.fecha
+)
+<span class="k">SELECT</span> id_pedido, fecha, total,
+       <span class="f">SUM</span>(total) <span class="k">OVER</span> (<span class="k">ORDER</span> <span class="k">BY</span> fecha, id_pedido) <span class="k">AS</span> acumulado
+<span class="k">FROM</span> t
+<span class="k">ORDER</span> <span class="k">BY</span> fecha, id_pedido;</code></pre><div class="rs"><div class="rs-h">Resultado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>fecha</th><th>total</th><th>acumulado</th></tr></thead><tbody><tr><td class="r">5001</td><td>2025-03-14</td><td class="r">410000.00</td><td class="r">410000.00</td></tr><tr><td class="r">5002</td><td>2025-03-15</td><td class="r">755000.00</td><td class="r">1165000.00</td></tr><tr><td class="r">5003</td><td>2025-04-02</td><td class="r">3200000.00</td><td class="r">4365000.00</td></tr><tr><td class="r">5004</td><td>2025-04-10</td><td class="r">425000.00</td><td class="r">4790000.00</td></tr><tr><td class="r">5005</td><td>2025-05-21</td><td class="r">2715000.00</td><td class="r">7505000.00</td></tr><tr><td class="r">5006</td><td>2025-06-30</td><td class="r">240000.00</td><td class="r">7745000.00</td></tr><tr><td class="r">5007</td><td>2025-07-08</td><td class="r">1710000.00</td><td class="r">9455000.00</td></tr><tr><td class="r">5008</td><td>2025-08-19</td><td class="r">180000.00</td><td class="r">9635000.00</td></tr><tr><td class="r">5009</td><td>2025-09-12</td><td class="r">500000.00</td><td class="r">10135000.00</td></tr><tr><td class="r">5010</td><td>2025-10-01</td><td class="r">315000.00</td><td class="r">10450000.00</td></tr></tbody></table></div></div>
+<h3>LAG y LEAD: mirar la fila anterior o siguiente</h3>
+<p>Comparar cada pedido con el anterior del mismo cliente:</p>
+<pre class="code "><code><span class="k">SELECT</span> id_cliente, id_pedido, fecha,
+       <span class="f">LAG</span>(fecha) <span class="k">OVER</span> (<span class="k">PARTITION</span> <span class="k">BY</span> id_cliente <span class="k">ORDER</span> <span class="k">BY</span> fecha) <span class="k">AS</span> pedido_anterior
+<span class="k">FROM</span> pedido
+<span class="k">ORDER</span> <span class="k">BY</span> id_cliente, fecha
+<span class="k">LIMIT</span> <span class="n">6</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_cliente</th><th>id_pedido</th><th>fecha</th><th>pedido_anterior</th></tr></thead><tbody><tr><td class="r">1</td><td class="r">5001</td><td>2025-03-14</td><td><span class="nl">NULL</span></td></tr><tr><td class="r">1</td><td class="r">5003</td><td>2025-04-02</td><td>2025-03-14</td></tr><tr><td class="r">1</td><td class="r">5008</td><td>2025-08-19</td><td>2025-04-02</td></tr><tr><td class="r">2</td><td class="r">5002</td><td>2025-03-15</td><td><span class="nl">NULL</span></td></tr><tr><td class="r">2</td><td class="r">5009</td><td>2025-09-12</td><td>2025-03-15</td></tr><tr><td class="r">3</td><td class="r">5004</td><td>2025-04-10</td><td><span class="nl">NULL</span></td></tr></tbody></table></div></div><div class="box key"><span class="t">Resumen</span><p><b>GROUP BY</b> reduce filas: una por grupo. <b>OVER</b> mantiene todas las filas y añade una columna calculada. Úsala para rankings, acumulados, comparaciones con la fila previa y porcentajes del total.</p></div></section><section class="chapter" id="c10"><header><h2><span class="num">10</span>Modificar datos: INSERT, UPDATE, DELETE</h2><p class="lead">Agregar, cambiar y borrar filas con seguridad.</p></header>
+<p>Hasta aquí solo leímos datos. Las sentencias DML (<i>Data Manipulation Language</i>) los modifican. Estos ejemplos no devuelven una tabla: el motor responde con el número de filas afectadas (<code>INSERT 0 1</code>, <code>Query OK, 1 row affected</code>).</p>
+<h3>INSERT: agregar filas</h3>
+<pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Julián Castro&#x27;</span>, <span class="s">&#x27;julian@correo.com&#x27;</span>, <span class="s">&#x27;Pereira&#x27;</span>, <span class="s">&#x27;2025-10-05&#x27;</span>);</code></pre>
+<p>Varias filas en una sola sentencia:</p>
+<pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> categoria (nombre)
+<span class="k">VALUES</span> (<span class="s">&#x27;Gamers&#x27;</span>), (<span class="s">&#x27;Redes&#x27;</span>), (<span class="s">&#x27;Impresión&#x27;</span>);</code></pre>
+<p>Copiar datos de una consulta con <code>INSERT … SELECT</code>:</p>
+<pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente_vip (id_cliente, nombre)
+<span class="k">SELECT</span> id_cliente, nombre
+<span class="k">FROM</span> cliente
+<span class="k">WHERE</span> ciudad = <span class="s">&#x27;Bogotá&#x27;</span>;</code></pre><div class="box tip"><span class="t">Siempre nombra las columnas</span><p>Escribe <code>INSERT INTO tabla (col1, col2) VALUES …</code> y no dependas del orden de las columnas de la tabla: si alguien agrega una columna, tu código sigue funcionando. Las columnas con <code>DEFAULT</code> o autonumeradas se omiten.</p></div>
+<h3>Obtener el identificador generado</h3>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Julián Castro&#x27;</span>, <span class="s">&#x27;julian@correo.com&#x27;</span>, <span class="s">&#x27;Pereira&#x27;</span>, CURRENT_DATE)
+<span class="k">RETURNING</span> id_cliente;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Julián Castro&#x27;</span>, <span class="s">&#x27;julian@correo.com&#x27;</span>, <span class="s">&#x27;Pereira&#x27;</span>, <span class="f">CURDATE</span>());
+
+<span class="k">SELECT</span> <span class="f">LAST_INSERT_ID</span>();</code></pre></div></div>
+<p><code>RETURNING</code> (solo PostgreSQL, también sirve en <code>UPDATE</code> y <code>DELETE</code>) devuelve columnas de las filas afectadas. En MySQL, <code>LAST_INSERT_ID()</code> entrega el último valor autonumérico de <i>tu conexión</i>.</p>
+<h3>UPDATE: modificar filas</h3>
+<pre class="code "><code><span class="k">UPDATE</span> producto
+<span class="k">SET</span> precio = precio * <span class="n">1.05</span>,
+    stock  = stock + <span class="n">10</span>
+<span class="k">WHERE</span> id_categoria = <span class="n">4</span>;</code></pre><div class="box warn"><span class="t">Nunca olvides el WHERE</span><p><code>UPDATE producto SET precio = 0;</code> cambia <b>todas</b> las filas. Antes de ejecutar un <code>UPDATE</code> o <code>DELETE</code>, prueba la misma condición con un <code>SELECT</code> y comprueba cuántas filas devuelve. Mejor aún: hazlo dentro de una transacción (capítulo 12).</p></div>
+<p>Actualizar usando datos de otra tabla: marcar como «entregado» los pedidos de clientes de Bogotá.</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">UPDATE</span> pedido <span class="k">AS</span> p
+<span class="k">SET</span> estado = <span class="s">&#x27;entregado&#x27;</span>
+<span class="k">FROM</span> cliente <span class="k">AS</span> c
+<span class="k">WHERE</span> c.id_cliente = p.id_cliente
+  <span class="k">AND</span> c.ciudad = <span class="s">&#x27;Bogotá&#x27;</span>
+  <span class="k">AND</span> p.estado = <span class="s">&#x27;enviado&#x27;</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">UPDATE</span> pedido <span class="k">AS</span> p
+<span class="k">JOIN</span> cliente <span class="k">AS</span> c <span class="k">ON</span> c.id_cliente = p.id_cliente
+<span class="k">SET</span> p.estado = <span class="s">&#x27;entregado&#x27;</span>
+<span class="k">WHERE</span> c.ciudad = <span class="s">&#x27;Bogotá&#x27;</span>
+  <span class="k">AND</span> p.estado = <span class="s">&#x27;enviado&#x27;</span>;</code></pre></div></div>
+<h3>DELETE y TRUNCATE</h3>
+<pre class="code "><code><span class="k">DELETE</span> <span class="k">FROM</span> pedido
+<span class="k">WHERE</span> estado = <span class="s">&#x27;cancelado&#x27;</span>;</code></pre>
+<p>Si hay filas de otras tablas que dependen de las que borras (por ejemplo <code>detalle_pedido</code> apunta a <code>pedido</code>), el motor rechaza el borrado, a menos que la clave foránea tenga <code>ON DELETE CASCADE</code>.</p>
+<div class="tw"><table class="dt"><thead><tr><th></th><th>DELETE</th><th>TRUNCATE</th></tr></thead><tbody><tr><td>Filtra con WHERE</td><td>Sí</td><td>No, borra todo</td></tr><tr><td>Velocidad</td><td>Fila por fila</td><td>Casi instantáneo</td></tr><tr><td>Reinicia autonumérico</td><td>No</td><td>Sí (PostgreSQL requiere <code>RESTART IDENTITY</code>)</td></tr><tr><td>Se puede revertir</td><td>Sí, en transacción</td><td>PostgreSQL sí; MySQL no (hace commit implícito)</td></tr></tbody></table></div><pre class="code "><code><span class="k">TRUNCATE</span> <span class="k">TABLE</span> detalle_temporal;</code></pre>
+<h3>UPSERT: insertar o actualizar</h3>
+<p>Muy útil cuando no sabes si la fila ya existe. Si el correo ya está registrado, actualiza la ciudad; si no, inserta:</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Marta Ruiz&#x27;</span>, <span class="s">&#x27;marta@correo.com&#x27;</span>, <span class="s">&#x27;Neiva&#x27;</span>, CURRENT_DATE)
+<span class="k">ON</span> <span class="k">CONFLICT</span> (correo)
+<span class="k">DO</span> <span class="k">UPDATE</span> <span class="k">SET</span> ciudad = EXCLUDED.ciudad;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Marta Ruiz&#x27;</span>, <span class="s">&#x27;marta@correo.com&#x27;</span>, <span class="s">&#x27;Neiva&#x27;</span>, <span class="f">CURDATE</span>())
+<span class="k">ON</span> <span class="k">DUPLICATE</span> <span class="k">KEY</span> <span class="k">UPDATE</span> ciudad = <span class="k">VALUES</span>(ciudad);</code></pre></div></div>
+<p>Ambos requieren una restricción <code>UNIQUE</code> o clave primaria sobre la columna que detecta el duplicado.</p>
+</section><section class="chapter" id="c11"><header><h2><span class="num">11</span>Definir la estructura: DDL</h2><p class="lead">CREATE, ALTER, DROP, restricciones, vistas y tipos de datos.</p></header>
+<p>El DDL (<i>Data Definition Language</i>) define la estructura. En el capítulo 2 ya creaste las tablas de ejemplo; aquí entendemos cada pieza.</p>
+<h3>CREATE TABLE y restricciones</h3>
+<p>Las <b>restricciones</b> (<i>constraints</i>) hacen que la base rechace datos inválidos, sin depender de que la aplicación lo valide.</p>
+<div class="tw"><table class="dt"><thead><tr><th>Restricción</th><th>Para qué sirve</th></tr></thead><tbody><tr><td><code>PRIMARY KEY</code></td><td>Identifica de forma única cada fila; no admite nulos</td></tr><tr><td><code>FOREIGN KEY … REFERENCES</code></td><td>El valor debe existir en la tabla referenciada</td></tr><tr><td><code>NOT NULL</code></td><td>La columna es obligatoria</td></tr><tr><td><code>UNIQUE</code></td><td>No se repiten valores (sí puede haber un nulo)</td></tr><tr><td><code>CHECK (condición)</code></td><td>El valor cumple una regla (MySQL lo aplica desde 8.0.16)</td></tr><tr><td><code>DEFAULT valor</code></td><td>Valor por omisión si no se indica</td></tr></tbody></table></div><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> resena (
+  id_resena    <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_producto  <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> producto (id_producto),
+  id_cliente   <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  puntaje      <span class="t">SMALLINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (puntaje <span class="k">BETWEEN</span> <span class="n">1</span> <span class="k">AND</span> <span class="n">5</span>),
+  comentario   <span class="t">TEXT</span>,
+  creada_en    <span class="t">TIMESTAMP</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="f">NOW</span>(),
+  <span class="k">CONSTRAINT</span> fk_resena_cliente
+    <span class="k">FOREIGN</span> <span class="k">KEY</span> (id_cliente) <span class="k">REFERENCES</span> cliente (id_cliente)
+    <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">CASCADE</span>,
+  <span class="k">CONSTRAINT</span> uq_una_por_cliente <span class="k">UNIQUE</span> (id_producto, id_cliente)
+);</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> resena (
+  id_resena    <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_producto  <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_cliente   <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  puntaje      <span class="t">TINYINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (puntaje <span class="k">BETWEEN</span> <span class="n">1</span> <span class="k">AND</span> <span class="n">5</span>),
+  comentario   <span class="t">TEXT</span>,
+  creada_en    <span class="t">DATETIME</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> CURRENT_TIMESTAMP,
+  <span class="k">CONSTRAINT</span> fk_resena_producto
+    <span class="k">FOREIGN</span> <span class="k">KEY</span> (id_producto) <span class="k">REFERENCES</span> producto (id_producto),
+  <span class="k">CONSTRAINT</span> fk_resena_cliente
+    <span class="k">FOREIGN</span> <span class="k">KEY</span> (id_cliente) <span class="k">REFERENCES</span> cliente (id_cliente)
+    <span class="k">ON</span> <span class="k">DELETE</span> <span class="k">CASCADE</span>,
+  <span class="k">CONSTRAINT</span> uq_una_por_cliente <span class="k">UNIQUE</span> (id_producto, id_cliente)
+) <span class="k">ENGINE</span>=InnoDB;</code></pre></div></div>
+<h3>Acciones de la clave foránea</h3>
+<p>Indican qué pasa con las filas hijas cuando se borra o cambia la fila padre:</p>
+<div class="tw"><table class="dt"><thead><tr><th>Acción</th><th>Efecto</th></tr></thead><tbody><tr><td><code>RESTRICT</code> / <code>NO ACTION</code></td><td>Rechaza el borrado (comportamiento por defecto)</td></tr><tr><td><code>CASCADE</code></td><td>Borra o actualiza también las filas hijas</td></tr><tr><td><code>SET NULL</code></td><td>Deja la columna hija en nulo (debe admitir nulos)</td></tr><tr><td><code>SET DEFAULT</code></td><td>La deja en su valor por omisión (MySQL/InnoDB no lo soporta)</td></tr></tbody></table></div>
+<h3>ALTER TABLE: cambiar una tabla existente</h3>
+<pre class="code "><code><span class="c">-- Agregar una columna</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> cliente <span class="k">ADD</span> <span class="k">COLUMN</span> telefono <span class="t">VARCHAR</span>(<span class="n">20</span>);
+
+<span class="c">-- Agregar una restricción</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> producto <span class="k">ADD</span> <span class="k">CONSTRAINT</span> ck_precio <span class="k">CHECK</span> (precio &gt;= <span class="n">0</span>);
+
+<span class="c">-- Renombrar una columna (ambos, MySQL 8.0+)</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> cliente <span class="k">RENAME</span> <span class="k">COLUMN</span> telefono <span class="k">TO</span> celular;
+
+<span class="c">-- Eliminar una columna</span>
+<span class="k">ALTER</span> <span class="k">TABLE</span> cliente <span class="k">DROP</span> <span class="k">COLUMN</span> celular;</code></pre>
+<p>Cambiar el tipo o el comportamiento de una columna sí varía:</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">ALTER</span> <span class="k">TABLE</span> cliente
+  <span class="k">ALTER</span> <span class="k">COLUMN</span> ciudad <span class="k">TYPE</span> <span class="t">VARCHAR</span>(<span class="n">80</span>);
+
+<span class="k">ALTER</span> <span class="k">TABLE</span> cliente
+  <span class="k">ALTER</span> <span class="k">COLUMN</span> ciudad <span class="k">SET</span> <span class="k">NOT</span> <span class="k">NULL</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">ALTER</span> <span class="k">TABLE</span> cliente
+  <span class="k">MODIFY</span> <span class="k">COLUMN</span> ciudad <span class="t">VARCHAR</span>(<span class="n">80</span>) <span class="k">NOT</span> <span class="k">NULL</span>;</code></pre></div></div>
+<h3>DROP: eliminar objetos</h3>
+<pre class="code "><code><span class="k">DROP</span> <span class="k">TABLE</span> <span class="k">IF</span> <span class="k">EXISTS</span> resena;
+<span class="k">DROP</span> <span class="k">INDEX</span> idx_pedido_cliente;   <span class="c">-- en MySQL: DROP INDEX idx_pedido_cliente ON pedido;</span></code></pre><div class="box warn"><span class="t">DROP no pide confirmación</span><p>No hay «papelera». <code>DROP TABLE</code> borra estructura y datos. Si otra tabla la referencia, el motor lo impide (PostgreSQL permite <code>DROP … CASCADE</code>, que arrastra lo dependiente: úsalo con extremo cuidado).</p></div>
+<h3>Vistas</h3>
+<p>Una <b>vista</b> guarda una consulta con nombre y se usa como si fuera una tabla. No almacena datos propios: ejecuta la consulta cada vez. Sirve para simplificar reportes y para limitar qué columnas ve un usuario.</p>
+<pre class="code "><code><span class="k">CREATE</span> <span class="k">VIEW</span> v_total_pedido <span class="k">AS</span>
+<span class="k">SELECT</span> p.id_pedido, p.id_cliente, p.fecha, p.estado,
+       <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+<span class="k">GROUP</span> <span class="k">BY</span> p.id_pedido, p.id_cliente, p.fecha, p.estado;</code></pre><pre class="code "><code><span class="k">SELECT</span> * <span class="k">FROM</span> v_total_pedido <span class="k">WHERE</span> total &gt; <span class="n">1000000</span>;</code></pre><div class="rs"><div class="rs-h">Resultado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>id_cliente</th><th>fecha</th><th>estado</th><th>total</th></tr></thead><tbody><tr><td class="r">5003</td><td class="r">1</td><td>2025-04-02</td><td>entregado</td><td class="r">3200000.00</td></tr><tr><td class="r">5005</td><td class="r">4</td><td>2025-05-21</td><td>pagado</td><td class="r">2715000.00</td></tr><tr><td class="r">5007</td><td class="r">5</td><td>2025-07-08</td><td>entregado</td><td class="r">1710000.00</td></tr></tbody></table></div></div>
+<p>PostgreSQL también ofrece <code>CREATE MATERIALIZED VIEW</code>, que sí guarda el resultado y se refresca con <code>REFRESH MATERIALIZED VIEW</code>. MySQL no la tiene.</p>
+<h3>Tipos de datos recomendados</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Dato</th><th>PostgreSQL</th><th>MySQL</th></tr></thead><tbody><tr><td>Entero autonumérico</td><td><code>INT GENERATED … AS IDENTITY</code></td><td><code>INT AUTO_INCREMENT</code></td></tr><tr><td>Dinero</td><td><code>NUMERIC(12,2)</code></td><td><code>DECIMAL(12,2)</code></td></tr><tr><td>Texto corto</td><td><code>VARCHAR(n)</code></td><td><code>VARCHAR(n)</code></td></tr><tr><td>Texto largo</td><td><code>TEXT</code></td><td><code>TEXT</code> / <code>MEDIUMTEXT</code></td></tr><tr><td>Verdadero/falso</td><td><code>BOOLEAN</code></td><td><code>BOOLEAN</code> (alias de <code>TINYINT(1)</code>)</td></tr><tr><td>Fecha y hora</td><td><code>TIMESTAMP</code> / <code>TIMESTAMPTZ</code></td><td><code>DATETIME</code> / <code>TIMESTAMP</code></td></tr><tr><td>JSON</td><td><code>JSONB</code></td><td><code>JSON</code></td></tr><tr><td>Identificador universal</td><td><code>UUID</code></td><td><code>CHAR(36)</code> o <code>BINARY(16)</code></td></tr></tbody></table></div><div class="box tip"><span class="t">Nunca uses FLOAT para dinero</span><p>Los números de coma flotante acumulan errores de redondeo (<code>0.1 + 0.2</code> no da exactamente <code>0.3</code>). Para valores monetarios usa <code>NUMERIC</code>/<code>DECIMAL</code> con escala fija.</p></div></section><section class="chapter" id="c12"><header><h2><span class="num">12</span>Transacciones y concurrencia</h2><p class="lead">COMMIT, ROLLBACK, ACID, niveles de aislamiento y bloqueos.</p></header>
+<p>Una <b>transacción</b> agrupa varias sentencias en una unidad indivisible: o se aplican todas, o ninguna. El ejemplo clásico es una transferencia bancaria: restar de una cuenta y sumar en otra. Si falla a la mitad, no puede quedar dinero «en el aire».</p>
+<h3>Propiedades ACID</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Letra</th><th>Propiedad</th><th>Significado</th></tr></thead><tbody><tr><td>A</td><td>Atomicidad</td><td>Todo o nada</td></tr><tr><td>C</td><td>Consistencia</td><td>Los datos pasan de un estado válido a otro válido (se respetan las restricciones)</td></tr><tr><td>I</td><td>Aislamiento</td><td>Las transacciones simultáneas no se estorban entre sí</td></tr><tr><td>D</td><td>Durabilidad</td><td>Lo confirmado sobrevive a una caída del servidor</td></tr></tbody></table></div>
+<h3>Comandos</h3>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">BEGIN</span>;
+
+<span class="k">UPDATE</span> producto <span class="k">SET</span> stock = stock - <span class="n">1</span> <span class="k">WHERE</span> id_producto = <span class="n">1</span>;
+<span class="k">INSERT</span> <span class="k">INTO</span> detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
+<span class="k">VALUES</span> (<span class="n">5006</span>, <span class="n">1</span>, <span class="n">1</span>, <span class="n">3200000</span>);
+
+<span class="k">COMMIT</span>;      <span class="c">-- confirma</span>
+<span class="c">-- ROLLBACK; -- o deshace todo</span></code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">START</span> <span class="k">TRANSACTION</span>;
+
+<span class="k">UPDATE</span> producto <span class="k">SET</span> stock = stock - <span class="n">1</span> <span class="k">WHERE</span> id_producto = <span class="n">1</span>;
+<span class="k">INSERT</span> <span class="k">INTO</span> detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
+<span class="k">VALUES</span> (<span class="n">5006</span>, <span class="n">1</span>, <span class="n">1</span>, <span class="n">3200000</span>);
+
+<span class="k">COMMIT</span>;      <span class="c">-- confirma</span>
+<span class="c">-- ROLLBACK; -- o deshace todo</span></code></pre></div></div>
+<p>Fuera de una transacción explícita, ambos motores usan <b>autocommit</b>: cada sentencia se confirma sola al ejecutarse. En MySQL solo las tablas <code>InnoDB</code> (el motor por defecto) soportan transacciones.</p>
+<h3>SAVEPOINT: deshacer una parte</h3>
+<pre class="code "><code><span class="k">BEGIN</span>;  <span class="c">-- en MySQL: START TRANSACTION;</span>
+
+<span class="k">INSERT</span> <span class="k">INTO</span> categoria (nombre) <span class="k">VALUES</span> (<span class="s">&#x27;Prueba A&#x27;</span>);
+<span class="k">SAVEPOINT</span> despues_a;
+
+<span class="k">INSERT</span> <span class="k">INTO</span> categoria (nombre) <span class="k">VALUES</span> (<span class="s">&#x27;Prueba B&#x27;</span>);
+<span class="k">ROLLBACK</span> <span class="k">TO</span> <span class="k">SAVEPOINT</span> despues_a;   <span class="c">-- descarta solo «Prueba B»</span>
+
+<span class="k">COMMIT</span>;                            <span class="c">-- queda «Prueba A»</span></code></pre><div class="box tip"><span class="t">Prueba el cambio antes de confirmar</span><p>Un hábito seguro para <code>UPDATE</code> y <code>DELETE</code>: abre la transacción, ejecuta el cambio, verifica con un <code>SELECT</code> que el número de filas es el esperado y solo entonces haz <code>COMMIT</code>. Si algo salió mal, <code>ROLLBACK</code>.</p></div>
+<h3>Diferencia importante: DDL dentro de transacciones</h3>
+<p>En PostgreSQL, casi todo el DDL (<code>CREATE TABLE</code>, <code>ALTER TABLE</code>…) es transaccional: puedes probar una migración y revertirla. En MySQL, el DDL provoca un <i>commit implícito</i>: lo que hubiera pendiente se confirma y el DDL no se puede deshacer.</p>
+<h3>Aislamiento: qué ve una transacción de las demás</h3>
+<p>Cuando dos transacciones trabajan a la vez pueden aparecer anomalías:</p>
+<ul>
+<li><b>Lectura sucia</b>: ver datos de otra transacción aún sin confirmar.</li>
+<li><b>Lectura no repetible</b>: leer la misma fila dos veces y obtener valores distintos porque otra transacción la cambió y confirmó.</li>
+<li><b>Lectura fantasma</b>: repetir una consulta y que aparezcan filas nuevas.</li>
+</ul>
+<div class="tw"><table class="dt"><thead><tr><th>Nivel</th><th>Lectura sucia</th><th>No repetible</th><th>Fantasma</th></tr></thead><tbody><tr><td><code>READ UNCOMMITTED</code></td><td>Posible (en PostgreSQL se comporta como READ COMMITTED)</td><td>Posible</td><td>Posible</td></tr><tr><td><code>READ COMMITTED</code> <i>(defecto en PostgreSQL)</i></td><td>No</td><td>Posible</td><td>Posible</td></tr><tr><td><code>REPEATABLE READ</code> <i>(defecto en MySQL/InnoDB)</i></td><td>No</td><td>No</td><td>Posible en el estándar; InnoDB y PostgreSQL lo evitan en la práctica</td></tr><tr><td><code>SERIALIZABLE</code></td><td>No</td><td>No</td><td>No</td></tr></tbody></table></div><pre class="code "><code><span class="c">-- PostgreSQL y MySQL</span>
+<span class="k">SET</span> <span class="k">TRANSACTION</span> ISOLATION LEVEL REPEATABLE READ;   <span class="c">-- antes de la primera sentencia</span></code></pre>
+<h3>Bloqueos: reservar filas</h3>
+<p>Para evitar que dos clientes compren la última unidad a la vez, se bloquea la fila mientras se decide:</p>
+<pre class="code "><code><span class="k">BEGIN</span>;  <span class="c">-- START TRANSACTION en MySQL</span>
+
+<span class="k">SELECT</span> stock <span class="k">FROM</span> producto <span class="k">WHERE</span> id_producto = <span class="n">1</span> <span class="k">FOR</span> <span class="k">UPDATE</span>;
+<span class="c">-- otras transacciones que quieran modificar esta fila esperan</span>
+
+<span class="k">UPDATE</span> producto <span class="k">SET</span> stock = stock - <span class="n">1</span> <span class="k">WHERE</span> id_producto = <span class="n">1</span>;
+<span class="k">COMMIT</span>;</code></pre><div class="box warn"><span class="t">Deadlock</span><p>Si la transacción A espera una fila que tiene B y B espera una de A, ninguna avanza: el motor detecta el <i>deadlock</i> y cancela una de las dos con un error. La defensa es tocar las filas siempre en el mismo orden y mantener las transacciones cortas.</p></div></section><section class="chapter" id="c13"><header><h2><span class="num">13</span>Índices y rendimiento</h2><p class="lead">Qué es un índice, cómo leer EXPLAIN y qué evitar.</p></header>
+<p>Con pocas filas todo es rápido. Con millones, una consulta mal pensada tarda minutos. Las herramientas básicas son los <b>índices</b> y leer el <b>plan de ejecución</b>.</p>
+<h3>Índices</h3>
+<p>Un índice es una estructura auxiliar (normalmente un árbol B) que permite encontrar filas sin leer toda la tabla, como el índice alfabético de un libro. Las claves primarias y las restricciones <code>UNIQUE</code> ya crean uno automáticamente.</p>
+<pre class="code "><code><span class="c">-- Acelera: WHERE id_cliente = ... y los JOIN por id_cliente</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> idx_pedido_cliente <span class="k">ON</span> pedido (id_cliente);
+
+<span class="c">-- Índice compuesto: sirve para filtrar por estado, o por estado y fecha</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> idx_pedido_estado_fecha <span class="k">ON</span> pedido (estado, fecha);
+
+<span class="c">-- Índice único</span>
+<span class="k">CREATE</span> <span class="k">UNIQUE</span> <span class="k">INDEX</span> uq_cliente_correo <span class="k">ON</span> cliente (correo);</code></pre><div class="tw"><table class="dt"><thead><tr><th>Conviene indexar</th><th>No conviene</th></tr></thead><tbody><tr><td>Columnas de clave foránea</td><td>Tablas pequeñas</td></tr><tr><td>Columnas usadas a menudo en <code>WHERE</code>, <code>JOIN</code> y <code>ORDER BY</code></td><td>Columnas con pocos valores distintos (como un booleano)</td></tr><tr><td>Columnas con muchos valores distintos</td><td>Tablas con muchísimas escrituras: cada índice se actualiza en cada <code>INSERT</code>/<code>UPDATE</code></td></tr></tbody></table></div><div class="box key"><span class="t">Índice compuesto: importa el orden</span><p>Un índice en <code>(estado, fecha)</code> sirve para consultar por <code>estado</code>, o por <code>estado</code> y <code>fecha</code>; pero <b>no</b> ayuda si solo filtras por <code>fecha</code>. Se lee de izquierda a derecha.</p></div>
+<h3>EXPLAIN: ver cómo piensa el motor</h3>
+<p>Antepón <code>EXPLAIN</code> a una consulta para ver el plan sin ejecutarla. Con <code>EXPLAIN ANALYZE</code> (PostgreSQL y MySQL 8.0.18+) se ejecuta de verdad y muestra los tiempos reales.</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">EXPLAIN</span> <span class="k">ANALYZE</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> pedido <span class="k">WHERE</span> id_cliente = <span class="n">1</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">EXPLAIN</span> <span class="k">ANALYZE</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> pedido <span class="k">WHERE</span> id_cliente = <span class="n">1</span>;</code></pre></div></div>
+<p>Qué buscar en el plan:</p>
+<div class="tw"><table class="dt"><thead><tr><th>Señal</th><th>PostgreSQL</th><th>MySQL</th></tr></thead><tbody><tr><td>Lee toda la tabla (lento en tablas grandes)</td><td><code>Seq Scan</code></td><td><code>type: ALL</code> / <code>Table scan</code></td></tr><tr><td>Usa un índice</td><td><code>Index Scan</code> / <code>Index Only Scan</code></td><td><code>type: ref</code>, <code>range</code>, <code>const</code></td></tr><tr><td>Ordena en memoria o disco</td><td><code>Sort</code></td><td><code>Using filesort</code></td></tr></tbody></table></div>
+<h3>Consultas que impiden usar el índice</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Evita</th><th>Mejor</th></tr></thead><tbody><tr><td><code>WHERE YEAR(fecha) = 2025</code> (función sobre la columna)</td><td><code>WHERE fecha &gt;= '2025-01-01' AND fecha &lt; '2026-01-01'</code></td></tr><tr><td><code>WHERE LOWER(correo) = 'x'</code></td><td>Guardar el correo ya en minúscula, o crear un índice sobre la expresión (PostgreSQL)</td></tr><tr><td><code>LIKE '%texto'</code> (comodín al inicio)</td><td><code>LIKE 'texto%'</code>, o búsqueda de texto completo</td></tr><tr><td><code>WHERE precio + 10 &gt; 100</code></td><td><code>WHERE precio &gt; 90</code></td></tr><tr><td>Comparar columna de texto con un número</td><td>Comparar tipos iguales</td></tr></tbody></table></div>
+<h3>Otros hábitos de rendimiento</h3>
+<ul>
+<li>Pide solo las columnas que necesitas; evita <code>SELECT *</code> en código de producción.</li>
+<li>Filtra lo antes posible y limita con <code>LIMIT</code> cuando solo muestras una página.</li>
+<li><code>OFFSET</code> grande es lento (recorre y descarta). Para paginar mucho, usa <i>keyset</i>: <code>WHERE id &gt; último_visto ORDER BY id LIMIT 20</code>.</li>
+<li>Prefiere <code>UNION ALL</code> sobre <code>UNION</code> si no hay duplicados que eliminar.</li>
+<li>Evita ejecutar una consulta por cada fila desde la aplicación (el problema «N+1»): resuélvelo con un <code>JOIN</code>.</li>
+<li>Mantén las estadísticas al día: <code>ANALYZE tabla;</code> en ambos motores (PostgreSQL además tiene <code>VACUUM</code>).</li>
+</ul>
+</section><section class="chapter" id="c14"><header><h2><span class="num">14</span>PostgreSQL frente a MySQL</h2><p class="lead">Tabla de consulta con todas las diferencias vistas.</p></header>
+<p>Resumen de las diferencias que más importan al pasar de un motor a otro. Todas aparecen en capítulos anteriores; esta es la tabla de consulta rápida.</p>
+<div class="tw"><table class="dt wide"><thead><tr><th>Tema</th><th>PostgreSQL</th><th>MySQL (8.0+)</th></tr></thead><tbody><tr><td>Autonumérico</td><td><code>GENERATED … AS IDENTITY</code> o <code>SERIAL</code></td><td><code>AUTO_INCREMENT</code></td></tr><tr><td>Obtener el id generado</td><td><code>INSERT … RETURNING id</code></td><td><code>LAST_INSERT_ID()</code></td></tr><tr><td>Comillas para nombres</td><td>Comillas dobles: <code>"Nombre"</code></td><td>Acento grave: <code>`nombre`</code></td></tr><tr><td>Comillas para texto</td><td>Solo simples: <code>'texto'</code></td><td>Simples (las dobles también, no lo hagas)</td></tr><tr><td>Distingue mayúsculas en <code>LIKE</code></td><td>Sí; <code>ILIKE</code> las ignora</td><td>No (según la colación)</td></tr><tr><td>Unir textos</td><td><code>CONCAT()</code> o <code>||</code></td><td><code>CONCAT()</code> (<code>||</code> es OR)</td></tr><tr><td>División de enteros</td><td><code>7 / 2</code> = 3</td><td><code>7 / 2</code> = 3.5; <code>7 DIV 2</code> = 3</td></tr><tr><td>Conversión de tipo</td><td><code>x::INT</code> o <code>CAST</code></td><td><code>CAST(x AS SIGNED)</code></td></tr><tr><td>Agregar texto de un grupo</td><td><code>STRING_AGG(col, ', ')</code></td><td><code>GROUP_CONCAT(col SEPARATOR ', ')</code></td></tr><tr><td>Año de una fecha</td><td><code>EXTRACT(YEAR FROM f)</code></td><td><code>YEAR(f)</code></td></tr><tr><td>Sumar a una fecha</td><td><code>f + INTERVAL '7 days'</code></td><td><code>DATE_ADD(f, INTERVAL 7 DAY)</code></td></tr><tr><td>Diferencia en días</td><td><code>f2 - f1</code></td><td><code>DATEDIFF(f2, f1)</code></td></tr><tr><td>Primeras filas</td><td><code>LIMIT n OFFSET m</code> o <code>FETCH FIRST n ROWS ONLY</code></td><td><code>LIMIT n OFFSET m</code></td></tr><tr><td>Orden de nulos</td><td><code>NULLS FIRST / NULLS LAST</code></td><td>No existe; nulos primero en <code>ASC</code></td></tr><tr><td><code>FULL JOIN</code></td><td>Sí</td><td>No (emular con <code>UNION</code>)</td></tr><tr><td><code>UPDATE</code> con otra tabla</td><td><code>UPDATE … FROM …</code></td><td><code>UPDATE t JOIN … SET …</code></td></tr><tr><td>Upsert</td><td><code>ON CONFLICT … DO UPDATE</code></td><td><code>ON DUPLICATE KEY UPDATE</code></td></tr><tr><td>Iniciar transacción</td><td><code>BEGIN</code></td><td><code>START TRANSACTION</code></td></tr><tr><td>DDL transaccional</td><td>Sí</td><td>No (commit implícito)</td></tr><tr><td>Aislamiento por defecto</td><td><code>READ COMMITTED</code></td><td><code>REPEATABLE READ</code></td></tr><tr><td>Cambiar tipo de columna</td><td><code>ALTER COLUMN … TYPE</code></td><td><code>MODIFY COLUMN</code></td></tr><tr><td>Vista materializada</td><td>Sí</td><td>No</td></tr><tr><td>Tipos extra destacados</td><td>Arreglos, <code>JSONB</code>, rangos, <code>UUID</code>, enumerados</td><td><code>ENUM</code> y <code>SET</code> por columna, <code>JSON</code></td></tr><tr><td>Salida de listar tablas</td><td><code>\dt</code> (en psql)</td><td><code>SHOW TABLES;</code></td></tr><tr><td>Cliente de consola</td><td><code>psql</code></td><td><code>mysql</code></td></tr></tbody></table></div><div class="box key"><span class="t">Para escribir SQL portable</span><p>Quédate con el SQL estándar: <code>CASE</code>, <code>COALESCE</code>, <code>CAST</code>, <code>JOIN</code> explícitos, <code>CONCAT</code>, <code>LIMIT</code>, funciones de ventana y CTE. Aísla lo específico (fechas, upsert, autonumérico) en pocos lugares.</p></div></section><section class="chapter" id="c15"><header><h2><span class="num">15</span>Seguridad, buenas prácticas y errores comunes</h2><p class="lead">Consultas parametrizadas, permisos y una lista para depurar.</p></header>
+<h3>Seguridad</h3>
+<p><b>Inyección SQL.</b> Ocurre cuando una aplicación arma la consulta pegando texto del usuario. Si el usuario escribe <code>' OR '1'='1</code>, cambia el significado de la consulta.</p>
+<pre class="code "><code><span class="c">-- MAL: se concatena la entrada del usuario</span>
+consulta = &quot;<span class="k">SELECT</span> * <span class="k">FROM</span> cliente <span class="k">WHERE</span> correo = <span class="s">&#x27;&quot; + entrada + &quot;&#x27;</span>&quot;
+
+<span class="c">-- BIEN: consulta parametrizada; el motor trata el valor siempre como dato</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> cliente <span class="k">WHERE</span> correo = $<span class="n">1</span>;   <span class="c">-- PostgreSQL</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> cliente <span class="k">WHERE</span> correo = ?;    <span class="c">-- MySQL</span></code></pre>
+<p><b>Permisos (DCL).</b> Cada aplicación debe conectarse con un usuario con lo mínimo necesario.</p>
+<div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">CREATE</span> ROLE app_ventas LOGIN PASSWORD <span class="s">&#x27;cambia_esta_clave&#x27;</span>;
+<span class="k">GRANT</span> <span class="k">SELECT</span>, <span class="k">INSERT</span>, <span class="k">UPDATE</span> <span class="k">ON</span> pedido, detalle_pedido <span class="k">TO</span> app_ventas;
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> cliente, producto <span class="k">TO</span> app_ventas;
+<span class="k">REVOKE</span> <span class="k">UPDATE</span> <span class="k">ON</span> pedido <span class="k">FROM</span> app_ventas;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">CREATE</span> USER <span class="s">&#x27;app_ventas&#x27;</span>@<span class="s">&#x27;%&#x27;</span> IDENTIFIED <span class="k">BY</span> <span class="s">&#x27;cambia_esta_clave&#x27;</span>;
+<span class="k">GRANT</span> <span class="k">SELECT</span>, <span class="k">INSERT</span>, <span class="k">UPDATE</span> <span class="k">ON</span> tienda.pedido <span class="k">TO</span> <span class="s">&#x27;app_ventas&#x27;</span>@<span class="s">&#x27;%&#x27;</span>;
+<span class="k">GRANT</span> <span class="k">SELECT</span> <span class="k">ON</span> tienda.cliente <span class="k">TO</span> <span class="s">&#x27;app_ventas&#x27;</span>@<span class="s">&#x27;%&#x27;</span>;
+<span class="k">REVOKE</span> <span class="k">UPDATE</span> <span class="k">ON</span> tienda.pedido <span class="k">FROM</span> <span class="s">&#x27;app_ventas&#x27;</span>@<span class="s">&#x27;%&#x27;</span>;</code></pre></div></div>
+<h3>Buenas prácticas de escritura</h3>
+<ul>
+<li>Escribe las palabras clave en mayúscula y cada cláusula principal en una línea nueva.</li>
+<li>Usa nombres claros y consistentes: minúsculas con guion bajo, tablas en singular, claves <code>id_tabla</code>.</li>
+<li>Siempre alias de tabla cortos y significativos al unir varias tablas; califica todas las columnas.</li>
+<li>Prefiere <code>JOIN … ON</code> explícito en vez de listar tablas con comas y condiciones en <code>WHERE</code>.</li>
+<li>No uses <code>SELECT *</code> salvo para explorar.</li>
+<li>Comenta lo no obvio con <code>--</code>.</li>
+<li>Haz respaldos y prueba que se puedan restaurar.</li>
+<li>Prueba <code>UPDATE</code>/<code>DELETE</code> primero como <code>SELECT</code>, y en una transacción.</li>
+</ul>
+<h3>Errores frecuentes y su causa</h3>
+<div class="tw"><table class="dt"><thead><tr><th>Mensaje o síntoma</th><th>Causa probable</th></tr></thead><tbody><tr><td><i>column must appear in the GROUP BY clause</i> / <i>only_full_group_by</i></td><td>Columna en <code>SELECT</code> sin agregar y sin estar en <code>GROUP BY</code></td></tr><tr><td><i>column "x" does not exist</i> / <i>Unknown column</i></td><td>Error de nombre, o usaste un alias en <code>WHERE</code></td></tr><tr><td><i>ambiguous column</i></td><td>Columna con el mismo nombre en dos tablas sin calificar</td></tr><tr><td>Resultado con demasiadas filas</td><td><code>JOIN</code> sin <code>ON</code>, o relación uno a muchos que multiplica filas antes de sumar</td></tr><tr><td>La suma sale inflada</td><td>Se hizo <code>SUM</code> después de un <code>JOIN</code> que repitió filas</td></tr><tr><td><code>= NULL</code> no devuelve nada</td><td>Debe ser <code>IS NULL</code></td></tr><tr><td><i>violates foreign key constraint</i> / <i>Cannot add or update a child row</i></td><td>Se inserta un hijo sin padre, o se borra un padre con hijos</td></tr><tr><td><i>duplicate key</i> / <i>Duplicate entry</i></td><td>Se repite un valor <code>PRIMARY KEY</code> o <code>UNIQUE</code></td></tr><tr><td><i>value too long for type</i></td><td>Texto más largo que el <code>VARCHAR(n)</code></td></tr></tbody></table></div>
+<h3>Hoja rápida: estructura completa de un SELECT</h3>
+<pre class="code "><code><span class="k">SELECT</span>   [<span class="k">DISTINCT</span>] columnas / expresiones / agregaciones
+<span class="k">FROM</span>     tabla [alias]
+[<span class="k">JOIN</span>    otra_tabla <span class="k">ON</span> condición]
+[<span class="k">WHERE</span>   condición sobre filas]
+[<span class="k">GROUP</span> <span class="k">BY</span> columnas]
+[<span class="k">HAVING</span>  condición sobre grupos]
+[<span class="k">ORDER</span> <span class="k">BY</span> columnas [<span class="k">ASC</span>|<span class="k">DESC</span>]]
+[<span class="k">LIMIT</span>   n [<span class="k">OFFSET</span> m]];</code></pre>
+<p>Ya tienes las bases. Para afianzarlas, resuelve los 20 ejercicios que siguen usando la base de datos de la tienda del capítulo 2.</p>
+</section><section class="chapter" id="ej"><header><h2><span class="num">★</span>Ejercicios: 20 consultas para practicar</h2><p class="lead">Resuélvelos con la base de la tienda (capítulo 2). Intenta cada uno antes de abrir la pista, y la pista antes de la solución. Marca los que vayas completando; tu avance se guarda en este navegador.</p></header><div class="score"><span id="cnt">0 de 20 completados</span><div class="bk"><i id="exbar"></i></div></div><article class="ex" id="e1" data-n="1"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 1 como hecho"><span></span></label><h3><span class="en">1</span>SELECT y ORDER BY</h3></header><p class="stmt">Muestra el nombre y el precio de todos los productos, del más caro al más barato.</p><details class="hint"><summary>Pista</summary><p>Necesitas <code>ORDER BY</code> con <code>DESC</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> precio <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td></tr><tr><td>Audífonos Studio</td><td class="r">350000.00</td></tr><tr><td>Teclado mecánico</td><td class="r">280000.00</td></tr><tr><td>Parlante Bluetooth</td><td class="r">180000.00</td></tr><tr><td>Webcam HD</td><td class="r">150000.00</td></tr><tr><td>Hub USB-C</td><td class="r">120000.00</td></tr><tr><td>Mouse inalámbrico</td><td class="r">65000.00</td></tr><tr><td>Cable HDMI 2 m</td><td class="r">25000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e2" data-n="2"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 2 como hecho"><span></span></label><h3><span class="en">2</span>WHERE con varias condiciones</h3></header><p class="stmt">Lista los productos de la categoría 2 (Periféricos) cuyo precio sea menor a 200.000, con nombre y precio.</p><details class="hint"><summary>Pista</summary><p>Dos condiciones unidas con <code>AND</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> nombre, precio
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> id_categoria = <span class="n">2</span>
+  <span class="k">AND</span> precio &lt; <span class="n">200000</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th></tr></thead><tbody><tr><td>Mouse inalámbrico</td><td class="r">65000.00</td></tr><tr><td>Webcam HD</td><td class="r">150000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e3" data-n="3"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 3 como hecho"><span></span></label><h3><span class="en">3</span>IN y ordenamiento</h3></header><p class="stmt">Muestra nombre y ciudad de los clientes que viven en Bogotá o en Cali, en orden alfabético por nombre.</p><details class="hint"><summary>Pista</summary><p><code>IN ('…', '…')</code> evita repetir <code>OR</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> nombre, ciudad
+<span class="k">FROM</span> cliente
+<span class="k">WHERE</span> ciudad <span class="k">IN</span> (<span class="s">&#x27;Bogotá&#x27;</span>, <span class="s">&#x27;Cali&#x27;</span>)
+<span class="k">ORDER</span> <span class="k">BY</span> nombre;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>ciudad</th></tr></thead><tbody><tr><td>Ana Torres</td><td>Bogotá</td></tr><tr><td>Luis Gómez</td><td>Cali</td></tr><tr><td>Sofía Díaz</td><td>Bogotá</td></tr><tr><td>Valentina Mora</td><td>Cali</td></tr></tbody></table></div></div></details></article><article class="ex" id="e4" data-n="4"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 4 como hecho"><span></span></label><h3><span class="en">4</span>Búsqueda de texto</h3></header><p class="stmt">Encuentra los productos cuyo nombre contenga la palabra «portátil», sin importar mayúsculas o minúsculas.</p><details class="hint"><summary>Pista</summary><p>En PostgreSQL existe <code>ILIKE</code>; en MySQL basta <code>LIKE</code>. Los comodines <code>%</code> van a ambos lados.</p></details><details class="sol"><summary>Ver solución</summary><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> id_producto, nombre
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> nombre <span class="k">ILIKE</span> <span class="s">&#x27;%portátil%&#x27;</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> id_producto, nombre
+<span class="k">FROM</span> producto
+<span class="k">WHERE</span> nombre <span class="k">LIKE</span> <span class="s">&#x27;%portátil%&#x27;</span>;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado esperado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_producto</th><th>nombre</th></tr></thead><tbody><tr><td class="r">1</td><td>Portátil Aero 14</td></tr><tr><td class="r">2</td><td>Portátil Nova 15</td></tr></tbody></table></div></div></details></article><article class="ex" id="e5" data-n="5"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 5 como hecho"><span></span></label><h3><span class="en">5</span>Rango de fechas</h3></header><p class="stmt">Lista los pedidos hechos entre el 1 de abril y el 30 de junio de 2025 cuyo estado no sea «cancelado».</p><details class="hint"><summary>Pista</summary><p><code>BETWEEN</code> incluye ambos extremos. Para negar usa <code>&lt;&gt;</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> id_pedido, fecha, estado
+<span class="k">FROM</span> pedido
+<span class="k">WHERE</span> fecha <span class="k">BETWEEN</span> <span class="s">&#x27;2025-04-01&#x27;</span> <span class="k">AND</span> <span class="s">&#x27;2025-06-30&#x27;</span>
+  <span class="k">AND</span> estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+<span class="k">ORDER</span> <span class="k">BY</span> fecha;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>fecha</th><th>estado</th></tr></thead><tbody><tr><td class="r">5003</td><td>2025-04-02</td><td>entregado</td></tr><tr><td class="r">5004</td><td>2025-04-10</td><td>enviado</td></tr><tr><td class="r">5005</td><td>2025-05-21</td><td>pagado</td></tr><tr><td class="r">5006</td><td>2025-06-30</td><td>pendiente</td></tr></tbody></table></div></div></details></article><article class="ex" id="e6" data-n="6"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 6 como hecho"><span></span></label><h3><span class="en">6</span>CASE</h3></header><p class="stmt">Muestra nombre, precio y una columna <code>segmento</code>: «Económico» si el precio es menor a 100.000, «Medio» si es menor a 1.000.000 y «Premium» en los demás casos.</p><details class="hint"><summary>Pista</summary><p>Los <code>WHEN</code> se evalúan en orden; el primero verdadero gana.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> nombre, precio,
+  <span class="k">CASE</span>
+    <span class="k">WHEN</span> precio &lt; <span class="n">100000</span>  <span class="k">THEN</span> <span class="s">&#x27;Económico&#x27;</span>
+    <span class="k">WHEN</span> precio &lt; <span class="n">1000000</span> <span class="k">THEN</span> <span class="s">&#x27;Medio&#x27;</span>
+    <span class="k">ELSE</span> <span class="s">&#x27;Premium&#x27;</span>
+  <span class="k">END</span> <span class="k">AS</span> segmento
+<span class="k">FROM</span> producto
+<span class="k">ORDER</span> <span class="k">BY</span> precio;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 10 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>precio</th><th>segmento</th></tr></thead><tbody><tr><td>Cable HDMI 2 m</td><td class="r">25000.00</td><td>Económico</td></tr><tr><td>Mouse inalámbrico</td><td class="r">65000.00</td><td>Económico</td></tr><tr><td>Hub USB-C</td><td class="r">120000.00</td><td>Medio</td></tr><tr><td>Webcam HD</td><td class="r">150000.00</td><td>Medio</td></tr><tr><td>Parlante Bluetooth</td><td class="r">180000.00</td><td>Medio</td></tr><tr><td>Teclado mecánico</td><td class="r">280000.00</td><td>Medio</td></tr><tr><td>Audífonos Studio</td><td class="r">350000.00</td><td>Medio</td></tr><tr><td>Monitor 24 pulgadas</td><td class="r">690000.00</td><td>Medio</td></tr><tr><td>Portátil Nova 15</td><td class="r">2650000.00</td><td>Premium</td></tr><tr><td>Portátil Aero 14</td><td class="r">3200000.00</td><td>Premium</td></tr></tbody></table></div></div></details></article><article class="ex" id="e7" data-n="7"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 7 como hecho"><span></span></label><h3><span class="en">7</span>Agregación simple</h3></header><p class="stmt">Calcula cuántos productos hay, cuántas unidades en total y el valor del inventario (suma de precio × stock).</p><details class="hint"><summary>Pista</summary><p><code>SUM(precio * stock)</code>; puedes poner varias agregaciones en el mismo <code>SELECT</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> <span class="f">COUNT</span>(*)            <span class="k">AS</span> productos,
+       <span class="f">SUM</span>(stock)          <span class="k">AS</span> unidades,
+       <span class="f">SUM</span>(precio * stock) <span class="k">AS</span> valor_inventario
+<span class="k">FROM</span> producto;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>productos</th><th>unidades</th><th>valor_inventario</th></tr></thead><tbody><tr><td class="r">10</td><td class="r">618</td><td class="r">124650000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e8" data-n="8"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 8 como hecho"><span></span></label><h3><span class="en">8</span>Fechas y GROUP BY</h3></header><p class="stmt">Para los pedidos que no están cancelados, muestra por mes: número de pedidos y total vendido (suma de cantidad × precio unitario).</p><details class="hint"><summary>Pista</summary><p>Necesitas unir <code>pedido</code> con <code>detalle_pedido</code>, agrupar por el mes y la función de mes cambia entre motores.</p></details><details class="sol"><summary>Ver solución</summary><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">EXTRACT</span>(MONTH <span class="k">FROM</span> p.fecha)           <span class="k">AS</span> mes,
+       <span class="f">COUNT</span>(<span class="k">DISTINCT</span> p.id_pedido)           <span class="k">AS</span> pedidos,
+       <span class="f">SUM</span>(d.cantidad * d.precio_unitario)   <span class="k">AS</span> total
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+<span class="k">WHERE</span> p.estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="f">EXTRACT</span>(MONTH <span class="k">FROM</span> p.fecha)
+<span class="k">ORDER</span> <span class="k">BY</span> mes;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">SELECT</span> <span class="f">MONTH</span>(p.fecha)                       <span class="k">AS</span> mes,
+       <span class="f">COUNT</span>(<span class="k">DISTINCT</span> p.id_pedido)           <span class="k">AS</span> pedidos,
+       <span class="f">SUM</span>(d.cantidad * d.precio_unitario)   <span class="k">AS</span> total
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+<span class="k">WHERE</span> p.estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="f">MONTH</span>(p.fecha)
+<span class="k">ORDER</span> <span class="k">BY</span> mes;</code></pre></div></div><div class="rs"><div class="rs-h">Resultado esperado · 7 filas</div><div class="tw"><table class="dt"><thead><tr><th>mes</th><th>pedidos</th><th>total</th></tr></thead><tbody><tr><td class="r">3</td><td class="r">2</td><td class="r">1165000.00</td></tr><tr><td class="r">4</td><td class="r">2</td><td class="r">3625000.00</td></tr><tr><td class="r">5</td><td class="r">1</td><td class="r">2715000.00</td></tr><tr><td class="r">6</td><td class="r">1</td><td class="r">240000.00</td></tr><tr><td class="r">7</td><td class="r">1</td><td class="r">1710000.00</td></tr><tr><td class="r">9</td><td class="r">1</td><td class="r">500000.00</td></tr><tr><td class="r">10</td><td class="r">1</td><td class="r">315000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e9" data-n="9"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 9 como hecho"><span></span></label><h3><span class="en">9</span>HAVING</h3></header><p class="stmt">Muestra los <code>id_categoria</code> que tienen más de dos productos, junto con cuántos son.</p><details class="hint"><summary>Pista</summary><p>El filtro sobre un conteo va en <code>HAVING</code>, no en <code>WHERE</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> id_categoria, <span class="f">COUNT</span>(*) <span class="k">AS</span> productos
+<span class="k">FROM</span> producto
+<span class="k">GROUP</span> <span class="k">BY</span> id_categoria
+<span class="k">HAVING</span> <span class="f">COUNT</span>(*) &gt; <span class="n">2</span>
+<span class="k">ORDER</span> <span class="k">BY</span> productos <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>id_categoria</th><th>productos</th></tr></thead><tbody><tr><td class="r">2</td><td class="r">4</td></tr></tbody></table></div></div></details></article><article class="ex" id="e10" data-n="10"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 10 como hecho"><span></span></label><h3><span class="en">10</span>INNER JOIN</h3></header><p class="stmt">Lista id del pedido, nombre del cliente, fecha y estado de los pedidos entregados, del más antiguo al más reciente.</p><details class="hint"><summary>Pista</summary><p>Une <code>pedido</code> con <code>cliente</code> por <code>id_cliente</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> p.id_pedido, c.nombre <span class="k">AS</span> cliente, p.fecha, p.estado
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> cliente c <span class="k">ON</span> c.id_cliente = p.id_cliente
+<span class="k">WHERE</span> p.estado = <span class="s">&#x27;entregado&#x27;</span>
+<span class="k">ORDER</span> <span class="k">BY</span> p.fecha;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 4 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>cliente</th><th>fecha</th><th>estado</th></tr></thead><tbody><tr><td class="r">5001</td><td>Marta Ruiz</td><td>2025-03-14</td><td>entregado</td></tr><tr><td class="r">5002</td><td>Luis Gómez</td><td>2025-03-15</td><td>entregado</td></tr><tr><td class="r">5003</td><td>Marta Ruiz</td><td>2025-04-02</td><td>entregado</td></tr><tr><td class="r">5007</td><td>Sofía Díaz</td><td>2025-07-08</td><td>entregado</td></tr></tbody></table></div></div></details></article><article class="ex" id="e11" data-n="11"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 11 como hecho"><span></span></label><h3><span class="en">11</span>LEFT JOIN y NULL</h3></header><p class="stmt">Muestra los clientes que nunca han hecho un pedido (nombre y ciudad).</p><details class="hint"><summary>Pista</summary><p><code>LEFT JOIN</code> desde <code>cliente</code> y busca las filas donde la parte derecha quedó en <code>NULL</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> c.nombre, c.ciudad
+<span class="k">FROM</span> cliente c
+<span class="k">LEFT</span> <span class="k">JOIN</span> pedido p <span class="k">ON</span> p.id_cliente = c.id_cliente
+<span class="k">WHERE</span> p.id_pedido <span class="k">IS</span> <span class="k">NULL</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 2 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>ciudad</th></tr></thead><tbody><tr><td>Diego Rojas</td><td>Ibagué</td></tr><tr><td>Valentina Mora</td><td>Cali</td></tr></tbody></table></div></div></details></article><article class="ex" id="e12" data-n="12"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 12 como hecho"><span></span></label><h3><span class="en">12</span>JOIN de tres tablas y total</h3></header><p class="stmt">Para cada pedido, muestra el id, el nombre del cliente y el total (suma de cantidad × precio unitario). Ordena del total más alto al más bajo y muestra solo los 5 primeros.</p><details class="hint"><summary>Pista</summary><p>Une <code>pedido</code>, <code>cliente</code> y <code>detalle_pedido</code>; agrupa por pedido y cliente.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> p.id_pedido, c.nombre <span class="k">AS</span> cliente,
+       <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+<span class="k">FROM</span> pedido p
+<span class="k">JOIN</span> cliente c <span class="k">ON</span> c.id_cliente = p.id_cliente
+<span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido = p.id_pedido
+<span class="k">GROUP</span> <span class="k">BY</span> p.id_pedido, c.nombre
+<span class="k">ORDER</span> <span class="k">BY</span> total <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="n">5</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 5 filas</div><div class="tw"><table class="dt"><thead><tr><th>id_pedido</th><th>cliente</th><th>total</th></tr></thead><tbody><tr><td class="r">5003</td><td>Marta Ruiz</td><td class="r">3200000.00</td></tr><tr><td class="r">5005</td><td>Carlos Pérez</td><td class="r">2715000.00</td></tr><tr><td class="r">5007</td><td>Sofía Díaz</td><td class="r">1710000.00</td></tr><tr><td class="r">5002</td><td>Luis Gómez</td><td class="r">755000.00</td></tr><tr><td class="r">5009</td><td>Luis Gómez</td><td class="r">500000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e13" data-n="13"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 13 como hecho"><span></span></label><h3><span class="en">13</span>LEFT JOIN con COUNT</h3></header><p class="stmt">Muestra todas las categorías con la cantidad de productos que tiene cada una, incluida la que no tiene ninguno.</p><details class="hint"><summary>Pista</summary><p>Cuenta una columna de la tabla derecha (<code>COUNT(p.id_producto)</code>), no <code>COUNT(*)</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> c.nombre <span class="k">AS</span> categoria, <span class="f">COUNT</span>(p.id_producto) <span class="k">AS</span> productos
+<span class="k">FROM</span> categoria c
+<span class="k">LEFT</span> <span class="k">JOIN</span> producto p <span class="k">ON</span> p.id_categoria = c.id_categoria
+<span class="k">GROUP</span> <span class="k">BY</span> c.id_categoria, c.nombre
+<span class="k">ORDER</span> <span class="k">BY</span> productos <span class="k">DESC</span>, c.nombre;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 5 filas</div><div class="tw"><table class="dt"><thead><tr><th>categoria</th><th>productos</th></tr></thead><tbody><tr><td>Periféricos</td><td class="r">4</td></tr><tr><td>Accesorios</td><td class="r">2</td></tr><tr><td>Audio</td><td class="r">2</td></tr><tr><td>Computadores</td><td class="r">2</td></tr><tr><td>Oficina</td><td class="r">0</td></tr></tbody></table></div></div></details></article><article class="ex" id="e14" data-n="14"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 14 como hecho"><span></span></label><h3><span class="en">14</span>Producto más vendido</h3></header><p class="stmt">Encuentra el producto del que se han vendido más unidades en total (cuenta todos los pedidos). Muestra el nombre y las unidades.</p><details class="hint"><summary>Pista</summary><p>Suma <code>cantidad</code> por producto, ordena descendente y quédate con una fila.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> pr.nombre, <span class="f">SUM</span>(d.cantidad) <span class="k">AS</span> unidades
+<span class="k">FROM</span> detalle_pedido d
+<span class="k">JOIN</span> producto pr <span class="k">ON</span> pr.id_producto = d.id_producto
+<span class="k">GROUP</span> <span class="k">BY</span> pr.id_producto, pr.nombre
+<span class="k">ORDER</span> <span class="k">BY</span> unidades <span class="k">DESC</span>
+<span class="k">LIMIT</span> <span class="n">1</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>unidades</th></tr></thead><tbody><tr><td>Mouse inalámbrico</td><td class="r">7</td></tr></tbody></table></div></div></details></article><article class="ex" id="e15" data-n="15"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 15 como hecho"><span></span></label><h3><span class="en">15</span>NOT EXISTS</h3></header><p class="stmt">Lista los productos que no aparecen en ningún pedido <i>no cancelado</i> (nunca vendidos o solo en pedidos cancelados).</p><details class="hint"><summary>Pista</summary><p>Un <code>NOT EXISTS</code> con una subconsulta que una <code>detalle_pedido</code> y <code>pedido</code> y excluya los cancelados.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> pr.id_producto, pr.nombre
+<span class="k">FROM</span> producto pr
+<span class="k">WHERE</span> <span class="k">NOT</span> <span class="k">EXISTS</span> (
+  <span class="k">SELECT</span> <span class="n">1</span>
+  <span class="k">FROM</span> detalle_pedido d
+  <span class="k">JOIN</span> pedido p <span class="k">ON</span> p.id_pedido = d.id_pedido
+  <span class="k">WHERE</span> d.id_producto = pr.id_producto
+    <span class="k">AND</span> p.estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+);</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 1 fila</div><div class="tw"><table class="dt"><thead><tr><th>id_producto</th><th>nombre</th></tr></thead><tbody><tr><td class="r">7</td><td>Parlante Bluetooth</td></tr></tbody></table></div></div></details></article><article class="ex" id="e16" data-n="16"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 16 como hecho"><span></span></label><h3><span class="en">16</span>Subconsulta escalar</h3></header><p class="stmt">Muestra los empleados cuyo salario sea mayor que el salario promedio de la empresa, con la diferencia respecto al promedio redondeada a cero decimales.</p><details class="hint"><summary>Pista</summary><p>Usa <code>(SELECT AVG(salario) FROM empleado)</code> dos veces: en <code>WHERE</code> y en la resta.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> nombre, cargo, salario,
+       <span class="f">ROUND</span>(salario - (<span class="k">SELECT</span> <span class="f">AVG</span>(salario) <span class="k">FROM</span> empleado), <span class="n">0</span>) <span class="k">AS</span> sobre_promedio
+<span class="k">FROM</span> empleado
+<span class="k">WHERE</span> salario &gt; (<span class="k">SELECT</span> <span class="f">AVG</span>(salario) <span class="k">FROM</span> empleado)
+<span class="k">ORDER</span> <span class="k">BY</span> salario <span class="k">DESC</span>;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 3 filas</div><div class="tw"><table class="dt"><thead><tr><th>nombre</th><th>cargo</th><th>salario</th><th>sobre_promedio</th></tr></thead><tbody><tr><td>Patricia Londoño</td><td>Gerente general</td><td class="r">9000000.00</td><td class="r">4550000.00</td></tr><tr><td>Andrés Cárdenas</td><td>Jefe de ventas</td><td class="r">5200000.00</td><td class="r">750000.00</td></tr><tr><td>Laura Mejía</td><td>Jefe de bodega</td><td class="r">4800000.00</td><td class="r">350000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e17" data-n="17"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 17 como hecho"><span></span></label><h3><span class="en">17</span>Auto-JOIN</h3></header><p class="stmt">Muestra cada empleado con el nombre de su jefe. Para quien no tiene jefe, escribe «Sin jefe».</p><details class="hint"><summary>Pista</summary><p>Une <code>empleado</code> consigo misma con <code>LEFT JOIN</code> y usa <code>COALESCE</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">SELECT</span> e.nombre <span class="k">AS</span> empleado,
+       <span class="f">COALESCE</span>(j.nombre, <span class="s">&#x27;Sin jefe&#x27;</span>) <span class="k">AS</span> jefe
+<span class="k">FROM</span> empleado e
+<span class="k">LEFT</span> <span class="k">JOIN</span> empleado j <span class="k">ON</span> j.id_empleado = e.id_jefe
+<span class="k">ORDER</span> <span class="k">BY</span> e.id_empleado;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 6 filas</div><div class="tw"><table class="dt"><thead><tr><th>empleado</th><th>jefe</th></tr></thead><tbody><tr><td>Patricia Londoño</td><td>Sin jefe</td></tr><tr><td>Andrés Cárdenas</td><td>Patricia Londoño</td></tr><tr><td>Laura Mejía</td><td>Patricia Londoño</td></tr><tr><td>Camilo Herrera</td><td>Andrés Cárdenas</td></tr><tr><td>Juliana Ortiz</td><td>Andrés Cárdenas</td></tr><tr><td>Felipe Vargas</td><td>Laura Mejía</td></tr></tbody></table></div></div></details></article><article class="ex" id="e18" data-n="18"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 18 como hecho"><span></span></label><h3><span class="en">18</span>CTE y función de ventana</h3></header><p class="stmt">Calcula el total gastado por cada cliente (sin pedidos cancelados) y su posición en un ranking de mayor a menor gasto. Usa una CTE y <code>RANK()</code>.</p><details class="hint"><summary>Pista</summary><p>La CTE calcula el total por cliente; la consulta final agrega <code>RANK() OVER (ORDER BY total DESC)</code>.</p></details><details class="sol"><summary>Ver solución</summary><pre class="code "><code><span class="k">WITH</span> gasto <span class="k">AS</span> (
+  <span class="k">SELECT</span> c.id_cliente, c.nombre,
+         <span class="f">SUM</span>(d.cantidad * d.precio_unitario) <span class="k">AS</span> total
+  <span class="k">FROM</span> cliente c
+  <span class="k">JOIN</span> pedido p         <span class="k">ON</span> p.id_cliente = c.id_cliente
+  <span class="k">JOIN</span> detalle_pedido d <span class="k">ON</span> d.id_pedido  = p.id_pedido
+  <span class="k">WHERE</span> p.estado &lt;&gt; <span class="s">&#x27;cancelado&#x27;</span>
+  <span class="k">GROUP</span> <span class="k">BY</span> c.id_cliente, c.nombre
+)
+<span class="k">SELECT</span> <span class="f">RANK</span>() <span class="k">OVER</span> (<span class="k">ORDER</span> <span class="k">BY</span> total <span class="k">DESC</span>) <span class="k">AS</span> puesto,
+       nombre, total
+<span class="k">FROM</span> gasto
+<span class="k">ORDER</span> <span class="k">BY</span> puesto;</code></pre><div class="rs"><div class="rs-h">Resultado esperado · 5 filas</div><div class="tw"><table class="dt"><thead><tr><th>puesto</th><th>nombre</th><th>total</th></tr></thead><tbody><tr><td class="r">1</td><td>Marta Ruiz</td><td class="r">3610000.00</td></tr><tr><td class="r">2</td><td>Carlos Pérez</td><td class="r">2715000.00</td></tr><tr><td class="r">3</td><td>Sofía Díaz</td><td class="r">2025000.00</td></tr><tr><td class="r">4</td><td>Luis Gómez</td><td class="r">1255000.00</td></tr><tr><td class="r">5</td><td>Ana Torres</td><td class="r">665000.00</td></tr></tbody></table></div></div></details></article><article class="ex" id="e19" data-n="19"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 19 como hecho"><span></span></label><h3><span class="en">19</span>DML en una transacción</h3></header><p class="stmt">Escribe una transacción que: (1) inserte un cliente nuevo de Pereira, (2) suba 10 % el precio de los productos de la categoría 3 (Audio) y (3) elimine los pedidos cancelados junto con su detalle. Confirma al final.</p><details class="hint"><summary>Pista</summary><p>Borra primero las filas hijas (<code>detalle_pedido</code>) y luego las del padre (<code>pedido</code>). Inicio de transacción: <code>BEGIN</code> o <code>START TRANSACTION</code>.</p></details><details class="sol"><summary>Ver solución</summary><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">BEGIN</span>;
+
+<span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Julián Castro&#x27;</span>, <span class="s">&#x27;julian@correo.com&#x27;</span>, <span class="s">&#x27;Pereira&#x27;</span>, CURRENT_DATE);
+
+<span class="k">UPDATE</span> producto
+<span class="k">SET</span> precio = precio * <span class="n">1.10</span>
+<span class="k">WHERE</span> id_categoria = <span class="n">3</span>;
+
+<span class="k">DELETE</span> <span class="k">FROM</span> detalle_pedido
+<span class="k">WHERE</span> id_pedido <span class="k">IN</span> (<span class="k">SELECT</span> id_pedido <span class="k">FROM</span> pedido <span class="k">WHERE</span> estado = <span class="s">&#x27;cancelado&#x27;</span>);
+
+<span class="k">DELETE</span> <span class="k">FROM</span> pedido
+<span class="k">WHERE</span> estado = <span class="s">&#x27;cancelado&#x27;</span>;
+
+<span class="k">COMMIT</span>;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">START</span> <span class="k">TRANSACTION</span>;
+
+<span class="k">INSERT</span> <span class="k">INTO</span> cliente (nombre, correo, ciudad, fecha_registro)
+<span class="k">VALUES</span> (<span class="s">&#x27;Julián Castro&#x27;</span>, <span class="s">&#x27;julian@correo.com&#x27;</span>, <span class="s">&#x27;Pereira&#x27;</span>, <span class="f">CURDATE</span>());
+
+<span class="k">UPDATE</span> producto
+<span class="k">SET</span> precio = precio * <span class="n">1.10</span>
+<span class="k">WHERE</span> id_categoria = <span class="n">3</span>;
+
+<span class="k">DELETE</span> <span class="k">FROM</span> detalle_pedido
+<span class="k">WHERE</span> id_pedido <span class="k">IN</span> (<span class="k">SELECT</span> id_pedido <span class="k">FROM</span> pedido <span class="k">WHERE</span> estado = <span class="s">&#x27;cancelado&#x27;</span>);
+
+<span class="k">DELETE</span> <span class="k">FROM</span> pedido
+<span class="k">WHERE</span> estado = <span class="s">&#x27;cancelado&#x27;</span>;
+
+<span class="k">COMMIT</span>;</code></pre></div></div><p class="note">Este ejercicio modifica datos o estructura, así que no hay tabla de resultado: comprueba que cada sentencia responda sin errores y verifica el efecto con un <code>SELECT</code>.</p></details></article><article class="ex" id="e20" data-n="20"><header><label class="chk"><input type="checkbox" aria-label="Marcar ejercicio 20 como hecho"><span></span></label><h3><span class="en">20</span>DDL: tabla, índice y vista</h3></header><p class="stmt">Crea la tabla <code>resena</code> (id autonumérico, id_producto y id_cliente con clave foránea, puntaje entre 1 y 5 obligatorio, comentario opcional y fecha de creación por defecto la actual; un cliente solo puede reseñar una vez cada producto). Luego crea un índice sobre <code>id_producto</code> y una vista <code>v_promedio_producto</code> con el puntaje promedio por producto.</p><details class="hint"><summary>Pista</summary><p>Restricciones: <code>CHECK</code>, <code>UNIQUE (id_producto, id_cliente)</code> y dos <code>FOREIGN KEY</code>. La vista usa <code>AVG</code> y <code>GROUP BY</code>.</p></details><details class="sol"><summary>Ver solución</summary><div class="dpair"><div class="dv pg"><span class="dl">PostgreSQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> resena (
+  id_resena   <span class="t">INT</span> <span class="k">GENERATED</span> <span class="k">ALWAYS</span> <span class="k">AS</span> <span class="k">IDENTITY</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_producto <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> producto (id_producto),
+  id_cliente  <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">REFERENCES</span> cliente (id_cliente),
+  puntaje     <span class="t">SMALLINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (puntaje <span class="k">BETWEEN</span> <span class="n">1</span> <span class="k">AND</span> <span class="n">5</span>),
+  comentario  <span class="t">TEXT</span>,
+  creada_en   <span class="t">TIMESTAMP</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> <span class="f">NOW</span>(),
+  <span class="k">UNIQUE</span> (id_producto, id_cliente)
+);
+
+<span class="k">CREATE</span> <span class="k">INDEX</span> idx_resena_producto <span class="k">ON</span> resena (id_producto);
+
+<span class="k">CREATE</span> <span class="k">VIEW</span> v_promedio_producto <span class="k">AS</span>
+<span class="k">SELECT</span> id_producto,
+       <span class="f">ROUND</span>(<span class="f">AVG</span>(puntaje), <span class="n">2</span>) <span class="k">AS</span> promedio,
+       <span class="f">COUNT</span>(*)               <span class="k">AS</span> resenas
+<span class="k">FROM</span> resena
+<span class="k">GROUP</span> <span class="k">BY</span> id_producto;</code></pre></div><div class="dv my"><span class="dl">MySQL</span><pre class="code "><code><span class="k">CREATE</span> <span class="k">TABLE</span> resena (
+  id_resena   <span class="t">INT</span> <span class="k">AUTO_INCREMENT</span> <span class="k">PRIMARY</span> <span class="k">KEY</span>,
+  id_producto <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  id_cliente  <span class="t">INT</span> <span class="k">NOT</span> <span class="k">NULL</span>,
+  puntaje     <span class="t">TINYINT</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">CHECK</span> (puntaje <span class="k">BETWEEN</span> <span class="n">1</span> <span class="k">AND</span> <span class="n">5</span>),
+  comentario  <span class="t">TEXT</span>,
+  creada_en   <span class="t">DATETIME</span> <span class="k">NOT</span> <span class="k">NULL</span> <span class="k">DEFAULT</span> CURRENT_TIMESTAMP,
+  <span class="k">UNIQUE</span> (id_producto, id_cliente),
+  <span class="k">FOREIGN</span> <span class="k">KEY</span> (id_producto) <span class="k">REFERENCES</span> producto (id_producto),
+  <span class="k">FOREIGN</span> <span class="k">KEY</span> (id_cliente)  <span class="k">REFERENCES</span> cliente (id_cliente)
+) <span class="k">ENGINE</span>=InnoDB;
+
+<span class="k">CREATE</span> <span class="k">INDEX</span> idx_resena_producto <span class="k">ON</span> resena (id_producto);
+
+<span class="k">CREATE</span> <span class="k">VIEW</span> v_promedio_producto <span class="k">AS</span>
+<span class="k">SELECT</span> id_producto,
+       <span class="f">ROUND</span>(<span class="f">AVG</span>(puntaje), <span class="n">2</span>) <span class="k">AS</span> promedio,
+       <span class="f">COUNT</span>(*)               <span class="k">AS</span> resenas
+<span class="k">FROM</span> resena
+<span class="k">GROUP</span> <span class="k">BY</span> id_producto;</code></pre></div></div><p class="note">Este ejercicio modifica datos o estructura, así que no hay tabla de resultado: comprueba que cada sentencia responda sin errores y verifica el efecto con un <code>SELECT</code>.</p></details></article></section></main>
+<footer>Los resultados mostrados se calcularon sobre los datos del capítulo 2. Las sintaxis propias de PostgreSQL y de MySQL se escribieron según la documentación de cada motor (PostgreSQL 14+ y MySQL 8.0+); si tu versión es anterior, algunas funciones, como las de ventana, <code>WITH</code> o <code>CHECK</code>, pueden no estar disponibles.</footer>
+</div>
+<script>
+(function(){
+ var D=document.body, key='sqlguia-dialect', ek='sqlguia-ex';
+ function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+ function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+ function setD(d){D.setAttribute('data-d',d);document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.d===d)});set(key,d)}
+ document.querySelectorAll('.seg button').forEach(function(b){b.addEventListener('click',function(){setD(b.dataset.d)})});
+ var d0=get(key); setD(d0==='pg'||d0==='my'||d0==='both'?d0:'both');
+ // progreso de lectura
+ var pb=document.querySelector('.prog i');
+ function onS(){var h=document.documentElement.scrollHeight-innerHeight;pb.style.width=(h>0?Math.min(100,scrollY/h*100):0)+'%'}
+ addEventListener('scroll',onS,{passive:true});onS();
+ // copiar
+ document.querySelectorAll('pre.code').forEach(function(p){
+  var b=document.createElement('button');b.className='cp';b.type='button';b.textContent='Copiar';
+  b.addEventListener('click',function(){
+   var t=p.querySelector('code').innerText;
+   function ok(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar'},1400)}
+   function fb(){var r=document.createRange();r.selectNodeContents(p.querySelector('code'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado'; setTimeout(function(){b.textContent='Copiar'},1400)}
+   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fb)}else fb();
+  });
+  p.appendChild(b);
+ });
+ // ejercicios
+ var saved={};try{saved=JSON.parse(get(ek)||'{}')}catch(e){}
+ var boxes=document.querySelectorAll('.ex input'),cnt=document.getElementById('cnt'),bar=document.getElementById('exbar');
+ function upd(){var n=0;boxes.forEach(function(c){if(c.checked)n++});cnt.textContent=n+' de '+boxes.length+' completados';bar.style.width=(n/boxes.length*100)+'%'}
+ boxes.forEach(function(c){var a=c.closest('.ex'),id=a.dataset.n;c.checked=!!saved[id];a.classList.toggle('done',c.checked);
+  c.addEventListener('change',function(){saved[id]=c.checked;a.classList.toggle('done',c.checked);set(ek,JSON.stringify(saved));upd()})});
+ upd();
+})();
+</script>
+</body></html>
